@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # WEB TA PURPOSES
 from selenium import webdriver
 # FINDING ELEMENTS PURPOSES
