@@ -41,9 +41,13 @@ import matplotlib
 import mysql.connector
 
 
-driver = webdriver.Chrome()
+driver = webdriver.chrome(
+    chrome_binary = "C:\\Program Files\\Google\Chrome\\Application\\chrome.exe"
+    )
+
 try:
     wait = WebDriverWait(driver, 10)
     driver.get("https://www.nytimes.com")
+
 finally:
     driver.quit()
