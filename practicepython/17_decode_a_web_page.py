@@ -43,11 +43,8 @@ import mysql.connector
 
 driver = webdriver.Chrome()
 try:
-    # WAIT PURPOSES
     wait = WebDriverWait(driver, 10)
     driver.get("https://www.nytimes.com")
-    
     print(driver.current_url)
-    
 finally:
     driver.quit()
