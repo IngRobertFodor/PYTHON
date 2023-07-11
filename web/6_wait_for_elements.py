@@ -8,6 +8,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 # Shortened version of code (as).
 from selenium.webdriver.support import expected_conditions as EC
 
+
 driver = webdriver.Chrome()
 try:
     # WAIT PURPOSES
