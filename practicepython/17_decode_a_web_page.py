@@ -41,13 +41,12 @@ import matplotlib
 import mysql.connector
 
 
-driver = webdriver.chrome(
-    chrome_binary = "C:\\Program Files\\Google\Chrome\\Application\\chrome.exe"
-    )
+import requests
+from bs4 import BeautifulSoup
 
-try:
-    wait = WebDriverWait(driver, 10)
-    driver.get("https://www.nytimes.com")
+url = 'http://www.google.com'
+r = requests.get(url)
+r_html = r.text
 
-finally:
-    driver.quit()
+print(r_html)
+print("Hello")
