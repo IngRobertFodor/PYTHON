@@ -39,12 +39,38 @@ import os
 import matplotlib
 # MYSQL PURPOSES
 import mysql.connector
+# REQUESTS PURPOSES
+# !!! RUN THIS FIRST (CMD)
+# pip install requests
+import requests
+# BEAUTIFUL SOUP PURPOSES
+# !!! RUN THIS FIRST (CMD)
+# pip install bs4
+from bs4 import BeautifulSoup
 
 
 driver = webdriver.Chrome()
-
 try:
+    # This is just test to open the browser.
     driver.get("https://www.nytimes.com")
-    print(driver.current_url)
+    
+    # These steps do things for this exercise.
+    web_page_url = "https://www.nytimes.com"
+    web_page_displayed = requests.get(web_page_url)
+    print(web_page_displayed.url)
+    html = web_page_displayed.content
+    soup = BeautifulSoup(html, features="html.parser")
+    
+    # This prints the web page title.
+    for t in soup.find_all('title'):
+        print(t.text)
+    # Empty row.
+    print()
+
+    # This should print the article titles.    
+    for tt in soup.find_all("h3", class_ = "indicate-hover"):
+        print(tt.text)
+
 finally:
+    # This is just test to close the browser.
     driver.quit()
