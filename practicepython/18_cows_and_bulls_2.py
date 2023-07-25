@@ -71,7 +71,7 @@ def play_cows_and_bulls_game():
 
     x = collections.Counter(random_number)
     
-    count = 0
+    count = 1
     
 
     while True:
@@ -82,37 +82,30 @@ def play_cows_and_bulls_game():
         # Ask user to guess the generated number.
         users_guess = int(input("GUESS the generated 4-digit number: "))
         print("User guessed this number: " + str(users_guess) + ".")
-        # This is first users guess.
-        count += 1
 
         if users_guess not in range(1000,9999):   
             print("Number doesn't have 4-digits.")
-            users_guess = int(input("GUESS the generated 4-digit number: "))
-            print("User guessed this number: " + str(users_guess) + ".")
-            count+=1
-            users_guess = str(users_guess)
+            count +=1
+            continue
                     
         elif random_number != str(users_guess):                      
             for a, b in zip(random_number, str(users_guess)):
                 if a == b:
-                    cows += 1
-                    x[b] += 1
+                    cows +=1
+                    x[b] +=1
             for a, b in zip(random_number, str(users_guess)):
                 if a != b and x[b] > 0:
-                    bulls += 1
-                    x[b] += 1
-            
-            users_guess = int(input("GUESS the generated 4-digit number: "))
-            print("User guessed this number: " + str(users_guess) + ".")
-            users_guess = str(users_guess)
+                    bulls +=1
+                    x[b] +=1
             print(cows,bulls,count)
-            count+=1
-                    
+            count +=1
+            continue
+            
         else:
             # random_number == users_guess
             users_guess = str(users_guess)
             print("This is the right guess: " + str(users_guess) + ". This was the 4-digit random number.")
-            print("4 cows, 0 bulls, 1 guess.")
+            print("4 cows, 0 bulls, " + str(count) + " guesses.")
             cows = 4
             break
 
