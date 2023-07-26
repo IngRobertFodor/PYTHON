@@ -9,3 +9,5 @@ def division(x, y):
 
 def multiplication(x, y):
     return x * y
+
+a = 5
