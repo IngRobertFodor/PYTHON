@@ -111,7 +111,7 @@ print(my_function(5))
 print(my_function(9))
 
 
-# Examples
+# Examples 1
 def get_integer(help_text="Give me a number: "):
     return int(input(help_text))
 
@@ -122,3 +122,51 @@ if age > 15:
   print("You are over the age of 15")
 
 print("You are in grade " + str(school_year))
+
+
+# Examples 2
+
+# Same results for 2.1, 2.2, 2.3.
+
+# Examples 2.1
+def make_even(num):
+  if num % 2 == 1:
+    return num + 1
+  else:
+    return num
+
+x = [551, 641, 891, 122, 453, 223, 234, 343, 562, 115, 554, 679, 516]
+
+y = []
+for num in x:
+  y.append(make_even(num))
+
+print(y)
+
+
+# Examples 2.2
+def make_even(num):
+  if num % 2 == 1:
+    return num + 1
+  else:
+    return num
+
+x = [551, 641, 891, 122, 453, 223, 234, 343, 562, 115, 554, 679, 516]
+
+y = [make_even(num) for num in x]
+
+print(y)
+
+
+# Examples 2.3
+def make_even(num):
+  if num % 2 == 1:
+    return num + 1
+  else:
+    return num
+
+x = [551, 641, 891, 122, 453, 223, 234, 343, 562, 115, 554, 679, 516]
+
+y = list(map(make_even, x))
+
+print(y)
