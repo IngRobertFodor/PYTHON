@@ -66,6 +66,16 @@ try:
         print(t.text)
     # Empty row.
     print()
+    
+    # This prints the first section of web page text.
+    first_text = soup.find_all("div", class_ = "body__inner-container")
+    print(first_text[0].text)
+    # Empty row.
+    print()
+    
+    # This prints the fourth section of web page text.
+    first_text = soup.find_all("div", class_ = "body__inner-container")
+    print(first_text[3].text)
 
 finally:
     # This is just test to close the browser.
