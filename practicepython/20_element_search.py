@@ -49,20 +49,31 @@ import requests
 from bs4 import BeautifulSoup
 
 
+# Write a function that takes an ordered list of numbers and another number.
+# The function decides whether the given number is inside the ordered list and returns and then prints an appropriate boolean.
+
+
 # Task 1
 # Try to find out, whether the "number" is in the defined list.
+# Then print boolean value True / False.
 def my_function():
 
     x = [1, 3, 5, 30, 42, 43, 500]
+    
+    value = True
 
     while True:
         number = input("Task 1: Give me your digit: ")
         number = int(number)
         if number not in x:
             print("Task 1: Incorrect answer")
+            value = False
+            print(value)
             continue
         else:
             print("Task 1: Correct answer")
+            value = True
+            print(value)
             break
     
     return
@@ -76,6 +87,8 @@ my_function()
 def my_function_with_binary_search():
 
     x = [11, 38, 58, 301, 425, 432, 5000]
+
+    value = True
 
     while True:
         
@@ -98,18 +111,26 @@ def my_function_with_binary_search():
                 print("Task 2: Result is: " + str(z))
                 if number not in x:
                     print("Task 2: Incorrect answer")
+                    value = False
+                    print(value)
                     continue
                 else:
                     print("Task 2: Correct answer")
+                    value = True
+                    print(value)
                 break
             else:
                 z = y[2]
                 print("Task 2: Result is: " + str(z))
                 if number not in x:
                     print("Task 2: Incorrect answer")
+                    value = False
+                    print(value)
                     continue
                 else:
                     print("Task 2: Correct answer")
+                    value = True
+                    print(value)
                 break
         else:
             y = x[4:]
@@ -121,18 +142,26 @@ def my_function_with_binary_search():
                 print("Task 2: Result is: " + str(z))
                 if number not in x:
                     print("Task 2: Incorrect answer")
+                    value = False
+                    print(value)
                     continue
                 else:
                     print("Task 2: Correct answer")
+                    value = True
+                    print(value)
                 break
             else:
                 z = y[2]
                 print("Task 2: Result is: " + str(z))
                 if number not in x:
                     print("Task 2: Incorrect answer")
+                    value = False
+                    print(value)
                     continue
                 else:
                     print("Task 2: Correct answer")
+                    value = True
+                    print(value)
                 break
 
     return
