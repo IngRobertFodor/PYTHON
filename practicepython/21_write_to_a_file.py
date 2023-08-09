@@ -49,38 +49,24 @@ import requests
 from bs4 import BeautifulSoup
 
 
-driver = webdriver.Chrome()
-try:
-    # This is just test to open the browser.
-    driver.get("https://www.nytimes.com")
-    
-    # These steps do things for this exercise.
-    web_page_url = "https://www.vanityfair.com/style/society/2014/06/monica-lewinsky-humiliation-culture"
-    web_page_displayed = requests.get(web_page_url)
-    print(web_page_displayed.url)
-    html = web_page_displayed.content
-    soup = BeautifulSoup(html, features="html.parser")
-    
-    # This prints the web page text.
-    for t in soup.find_all("div", class_ = "body__inner-container"):
-        print(t.text)
-    # Empty row.
-    print()
-    
-    # This prints the first section of web page text.
-    first_text = soup.find_all("div", class_ = "body__inner-container")
-    print(first_text[0].text)
-    # Empty row.
-    print()
-    
-    # This 1. prints and then 2. saves the fourth section of web page text to the txt file.
-    fourth_text = soup.find_all("div", class_ = "body__inner-container")
-    # 1. print
-    print(fourth_text[3].text)
-    # 2. save
-    with open("file_to_save_fourth_text.txt", "w") as open_file:
-        open_file.write(fourth_text[3].text)
+# 1
+# This is considered WORSE programming practice.
+# In this code example, the file object will be opened, saved and then closed manually.
+# Because in case of error in the program, it terminates before hitting the ".close()" statement.
+my_file = open("file_to_save_one.txt", "w")
+# Opening a file for writing with "w" will overwrite any file that currently exists with that name.
+my_file.write("1: This is my text.")
+my_file.close()
 
-finally:
-    # This is just test to close the browser.
-    driver.quit()
+# 2.1
+# This is considered CORRECT programming practice.
+# As soon as the program exists the with code block for any reason, it will close the file.
+# Opening a file for writing with "w" will overwrite any file that currently exists with that name.
+with open("file_to_save_two.txt", "w") as open_file:
+    open_file.write("2.1: This is my text.")
+
+# 2.2
+# User should define file name.
+user_defined_file_name = input("Define the name of your file: ")
+with open(user_defined_file_name, "w") as open_file:
+    open_file.write("2.2: This is my text.")
