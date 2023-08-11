@@ -69,7 +69,13 @@ def play_cows_and_bulls_game():
     random_number = ''.join(map(str, random_number_digits))
     print("This is random generated 4-digit number: " + str(random_number) + ".")
 
-
+    
+    # collections (collections.Counter)
+    # Counter is used to keep the count of the elements in an iterable in the form of an unordered dictionary
+    # The key represents the element in the iterable and the value represents the count of that element in the iterable.
+    # Example to describe how it works.
+        # print(Counter(['B','B','A','B','C','A','B','B','A','C']))
+        # Counter({'B': 5, 'A': 3, 'C': 2})
     x = collections.Counter(random_number)
     
     count = 1
@@ -88,7 +94,15 @@ def play_cows_and_bulls_game():
             print("Number doesn't have 4-digits.")
             count +=1
             continue
-                    
+
+        # zip()
+        # Python’s zip() function creates an iterator that will aggregate elements from two or more iterables.
+        # Example to describe how it works.
+            # numbers = [1, 2, 3]
+            # letters = ['a', 'b', 'c']
+            # zipped = zip(numbers, letters)
+            # print(list(zipped))
+            # [(1, 'a'), (2, 'b'), (3, 'c')]
         elif random_number != str(users_guess):                      
             for a, b in zip(random_number, str(users_guess)):
                 if a == b:

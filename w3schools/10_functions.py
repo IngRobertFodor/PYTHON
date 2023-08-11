@@ -159,6 +159,9 @@ print(y)
 
 
 # Examples 2.3
+# map()
+# 2 parameters - 1. function (required), 2. iterable (e.g. list) (required)
+# The map() function executes a specified function for each item in an iterable. 
 def make_even(num):
   if num % 2 == 1:
     return num + 1
