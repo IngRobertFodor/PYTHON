@@ -148,27 +148,28 @@ def play_game_four_binary_search(list_a, my_number, low=None, high=None, count=0
     if high < low:
         return False
     
-    midpoint = (low + high) // 2
-    # Our midpoint is 49, because "list_a[49] == 50".
-    if list_a[midpoint] == my_number:
-        count += 1
-        return count
+    while True:
+        midpoint = (low + high) // 2
+        # Our midpoint is 49, because "list_a[49] == 50".
+        if my_number > list_a[midpoint]:
+            new_low = midpoint + 1
+            count += 1
+            return play_game_four_binary_search(list_a, my_number, new_low, high, count) 
+        
+        elif my_number < list_a[midpoint]:
+            new_high = midpoint - 1
+            count += 1
+            return play_game_four_binary_search(list_a, my_number, low, new_high, count)
+        
+        else:
+            # list_a[midpoint] == my_number:
+            count += 1
+            return count
     
-    elif my_number < list_a[midpoint]:
-        new_high = midpoint - 1
-        count += 1
-        return play_game_four_binary_search(list_a, my_number, low, new_high, count)
-
-    else:
-        # elif my_number > list_a[midpoint]:
-        new_low = midpoint + 1
-        count += 1
-        return play_game_four_binary_search(list_a, my_number, new_low, high, count)    
-
 
 if __name__ == "__main__":
     
-    # First way for PC to guess.    
+# First way for PC to guess.    
     # The number of guesses is everytime different.
     play_game_one(80)
     # e.g. 120
@@ -178,7 +179,7 @@ if __name__ == "__main__":
     # Empty row.
     print()
 
-    # Second way for PC to guess.
+# Second way for PC to guess.
     # The number of guesses is everytime the same (55).
     play_game_two(55)
     # e.g. 55
@@ -188,15 +189,15 @@ if __name__ == "__main__":
     # Empty row.
     print()
 
-    # Third way for PC to guess.
+# Third way for PC to guess.
     play_game_three(38)
     play_game_three(88)
 
     # Empty row.
     print()
 
-    # The Fourth best way for PC to guess.
-    # Using "Binary search".
+# The Fourth best way for PC to guess.
+# Using "Binary search".
     # List of digits 1-100 (including 1 and 100).
     list_a = list(range(1,101))
     my_number = 88
