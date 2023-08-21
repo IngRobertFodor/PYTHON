@@ -48,3 +48,25 @@ import requests
 # pip install bs4
 from bs4 import BeautifulSoup
 
+
+def max_of_three(a=None, b=None, c=None):
+
+    if a > b and a > c:
+        print(a)
+    elif b > a and b > c:
+        print(b)
+    else:
+    # c is the biggest
+        print(c)
+
+        return
+
+
+if __name__ == "__main__":
+
+    a = 123
+    b = 456
+    c = 789
+    
+
+    max_of_three(a,b,c)
