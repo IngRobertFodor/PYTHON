@@ -97,7 +97,6 @@ while True:
         print(hangman)
         print(f"Letter correct, {user_letter_guess}. This was your {count} wrong guess.")
         if len(letters) == len(hangman):
-            # hangman = "".join(hangman)
             print(hangman)
             hangman.sort()
             hangman = set(hangman)
