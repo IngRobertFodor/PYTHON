@@ -1,0 +1,97 @@
+# WEB TA PURPOSES
+from selenium import webdriver
+# FINDING ELEMENTS PURPOSES
+from selenium.webdriver.common.by import By
+# FINDING ELEMENTS PURPOSES
+# !!! RUN THIS FIRST (CMD)
+# pip install htmldom==2.0
+from htmldom import htmldom
+# TEXT PURPOSES
+from selenium.webdriver.common.keys import Keys
+# WAIT PURPOSES
+from selenium.webdriver.support.wait import WebDriverWait
+# WAIT PURPOSES
+# Shortened version of code (as).
+from selenium.webdriver.support import expected_conditions as EC
+# SLEEP PURPOSES
+import time
+# DATE TIME PURPOSES
+import datetime
+# DROPDOWN PURPOSES
+from selenium.webdriver.support.select import Select
+# SLIDER PURPOSES - IN THIS SCRIPT
+from selenium.webdriver.common.action_chains import ActionChains
+# RANDOM PURPOSES
+# https://www.w3schools.com/python/module_random.asp
+import random
+# STRING PURPOSES
+import string
+# MATH PURPOSES
+import math
+# MATH PURPOSES - Fractions
+import fractions
+# SEARCH PURPOSES (RegEx)
+import re
+# DELETE, FILE HANDLING PURPOSES
+import os
+# MATPLOTLIB, VISUALIZATION PURPOSES
+import matplotlib
+# MYSQL PURPOSES
+import mysql.connector
+# REQUESTS PURPOSES
+# !!! RUN THIS FIRST (CMD)
+# pip install requests
+import requests
+# BEAUTIFUL SOUP PURPOSES
+# !!! RUN THIS FIRST (CMD)
+# pip install bs4
+from bs4 import BeautifulSoup
+# COLLECTIONS PURPOSES
+import collections
+
+
+# Open, read file and choose random word from file.
+with open("sowpods.txt", "r") as open_file:
+        text = open_file.read()
+        words = text.split()
+        word = random.choice(words)
+        print(word)
+        # Split word to letters.
+        letters = []
+        for i in word:
+             letters.append(i)
+        print(letters)
+
+# Compare word from file with user´s guess.
+count = 0
+hangman = []
+while True:
+    # User should guess LETTERS from that random word from file.
+    print("Welcome to Hangman´s game.")
+    user_letter_guess = input("Guess the LETTER from Hangman´s word: ")
+    print(user_letter_guess)
+
+    if user_letter_guess not in string.ascii_uppercase:   
+        count +=1
+        print(f"Letter incorrect, or not in uppercase. This was your {count} wrong guess.")
+        if count >= 7:
+            print(f"You are hanged. This was your {count} wrong guess.")
+            break
+        continue
+    elif user_letter_guess not in letters:
+        count +=1
+        print(f"Wrong guess. This was your {count} wrong guess.")
+        if count >= 7:
+            print(f"You are hanged. This was your {count} wrong guess.")
+            break
+        continue
+    elif user_letter_guess in letters:
+        hangman.append(user_letter_guess)
+        print(hangman)
+        print(f"Letter correct, {user_letter_guess}. This was your {count} wrong guess.")
+        if len(letters) == len(hangman):
+            hangman = "".join(hangman)
+            print(hangman)
+            print(f"You have won. This is the word we were looking for: {word}. And you needed: {count} wrong guess.")
+            break
+        continue
