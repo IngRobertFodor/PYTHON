@@ -23,6 +23,7 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.action_chains import ActionChains
 # RANDOM PURPOSES
 # https://www.w3schools.com/python/module_random.asp
+# Import the random module, and display a random number between 1 and 9:
 import random
 # STRING PURPOSES
 import string
@@ -61,7 +62,10 @@ with open("sowpods.txt", "r") as open_file:
         for i in word:
              letters.append(i)
         print(letters)
-
+        letters.sort()
+        # Sorted "letters".
+        print(letters)
+        
 # Compare word from file with user´s guess.
 count = 0
 hangman = []
@@ -90,8 +94,12 @@ while True:
         print(hangman)
         print(f"Letter correct, {user_letter_guess}. This was your {count} wrong guess.")
         if len(letters) == len(hangman):
-            hangman = "".join(hangman)
+            # hangman = "".join(hangman)
             print(hangman)
-            print(f"You have won. This is the word we were looking for: {word}. And you needed: {count} wrong guess.")
-            break
-        continue
+            hangman.sort()
+            # Sorted "hangman".
+            print(hangman)
+            # Sorted "letters" can be compared to sorted "hangman".
+            if letters == hangman:
+                print(f"You have found the word: {word}. And you needed {count} guess.")
+                break
