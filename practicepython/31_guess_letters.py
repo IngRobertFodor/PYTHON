@@ -51,6 +51,8 @@ from bs4 import BeautifulSoup
 import collections
 
 
+# There is one shotcut. We will consider each letter as unique.
+
 # Open, read file and choose random word from file.
 with open("sowpods.txt", "r") as open_file:
         text = open_file.read()
@@ -63,7 +65,8 @@ with open("sowpods.txt", "r") as open_file:
              letters.append(i)
         print(letters)
         letters.sort()
-        # Sorted "letters".
+        letters = set(letters)
+        # Sorted "letters" transfered to set.
         print(letters)
         
 # Compare word from file with user´s guess.
@@ -97,7 +100,8 @@ while True:
             # hangman = "".join(hangman)
             print(hangman)
             hangman.sort()
-            # Sorted "hangman".
+            hangman = set(hangman)
+            # Sorted "hangman" transfered to set.
             print(hangman)
             # Sorted "letters" can be compared to sorted "hangman".
             if letters == hangman:
