@@ -51,7 +51,7 @@ from bs4 import BeautifulSoup
 import collections
 
 
-# First way
+# First Code Example
 print("First way")
 
 count = 0
@@ -89,7 +89,7 @@ while True:
             break
 
 
-# Second way
+# Second Code Example
 print("Second way")
 # There is a shotcut. We will consider each letter as unique.
 
