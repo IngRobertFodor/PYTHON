@@ -80,12 +80,12 @@ while True:
                 print(word_to_guess_corrected)
                 print(f"Letter correct, {user_guessed_letter}. This was your {count} wrong guess.")    
                 break
-        wtgc = "".join(word_to_guess_corrected)
+        wtgc = set(word_to_guess_corrected)
         print(wtgc)
-        wtg = "".join(word_to_guess)
-        print(wtg)
+        wtg= set(word_to_guess)
+        print(wtgc)
         if wtg == wtgc:
-            print(f"You have found the word to guess: {wtg}. And you needed {count} guess.")
+            print(f"You have found the word to guess: {''.join(word_to_guess)}. And you needed {count} guess.")
             break
 
 
