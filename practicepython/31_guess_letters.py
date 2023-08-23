@@ -51,7 +51,47 @@ from bs4 import BeautifulSoup
 import collections
 
 
-# There is one shotcut. We will consider each letter as unique.
+# First way
+print("First way")
+
+count = 0
+word_to_guess = "EVAPORATE"
+word_to_guess = list(word_to_guess)
+word_to_guess_corrected = list("_" * len(word_to_guess))
+# We have lists, where we can find items by its index now.
+print(word_to_guess)
+print(word_to_guess_corrected)
+while True:
+    print("Welcome to Hangman´s game.")
+    user_guessed_letter = input("Guess the LETTER: ")
+    print(user_guessed_letter)
+
+    if user_guessed_letter not in string.ascii_uppercase or user_guessed_letter not in word_to_guess:   
+        count +=1
+        print(f"Letter incorrect, not in uppercase or wrong guess. This was your {count} wrong guess.")
+        # "count >= 7" wrong guesses (One per each letter in "hagnman".)
+        if count >= 7:
+            print(f"You are hanged. This was your {count} wrong guess.")
+            break
+    elif user_guessed_letter in word_to_guess:
+        for i in range(len(word_to_guess_corrected)):
+            if word_to_guess_corrected[i] == "_":
+                word_to_guess_corrected[i] = user_guessed_letter
+                print(word_to_guess_corrected)
+                print(f"Letter correct, {user_guessed_letter}. This was your {count} wrong guess.")    
+                break
+        wtgc = "".join(word_to_guess_corrected)
+        print(wtgc)
+        wtg = "".join(word_to_guess)
+        print(wtg)
+        if wtg == wtgc:
+            print(f"You have found the word to guess: {wtg}. And you needed {count} guess.")
+            break
+
+
+# Second way
+print("Second way")
+# There is a shotcut. We will consider each letter as unique.
 
 # Open, read file and choose random word from file.
 with open("sowpods.txt", "r") as open_file:
