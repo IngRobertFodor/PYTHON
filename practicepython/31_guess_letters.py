@@ -91,6 +91,12 @@ while True:
                 print(word_to_guess_corrected)
                 print(f"Letter correct, {user_guessed_letter}. This was your {count} wrong guess.")    
                 break
+            elif user_guessed_letter in word_to_guess_corrected:
+                print("Already guessed.")
+                word_to_guess_corrected.remove(user_guessed_letter[i])
+                word_to_guess_corrected.append("_")
+                count +=1
+                continue
         wtgc = set(word_to_guess_corrected)
         print(wtgc)
         wtg= set(word_to_guess)
