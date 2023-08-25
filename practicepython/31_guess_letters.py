@@ -55,9 +55,10 @@ import collections
 print("First way")
 
 count = 0
-# Word to find in this game.
+# Words to pick up from, to find in this game.
 word_to_guess = ["BOAT", "USA", "HOME", "COMPUTER", "DOG"]
 word_to_guess = random.choice(word_to_guess)
+# Show word to find.
 print(word_to_guess)
 word_to_guess = list(word_to_guess)
 # This will be the word that user guesses.
