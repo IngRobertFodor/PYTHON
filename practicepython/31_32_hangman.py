@@ -89,7 +89,9 @@ while True:
                 word_from_letters_guessed.remove(user_guessed_letter[i])
                 word_from_letters_guessed.append("_")
                 count +=1
-                continue
+                if count >= 7:
+                    print(f"You are hanged. This was your {count} wrong guess.")
+                    break
             elif word_from_letters_guessed[i] == "_":
                 word_from_letters_guessed[i] = user_guessed_letter
                 print(word_from_letters_guessed)
@@ -98,11 +100,13 @@ while True:
                 print(b)
                 print(f"Letter correct, {user_guessed_letter}. This was your {count} wrong guess.")    
                 break
-        wtg = set(word_to_guess)
-        wflg = set(word_from_letters_guessed)
-        if wtg == wflg:
-            print(f"You have found the word to guess: {''.join(word_to_guess)}. And you needed {count} guess.")
-            break
+    wtg = set(word_to_guess)
+    wflg = set(word_from_letters_guessed)
+    if wtg == wflg:
+        print(f"You have found the word to guess: {''.join(word_to_guess)}. And you needed {count} guess.")
+        break
+    elif count >= 7:
+        break
 
 
 # Second Code Example
