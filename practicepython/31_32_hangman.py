@@ -84,7 +84,13 @@ while True:
             break
     elif user_guessed_letter in word_to_guess:
         for i in range(0,len(word_from_letters_guessed)):
-            if word_from_letters_guessed[i] == "_":
+            if user_guessed_letter in word_from_letters_guessed:
+                print("Already guessed.")
+                word_from_letters_guessed.remove(user_guessed_letter[i])
+                word_from_letters_guessed.append("_")
+                count +=1
+                continue
+            elif word_from_letters_guessed[i] == "_":
                 word_from_letters_guessed[i] = user_guessed_letter
                 print(word_from_letters_guessed)
                 # This shows each letter and number of its occurences in "word_from_letters_guessed".
@@ -92,12 +98,6 @@ while True:
                 print(b)
                 print(f"Letter correct, {user_guessed_letter}. This was your {count} wrong guess.")    
                 break
-            elif user_guessed_letter in word_from_letters_guessed:
-                print("Already guessed.")
-                word_from_letters_guessed.remove(user_guessed_letter[i])
-                word_from_letters_guessed.append("_")
-                count +=1
-                continue
         wtg = set(word_to_guess)
         wflg = set(word_from_letters_guessed)
         if wtg == wflg:
