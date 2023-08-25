@@ -56,12 +56,13 @@ print("First way")
 
 count = 0
 # Words to pick up from in this game.
+# Only words with unique letters are here (e.g. "SLOVAKIA" has "A" and "A", therefore it is not here.).
 word_to_guess = ["BOAT", "USA", "HOME", "COMPUTER", "DOG"]
 word_to_guess = random.choice(word_to_guess)
 # Show word to find.
 print(word_to_guess)
 word_to_guess = list(word_to_guess)
-# This will be the word from letters that user guessed.
+# This will be the "word from letters that user guessed".
 word_from_letters_guessed = list("_" * len(word_to_guess))
 # We have lists, where we can find items by its index now.
 print(word_to_guess)
@@ -78,7 +79,7 @@ while True:
     if user_guessed_letter not in string.ascii_uppercase or user_guessed_letter not in word_to_guess:   
         count +=1
         print(f"Not a letter, not in uppercase or other wrong guess. This was your {count} wrong guess.")
-        # "count >= 7" wrong guesses (One per each letter in "hagnman".)
+        # "count >= 7" wrong guesses (One per each letter in "hagnman".).
         if count >= 7:
             print(f"You are hanged. This was your {count} wrong guess.")
             break
