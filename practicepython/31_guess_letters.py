@@ -55,8 +55,10 @@ import collections
 print("First way")
 
 count = 0
+# Word to find in this game.
 word_to_guess = "EVAPORATE"
 word_to_guess = list(word_to_guess)
+# This will be the word that user guesses.
 word_to_guess_corrected = list("_" * len(word_to_guess))
 # We have lists, where we can find items by its index now.
 print(word_to_guess)
@@ -65,7 +67,10 @@ while True:
     print("Welcome to Hangman´s game.")
     user_guessed_letter = input("Guess the LETTER: ")
     print(user_guessed_letter)
-
+    # This shows each letter and number of its occurences in "word_to_guess".
+    a = [[x,word_to_guess.count(x)] for x in set(word_to_guess)]
+    print(a)
+    
     if user_guessed_letter not in string.ascii_uppercase or user_guessed_letter not in word_to_guess:   
         count +=1
         print(f"Letter incorrect, not in uppercase or wrong guess. This was your {count} wrong guess.")
@@ -77,6 +82,9 @@ while True:
         for i in range(0,len(word_to_guess_corrected)):
             if word_to_guess_corrected[i] == "_":
                 word_to_guess_corrected[i] = user_guessed_letter
+                # This shows each letter and number of its occurences in "word_to_guess_corrected".
+                b = [[x,word_to_guess_corrected.count(x)] for x in set(word_to_guess_corrected)]
+                print(b)
                 print(word_to_guess_corrected)
                 print(f"Letter correct, {user_guessed_letter}. This was your {count} wrong guess.")    
                 break
