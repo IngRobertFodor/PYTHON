@@ -56,7 +56,9 @@ print("First way")
 
 count = 0
 # Word to find in this game.
-word_to_guess = "EVAPORITY"
+word_to_guess = ["BOAT", "USA", "HOME", "COMPUTER", "DOG"]
+word_to_guess = random.choice(word_to_guess)
+print(word_to_guess)
 word_to_guess = list(word_to_guess)
 # This will be the word that user guesses.
 word_to_guess_corrected = list("_" * len(word_to_guess))
