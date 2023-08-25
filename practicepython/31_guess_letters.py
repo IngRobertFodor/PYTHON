@@ -74,7 +74,7 @@ while True:
             print(f"You are hanged. This was your {count} wrong guess.")
             break
     elif user_guessed_letter in word_to_guess:
-        for i in range(len(word_to_guess_corrected)):
+        for i in range(0,len(word_to_guess_corrected)):
             if word_to_guess_corrected[i] == "_":
                 word_to_guess_corrected[i] = user_guessed_letter
                 print(word_to_guess_corrected)
