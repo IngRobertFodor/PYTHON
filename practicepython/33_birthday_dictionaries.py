@@ -56,25 +56,37 @@ with open("birthday_dictionaries.txt", "r") as open_file:
     print(my_string)
     print(type(my_string))
     
+
+    # DICTIONARY 1 "my_dictionary"
+    # Keys for "my_dictionary".
     keys = my_string[0:23]
     print(keys)
     keys_list = keys.split(",")
     print(keys_list)
-    
-    values = my_string[24:]
+    # Values for "my_dictionary"
+    values = my_string[24:67]
     print(values)
     valuest_list = values.split(",")
     print(valuest_list)
-
-    # Created dictionary.
+    # Create dictionary "my_dictionary".
     my_dictionary = {keys_list[i]: valuest_list[i] for i in range(0, len(keys_list))}
     print(my_dictionary)
     print(type(my_dictionary))
     print(my_dictionary.keys())
     print(my_dictionary.values())
 
-    # Ask my user, which other user birthday he wants (user1, user2, user3 or user4).
-    print("Welcome to the birthday dictionaries.")
-    birthday_database = input("Who's birthday do you want to look up (user1, user2, user3 or user4) ?: ")
 
-    print(my_dictionary[birthday_database])
+    # DICTIONARY 2  "my_eval_dictionary".
+    # "EVAL" was used to convert string to dictionary.
+    birthdays = my_string[69:]
+    print(birthdays)
+    my_eval_dictionary = eval(birthdays)
+    print(type(my_eval_dictionary))
+
+
+    # Ask user what he wants to see.
+    user = input("Who's birthday do you want to look up?: ")
+    
+    # Only one of these two print statements can be in use at a time, because it wouldn´t work.
+    # print(my_dictionary[user])
+    print(my_eval_dictionary[user])
