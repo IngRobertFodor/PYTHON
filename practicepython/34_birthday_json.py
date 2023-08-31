@@ -55,14 +55,14 @@ import json
 
 
 
-# 1 Exercise
+# 1.1 Exercise
 # This will create .json file "birthday_json_one.json" with dictionary "info_about_me" there.
-'''
+
 info_about_me = {
     "name": "Michele",
     "has_a_dog": False
 }
-
+'''
 # This will create .json file "birthday_json_one.json".
 with open("birthday_json_one.json", "w") as open_file:
     json.dump(info_about_me, open_file)
@@ -76,9 +76,9 @@ print("Does Michelle has a dog?: " + str(info["has_a_dog"]) + ".")
 
 
 
-# 2 Exercise
+# 2.1 Exercise
 # This will create .json file "birthday_json_two.json" with dictionary "birthdays_dictionary" there.  
-'''
+
 birthdays_dictionary = {
     "Albert Einstein": "03/14/1879",
     "Benjamin Franklin": "01/17/1706",
@@ -86,7 +86,7 @@ birthdays_dictionary = {
     "Donald Trump": "06/14/1946",
     "Rowan Atkinson": "01/6/1955"
 }
-
+'''
 # This will create .json file "birthday_json_two.json".
 with open("birthday_json_two.json", "w") as open_file:
     json.dump(birthdays_dictionary, open_file)
