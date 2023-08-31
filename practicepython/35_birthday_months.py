@@ -56,11 +56,37 @@ import json
 # This will read from .json file "birthday_json_two.json".
 with open("birthday_json_two.json", "r") as open_file:
     data = json.load(open_file)
-c = []
+
 print(data.values())
+c = []
 for i in (data.values()):
     a = (i[0:2])
     print(a)
+    if a == "01":
+        a = "January"
+    elif a == "02":
+        a = "February"
+    elif a == "03":
+        a = "March"
+    elif a == "04":
+        a = "April"
+    elif a == "05":
+        a = "May"
+    elif a == "06":
+        a = "June"
+    elif a == "07":
+        a = "July"
+    elif a == "08":
+        a = "August"
+    elif a == "09":
+        a = "September"
+    elif a == "10":
+        a = "October"
+    elif a == "11":
+        a = "November"
+    elif a == "12":
+        a = "December"
     c.append(a)
+
 print(c)
 print(collections.Counter(c))
