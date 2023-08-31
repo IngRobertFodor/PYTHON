@@ -96,3 +96,20 @@ with open("birthday_json_two.json", "r") as open_file:
     data = json.load(open_file)
 
 print("Einstein's birthday: " + str(data["Albert Einstein"]) + ".")
+
+
+# 2.2 Exercise
+# Ask the user for another name and birthday to add to the dictionary, and update the .json file you have on disk with this name. 
+key = input("Write key for dictionary, name: ")
+value = input("Write value to the key for dictionary, date: ")
+new_dictionary_entry = {key: value}
+
+with open("birthday_json_two.json", "r") as open_file:
+    data = json.load(open_file)
+    
+data.update(new_dictionary_entry)
+
+with open("birthday_json_two.json", "w") as open_file:
+    json.dump(data, open_file)
+
+print(data)
