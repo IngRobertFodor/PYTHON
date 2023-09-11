@@ -85,9 +85,9 @@ def play_game():
                 print("Number not from interval (1 to 9). Guess again.")
         
         except ValueError:
-            # Guess like e.g. testing will throw ValueError.
+            # Testing whether guess is a number. Guess like e.g. testing will throw ValueError.
             # I won´t count these guesses.
-            print("ValueError, number not from interval (1 to 9).")
+            print("ValueError, guess is not a number.")
             if guess_random_number == "EXIT":
                 print("User don´t want to play.")
                 break
