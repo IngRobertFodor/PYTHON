@@ -1,14 +1,14 @@
-from itertools import groupby
-
 with open("2022_02.txt", "r") as open_file:
     
-    lines = open_file.read()
+    lines = open_file.readlines()
     print(lines)
-    keys = lines[0:1]
-    print(keys)
-    values = lines[2:3]
-    print(values)
-        
-    # Create dictionary "my_dictionary".
-    # my_dictionary = {lines[i][0:1]: lines[i][2:3] for i in range(0, len(lines))}
-    # print(my_dictionary)
+    print(len(lines))
+    keys_list = []
+    values_list = []
+    for i in range(0,len(lines)):
+        keys = lines[i][0:1]
+        keys_list.append(keys)
+        values = lines[i][2:3]
+        values_list.append(values)
+    print(keys_list)
+    print(values_list)
