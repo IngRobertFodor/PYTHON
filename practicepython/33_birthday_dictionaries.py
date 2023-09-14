@@ -66,10 +66,10 @@ with open("birthday_dictionaries.txt", "r") as open_file:
     # Values for "my_dictionary"
     values = my_string[24:67]
     print(values)
-    valuest_list = values.split(",")
-    print(valuest_list)
+    values_list = values.split(",")
+    print(values_list)
     # Create dictionary "my_dictionary".
-    my_dictionary = {keys_list[i]: valuest_list[i] for i in range(0, len(keys_list))}
+    my_dictionary = {keys_list[i]: values_list[i] for i in range(0, len(keys_list))}
     print(my_dictionary)
     print(type(my_dictionary))
     print(my_dictionary.keys())
@@ -79,9 +79,11 @@ with open("birthday_dictionaries.txt", "r") as open_file:
     # DICTIONARY 2  "my_eval_dictionary".
     # "EVAL" was used to convert string to dictionary.
     birthdays = my_string[69:]
+    print(type(birthdays))
     print(birthdays)
     my_eval_dictionary = eval(birthdays)
     print(type(my_eval_dictionary))
+    print(my_eval_dictionary)
 
 
     # Ask user what he wants to see.
