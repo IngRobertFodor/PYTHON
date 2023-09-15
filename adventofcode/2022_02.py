@@ -55,7 +55,6 @@ with open("2022_02.txt", "r") as open_file:
     print(f"This is sum of points (just for moves) for my opponent: {a+b+c}.")
     print(f"This is sum of points (just for moves) for me: {x+y+z}.")
     print()
-
     
     # These will be base data to calculate sum for loses, draws or wins (1, 3, 6).
     for i in range(0,len(my_opponent)):
@@ -98,3 +97,35 @@ with open("2022_02.txt", "r") as open_file:
     draw_points = len(results_draws) * 3
     print(f"For draw are same points for my opponent and me: {draw_points}.")
     print()
+
+    # This will be sum for my wins. 
+    my_opponent_nextlist = my_opponent_draws.copy()
+    my_moves_nextlist = my_moves_draws.copy()
+    for i in range(0, len(my_opponent_nextlist)):
+        for i in range(0, len(my_moves_nextlist)):
+            if my_opponent_nextlist[i] == '3' and my_moves_nextlist[i] == '1':
+                my_opponent_nextlist[i] = "loss"  
+                my_moves_nextlist[i] = "win"
+            elif my_opponent_nextlist[i] == '1' and my_moves_nextlist[i] == '2':
+                my_opponent_nextlist[i] = "loss"  
+                my_moves_nextlist[i] = "win"
+            elif my_opponent_nextlist[i] == '2' and my_moves_nextlist[i] == '3':
+                my_opponent_nextlist[i] = "loss"  
+                my_moves_nextlist[i] = "win"
+    print(my_opponent_nextlist)
+    print(my_moves_nextlist)    
+    results_my_wins = []
+    for item in my_moves_nextlist:
+        if item == "win":
+            results_my_wins.append(item)
+    print(results_my_wins)
+    print(len(results_my_wins))
+## These are points for my wins.
+    print("Third part of results.")
+    my_win_points = len(results_my_wins) * 6
+    print(f"These are my win points: {my_win_points}.")
+    print()
+
+
+### RESULT
+    print(f"Result is: {x+y+z+draw_points+my_win_points}")
