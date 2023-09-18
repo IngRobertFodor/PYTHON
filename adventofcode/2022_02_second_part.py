@@ -16,52 +16,15 @@ with open("2022_02.txt", "r") as open_file:
         me = lines[i][2:3]
         my_moves.append(me)
     # This is my opponent (A, B, C).
-    print(my_opponent)
-    print(collections.Counter(my_opponent))
+    print(my_opponent)  
     # This is me (X, Y, Z).
     print(my_moves)
-    print(collections.Counter(my_moves))
 
-    # This will count moves of each player.
-    # These are my opponent's moves (A, B, C).
-    a = my_opponent.count("A")
-    print(a)
-    a = a*1
-    print(a)
-    b = my_opponent.count("B")
-    print(b)
-    b = b*2
-    print(b)
-    c = my_opponent.count("C")
-    print(c)
-    c = c*3
-    print(c)
-    # These are my moves (X, Y, Z).
-    x = my_moves.count("X")
-    print(x)
-    x = x*1
-    print(x)
-    y = my_moves.count("Y")
-    print(y)
-    y = y*2
-    print(y)
-    z = my_moves.count("Z")
-    print(z)
-    z = z*3
-    print(z)
 
-## This is sum (just for moves).
-    print("First part of results.")
-    print(f"This is sum of points (just for moves) for my opponent: {a+b+c}.")
-    print(f"This is sum of points (just for moves) for me: {x+y+z}.")
-    print()
-    
-    # T Pointshese will be base data to calculate sum for loses, draws or wins (0, 3, 6).
     # X     Loss    0 points
     # Y     Draw    3 points
     # Z     Win     6 points
     my_moves_nextlist= my_moves.copy()
-    print(my_moves_nextlist)
     for i in range(0, len(my_moves_nextlist)):
         if my_moves_nextlist[i] == 'X':
             my_moves_nextlist[i] = 0
@@ -70,16 +33,63 @@ with open("2022_02.txt", "r") as open_file:
         if my_moves_nextlist[i] == 'Z':
             my_moves_nextlist[i] = 6
     print(my_moves_nextlist)
-
 ## These are points for my losses, draws and wins.
-    print("Second part of results.")
-    print(sum(my_moves_nextlist))
-    print(f"These are points for my losses, draws and wins: {my_moves_nextlist}.")
+    print("First part of results.")
+    first_results = int(sum(my_moves_nextlist))
+    print(first_results)
+    print(f"These are points for my losses, draws and wins: {first_results}.")
     print()
 
-### RESULT
-    first_results = x+y+z
-    print(first_results)
-    second_results = int(sum(my_moves_nextlist))
+
+    # A     Rock        1 points
+    # B     Paper       2 points
+    # C     Scissors    3 points
+    # X     Rock        1 points
+    # Y     Paper       2 points
+    # Z     Scissors    3 points
+    my_opponent = my_opponent.copy()
+    print(my_opponent)
+    my_moves_change = my_moves.copy()
+    print(my_moves_change)
+    for i in range(0, len(my_moves_change)):
+        for i in range(0, len(my_opponent)):
+            # I should loose.
+            if my_moves_change[i] == 'X' and my_opponent[i] == 'A':  
+                my_moves_change[i] = 'ZZ'
+            elif my_moves_change[i] == 'X' and my_opponent[i] == 'B':  
+                my_moves_change[i] = 'XX'
+            elif my_moves_change[i] == 'X' and my_opponent[i] == 'C':  
+                my_moves_change[i] = 'YY'
+            # I should draw.
+            elif my_moves_change[i] == 'Y' and my_opponent[i] == 'A':  
+                my_moves_change[i] = 'XX'
+            elif my_moves_change[i] == 'Y' and my_opponent[i] == 'B':  
+                my_moves_change[i] = 'YY'
+            elif my_moves_change[i] == 'Y' and my_opponent[i] == 'C':  
+                my_moves_change[i] = 'ZZ'
+            # I should win.
+            elif my_moves_change[i] == 'Z' and my_opponent[i] == 'A':  
+                my_moves_change[i] = 'YY'
+            elif my_moves_change[i] == 'Z' and my_opponent[i] == 'B':  
+                my_moves_change[i] = 'ZZ'
+            elif my_moves_change[i] == 'Z' and my_opponent[i] == 'C':  
+                my_moves_change[i] = 'XX'
+    print(my_moves_change)
+    for i in range(0, len(my_moves_change)):
+        if my_moves_change[i] == 'XX':
+            my_moves_change[i] = 0
+        elif my_moves_change[i] == 'YY':
+            my_moves_change[i] = 3
+        elif my_moves_change[i] == 'ZZ':
+            my_moves_change[i] = 6
+    print(my_moves_change)
+## This is sum of points just for my moves.
+    print("Second part of results.")
+    second_results = int(sum(my_moves_change))
     print(second_results)
+    print(f"This is sum of points (just for moves) for me: {second_results}.")
+    print() 
+
+
+### RESULT
     print(f"Result is: {first_results+second_results}.")
