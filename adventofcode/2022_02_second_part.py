@@ -5,37 +5,15 @@ with open("2022_02.txt", "r") as open_file:
     
     lines = open_file.readlines()
     print(lines)
-    print(len(lines))
-    # This is my opponent (A, B, C).
-    my_opponent = []
     # This is me (X, Y, Z).
     my_moves = []
     for i in range(0,len(lines)):
-        opponent = lines[i][0:1]
-        my_opponent.append(opponent)
         me = lines[i][2:3]
         my_moves.append(me)
-    # This is my opponent (A, B, C).
-    print(my_opponent)
-    print(collections.Counter(my_opponent))
     # This is me (X, Y, Z).
     print(my_moves)
     print(collections.Counter(my_moves))
 
-    # This will count moves of each player.
-    # These are my opponent's moves (A, B, C).
-    a = my_opponent.count("A")
-    print(a)
-    a = a*1
-    print(a)
-    b = my_opponent.count("B")
-    print(b)
-    b = b*2
-    print(b)
-    c = my_opponent.count("C")
-    print(c)
-    c = c*3
-    print(c)
     # These are my moves (X, Y, Z).
     x = my_moves.count("X")
     print(x)
@@ -50,29 +28,19 @@ with open("2022_02.txt", "r") as open_file:
     z = z*3
     print(z)
 
-## This is sum (just for moves).
+## This is sum (just for my moves).
     print("First part of results.")
-    print(f"This is sum of points (just for moves) for my opponent: {a+b+c}.")
     print(f"This is sum of points (just for moves) for me: {x+y+z}.")
     print()
     
-    # These will be base data to calculate sum for loses, draws or wins (1, 3, 6).
-    for i in range(0,len(my_opponent)):
-        if my_opponent[i] == "A":
-            my_opponent[i] = "1"
-        elif my_opponent[i] == "B":
-            my_opponent[i] = "2"
-        elif my_opponent[i] == "C":
-            my_opponent[i] = "3"
-    print(my_opponent)
-    print(len(my_opponent))
-    for j in range(0,len(my_moves)):
-        if my_moves[j] == "X":
-            my_moves[j] = "1"
-        elif my_moves[j] == "Y":
-            my_moves[j] = "2"
-        elif my_moves[j] == "Z":
-            my_moves[j] = "3"
+    # These will be base data to calculate sum for loses, draws or wins (0, 3, 6).
+    for i in range(0,len(my_moves)):
+        if my_moves[i] == "X":
+            my_moves[i] = "1"
+        elif my_moves[i] == "Y":
+            my_moves[i] = "2"
+        elif my_moves[i] == "Z":
+            my_moves[i] = "3"
     print(my_moves)
     print(len(my_moves))
 

@@ -56,7 +56,7 @@ with open("2022_02.txt", "r") as open_file:
     print(f"This is sum of points (just for moves) for me: {x+y+z}.")
     print()
     
-    # These will be base data to calculate sum for loses, draws or wins (1, 3, 6).
+    # These will be base data to calculate sum for loses, draws or wins (0, 3, 6).
     for i in range(0,len(my_opponent)):
         if my_opponent[i] == "A":
             my_opponent[i] = "1"
