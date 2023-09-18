@@ -55,33 +55,33 @@ with open("2022_02.txt", "r") as open_file:
         for i in range(0, len(my_opponent)):
             # I should loose.
             if my_moves_change[i] == 'X' and my_opponent[i] == 'A':  
-                my_moves_change[i] = 'ZZ'
+                my_moves_change[i] = 'C'
             elif my_moves_change[i] == 'X' and my_opponent[i] == 'B':  
-                my_moves_change[i] = 'XX'
+                my_moves_change[i] = 'A'
             elif my_moves_change[i] == 'X' and my_opponent[i] == 'C':  
-                my_moves_change[i] = 'YY'
+                my_moves_change[i] = 'B'
             # I should draw.
             elif my_moves_change[i] == 'Y' and my_opponent[i] == 'A':  
-                my_moves_change[i] = 'XX'
+                my_moves_change[i] = 'A'
             elif my_moves_change[i] == 'Y' and my_opponent[i] == 'B':  
-                my_moves_change[i] = 'YY'
+                my_moves_change[i] = 'B'
             elif my_moves_change[i] == 'Y' and my_opponent[i] == 'C':  
-                my_moves_change[i] = 'ZZ'
+                my_moves_change[i] = 'C'
             # I should win.
             elif my_moves_change[i] == 'Z' and my_opponent[i] == 'A':  
-                my_moves_change[i] = 'YY'
+                my_moves_change[i] = 'B'
             elif my_moves_change[i] == 'Z' and my_opponent[i] == 'B':  
-                my_moves_change[i] = 'ZZ'
+                my_moves_change[i] = 'C'
             elif my_moves_change[i] == 'Z' and my_opponent[i] == 'C':  
-                my_moves_change[i] = 'XX'
+                my_moves_change[i] = 'A'
     print(my_moves_change)
     for i in range(0, len(my_moves_change)):
-        if my_moves_change[i] == 'XX':
-            my_moves_change[i] = 0
-        elif my_moves_change[i] == 'YY':
+        if my_moves_change[i] == 'A':
+            my_moves_change[i] = 1
+        elif my_moves_change[i] == 'B':
+            my_moves_change[i] = 2
+        elif my_moves_change[i] == 'C':
             my_moves_change[i] = 3
-        elif my_moves_change[i] == 'ZZ':
-            my_moves_change[i] = 6
     print(my_moves_change)
 ## This is sum of points just for my moves.
     print("Second part of results.")
