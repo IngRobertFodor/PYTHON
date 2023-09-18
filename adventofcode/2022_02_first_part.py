@@ -128,4 +128,4 @@ with open("2022_02.txt", "r") as open_file:
 
 
 ### RESULT
-    print(f"Result is: {x+y+z+draw_points+my_win_points}")
+    print(f"Result is: {x+y+z+draw_points+my_win_points}.")
