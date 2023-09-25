@@ -22,17 +22,17 @@ with open("2022_03.txt", "r") as open_file:
             string_two = set(item[n//2:])
             print("First Half of String:",string_one)
             print("Second Half of String:",string_two)
-            unique = set(string_one).intersection(set(string_two))
-            print(f" This is item from backpack that is unique: {unique}.")
-            elf_items.append(unique)
+            intersection = set(string_one).intersection(set(string_two))
+            print(f" This is item from backpack that is intersection: {intersection}.")
+            elf_items.append(intersection)
         else:
             string_one = set(item[0:(n//2+1)])
             string_one = set(item[(n//2+1):])
             print("First Half of String:",string_one)
             print("Second Half of String:",string_two)
-            unique = set(string_one).intersection(set(string_two))
-            print(f" This is item from backpack that is unique: {unique}.")
-            elf_items.append(unique)
+            intersection = set(string_one).intersection(set(string_two))
+            print(f" This is item from backpack that is intersection: {intersection}.")
+            elf_items.append(intersection)
     print(elf_items)
 
     elf_items_strings_first = []
@@ -47,8 +47,8 @@ with open("2022_03.txt", "r") as open_file:
         string_i = i.replace("'}", "")
         elf_items_strings_second.append(string_i)
     print(elf_items_strings_second)
-    elf_items_strings_second
     elf_items_strings = elf_items_strings_second
+    print()
     print(elf_items_strings)
 
     elf_items_strings_lower_case = []
@@ -77,5 +77,6 @@ with open("2022_03.txt", "r") as open_file:
         if i in priority_values.keys():
             x = priority_values.get(i)
             xx.append(x)
+    print()        
     print(xx)
     print(f"This is sum of priority values in backpack: {sum(xx)}.")
