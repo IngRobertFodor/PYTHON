@@ -1,3 +1,5 @@
+#2 Find the item type that corresponds to the badges of each three-Elf group. What is the sum of the priorities of those item types?
+
 with open("2022_03.txt", "r") as open_file:
     
     lines = open_file.readlines()
