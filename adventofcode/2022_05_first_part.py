@@ -25,11 +25,10 @@ with open("2022_05.txt", "r") as open_file:
         item = lines[i].strip()
         list_items_steps.append(item)
     print(list_items_steps)
-
     # This parse each row of predefined moves.
     for i in range(0,len(list_items_steps)):
-        number_of_crates = list_items_steps[i][5:6]
-        # print(number_of_crates)
+        number_of_crates_to_move = list_items_steps[i][5:6]
+        # print(number_of_crates_to_move)
         move_from_pile = list_items_steps[i][12:13]
         # print(move_from_pile)
         move_to_pile = list_items_steps[i][17:18]
