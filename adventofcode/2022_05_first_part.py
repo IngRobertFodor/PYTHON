@@ -1,5 +1,9 @@
 #1 After the rearrangement procedure completes, what crate ends up on top of each stack?
 
+# LISTS ALL INSTALLED LIBRARIES
+#   pip list
+
+
 with open("2022_05.txt", "r") as open_file:
     
     lines = open_file.readlines()
