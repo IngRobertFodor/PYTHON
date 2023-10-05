@@ -2,6 +2,7 @@
 
 # LISTS ALL INSTALLED LIBRARIES
 #   pip list
+import collections
 
 
 with open("2022_05.txt", "r") as open_file:
@@ -29,14 +30,6 @@ with open("2022_05.txt", "r") as open_file:
         item = lines[i].strip()
         list_items_steps.append(item)
     print(list_items_steps)
-    # This parse each row of predefined moves.
-    for i in range(0,len(list_items_steps)):
-        number_of_crates_to_move = list_items_steps[i][5:6]
-        # print(number_of_crates_to_move)
-        move_from_pile = list_items_steps[i][12:13]
-        # print(move_from_pile)
-        move_to_pile = list_items_steps[i][17:18]
-        # print(move_to_pile)
     
     crates_board = ["[N]"," - "," - "," - ","[R]"," - "," - "," - ","[C]",
                     "[T]","[J]"," - "," - ","[S]","[J]"," - "," - ","[N]",
@@ -64,3 +57,53 @@ with open("2022_05.txt", "r") as open_file:
     print()
     print("Board at the begining of predefined moves.")
     print_board()
+
+    # This loops thru these lists vertically. "vlist" displays the vertical list.
+    line_one = ["[N]"," - "," - "," - ","[R]"," - "," - "," - ","[C]"]
+    line_two = ["[T]","[J]"," - "," - ","[S]","[J]"," - "," - ","[N]"]
+    line_three = ["[B]","[Z]"," - ","[H]","[M]","[Z]"," - "," - ","[D]"]
+    line_four = ["[S]","[P]"," - ","[G]","[L]","[H]","[Z]"," - ","[T]"]
+    line_five = ["[Q]","[D]"," - ","[F]","[D]","[V]","[L]","[S]","[M]"]
+    line_six = ["[H]","[F]","[V]","[J]","[C]","[W]","[P]","[W]","[L]"]
+    line_seven = ["[G]","[S]","[H]","[Z]","[Z]","[T]","[F]","[V]","[H]"]
+    line_eight = ["[R]","[H]","[Y]","[M]","[T]","[M]","[T]","[Q]","[W]"]
+    line_nine = [" 1 "," 2 "," 3 "," 4 "," 5 "," 6 "," 7 "," 8 "," 9 "]
+    vlist = list(zip(line_one,line_two,line_three,line_four,line_five,line_six,line_seven,line_eight))
+    print(vlist)
+
+    # This parse each row of predefined moves.
+    for i in range(0,len(list_items_steps)):
+
+        number_of_crates_to_move = list_items_steps[i][5:6]
+        print("number_of_crates_to_move: ", number_of_crates_to_move)
+        
+        ## Removing crates.
+        move_from_pile = list_items_steps[i][12:13]
+        print("move_from_pile: ", move_from_pile)
+        new_r_list = vlist[int(move_from_pile)-1]
+        new_r_list = list(new_r_list)
+        print(f'This is "move_from_pile" before move: {new_r_list}.')
+        new_r_list = vlist[int(move_from_pile)-1][int(number_of_crates_to_move):]
+        new_r_list = list(new_r_list)
+        print(f'This is "move_from_pile" after move: {new_r_list}.')
+
+        ## These are moved crates.
+        moved_crates = vlist[int(move_from_pile)-1][:int(number_of_crates_to_move)]
+        moved_crates = list(moved_crates)
+        print(f'These crates were moved: {moved_crates}.')
+        # Should be reversed due to later purposes.
+        moved_crates.reverse()
+
+        ## Adding crates.
+        move_to_pile = list_items_steps[i][17:18]
+        print("move_to_pile: ", move_to_pile)
+        new_a_list = vlist[int(move_to_pile)-1]
+        new_a_list = list (new_a_list)
+        print(f'This is "move_to_pile" before move: {new_a_list}.')
+        for i in range(1, len(moved_crates)+1):
+            if " - " in new_a_list:
+                new_a_list.remove(" - ")
+        for i in range(0, len(moved_crates)):
+            new_a_list.insert(0, moved_crates[i])
+        new_a_list = list(new_a_list)
+        print(f'This is "move_to_pile" after move: {new_a_list}.')
