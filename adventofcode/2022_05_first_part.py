@@ -2,7 +2,6 @@
 
 # LISTS ALL INSTALLED LIBRARIES
 #   pip list
-import collections
 
 
 with open("2022_05.txt", "r") as open_file:
@@ -70,40 +69,48 @@ with open("2022_05.txt", "r") as open_file:
     line_nine = [" 1 "," 2 "," 3 "," 4 "," 5 "," 6 "," 7 "," 8 "," 9 "]
     vlist = list(zip(line_one,line_two,line_three,line_four,line_five,line_six,line_seven,line_eight))
     print(vlist)
+    print()
 
+    count = 0
     # This parse each row of predefined moves.
     for i in range(0,len(list_items_steps)):
 
-        number_of_crates_to_move = list_items_steps[i][5:6]
+        number_of_crates_to_move = list_items_steps[i][5:7]
         print("number_of_crates_to_move: ", number_of_crates_to_move)
         
         ## Removing crates.
-        move_from_pile = list_items_steps[i][12:13]
+        move_from_pile = list_items_steps[i][-1:]
         print("move_from_pile: ", move_from_pile)
         new_r_list = vlist[int(move_from_pile)-1]
+        # This removes " - " to be able to select only valid crates to move. 
+        new_r_list = [i for i in new_r_list if i != " - "]
         new_r_list = list(new_r_list)
-        print(f'This is "move_from_pile" before move: {new_r_list}.')
-        new_r_list = vlist[int(move_from_pile)-1][int(number_of_crates_to_move):]
-        new_r_list = list(new_r_list)
-        print(f'This is "move_from_pile" after move: {new_r_list}.')
-
+        print(f'Adjusted "move_from_pile" {move_from_pile} list before move: {new_r_list}.')
+        
         ## These are moved crates.
-        moved_crates = vlist[int(move_from_pile)-1][:int(number_of_crates_to_move)]
+        moved_crates = new_r_list[:int(number_of_crates_to_move)]
         moved_crates = list(moved_crates)
         print(f'These crates were moved: {moved_crates}.')
         # Should be reversed due to later purposes.
         moved_crates.reverse()
+        new_r_list = new_r_list[int(number_of_crates_to_move):]
+        new_r_list = list(new_r_list)
+        vlist[int(move_from_pile)-1] = new_r_list
+        print(f'This is "move_from_pile" {move_from_pile} after move: {vlist[int(move_from_pile)-1]}.')
 
         ## Adding crates.
-        move_to_pile = list_items_steps[i][17:18]
+        move_to_pile = list_items_steps[i][-7:-5]
         print("move_to_pile: ", move_to_pile)
         new_a_list = vlist[int(move_to_pile)-1]
-        new_a_list = list (new_a_list)
-        print(f'This is "move_to_pile" before move: {new_a_list}.')
-        for i in range(1, len(moved_crates)+1):
-            if " - " in new_a_list:
-                new_a_list.remove(" - ")
+        # This removes " - " to be able to add crates only to valid spots.
+        new_a_list = [i for i in new_a_list if i != " - "]
+        new_a_list = list(new_a_list)
+        print(f'Adjusted "move_to_pile" {move_to_pile} list before move: {new_a_list}.')
         for i in range(0, len(moved_crates)):
             new_a_list.insert(0, moved_crates[i])
         new_a_list = list(new_a_list)
-        print(f'This is "move_to_pile" after move: {new_a_list}.')
+        vlist[int(move_to_pile)-1] = new_a_list
+        print(f'This is "move_to_pile" {move_to_pile} after move: {vlist[int(move_to_pile)-1]}.')
+        count += 1
+        print(count)
+        print()
