@@ -92,7 +92,7 @@ with open("2022_05.txt", "r") as open_file:
         moved_crates = list(moved_crates)
         print(moved_crates)
         moved_crates.reverse()
-        print(f'These crates were moved: {moved_crates}.')
+        print(f'These crates were moved: {moved_crates}. Order is reversed.')
         new_r_list = new_r_list[int(number_of_crates_to_move):]
         new_r_list = list(new_r_list)
         vlist[int(move_from_pile)-1] = new_r_list
