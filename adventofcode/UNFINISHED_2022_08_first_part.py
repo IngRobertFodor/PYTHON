@@ -1,7 +1,7 @@
 #1 Consider your map; how many trees are visible from outside the grid?
 
 
-with open("UNFINISHED_2022_08.txt", "r") as open_file:
+with open("2022_08.txt", "r") as open_file:
 
     # Rows
     lines_list = []
@@ -26,16 +26,30 @@ with open("UNFINISHED_2022_08.txt", "r") as open_file:
     aa = []
     for i in range(0,len(lines_list)):
         a = list(lines_list[i])
+        print(a)
         aa.append(a)
-        maxx = max(a)
-        print(f'Max value: {maxx}.')
-        ind = a.index(str(maxx))
-        print(f'Index of max value: {ind}, row: {a}.')      
+        maxx_row = max(a)
+        print(f'Max value in row: {maxx_row}.')
+        ind = a.index(str(maxx_row))
+        print(f'Index of max row value: {ind}, in row: {a}.')      
     print()
 
     # Columns
     print("Columns")
     lines_columns = zip(*lines_list)
     for i in lines_columns:
-        print(list(i))
+        b = list(i)
+        print(b)
+    print()
+    
+    # Columns details
+    print("Columns details")
+    lines_columns = zip(*lines_list)
+    for i in lines_columns:
+        b = list(i)
+        print(b)
+        maxx_column = max(b)
+        print(f'Max value in column: {maxx_column}.')
+        ind = b.index(str(maxx_column))
+        print(f'Index of max column value: {ind}, in column: {b}.')
     print()
