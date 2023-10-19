@@ -28,7 +28,7 @@ with open("2022_07.txt", "r") as open_file:
         # 1. Highest Level:
         # cd /
     x = list_items[0]
-    print("     Highest level is: " + str(x) + ".")
+    print("     Highest level is: " + str(" ".join(x).strip("$")) + ".")
     print()
 
         # 2. Second Level:
