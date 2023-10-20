@@ -41,6 +41,15 @@ print(s)
 print()
 
 
+    # locals()
+# These are variables defined within function.
+#print(locals())
+
+    # globals()
+# These are variables defined outside function.
+#print(globals())
+
+
     # functions
 def add_numbers(i):
     if i == 0:
