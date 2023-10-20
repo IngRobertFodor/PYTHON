@@ -1,5 +1,7 @@
+# Prime Numbers
 # Number 1 is not prime number.
 # List all prime numbers to my_number.
+
 
 def find_prime_numbers(my_number):
     prime_numbers_list_to_my_number = []
@@ -8,11 +10,12 @@ def find_prime_numbers(my_number):
         for i in range(2,num):
             if (num%i==0):
                 prime = False
-        if prime:
+        if prime==True:
             #print(num)
             prime_numbers_list_to_my_number.append(num)
 
     return print(prime_numbers_list_to_my_number)
 
-find_prime_numbers(20)
+
 find_prime_numbers(150)
+find_prime_numbers(149)
