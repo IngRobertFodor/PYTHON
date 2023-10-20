@@ -100,6 +100,15 @@ print(other_solution_factorial("Test"))
 print()
 
 
+    # *args, **kwargs
+def perform_action(*args, **kwargs):
+    print(args)
+    print(kwargs)
+
+perform_action(1,5, message="Sum.")
+print()
+
+
     # bytes
 print("Bytes.")
 print(bytes(4))
