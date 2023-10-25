@@ -20,6 +20,7 @@ with open("2022_07.txt", "r") as open_file:
         elif line.startswith("$ cd") and line_split[2] == (".."):
             stack.pop()
         else:
+            # "accumulate" counts sum value, e.g. for "a", then "a+b", then "a+b+c", etc.
             for folder in accumulate(stack, lambda x,y: x + "*" + y):
                 if folder not in sizes.keys():
                     sizes[folder] = 0
