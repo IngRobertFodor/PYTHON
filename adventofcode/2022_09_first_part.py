@@ -1,6 +1,25 @@
 #1 Simulate your complete hypothetical series of motions. How many positions does the tail of the rope visit at least once?
 
 
+# Training
+#########################################################################################
+result_one = []
+result_two = []
+list_aaaaa = ["Test_a","Test_aa","Test_bb","Test_aaa","Test_aaaa"]
+list_bbbbb = ["Test_b","Test_bb","Test_bbb","Test_bbbb","Test_aa"]
+list_ccccc = ["Test_c","Test_cc","Test_aa","Test_ccc","Test_cccc"]
+for i in list_aaaaa:
+    for j in list_bbbbb:
+        if i == j:
+            result_one.append(i)
+            for k in list_ccccc:
+                if i == k:
+                    result_two.append(i)
+print(result_one)
+print(result_two)
+#########################################################################################
+
+
 def read_file():
     with open("2022_09.txt", "r") as open_file:
     
