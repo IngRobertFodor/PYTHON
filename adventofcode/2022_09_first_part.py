@@ -53,13 +53,13 @@ def original_board():
     return my_list_list
 
 
-def find_default_spot():
+def find_moves():
     # Iterate over each row.
-    for i in range(len(defalt_spot)):
+    for i in range(len(default_spot)):
         # Iterate over each column.
-        for j in range(len(defalt_spot[i])):
+        for j in range(len(default_spot[i])):
             # Check if the current element is equal to "H".
-            if defalt_spot[i][j] == 'H':
+            if default_spot[i][j] == 'H':
                 # Print the position of "H".
                 return print(f"Found 'H' at position ({i},{j}).")
 
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     my_input = read_file()
     print(my_input)
     print()    
-    defalt_spot = original_board()
-    print(defalt_spot)
+    default_spot = original_board()
+    print(default_spot)
     print()
-    find_default_spot()
+    find_moves()
