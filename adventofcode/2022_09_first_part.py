@@ -17,6 +17,7 @@ for i in list_aaaaa:
                     result_two.append(i)
 print(result_one)
 print(result_two)
+print()
 #########################################################################################
 
 
@@ -43,6 +44,32 @@ def read_file():
     return my_dict
 
 
+def original_board():
+    my_list = ["......", "......", "......", "......", "H....."]
+    my_list_list = []
+    for item in my_list:
+        my_list_list.append(list(item))
+    #print(my_list_list)
+    return my_list_list
+
+
+def find_default_spot():
+    # Iterate over each row.
+    for i in range(len(defalt_spot)):
+        # Iterate over each column.
+        for j in range(len(defalt_spot[i])):
+            # Check if the current element is equal to "H".
+            if defalt_spot[i][j] == 'H':
+                # Print the position of "H".
+                return print(f"Found 'H' at position ({i},{j}).")
+
+
 if __name__ == "__main__":
+    
     my_input = read_file()
     print(my_input)
+    print()    
+    defalt_spot = original_board()
+    print(defalt_spot)
+    print()
+    find_default_spot()
