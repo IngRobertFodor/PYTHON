@@ -45,12 +45,16 @@ def read_file():
 
 
 def original_board():
-    my_list = ["......", "......", "......", "......", "H....."]
-    my_list_list = []
+    my_list = [
+    ['.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.'],
+    ['H', '.', '.', '.', '.', '.']
+    ]
     for item in my_list:
-        my_list_list.append(list(item))
-    #print(my_list_list)
-    return my_list_list
+        print(item)
+    return my_list
 
 
 def find_moves():
