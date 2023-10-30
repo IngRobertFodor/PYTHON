@@ -28,7 +28,7 @@ with open("2022_09.txt", "r") as open_file:
     for line in open_file:
         x = line.split()
         my_dict.update({x[0].strip() : x[1].strip()})
-    #print(my_dict)
+    print(my_dict)
     # These are moves of the letters one by one.
     for key in my_dict:
         if key == "R":
