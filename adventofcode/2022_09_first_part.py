@@ -72,7 +72,7 @@ if __name__ == "__main__":
     
     my_input = read_file()
     print(my_input)
-    print()   
+    print()    
     default_spot = original_board()
     print(default_spot)
     print()
