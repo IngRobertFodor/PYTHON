@@ -21,6 +21,7 @@ print()
 #########################################################################################
 
 
+'''
 with open("2022_09.txt", "r") as open_file:
     
     # Read file as "dictionary".
@@ -73,3 +74,4 @@ with open("2022_09.txt", "r") as open_file:
                 my_list[i][h_column_index_new] = 'H'
                 print(h_row)
                 break
+'''
