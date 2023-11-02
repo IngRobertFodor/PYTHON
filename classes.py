@@ -5,11 +5,11 @@ class Motorcycle:
     model = None
 
     def __init__(self, make, model):
-        self.make = make
-        self.model = model
+        self.my_make = make
+        self.my_model = model
     
     def __repr__(self):
-        return (f'{self.make} {self.model} with engine '
+        return (f'{self.my_make} {self.my_model} with engine '
                 f'{"on" if self.is_engine_on else "off"} and headlights '
                 f'{"on" if self.is_headlights_on else "off"}')
 
@@ -51,11 +51,11 @@ class Car:
     model = None
 
     def __init__(self, make, model):
-        self.make = make
-        self.model = model
+        self.my_make = make
+        self.my_model = model
     
     def __repr__(self):
-        return (f'{self.make} {self.model} with engine '
+        return (f'{self.my_make} {self.my_model} with engine '
                 f'{"on" if self.is_engine_on else "off"} and headlights '
                 f'{"on" if self.is_headlights_on else "off"}')
 

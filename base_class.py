@@ -7,11 +7,11 @@ class Vehicle:
     model = None
 
     def __init__(self, make, model):
-        self.make = make
-        self.model = model
+        self.my_make = make
+        self.my_model = model
     
     def __repr__(self):
-        return (f'{self.make} {self.model} with engine '
+        return (f'{self.my_make} {self.my_model} with engine '
                 f'{"on" if self.is_engine_on else "off"} and headlights '
                 f'{"on" if self.is_headlights_on else "off"}')
 
@@ -48,8 +48,8 @@ moto = Motorcycle("Triumph", "Thruxton")
 car = Car("Mercedes", "S Class") 
 
 
-for vehicle in [moto, car]:
-    print(vehicle)
-    vehicle.turn_engine_on()
-    vehicle.turn_headlights_on()
+for my_vehicle in [moto, car]:
+    print(my_vehicle)
+    my_vehicle.turn_engine_on()
+    my_vehicle.turn_headlights_on()
     print()
