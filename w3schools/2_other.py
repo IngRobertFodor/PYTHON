@@ -123,7 +123,7 @@ print(x == y)
 x = 5
 # Returns True because 5 is greater than 3 AND 5 is less than 10.
 print(x > 3 and x < 10)
-# Returns True because one of the conditions are true (5 is greater than 3, but 5 is not less than 4).
+# Returns True because one of the conditions is true (5 is greater than 3, but 5 is not less than 4).
 print(x > 3 or x < 4)
 # Returns False because NOT is used to reverse the result.
 print(not(x > 3 and x < 10))
@@ -133,5 +133,5 @@ print(not(x > 3 and x < 10))
 thislist = ["apple", "banana", "cherry"]
 print(len(thislist))
 
-thistuple = tuple(("apple", "banana", "cherry"))
+thistuple = ("apple", "banana", "cherry")
 print(len(thistuple))
