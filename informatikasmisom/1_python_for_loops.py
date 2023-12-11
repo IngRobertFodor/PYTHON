@@ -43,3 +43,19 @@ for row_value in range(rows - 1, 0, -1):
     print("", end="\n")
 # Empty row.
 print()
+
+
+## Example 4
+
+rows = 5
+
+for row_value in range(1, rows + 1):
+    for number in range(row_value, 0, -1):
+        print(str(number) + " ", end="")    
+    print("", end="\n")
+for row_value in range(rows - 1, 0, -1):
+    for number in range(row_value, 0, -1):
+        print(str(number) + " ", end="")    
+    print("", end="\n")
+# Empty row.
+print()
