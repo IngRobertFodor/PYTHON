@@ -31,7 +31,8 @@ import random
 # Tuple is a collection which is ordered and unchangeable. Allows duplicate members.
 # Set is a collection which is unordered, unchangeable, and unindexed. No duplicate members.
 # Dictionary is a collection which is ordered and changeable. No duplicate members.
-
+#Test
+print()
 
 # Change the values "banana" and "cherry" with the values "blackcurrant" and "watermelon".
 thislist = ["apple", "banana", "cherry", "orange", "kiwi", "mango"]
