@@ -90,6 +90,7 @@ print()
 # The program should ask the user for the maximum number and then print a multiplication table from 1 to that number.
 # For example, if the user enters 5, the program should print the following table:
 '''
+Example with user input = 5.
 1  2  3  4  5
 2  4  6  8  10
 3  6  9  12 15
@@ -98,7 +99,7 @@ print()
 '''
 number=input("Give me number: ")
 number=int(number)
-print("Number is:", number)
+print("Number for Exercise 7 is:", number)
 for number_in_first_row in range(1,number+1):
     for row in range(1,number+1):
         print(number_in_first_row*row, "", end="")
@@ -111,6 +112,7 @@ print()
     # Exercise  8.1
 # Write a program that prints a diamond shape made of numbers.
 '''
+Example with user input = 5.
 1
 22
 333
@@ -119,7 +121,7 @@ print()
 '''
 number=input("Give me number: ")
 number=int(number)
-print("Number is:", number)
+print("Number for Exercise 8.1 is:", number)
 for row_number in range(1,number+1):
     print(row_number*str(row_number), "", end="")
     print()
@@ -132,6 +134,7 @@ print()
 # Cleaner Code.
 # Write a program that prints a diamond shape made of numbers.
 '''
+Example with user input = 5.
     1
    2 2
   3 3 3
@@ -140,7 +143,7 @@ print()
 '''
 number=input("Give me number: ")
 number=int(number)
-print("Number is:", number)
+print("Number for Exercise 8.2 is:", number)
 for row_number in range(1, number + 1):
         # Print spaces
         for a in range(number - row_number):
@@ -150,3 +153,69 @@ for row_number in range(1, number + 1):
             print(row_number, "", end="")
         # Move to the next line
         print()
+
+# EMPTY ROW
+print()
+
+
+    # Exercise  9.1
+# Write a program that prints a diamond shape made of asterisks. The number of rows should be determined by the user input.
+'''
+Example with user input = 5.
+    *
+   * *
+  * * *
+ * * * *
+* * * * *
+ * * * *
+  * * *
+   * *
+    *
+'''
+number=input("Give me number: ")
+number=int(number)
+print("Number for Exercise 9.1 is:", number)
+for row_number in range(1,number+1):
+    for space in range(number-row_number):
+        print(" ", end="")
+    for asterisk in range(row_number):
+        print("*", "", end="")
+    print()
+for row_number in range(number-1,0,-1):
+    for space in range(number-row_number):
+        print(" ", end="")
+    for asterisk in range(row_number):
+        print("*", "", end="")
+    print()
+    
+# EMPTY ROW
+print()
+
+
+    # Exercise  9.2
+# Write a program that prints a diamond shape made of asterisks. The number of rows should be determined by the user input.
+'''
+Example with user input = 5.
+  *
+ ***
+*****
+ ***
+  *
+'''
+number=input("Give me number: ")
+number=int(number)
+print("Number for Exercise 9.2 is:", number)
+for row_number in range(1,number+1):
+    for space in range(number-row_number):
+        print(" ", end="")
+    for asterisk in range(row_number):
+        if int(row_number)%2 != 0:
+            print("*", "", end="")
+    print()
+for row_number in range(number-1,0,-1):
+    for space in range(number-row_number):
+        print(" ", end="")
+    for asterisk in range(row_number):
+        if int(row_number)%2 != 0:
+            print("*", "", end="")
+    print()
