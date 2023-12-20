@@ -209,13 +209,17 @@ for row_number in range(1,number+1):
     for space in range(number-row_number):
         print(" ", end="")
     for asterisk in range(row_number):
-        if int(row_number)%2 != 0:
+        if int(row_number)%2 == 0:
+            continue
+        else:
             print("*", "", end="")
     print()
 for row_number in range(number-1,0,-1):
     for space in range(number-row_number):
         print(" ", end="")
     for asterisk in range(row_number):
-        if int(row_number)%2 != 0:
+        if int(row_number)%2 == 0:
+            continue
+        else:
             print("*", "", end="")
     print()
