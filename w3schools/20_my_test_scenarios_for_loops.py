@@ -1,3 +1,6 @@
+# For Loops, Nested Loops
+
+
     # Exercise 1
 #####
 #####
@@ -223,3 +226,20 @@ for row_number in range(number-1,0,-1):
         else:
             print("*", "", end="")
     print()
+       
+# EMPTY ROW
+print()
+
+
+    # Exercise  10
+# Nested Loop - Lists - Vowels
+# Nested Loop - Lists - Vowels
+string = "Geeks for Geeks"
+vowels = "AaEeIiOoUu"
+result_vowels = []
+for letter in string:
+  for vowel in vowels:
+    if vowel==letter:
+      result_vowels.append(vowel)
+print(result_vowels)
+print("In string were", len(result_vowels), "vowels.")
