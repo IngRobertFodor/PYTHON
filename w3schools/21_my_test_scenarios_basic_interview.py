@@ -36,3 +36,16 @@ factorial = 1
 for num in range(1,my_number+1):
   factorial=factorial*num
 print("Factorial:",factorial)
+
+
+# Basic Function - Calculate Average
+def calculate_average(my_list):
+  my_list_sum = sum(my_list)
+  average = my_list_sum/(len(my_list))
+  return print("Average in my list:", average)
+
+my_list_one = list(range(1,11))
+my_list_two = list(range(11,21))
+
+calculate_average(my_list_one)
+calculate_average(my_list_two)
