@@ -38,7 +38,7 @@ for num in range(1,my_number+1):
 print("Factorial:",factorial)
 
 
-# Basic Function - Calculate Average
+# Basic Function 1 - Calculate Average
 def calculate_average(my_list):
   my_list_sum = sum(my_list)
   average = my_list_sum/(len(my_list))
@@ -49,3 +49,18 @@ my_list_two = list(range(11,21))
 
 calculate_average(my_list_one)
 calculate_average(my_list_two)
+
+
+# Basic Function 2 - Calculate Sum of Even Numbers
+def calculate_sum_even(my_list):
+  sum_even= 0
+  for number in my_list:
+    if number%2==0:
+      sum_even += number   
+  return print(sum_even)
+
+my_list_three = list(range(1,11))
+my_list_four = list(range(11,21))
+
+calculate_sum_even(my_list_three)
+calculate_sum_even(my_list_four)
