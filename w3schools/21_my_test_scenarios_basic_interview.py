@@ -1,16 +1,17 @@
 # String Actions
 a = "test"
-my_list = []
-new_list = []
+my_list_a = []
+reversed_list_a = []
 for letter in a:
-  my_list.append(letter)
-print(my_list)
-my_list.reverse()
-print(my_list)
-new_list = "".join(my_list)
-print(new_list)
+  my_list_a.append(letter)
+print(my_list_a)
+reversed_list_a = my_list_a.copy()
+reversed_list_a.reverse()
+print(reversed_list_a)
+reversed_a = "".join(reversed_list_a)
+print(reversed_a)
 
-if my_list==new_list:
+if my_list_a==reversed_list_a:
   print("YES")
 else:
   print("NO")
