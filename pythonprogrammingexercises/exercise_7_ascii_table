@@ -1,0 +1,27 @@
+import string
+import collections
+
+
+# ASCII Table
+
+x = string.printable
+
+char = []
+id_char = []
+
+for character in x: 
+    if ord(character) >= 32 and ord(character) <= 126:
+
+        ### Option 1 how to display it.
+        print(ord(character), " ", character)
+
+        id_char.append(ord(character))
+        char.append(character)
+
+### Option 2 how to display it.
+my_dictionary=dict(zip(id_char,char))
+my_ordered_dictionary = collections.OrderedDict(sorted(my_dictionary.items()))
+
+print(my_ordered_dictionary)
+print("ASCII on position 35 is '#': " + my_ordered_dictionary[35])
+print("ASCII on position 126 is '~': " + my_ordered_dictionary[126])
