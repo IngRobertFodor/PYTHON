@@ -1,5 +1,6 @@
 # Chess Square Color
-def get_chess__square_color(row, column):
+
+def get_chess_square_color(row, column):
     chess_board = []
 
     for row_square in range(0,8):
@@ -32,7 +33,9 @@ def get_chess__square_color(row, column):
     ### Using list comprehension.
     new_chess_board_two = [chess_board[i:i + n] for i in range(0, len(chess_board), n)]
     print(new_chess_board_two)
+    print()
 
     return print(new_chess_board[row][column])
 
-get_chess__square_color(4,6)
+
+get_chess_square_color(4,6)

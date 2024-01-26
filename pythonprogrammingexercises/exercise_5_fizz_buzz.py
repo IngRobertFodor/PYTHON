@@ -17,6 +17,7 @@ def fizz_buzz(up_to):
         # number % 5 != 0
             number = number
         print(number, "", end="")
+    return
 
 
 fizz_buzz(up_to)

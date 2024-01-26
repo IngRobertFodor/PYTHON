@@ -29,7 +29,7 @@ def ordinal_suffix(number):
         return print(result)
     elif int(last_num) in range (4,10):
         suffix = "th"
-        result = number + suffix
+        result = number + suffix      
         return print(result)
         
 
