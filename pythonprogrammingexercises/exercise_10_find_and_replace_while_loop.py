@@ -1,4 +1,4 @@
-# Find and Replace using While loop
+# Find and Replace using While Loop
 
 def find_and_replace(my_sentence, old_text, new_text):
     

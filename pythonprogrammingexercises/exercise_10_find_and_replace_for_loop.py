@@ -1,4 +1,4 @@
-# Find and Replace using For loop
+# Find and Replace using For Loop
 
 def find_and_replace(my_sentence, old_text, new_text):
     
