@@ -1,6 +1,3 @@
-import random
-
-
 # Ordinal Suffix
 
 def ordinal_suffix(number):
