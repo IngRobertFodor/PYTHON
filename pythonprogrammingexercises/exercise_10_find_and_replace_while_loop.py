@@ -4,7 +4,7 @@ def find_and_replace(my_sentence, old_text, new_text):
     
     i=0
     while True:
-        if my_sentence[i:i + len(old_text)] == old_text:
+        if my_sentence[i:i + len(old_text)] == old_text and i<=len(my_sentence):
             new_sentence = my_sentence.replace(my_sentence[i:i + len(old_text)], new_text)          
             return print(new_sentence)
         else:
