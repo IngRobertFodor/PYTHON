@@ -19,27 +19,25 @@ def max_number(my_list):
         return print("Maximal number in this list is:",my_list[0])
 
 def min_number_using_loop(my_list):
-    my_list.sort()
     if len(my_list) == 0:
         return print(None)
     else:
-        for i in my_list:
-            if i < (i+1):
-                return print(i)
-            break
-
-def max_number_using_loop(my_list):
-    my_list.sort(reverse=True)
-    my_biggest = []
-    if len(my_list) == 0:
-        return print(None)
-    else:
-        for i in my_list:
-            my_biggest.append(i)
-            if (i+1) < (i):
-                continue
-            return print("Number of items in list are:", len(my_biggest), "and the biggest number is:", my_biggest[0], ".")
+        my_smallest = my_list[0]
+        for i in range(0, len(my_list)):
+            if my_list[i] < my_smallest:
+                my_smallest = my_list[i]    
+        return print("The smallest number is:", my_smallest, ".")
             
+def max_number_using_loop(my_list):
+    if len(my_list) == 0:
+        return print(None)
+    else:
+        my_biggest = my_list[0]
+        for i in range(0, len(my_list)):
+            if my_list[i] > my_biggest:
+                my_biggest = my_list[i]
+        return print("The biggest number is:", my_biggest, ".")
+        
 
 min_number([])
 max_number([])
@@ -52,6 +50,9 @@ max_number([280, 25, 42, 2, 280])
 
 min_number_using_loop([])
 max_number_using_loop([])
+
+min_number_using_loop(numbers_list)
+max_number_using_loop(numbers_list)
 
 min_number_using_loop([2, 2, 2, 2, 28, 25, 42, 2, 28])
 max_number_using_loop([2, 2, 2, 2, 28, 25, 42, 2, 28])
