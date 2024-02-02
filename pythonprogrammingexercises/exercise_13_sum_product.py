@@ -9,18 +9,30 @@ def calculate_sum(my_list):
     for number in my_list:
         sum_number += number 
     if len(my_list) == 0:
-        return print(0)
+        # This print is for execution of exercise 13.
+        #print(0)
+        # When it is commented, it is for execution of exercise 14.
+        return 0
     else:
-        return print(str(sum_number))
+        # This print is for execution of exercise 13.
+        #print(sum_number)
+        # When it is commented, it is for execution of exercise 14.
+        return sum_number
 
 def calculate_product(my_list):
     multipl_number = 1
     for number in my_list:
         multipl_number *= number
     if len(my_list) == 0:
-        return print(1)
+        # This print is for execution of exercise 13.
+        #print(multipl_number)
+        # When it is commented, it is for execution of exercise 14.
+        return 1
     else:
-        return print(multipl_number)
+        # This print is for execution of exercise 13.
+        #print(multipl_number)
+        # When it is commented, it is for execution of exercise 14.
+        return multipl_number
 
 
 calculate_sum(numbers_list_one)
