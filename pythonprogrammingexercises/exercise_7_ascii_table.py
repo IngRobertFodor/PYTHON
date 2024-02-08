@@ -23,10 +23,12 @@ def print_ascii_table(num):
     # To order dictionary.
     my_ordered_dictionary = collections.OrderedDict(sorted(my_dictionary.items()))
     
-    text = print("ASCII position", num, "is:", my_ordered_dictionary[num])
+    print("ASCII position", num, "is:", my_ordered_dictionary[num])
     
-    return text
+    return my_ordered_dictionary[num]
 
 
-print_ascii_table(35)
-print_ascii_table(126)
+result_one = print_ascii_table(35)
+print(result_one)
+result_two = print_ascii_table(126)
+print(result_two)

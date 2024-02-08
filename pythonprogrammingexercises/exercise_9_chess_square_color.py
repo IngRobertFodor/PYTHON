@@ -35,7 +35,8 @@ def get_chess_square_color(row, column):
     print(new_chess_board_two)
     print()
 
-    return print(new_chess_board[row][column])
+    return new_chess_board[row][column]
 
 
-get_chess_square_color(4,6)
+result = get_chess_square_color(4,6)
+print(result)
