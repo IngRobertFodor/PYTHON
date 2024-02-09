@@ -1,12 +1,27 @@
 # Mode
 
 my_list_empty = []
-my_list_one = [3, 7, 10, 4, 1, 1, 6, 9, 1, 2, 8]
-my_list_two = [3, 4, 7.5, 10, 4, 1, 6.99, 9, 5, 2, 8]
+my_list_one = [3, 7, 10, 4, 9, 11, 11, 6, 9, 11, 2, 8]
+my_list_two = [3, 4, 4, 7.5, 7.5, 10, 4, 1, 6.99, 9, 5, 2, 8, 3, 4, 4, 7.5, 7.5, 10, 4, 1, 6.99, 9, 5, 2, 8]
 
 def mode(my_list):
-    pass
-
+    
+    if len(my_list) == 0:
+        return None
+    else:
+        my_count = ""
+        my_dict = {}
+        for number in my_list:
+            my_count = my_list.count(number)
+            my_dict[number] = my_count
+        #print("This is my dictionary:", my_dict)
+        
+        for key, value in my_dict.items():
+            if value == max(my_dict.values()):
+                #print("This is the maximal number of occurencies of some number in my_list:", value)
+                result = key
+                return result
+    
 
 # Asserts
 assert mode([]) == None 
