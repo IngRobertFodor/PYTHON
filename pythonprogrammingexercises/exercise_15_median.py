@@ -33,7 +33,6 @@ testData = [3, 7, 10, 4, 1, 9, 6, 2, 8]
 for i in range(1000): 
     random.shuffle(testData) 
     assert median(testData) == 6
-print()
 
 
 result_one = median(my_list_empty)
