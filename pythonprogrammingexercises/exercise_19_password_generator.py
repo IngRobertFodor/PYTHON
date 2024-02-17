@@ -41,7 +41,8 @@ def generate_password(password_length):
     
     password = list(my_default_chracters + my_other_characters)
     random.shuffle(password)
-    return password
+    super_password = "".join(password)
+    return super_password
 
 
 # Asserts
