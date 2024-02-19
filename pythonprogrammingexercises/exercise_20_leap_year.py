@@ -21,8 +21,8 @@ assert leap_year(2100) == False
 assert leap_year(2400) == True
 
 
-result_one = leap_year(2354)
-print(result_one)
-print()
-result_two = leap_year(2000)
-print(result_two)
+#result_one = leap_year(2354)
+#print(result_one)
+#print()
+#result_two = leap_year(2000)
+#print(result_two)
