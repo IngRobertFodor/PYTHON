@@ -3,6 +3,7 @@
 def draw_3d_box(size):
     if type(size)!=int or size<1:
         return print("None")
+    
     else:
         
         print(" "*(size), "+", ((size)*2)*"-", "+")
