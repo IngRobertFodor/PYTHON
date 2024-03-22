@@ -8,8 +8,8 @@ def draw_3d_box(size):
         
         print(" "*(size), "+", ((size)*2)*"-", "+")
         
-        for i in range(size,0,-1):
-            print(" "*(i-1), "/", ((size)*2)*" ", "/")
+        for i in range(0,size):
+            print(" "*(size-(i+1)), "/", ((size)*2)*" ", "/")
         
         print("+", ((size)*2)*"-", "+")
         
