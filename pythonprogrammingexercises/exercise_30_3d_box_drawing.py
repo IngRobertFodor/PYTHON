@@ -28,4 +28,3 @@ draw_3d_box(4)
 draw_3d_box(5)
 print()
 draw_3d_box(0)
-'''
