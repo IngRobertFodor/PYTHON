@@ -1,9 +1,9 @@
 # Convert Integers To Strings
 
 def convert_int_to_str(my_number):
-    my_string = "{}".format(my_number)
-    #print(type(my_string))
-    return my_string
+    my_string_num = "{}".format(my_number)
+    #print(type(my_string_num))
+    return my_string_num
 
 
 # Asserts
