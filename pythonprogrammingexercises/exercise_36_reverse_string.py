@@ -49,4 +49,4 @@ assert reverse_string('xxxx') == 'xxxx'
 
 
 print()
-print(reverse_string("Hello5 !"))
+print(reverse_string("Hello !"))
