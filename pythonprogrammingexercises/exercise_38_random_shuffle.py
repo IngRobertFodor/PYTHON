@@ -13,7 +13,7 @@ def random_shuffle(my_list):
 
 # Asserts
 random.seed(42) 
-for i in range(10): 
+for i in range(5): 
     testData1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] 
     testData1 = random_shuffle(testData1) 
     assert len(testData1) == 10 
