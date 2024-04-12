@@ -5,21 +5,8 @@ import random
 
 def random_shuffle(my_list):
     
-    original_my_list_length = len(my_list)
-    for i in range(0,len(my_list)):
-        my_list.append(my_list[i])
-    #print(my_list)
-    if original_my_list_length != 0:
-        random_item = random.choice(my_list)
-        #print(random_item)
-        ### Using this random item index "random.choice()"", we can shuffle the list differently.
-        random_item_index = my_list.index(random_item)
-        #print(random_item_index)
-        if random_item_index == 0:
-            random_item_index = random_item_index+1
-    
-        my_list = my_list[random_item_index:random_item_index+original_my_list_length]
-        print(my_list)
+    my_list=random.sample(my_list,k=len(my_list))
+    print(my_list)
 
     return my_list
 
