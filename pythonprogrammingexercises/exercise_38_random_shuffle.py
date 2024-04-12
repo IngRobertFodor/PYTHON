@@ -1,12 +1,11 @@
 import random
-# Import copy to fix asserts.
-import copy
 
 
 # Random Shuffle
 
 def random_shuffle(my_list):
 
+    #print(my_list)
     len_my_list = len(my_list)
     #print("Length of my list:",len_my_list)
     random_item = random.choice(my_list)
@@ -31,15 +30,13 @@ def random_shuffle(my_list):
 random.seed(42) 
 for i in range(10): 
     testData1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] 
-    testData1_copy = copy.copy(testData1)
-    random_shuffle(testData1_copy) 
-    assert len(testData1_copy) == 10 
-    assert testData1_copy != [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] 
-    assert sorted(testData1_copy) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] 
+    random_shuffle(testData1) 
+    assert len(testData1) == 10 
+    assert testData1 != [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] 
+    assert sorted(testData1) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] 
 testData2 = [] 
-testData2_copy = copy.copy(testData2)
-random_shuffle(testData2_copy) 
-assert testData2_copy == []
+random_shuffle(testData2) 
+assert testData2 == []
 '''
 
 my_list_one = [2,4,6,8]
