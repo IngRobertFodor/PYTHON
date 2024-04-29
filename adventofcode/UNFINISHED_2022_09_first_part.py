@@ -46,6 +46,9 @@ head_place = "H"
 print(head_place)
 print("Head place:",head_place,"starting position is: my_list[4][0]")
 
+dot_place = "."
+
+
 my_list = [
     ['.', '.', '.', '.', '.', '.'],
     ['.', '.', '.', '.', '.', '.'],
@@ -79,7 +82,7 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
         if my_dictionary["my_direction"] == "R":
             print(movement_row,movement_column)
             # Head Moves
-            my_list[movement_row][movement_column] = "."
+            my_list[movement_row][movement_column] = dot_place
             movement_column_head = movement_column + int(my_dictionary["steps"])
             print(movement_row,movement_column_head)
             my_list[movement_row][movement_column_head] = head_place
