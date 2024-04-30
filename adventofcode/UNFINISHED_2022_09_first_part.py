@@ -33,15 +33,17 @@ for item in my_list:
 print()
 
 
-movement_row = 4
-movement_column =  0
+t_movement_row = 4
+t_movement_column =  0
+h_movement_row = 4
+h_movement_column =  0
 
-tail_place = my_list[movement_row][movement_column]
+tail_place = my_list[t_movement_row][t_movement_column]
 tail_place = "T"
 print(tail_place)
 print("Tail place:",tail_place,"starting position is: my_list[4][0]")
 
-head_place = my_list[movement_row][movement_column]
+head_place = my_list[h_movement_row][h_movement_column]
 head_place = "H"
 print(head_place)
 print("Head place:",head_place,"starting position is: my_list[4][0]")
@@ -80,56 +82,78 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
         print(my_dictionary)
         
         if my_dictionary["my_direction"] == "R":
-            print(movement_row,movement_column)
+            print(h_movement_row,h_movement_column)
             # Head Moves
-            my_list[movement_row][movement_column] = dot_place
-            movement_column_head = movement_column + int(my_dictionary["steps"])
-            print(movement_row,movement_column_head)
-            my_list[movement_row][movement_column_head] = head_place
-            # Tail Moves
-            movement_column_tail = movement_column + (int(my_dictionary["steps"])-1)
-            print(movement_row,movement_column_tail)
-            my_list[movement_row][movement_column_tail] = tail_place
+            my_list[h_movement_row][h_movement_column] = dot_place
+            h_movement_column = h_movement_column + int(my_dictionary["steps"])
+            print(h_movement_row,h_movement_column)
+            movement_column = h_movement_column
+            my_list[h_movement_row][h_movement_column] = head_place
             for item in my_list:
                 print(item)
             print()
-
-
-
+            # Tail Moves
+            my_list[t_movement_row][t_movement_column] = dot_place
+            t_movement_column = t_movement_column + int(my_dictionary["steps"])
+            print(t_movement_row,t_movement_column)
+            my_list[t_movement_row][t_movement_column] = tail_place
+            for item in my_list:
+                print(item)
+            print()
 
         elif my_dictionary["my_direction"] == "U":
-            print(movement_row,movement_column)
-            head_place = "."
-            movement_row = movement_row - int(my_dictionary["steps"])
-            print(movement_row,movement_column)
-            my_list[movement_row][movement_column] = head_place
-            #
-            movement_row_tail = movement_row - (int(my_dictionary["steps"])-1)
-            print(movement_row,movement_column)
-            my_list[movement_row][movement_column] = tail_place
+            print(h_movement_row,h_movement_column)
+            # Head Moves
+            my_list[h_movement_row][h_movement_column] = dot_place           
+            h_movement_row = h_movement_row - int(my_dictionary["steps"])
+            print(h_movement_row,h_movement_column)
+            my_list[h_movement_row][h_movement_column] = head_place
             for item in my_list:
                 print(item)
             print()
-
-
-
+            # Tail Moves
+            my_list[t_movement_row][t_movement_column] = dot_place
+            t_movement_row = t_movement_row - int(my_dictionary["steps"])
+            print(t_movement_row,t_movement_column)
+            my_list[t_movement_row][t_movement_column] = tail_place
+            for item in my_list:
+                print(item)
+            print()
 
         elif my_dictionary["my_direction"] == "L":
-            print(movement_row,movement_column)
-            my_list[movement_row][movement_column] = "."
-            movement_column = movement_column - int(my_dictionary["steps"])
-            print(movement_row,movement_column)
-            my_list[movement_row][movement_column] = head_place
+            print(h_movement_row,h_movement_column)
+            # Head Moves
+            my_list[h_movement_row][h_movement_column] = dot_place           
+            h_movement_column = h_movement_column - int(my_dictionary["steps"])
+            print(h_movement_row,h_movement_column)
+            my_list[h_movement_row][h_movement_column] = head_place
             for item in my_list:
                 print(item)
             print()
-    
+            # Tail Moves
+            my_list[t_movement_row][t_movement_column] = dot_place
+            t_movement_column = t_movement_column - int(my_dictionary["steps"])
+            print(t_movement_row,t_movement_column)
+            my_list[t_movement_row][t_movement_column] = tail_place
+            for item in my_list:
+                print(item)
+            print()
+
         elif my_dictionary["my_direction"] == "D":
-            print(movement_row,movement_column)
-            my_list[movement_row][movement_column] = "."
-            movement_row = movement_row + int(my_dictionary["steps"])
-            print(movement_row,movement_column)
-            my_list[movement_row][movement_column] = head_place
+            print(h_movement_row,h_movement_column)
+            # Head Moves
+            my_list[h_movement_row][h_movement_column] = dot_place           
+            h_movement_row = h_movement_row + int(my_dictionary["steps"])
+            print(h_movement_row,h_movement_column)
+            my_list[h_movement_row][h_movement_column] = head_place
+            for item in my_list:
+                print(item)
+            print()
+            # Tail Moves
+            my_list[t_movement_row][t_movement_column] = dot_place
+            t_movement_row = t_movement_row + int(my_dictionary["steps"])
+            print(t_movement_row,t_movement_column)
+            my_list[t_movement_row][t_movement_column] = tail_place
             for item in my_list:
                 print(item)
             print()
