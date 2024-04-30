@@ -87,7 +87,6 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
             my_list[h_movement_row][h_movement_column] = dot_place
             h_movement_column = h_movement_column + int(my_dictionary["steps"])
             print(h_movement_row,h_movement_column)
-            movement_column = h_movement_column
             my_list[h_movement_row][h_movement_column] = head_place
             for item in my_list:
                 print(item)
