@@ -28,6 +28,8 @@ my_list = [
     ['.', '.', '.', '.', '.', '.'],
     ['.', '.', '.', '.', '.', '.']
     ]
+start = "s"
+my_list[4][0] = start
 for item in my_list:
     print(item)
 print()
@@ -37,35 +39,12 @@ t_movement_row = 4
 t_movement_column =  0
 h_movement_row = 4
 h_movement_column =  0
-
-tail_place = my_list[t_movement_row][t_movement_column]
 tail_place = "T"
-print(tail_place)
-print("Tail place:",tail_place,"starting position is: my_list[4][0]")
-
-head_place = my_list[h_movement_row][h_movement_column]
 head_place = "H"
-print(head_place)
-print("Head place:",head_place,"starting position is: my_list[4][0]")
-
 dot_place = "."
 
 
-my_list = [
-    ['.', '.', '.', '.', '.', '.'],
-    ['.', '.', '.', '.', '.', '.'],
-    ['.', '.', '.', '.', '.', '.'],
-    ['.', '.', '.', '.', '.', '.'],
-    [head_place, '.', '.', '.', '.', '.']
-    ]
-for item in my_list:
-    print(item)
-print()
-
-
 my_dictionary = {"my_direction": "", "steps": ""}
-#print(my_dictionary)
-#print()
 
 
 with open("UNFINISHED_2022_09.txt", "r") as open_file:  
@@ -90,7 +69,6 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
             my_list[h_movement_row][h_movement_column] = head_place
             for item in my_list:
                 print(item)
-            print()
             # Tail Moves
             my_list[t_movement_row][t_movement_column] = dot_place
             t_movement_column = t_movement_column + int(my_dictionary["steps"])
@@ -109,7 +87,6 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
             my_list[h_movement_row][h_movement_column] = head_place
             for item in my_list:
                 print(item)
-            print()
             # Tail Moves
             my_list[t_movement_row][t_movement_column] = dot_place
             t_movement_row = t_movement_row - int(my_dictionary["steps"])
@@ -128,7 +105,6 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
             my_list[h_movement_row][h_movement_column] = head_place
             for item in my_list:
                 print(item)
-            print()
             # Tail Moves
             my_list[t_movement_row][t_movement_column] = dot_place
             t_movement_column = t_movement_column - int(my_dictionary["steps"])
@@ -147,7 +123,6 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
             my_list[h_movement_row][h_movement_column] = head_place
             for item in my_list:
                 print(item)
-            print()
             # Tail Moves
             my_list[t_movement_row][t_movement_column] = dot_place
             t_movement_row = t_movement_row + int(my_dictionary["steps"])
