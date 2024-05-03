@@ -71,7 +71,7 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
                 # Tail Moves
                 # Tail Moves
                 my_list[t_movement_row][t_movement_column] = tail_place
-                if h_movement_row != t_movement_row and h_movement_column !=t_movement_column:
+                if h_movement_row != t_movement_row and h_movement_column !=t_movement_column and h_movement_column-t_movement_column==2:
                     my_list[t_movement_row][t_movement_column] = dot_place
                     t_movement_row = h_movement_row
                     print("t moves:",t_movement_row,t_movement_column)
@@ -88,7 +88,8 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
             print()
             print("Result List:",t_movement_row,t_movement_column)
             print()
-                
+
+        # This should have all conditions implemented.        
         elif my_dictionary["my_direction"] == "U":
             print(h_movement_row,h_movement_column)
             # Head Moves
@@ -100,10 +101,10 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
                 for item in my_list:
                     print(item)
                 # Tail Moves
-                my_list[t_movement_row][t_movement_column] = tail_place
-                if h_movement_row != t_movement_row and h_movement_column !=t_movement_column:
+                if h_movement_row != t_movement_row and h_movement_column !=t_movement_column and t_movement_row-h_movement_row==2:
                     my_list[t_movement_row][t_movement_column] = dot_place
                     t_movement_column = h_movement_column
+                    t_movement_row = h_movement_row + 1
                     print("t moves:",t_movement_row,t_movement_column)
                     my_list[t_movement_row][t_movement_column] = tail_place
                     for item in my_list:
@@ -111,6 +112,7 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
                 elif t_movement_row-h_movement_row==2:
                     my_list[t_movement_row][t_movement_column] = dot_place
                     t_movement_row = h_movement_row + 1
+                    my_list[t_movement_row][t_movement_column] = tail_place
                     print("t moves:",t_movement_row,t_movement_column)
                     my_list[t_movement_row][t_movement_column] = tail_place
                     for item in my_list:
@@ -131,7 +133,7 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
                     print(item)
                 # Tail Moves
                 my_list[t_movement_row][t_movement_column] = tail_place
-                if h_movement_row != t_movement_row and h_movement_column !=t_movement_column:
+                if h_movement_row != t_movement_row and h_movement_column !=t_movement_column and t_movement_column-h_movement_column==2:
                     my_list[t_movement_row][t_movement_column] = dot_place
                     t_movement_row = h_movement_row
                     print("t moves:",t_movement_row,t_movement_column)
@@ -161,7 +163,7 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
                     print(item)
                 # Tail Moves
                 my_list[t_movement_row][t_movement_column] = tail_place
-                if h_movement_row != t_movement_row and h_movement_column !=t_movement_column:
+                if h_movement_row != t_movement_row and h_movement_column !=t_movement_column and h_movement_row-t_movement_row==2:
                     my_list[t_movement_row][t_movement_column] = dot_place
                     t_movement_column = h_movement_column
                     print("t moves:",t_movement_row,t_movement_column)
