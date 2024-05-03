@@ -89,10 +89,11 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
             print("Result List:",t_movement_row,t_movement_column)
             print()
 
-        # This should have all conditions implemented.        
+        ### This should have all conditions implemented.        
         elif my_dictionary["my_direction"] == "U":
             print(h_movement_row,h_movement_column)
-            # Head Moves
+            ## Head Moves
+            # This is the "H" movement.
             for move in range(0,int(my_dictionary["steps"])):
                 my_list[h_movement_row][h_movement_column] = dot_place
                 h_movement_row = h_movement_row - 1
@@ -100,7 +101,8 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
                 my_list[h_movement_row][h_movement_column] = head_place
                 for item in my_list:
                     print(item)
-                # Tail Moves
+                ## Tail Moves
+                # This alligns rows and columns for "H" and "T".
                 if h_movement_row != t_movement_row and h_movement_column !=t_movement_column and t_movement_row-h_movement_row==2:
                     my_list[t_movement_row][t_movement_column] = dot_place
                     t_movement_column = h_movement_column
@@ -109,6 +111,7 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
                     my_list[t_movement_row][t_movement_column] = tail_place
                     for item in my_list:
                         print(item)
+                # This will continue in following the "H" with "T".
                 elif t_movement_row-h_movement_row==2:
                     my_list[t_movement_row][t_movement_column] = dot_place
                     t_movement_row = h_movement_row + 1
