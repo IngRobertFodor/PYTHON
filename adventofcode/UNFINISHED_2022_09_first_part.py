@@ -43,7 +43,7 @@ my_list = [
     ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
     ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.']    
     ]
-start = "#"
+start = "s"
 my_list[19][0] = start
 for item in my_list:
     print(item)
@@ -58,6 +58,30 @@ head_place = "H"
 dot_place = "."
 
 my_dictionary = {"my_direction": "", "steps": ""}
+
+my_list_tail_positions = [
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.']    
+    ]
+my_list_tail_positions [19][0] = start
 
 
 with open("UNFINISHED_2022_09.txt", "r") as open_file:  
@@ -82,8 +106,8 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
                 print("h moves:",h_movement_row,h_movement_column)
                 my_list[h_movement_row][h_movement_column] = head_place
                 my_list[t_movement_row][t_movement_column] = tail_place
-                #for item in my_list:
-                #    print(item)
+                for item in my_list:
+                    print(item)
                 # Tail Moves
                 my_list[t_movement_row][t_movement_column] = tail_place
                 if h_movement_row != t_movement_row and h_movement_column !=t_movement_column and h_movement_column-t_movement_column==2:
@@ -92,15 +116,17 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
                     t_movement_column = h_movement_column - 1
                     print("t moves:",t_movement_row,t_movement_column)
                     my_list[t_movement_row][t_movement_column] = tail_place
-                #    for item in my_list:
-                #        print(item)
+                    my_list_tail_positions[t_movement_row][t_movement_column] = "#"
+                    for item in my_list:
+                        print(item)
                 elif h_movement_column-t_movement_column==2:
                     my_list[t_movement_row][t_movement_column] = dot_place
                     t_movement_column = h_movement_column - 1
                     print("t moves:",t_movement_row,t_movement_column)
                     my_list[t_movement_row][t_movement_column] = tail_place
-                #    for item in my_list:
-                #        print(item)    
+                    my_list_tail_positions[t_movement_row][t_movement_column] = "#"
+                    for item in my_list:
+                        print(item)    
             print()
             print("Result List:",t_movement_row,t_movement_column)
             print()
@@ -115,8 +141,8 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
                 h_movement_row = h_movement_row - 1
                 print("h moves:",h_movement_row,h_movement_column)
                 my_list[h_movement_row][h_movement_column] = head_place
-                #for item in my_list:
-                #    print(item)
+                for item in my_list:
+                    print(item)
                 ## Tail Moves
                 # This alligns rows and columns for "H" and "T".
                 if h_movement_row != t_movement_row and h_movement_column !=t_movement_column and t_movement_row-h_movement_row==2:
@@ -125,8 +151,9 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
                     t_movement_row = h_movement_row + 1
                     print("t moves:",t_movement_row,t_movement_column)
                     my_list[t_movement_row][t_movement_column] = tail_place
-                #    for item in my_list:
-                #        print(item)
+                    my_list_tail_positions[t_movement_row][t_movement_column] = "#"
+                    for item in my_list:
+                        print(item)
                 # This will continue in following the "H" with "T".
                 elif t_movement_row-h_movement_row==2:
                     my_list[t_movement_row][t_movement_column] = dot_place
@@ -134,8 +161,9 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
                     my_list[t_movement_row][t_movement_column] = tail_place
                     print("t moves:",t_movement_row,t_movement_column)
                     my_list[t_movement_row][t_movement_column] = tail_place
-                #    for item in my_list:
-                #        print(item)
+                    my_list_tail_positions[t_movement_row][t_movement_column] = "#"
+                    for item in my_list:
+                        print(item)
             print()
             print("Result List:",t_movement_row,t_movement_column)
             print()
@@ -148,8 +176,8 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
                 h_movement_column = h_movement_column - 1
                 print("h moves:",h_movement_row,h_movement_column)
                 my_list[h_movement_row][h_movement_column] = head_place
-                #for item in my_list:
-                #    print(item)
+                for item in my_list:
+                    print(item)
                 # Tail Moves
                 my_list[t_movement_row][t_movement_column] = tail_place
                 if h_movement_row != t_movement_row and h_movement_column !=t_movement_column and t_movement_column-h_movement_column==2:
@@ -158,15 +186,17 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
                     t_movement_column = h_movement_column + 1
                     print("t moves:",t_movement_row,t_movement_column)
                     my_list[t_movement_row][t_movement_column] = tail_place
-                #    for item in my_list:
-                #        print(item)
+                    my_list_tail_positions[t_movement_row][t_movement_column] = "#"
+                    for item in my_list:
+                        print(item)
                 elif t_movement_column-h_movement_column==2:
                     my_list[t_movement_row][t_movement_column] = dot_place
                     t_movement_column = h_movement_column + 1
                     print("t moves:",t_movement_row,t_movement_column)
                     my_list[t_movement_row][t_movement_column] = tail_place
-                #    for item in my_list:
-                #        print(item)
+                    my_list_tail_positions[t_movement_row][t_movement_column] = "#"
+                    for item in my_list:
+                        print(item)
             print()
             print("Result List:",t_movement_row,t_movement_column)
             print()
@@ -179,8 +209,8 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
                 h_movement_row = h_movement_row + 1
                 print("h moves:",h_movement_row,h_movement_column)
                 my_list[h_movement_row][h_movement_column] = head_place
-                #for item in my_list:
-                #    print(item)
+                for item in my_list:
+                    print(item)
                 # Tail Moves
                 my_list[t_movement_row][t_movement_column] = tail_place
                 if h_movement_row != t_movement_row and h_movement_column !=t_movement_column and h_movement_row-t_movement_row==2:
@@ -189,15 +219,24 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
                     t_movement_row = h_movement_row - 1
                     print("t moves:",t_movement_row,t_movement_column)
                     my_list[t_movement_row][t_movement_column] = tail_place
-                #    for item in my_list:
-                #        print(item)
+                    my_list_tail_positions[t_movement_row][t_movement_column] = "#"
+                    for item in my_list:
+                        print(item)
                 elif h_movement_row-t_movement_row==2:
                     my_list[t_movement_row][t_movement_column] = dot_place
                     t_movement_row = h_movement_row - 1
                     print("t moves:",t_movement_row,t_movement_column)
                     my_list[t_movement_row][t_movement_column] = tail_place
-                #    for item in my_list:
-                #        print(item)
+                    my_list_tail_positions[t_movement_row][t_movement_column] = "#"
+                    for item in my_list:
+                        print(item)
             print()
             print("Result List:",t_movement_row,t_movement_column)
             print()
+    
+
+###
+print("This is result list.")
+for item in my_list_tail_positions:
+    print(item)
+print()
