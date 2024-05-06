@@ -45,7 +45,7 @@ dot_place = "."
 my_dictionary = {"my_direction": "", "steps": ""}
 
 
-with open("teoretic_2022_09.txt", "r") as open_file:  
+with open("short_version_2022_09.txt", "r") as open_file:  
 
     lines = open_file.readlines()
     #print(lines)
