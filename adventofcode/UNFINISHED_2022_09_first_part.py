@@ -70,7 +70,6 @@ with open("UNFINISHED_2022_09.txt", "r") as open_file:
                 for item in my_list:
                     print(item)
                 # Tail Moves
-                # Tail Moves
                 my_list[t_movement_row][t_movement_column] = tail_place
                 if h_movement_row != t_movement_row and h_movement_column !=t_movement_column and h_movement_column-t_movement_column==2:
                     my_list[t_movement_row][t_movement_column] = dot_place
