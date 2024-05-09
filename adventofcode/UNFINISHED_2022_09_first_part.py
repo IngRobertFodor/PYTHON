@@ -2,17 +2,17 @@
 
 
 my_list = []
-for i in range(400):
+for i in range(2500):
     i='.'
     my_list.append(i)
 
 my_list_chunked = []
-chunk_size = 20
+chunk_size = 50
 for i in range(0, len(my_list), chunk_size):
     my_list_chunked.append(my_list[i:i+chunk_size])
 
 start = "s"
-my_list_chunked[19][0] = start
+my_list_chunked[15][0] = start
 
 for i in my_list_chunked:
     print(i)
@@ -20,27 +20,27 @@ print()
 
 
 my_list_tail_positions = []
-for i in range(400):
+for i in range(2500):
     i='.'
     my_list_tail_positions.append(i)
 
 my_list_tail_positions_chunked = []
-chunk_size = 20
+chunk_size = 50
 for i in range(0, len(my_list_tail_positions), chunk_size):
     my_list_tail_positions_chunked.append(my_list_tail_positions[i:i+chunk_size])
 
 start = "s"
-my_list_tail_positions_chunked[19][0] = start
+my_list_tail_positions_chunked[15][0] = start
 
 for i in my_list_tail_positions_chunked:
     print(i)
 print()
 
 
-t_movement_row = 19
-t_movement_column =  0
-h_movement_row = 19
-h_movement_column =  0
+t_movement_row = 15
+t_movement_column = 0
+h_movement_row = 15
+h_movement_column = 0
 tail_place = "T"
 head_place = "H"
 dot_place = "."
