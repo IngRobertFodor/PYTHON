@@ -49,7 +49,7 @@ dot_place = "."
 my_dictionary = {"my_direction": "", "steps": ""}
 
 
-with open("UNFINISHED_2022_09.txt", "r") as open_file:  
+with open("2022_09.txt", "r") as open_file:  
 
 
     lines = open_file.readlines()
