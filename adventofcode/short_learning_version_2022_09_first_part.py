@@ -54,7 +54,7 @@ my_list_tail_positions = [
 my_list_tail_positions [4][0] = start
 
 
-with open("short_version_2022_09.txt", "r") as open_file:  
+with open("short_learning_version_2022_09.txt", "r") as open_file:  
 
     lines = open_file.readlines()
     #print(lines)
