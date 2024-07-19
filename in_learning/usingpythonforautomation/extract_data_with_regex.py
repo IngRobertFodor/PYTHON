@@ -9,6 +9,6 @@ example = "The number is 123-456-7890."
 
 result = phone_num.search(example)
 
-if result:
-    print("Phone number found:", result.group())
-    print("Area code:", result.group()[0:3])
+print(result.group())
+print("Phone number found:", result.group())
+print("Area code:", result.group()[0:3])
