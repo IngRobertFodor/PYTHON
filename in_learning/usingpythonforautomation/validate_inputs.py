@@ -1,6 +1,6 @@
 # This script demonstrates how to use the pyinputplus module to validate user inputs.
     # It works despite the warnings in the terminal.
-import pyinputplus as pyip
+import pyinputplus as pyip # type: ignore
 
 
 print("\nEXAMPLE 1") 
