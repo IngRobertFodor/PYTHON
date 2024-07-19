@@ -24,4 +24,5 @@ print()
 my_string = "blick, blue and brown, blond"
 pattern = r'bl\w+'
 matches = re.findall(pattern, my_string)
+# Output: ['blick', 'blue', 'blond']
 print(matches)
