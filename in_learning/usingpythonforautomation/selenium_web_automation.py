@@ -33,4 +33,4 @@ try:
 except:
 	print("Login Failed.")
 
-driver.close()
+driver.quit()
