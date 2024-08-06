@@ -27,7 +27,7 @@ sleep(2)
 button_login = driver.find_element(By.TAG_NAME, 'button')
 button_login.click()
 check_login = driver.find_element(By.ID, 'flash')
-# This is Compare of our success message to the expected message.
+# This is Compare.
 try:
 	print(check_login.text)
 except:
