@@ -26,4 +26,10 @@ class WikiscrapingSpider(CrawlSpider):
 
 
 # CRAWLSPIDER
+
 ## scrapy runspider wikiscraping.py -o wikicrawler.xml -t xml -s CLOSESPIDER_ITEMCOUNT=10
+
+# But we can do the same thing using our settings.py file.
+## CLOSESPIDER_ITEMCOUNT=10
+## FEED_URI='wikicrawler.xml'
+## FEED_FORMAT='xml'

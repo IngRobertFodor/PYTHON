@@ -13,6 +13,11 @@ SPIDER_MODULES = ["wiki_scraper.spiders"]
 NEWSPIDER_MODULE = "wiki_scraper.spiders"
 
 
+CLOSESPIDER_ITEMCOUNT=10
+FEED_URI='wikicrawler.xml'
+FEED_FORMAT='xml'
+
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "wiki_scraper (+http://www.yourdomain.com)"
 
