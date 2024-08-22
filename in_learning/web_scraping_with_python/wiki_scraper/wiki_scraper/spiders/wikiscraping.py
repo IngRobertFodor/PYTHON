@@ -26,4 +26,4 @@ class WikiscrapingSpider(CrawlSpider):
 
 
 # CRAWLSPIDER
-## scrapy runspider wikiscraping.py -o articles.xml -t xml -s CLOSESPIDER_ITEMCOUNT=10
+## scrapy runspider wikiscraping.py -o wikicrawler.xml -t xml -s CLOSESPIDER_ITEMCOUNT=10
