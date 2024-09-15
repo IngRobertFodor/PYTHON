@@ -61,7 +61,7 @@ print()
 
 ### TRANSPOSE
 
-# Transpose array menas to change the rows into columns and columns into rows.
+# Transpose array means to change the rows into columns and columns into rows.
 
 print("TRANSPOSE")
 
