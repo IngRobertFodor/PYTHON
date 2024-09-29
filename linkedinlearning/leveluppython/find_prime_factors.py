@@ -1,3 +1,4 @@
+# !!! RUN THIS FIRST (CMD)
 # pip install sympy
 import sympy # type: ignore
 
