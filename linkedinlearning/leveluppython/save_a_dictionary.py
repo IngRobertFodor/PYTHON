@@ -14,11 +14,10 @@ def save_my_dict_to_file(my_dict):
 
 def open_and_read_new_file(dict_file_name):
     file_to_read = open(dict_file_name, "r")
-    return file_to_read.read()
+    return print(file_to_read.read()), file_to_read.close()
 
 
 my_test_dict = {"name": "John", "age": 30, "city": "New York"}
 
 
-retrieved_dict = open_and_read_new_file(save_my_dict_to_file(my_test_dict))
-print(retrieved_dict)
+open_and_read_new_file(save_my_dict_to_file(my_test_dict))

@@ -31,7 +31,9 @@ def count_words(text_file):
         if value in word_occurencies_counted[0:10]:
             print(key, ":", value)
     print()
-            
+
+    file.close()
+     
     return print("File read successfully.")
 
 
