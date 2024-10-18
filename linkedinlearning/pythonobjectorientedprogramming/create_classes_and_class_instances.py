@@ -1,3 +1,5 @@
+    ### This is CREATING CLASS (Book).
+
 class Book:
 
     def __init__(self, title, price, discount):
@@ -12,8 +14,11 @@ class Book:
         return self.price - self.discount
 
 
+    ### This is CREATING INSTANCE OF Book CLASS (book_one and book_two).
+
 book_one = Book("My Book", 5.12345, 0.2)
 book_two = Book(title="My Second Book", price=20.00, discount=0.5)
+
 
 # This will print the type of the book_one.
 # Output: <class '__main__.Book'>.
@@ -28,7 +33,7 @@ print("This is title of book_one:", book_one.title)
 # This will print the price of the book_one.
 print("This is price of book_one:", book_one.get_price())
 
-### ROUNDING DECIMALS
+    ## ROUNDING DECIMALS
 # This will print the price of the book_one rounded to 4 and 5 decimals.
 print("The book_one price rounded to 4 decimals:", round(book_one.get_price(), 4))
 print("The book_one price rounded to 5 decimals:", "{:.5f}".format(book_one.get_price()))
@@ -38,12 +43,18 @@ print("This is title of book_two:", book_two.title)
 print()
 
 
+    ### This is another example of creating a class (Newspaper).
+
 class Newspaper():
+    
     def __init__(self, title):
         self.title = title
 
 
+    ### and an instance of the Newspaper class (newspaper_one).
+
 newspaper_one = Newspaper("The New York Times")
+
 
 # This will print the type of the newspaper_one.
 # Output: <class '__main__.Newspaper'>.
