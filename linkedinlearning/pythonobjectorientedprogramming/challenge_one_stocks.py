@@ -6,7 +6,7 @@ class Stock:
         self.company = company
 
     def get_description(self):
-        print(self.ticker+": " + self.company + "-- $" + str(self.price))
+        print(self.ticker +": " + self.company + " -- $" + str(self.price))
         return
 
     
