@@ -70,6 +70,7 @@ print("Stocks")
 for stock in my_stocks:
     print(stock)
 print()
+
 print("Bonds")
 for bond in my_bonds:
     print(bond)
