@@ -17,4 +17,4 @@ contents = "The movie industry is undergoing significant changes due to new tren
 
 
 create_file(file_path, contents)
-result = count_words(file_path)
+count_words(file_path)
