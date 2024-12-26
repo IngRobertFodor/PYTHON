@@ -24,12 +24,14 @@ def generate_special_password(number_representing_length_of_password):
                 generated_password.append(line_list[1])
                 break
     print(generated_password)
+    print()
     generated_password = " ".join(generated_password)
+    print(generated_password)
     print()
 
     password_file.close()
     
-    return print("Password generated successfully:", generated_password)
+    return print("Password generated successfully:", generated_password.replace(" ", ""))
 
 
 generate_special_password(5)
