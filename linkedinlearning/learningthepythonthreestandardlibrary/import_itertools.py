@@ -1,4 +1,5 @@
 import itertools
+from itertools import combinations, permutations
 
 
 # itertools.count(start, step)
@@ -83,3 +84,31 @@ for item in result:
 # ('b', 'c')
 # ('b', 'd')
 # ('c', 'd')
+print()
+
+
+# Exercice
+# Find all the combinations and permutations of the numbers 0 to 100 that sum to 100 and should be of 3 numbers.
+
+num_range = list(range(0, 101, 10))
+print(num_range)
+print()
+
+print("Combinations with sum of 100")
+result = combinations(num_range, 3)
+counter = 0
+for item in result:
+    if sum(item) == 100:
+        print(item)
+        counter += 1
+print(counter)
+print()
+
+print("Permutations with sum of 100")
+result_two = permutations(num_range, 3)
+counter = 0
+for item in result_two:
+    if sum(item) == 100:
+        print(item)
+        counter += 1
+print(counter)
