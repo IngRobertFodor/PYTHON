@@ -29,4 +29,12 @@ print("Find element by ID:", selenium_ide_icon.text)
 text_relative_xpath = driver.find_element(By.XPATH, "//p[@class='lead mt-3 mb-0']")
 print("Find element by XPATH:",text_relative_xpath.text)
 
+driver.get("https://www.selenium.dev/documentation/about/")
+time.sleep(2)
+driver.back()
+time.sleep(2)
+driver.forward()
+time.sleep(2)
+driver.refresh()
+
 driver.quit()
