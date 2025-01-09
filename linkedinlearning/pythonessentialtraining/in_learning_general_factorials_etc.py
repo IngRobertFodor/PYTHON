@@ -14,29 +14,31 @@ print(round(a))
 # Result: 5
 
 a = 14/3
-a = round(a,2)
-print(round(a,2))
+a = round(a, 2)
+print(round(a, 2))
 # Result: 4.67
 
 a = 14/3
 a = int(a)
-print(int(a))
+print(a)
 # Result: 4
 
 a = 14/3
 a = float(a)
-print(float(a))
+print(a)
 # Result: 4.666666666666667
 print()
 
 
-# This prints the sum of all of the numbers from 1 to 10
+# This prints the sum of all of the numbers from 1 to 10.
 i = 0
 s = 0
 while i < 10:
     i = i + 1
     s = s + i
-print(s)
+    print(i)
+    print(s)
+print("Sum of all numbers from 1 to 10 is: ", s)
 # Result: 55
 print()
 
@@ -114,7 +116,7 @@ def perform_action(*args, **kwargs):
     print(args)
     print(kwargs)
 
-perform_action(1,5, message="Sum.")
+perform_action(1, 5, message="Sum.")
 print()
 
 
@@ -170,12 +172,16 @@ d = {"a" : 1, "b" : 2}
 print(d)
 e = d.get("a")
 print(e)
+for key,value in d.items():
+    print(key)
+    print(value)
 print()
 
 
     # dictionary comprehensions
 print("Dictionary comprehensions.")
 dd = [("a",1),("b",2)]
+
 # "dddd" and "eeee" are both same, but different code.
 dddd = {item[0]:item[1] for item in dd}
 print(dddd)
