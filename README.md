@@ -12,5 +12,10 @@ C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythona
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\learningthepythonthreestandardlibrary\import_itertools.py
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\hackerrank\list_comprehensions.py
 
-3. Rounding
-C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\create_classes_and_class_instances.py
+3. Classes - Basics and Inheritance
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\inheritance.py
+
+4. Rounding
+-    round(book_one.price, 2)
+-    "{:.2f}".format(newspaper_one.price)
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\inheritance.py
