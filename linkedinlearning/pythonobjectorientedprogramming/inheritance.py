@@ -33,12 +33,12 @@ class Newspaper(Periodical):
         super().__init__(title, publisher, price, period)
 
 
-b1 = Book("Brave New World", "Aldous Huxley", 311, 29.11)
-m1 = Magazine("Scientific American", "Springer Nature", 5.99, "Monthly")
-n1 = Newspaper("NY Times", "New York Times Company", 6.0, "Daily")
+book_one = Book("Brave New World", "Aldous Huxley", 311, 29.11)
+magazine_one = Magazine("Scientific American", "Springer Nature", 5.99, "Monthly")
+newspaper_one = Newspaper("NY Times", "New York Times Company", 6.0, "Daily")
 
 
-print(b1.author)
-print(n1.publisher)
-print(b1.price, m1.price, n1.price)
-print(round(b1.price, 2), m1.price, "{:.2f}".format(n1.price))
+print(book_one.author)
+print(newspaper_one.publisher)
+print(book_one.price, magazine_one.price, newspaper_one.price)
+print(round(book_one.price, 2), magazine_one.price, "{:.2f}".format(newspaper_one.price))
