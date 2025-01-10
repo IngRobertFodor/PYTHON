@@ -11,3 +11,6 @@ C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythona
 2. itertools - combinations, permutations, product
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\learningthepythonthreestandardlibrary\import_itertools.py
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\hackerrank\list_comprehensions.py
+
+3. Rounding
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\create_classes_and_class_instances.py

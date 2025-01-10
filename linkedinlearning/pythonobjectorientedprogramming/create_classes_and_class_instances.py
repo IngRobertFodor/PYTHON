@@ -32,6 +32,7 @@ print("Is book_one an instance of Book class?", isinstance(book_one, Book))
 print("This is title of book_one:", book_one.title)
 # This will print the price of the book_one.
 print("This is price of book_one:", book_one.get_price())
+print("This is price of book_one:", book_one.price)
 
     ## ROUNDING DECIMALS
 # This will print the price of the book_one rounded to 4 and 5 decimals.
