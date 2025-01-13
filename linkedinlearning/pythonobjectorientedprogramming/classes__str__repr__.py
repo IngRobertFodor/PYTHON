@@ -23,17 +23,17 @@ b2 = Book("The Catcher in the Rye", "JD Salinger", 29.95)
 
 print(b1)
 # Output:
-# War and Peace by Leo Tolstoy, costs 39.95
+# War and Peace by Leo Tolstoy for: 39.95$.
 print(b2)
 # Output:
-# The Catcher in the Rye by JD Salinger, costs 29.95
+# The Catcher in the Rye by JD Salinger for: 29.95$.
 print()
 
 
 # Use str() and repr().
 print(str(b1))
 # Output:
-# War and Peace by Leo Tolstoy, costs 39.95
+# War and Peace by Leo Tolstoy for: 39.95$.
 print(repr(b2))
 # Output:
-# title=The Catcher in the Rye,author=JD Salinger,price=29.95
+# title=The Catcher in the Rye by author=JD Salinger for price=29.95$.
