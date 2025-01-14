@@ -36,6 +36,14 @@ class Book:
 
 ## There are comparison methods like: __gt__, __le__, __ne__, etc.
 
+    # __le__ for comparing less than or equal to another object.
+    # le = LESS THAN OR EQUAL TO
+    def __le__(self, value):
+        if self.price <= value.price:
+            return True
+        else:
+            return False
+
 
 b1 = Book("War and Peace", "Leo Tolstoy", 39.95)
 b2 = Book("The Catcher in the Rye", "JD Salinger", 29.95)
@@ -62,7 +70,12 @@ print(b2 < b1)
 print(b3 >= b2)
 
 
+# Comparing using __le__.
+print(b3 <= b2)
+
+
 # Sorted list of books by price.
 books = [b1, b2, b3, b4]
 books.sort()
 print([book.title for book in books])
+print([book.price for book in books])
