@@ -1,5 +1,5 @@
-As a senior test automation QA specialist, I have been working on expanding my skill set by learning  OOP: **Python** through various training projects on my GitHub.
-These projects showcase my journey in exploring the different concepts and techniques. From basic scripts to more complex automation frameworks.
+As a senior test automation QA specialist, I have been working on expanding my skill set by learning OOP: **Python** through various training projects on my GitHub.
+These projects showcase my journey in exploring the different concepts and techniques. From basic scripts to more complex automation frameworks, including web automation using Selenium.
 My GitHub repositories reflect my dedication to mastering Python and applying it to the field of quality assurance.
 
 
@@ -41,3 +41,7 @@ C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\hackerrank\list_comprehe
 -    round(book_one.price, 2)
 -    "{:.2f}".format(newspaper_one.price)
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\inheritance.py
+
+7. try, except and assert
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\automate_error_handling_part1.py
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\automate_error_handling_part2.py
