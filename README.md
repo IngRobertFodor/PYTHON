@@ -48,3 +48,4 @@ C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpy
 
 8. Files - open, read, write, close
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\files.py
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\parse_data_part1_from_txt.py
