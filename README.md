@@ -15,18 +15,24 @@ C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythona
     Drag And Drop
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonautomationandtesting\web_elements_drag_and_drop.py
     Waits
+    IMPLICIT WAIT
+    from time import sleep
+    "time.sleep(5)"
+    EXPLICIT WAIT
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\selenium_web_automation_wait.py
 
 2. Classes - Basics and Inheritance
-"def __init__()",
-"super().__init__()"
+    "def __init__()",
+    "super().__init__()"
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\create_classes_and_class_instances.py
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\inheritance.py
 
 3. Classes -
-"def __str__()",
-"def __repr__()",
-"def __call__()"
+    "def __str__()",
+    "def __repr__()",
+    "def __call__()"
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\classes__str__repr__.py
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\classes__call__.py
 
@@ -40,8 +46,8 @@ C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\learnin
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\hackerrank\list_comprehensions.py
 
 6. Rounding
--    round(book_one.price, 2)
--    "{:.2f}".format(newspaper_one.price)
+    round(book_one.price, 2)
+    "{:.2f}".format(newspaper_one.price)
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\inheritance.py
 
 7. try, except and assert
