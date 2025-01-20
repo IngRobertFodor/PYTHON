@@ -14,6 +14,8 @@ C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythona
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonautomationandtesting\web_elements_dropdown.py
     Drag And Drop
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonautomationandtesting\web_elements_drag_and_drop.py
+    Waits
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\selenium_web_automation_wait.py
 
 2. Classes - Basics and Inheritance
 "def __init__()",
