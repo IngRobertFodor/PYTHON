@@ -9,7 +9,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 # DROPDOWN PURPOSES
 from selenium.webdriver.support.select import Select
-# SLIDER PURPOSES - IN THIS SCRIPT
+# SLIDER PURPOSES
 from selenium.webdriver.common.action_chains import ActionChains
 
 

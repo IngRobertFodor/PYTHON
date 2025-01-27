@@ -19,7 +19,7 @@ import time
 import datetime
 # DROPDOWN PURPOSES
 from selenium.webdriver.support.select import Select
-# SLIDER PURPOSES - IN THIS SCRIPT
+# SLIDER PURPOSES
 from selenium.webdriver.common.action_chains import ActionChains
 # RANDOM PURPOSES
 # https://www.w3schools.com/python/module_random.asp

@@ -17,7 +17,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 # DROPDOWN PURPOSES
 from selenium.webdriver.support.select import Select
-# SLIDER PURPOSES - IN THIS SCRIPT
+# SLIDER PURPOSES
 from selenium.webdriver.common.action_chains import ActionChains
 
 

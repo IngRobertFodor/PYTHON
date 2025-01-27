@@ -7,7 +7,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 # WAIT PURPOSES
 # Shortened version of code (as).
 from selenium.webdriver.support import expected_conditions as EC
-# DROPDOWN PURPOSES - IN THIS SCRIPT
+# DROPDOWN PURPOSES
 from selenium.webdriver.support.select import Select
 
 
