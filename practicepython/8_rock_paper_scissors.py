@@ -48,7 +48,7 @@ player_one = input("Give me Your game move: ")
 player_one = str(player_one)
 print("Player One: Your game move was " + player_one + ".")
 player_two = input("Give me Your game move: ")
-print("Player Two: Your game move was " + player_two + ".")
+print("Player Two: Your game move was", player_two,".")
 player_two = str(player_two)
 
 

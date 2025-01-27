@@ -40,8 +40,7 @@ import mysql.connector
 
 
 def play_game():
-    tuple_a = range(1,10)
-    tuple_a = tuple(tuple_a)
+    tuple_a = tuple(range(1,10))
     print(tuple_a)
 
     random_number = random.randint(1,9)
