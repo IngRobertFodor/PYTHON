@@ -64,7 +64,7 @@ for y in x:
 
 # Excercise 3
 
-# Ask the user for a number and return a list that contains only elements from the original list a that are smaller than that number given by the user.
+# Ask the user for a number and return a list that contains only elements from the original list, that are smaller, than that number given by the user.
 
 xxx = [1, 1, 2, 3, 5, 8, 14, 21, 34, 55, 89]
 
@@ -79,3 +79,5 @@ print(xxx)
 
 bbb = [yyy for yyy in xxx if yyy<11]
 print(bbb)
+bbbbbb = [yyy for yyy in xxx if yyy<my_number]
+print(bbbbbb)
