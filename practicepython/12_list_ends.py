@@ -43,9 +43,7 @@ import mysql.connector
 a = [5, 10, 15, 20, 25]
 
 def my_new_function():
-    new_list = a.copy()
-    print(new_list)
-    new_list.clear()
+    new_list = list()
     print(new_list)
     new_list.insert(0, a[-1])
     new_list.insert(0, a[0])
