@@ -43,31 +43,29 @@ import mysql.connector
 
 # User tells us, how long should be the password.
 password_length = input("How long should be Your password?: ")
-print("Your picked the length " + password_length + ".")
+print("You picked the length " + password_length + ".")
 password_length = int(password_length)
 
 # Default password list, to select password from.
 default_pwd_options = ["Asdfg", "Gfdsa", "Qwert", "Trewq"]
 default_password = random.choice(default_pwd_options)
+#print("Your default password is " + default_password + ".")
 
 # Write a password generator in Python. This function does that.
 def new_pwd():
-    generated_password = []
-
-    possible_choices = string.ascii_lowercase + string.ascii_uppercase + string.digits + string.punctuation
-    random_choices = random.choices(possible_choices, weights=None, cum_weights=None, k=password_length)
-
-    for x in random_choices:
-        generated_password.append(x)
-
-    new_generated_password = "".join(generated_password)
     
+    generated_password = []
+    possible_choices = string.ascii_lowercase + string.ascii_uppercase + string.digits + string.punctuation
+    while len(generated_password) < password_length:
+        random_choice = random.choice(possible_choices)
+        generated_password.append(random_choice)
+    new_generated_password = "".join(generated_password)
     return print("Your new password is " + new_generated_password + ".")
 
 # Length of password defined by user in input string. It predefines, how will the password look like.
 if password_length <= 5:
     print("Your new password is one of the defaults: " + default_password + ".")
-elif password_length <= 15:
+elif password_length > 5 and password_length <= 15:
     new_pwd()
 else:
     print("The maximal password length is 15.")

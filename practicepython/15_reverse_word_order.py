@@ -45,10 +45,10 @@ a = "My name is Michele"
 aa = "My name is Nicky"
 
 def reversed_order_version1(x):
-    list_a = x.split()
-    list_a.reverse()
-    print(list_a)
-    return
+    list_x = x.split()
+    list_x.reverse()
+    #print(list_x)
+    return print(" ".join(list_x))
 
 reversed_order_version1(a)
 reversed_order_version1(aa)
@@ -61,10 +61,10 @@ def reversed_order_version2():
     x = input("Give me Your name and surname: ")
     print("Your name is " + x + ".")
 
-    list_a = x.split()
-    list_a.reverse()
-    reversed_list_a = ' '.join(list_a)
-    print(reversed_list_a)
-    return print("Your reversed name is " + reversed_list_a + ".")
+    list_x = x.split()
+    list_x.reverse()
+    reversed_list_x = " ".join(list_x)
+    print(reversed_list_x)
+    return print("Your reversed name is " + reversed_list_x + ".")
 
 reversed_order_version2()

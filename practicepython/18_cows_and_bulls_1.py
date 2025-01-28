@@ -64,7 +64,7 @@ def play_cows_and_bulls_game():
     print(random_number_digits)
     # This joins and prints random 4-digits number.
     random_number = ''.join(map(str, random_number_digits))
-    print("This is random generated 4-digit number: " + str(random_number) + ".")
+    print("This is random generated 4-digit number: " + random_number + ".")
 
     guesses = 0
     playing = True
@@ -72,9 +72,9 @@ def play_cows_and_bulls_game():
 
         # Ask user to guess the generated number.
         users_guess = int(input("GUESS the generated 4-digit number: "))
-        print("User guessed this number: " + str(users_guess) + ".")
-        guesses +=1
         users_guess = str(users_guess)
+        print("User guessed this number: " + users_guess + ".")
+        guesses +=1
 
         cows = 0
         bulls = 0

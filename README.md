@@ -45,15 +45,21 @@ C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythono
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\learningthepythonthreestandardlibrary\import_itertools.py
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\hackerrank\list_comprehensions.py
 
-6. Rounding
+6. collections - Counter
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\practicepython\18_cows_and_bulls_2_cleaner_code.py
+
+7. map(), zip()
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\practicepython\18_cows_and_bulls_2_cleaner_code.py
+
+8. Rounding
     round(book_one.price, 2)
     "{:.2f}".format(newspaper_one.price)
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\inheritance.py
 
-7. try, except and assert
+9. try, except and assert
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\automate_error_handling_part1.py
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\automate_error_handling_part2.py
 
-8. Files - open, read, write, close
+10. Files - open, read, write, close
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\files.py
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\parse_data_part1_from_txt.py

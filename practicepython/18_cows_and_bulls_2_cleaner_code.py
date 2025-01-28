@@ -67,7 +67,7 @@ def play_cows_and_bulls_game():
 
     # This joins and prints random 4-digits number.
     random_number = ''.join(map(str, random_number_digits))
-    print("This is random generated 4-digit number: " + str(random_number) + ".")
+    print("This is random generated 4-digit number: " + random_number + ".")
 
     
     # collections (collections.Counter)
@@ -77,9 +77,11 @@ def play_cows_and_bulls_game():
         # print(Counter(['B','B','A','B','C','A','B','B','A','C']))
         # Counter({'B': 5, 'A': 3, 'C': 2})
     x = collections.Counter(random_number)
+    x = dict(x)
+    print(x)
     
-    count = 1
-    
+
+    count = 1 
 
     while True:
 
@@ -103,15 +105,13 @@ def play_cows_and_bulls_game():
             # zipped = zip(numbers, letters)
             # print(list(zipped))
             # [(1, 'a'), (2, 'b'), (3, 'c')]
-        elif random_number != str(users_guess):                      
+        elif random_number != str(users_guess):
             for a, b in zip(random_number, str(users_guess)):
                 if a == b:
                     cows +=1
-                    x[b] +=1
             for a, b in zip(random_number, str(users_guess)):
-                if a != b and x[b] > 0:
+                if a != b:
                     bulls +=1
-                    x[b] +=1
             print(cows,bulls,count)
             count +=1
             continue
@@ -119,11 +119,9 @@ def play_cows_and_bulls_game():
         else:
             # random_number == users_guess
             users_guess = str(users_guess)
-            print("This is the right guess: " + str(users_guess) + ". This was the 4-digit random number.")
+            print("This is the right guess: " + users_guess + ". This was the 4-digit random number.")
             print("4 cows, 0 bulls, " + str(count) + " guesses.")
-            cows = 4
             break
-
 
     return
     
