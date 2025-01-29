@@ -114,6 +114,7 @@ print()
 def my_function_with_binary_search():
 
     x = [11, 38, 58, 301, 425, 432, 5000]
+    #print(x)
 
     value = True
 
@@ -124,72 +125,71 @@ def my_function_with_binary_search():
         
         x_list_middle_item = x[len(x)//2]
         if len(x) % 2 == 1:
-            print("Middle of x list: " + str(x_list_middle_item))
+            print("Just for information, middle of x list: " + str(x_list_middle_item))
         else:
-            print("Task 2: Number of list items is odd, therefore it is unable to set the middle of the list.")
+            print("Task 2: Number of list items is even, therefore it is unable to set the middle of the list.")
             break
-        if number < x_list_middle_item:
-            y = x[0:3]
-            print(y)
+
+        if number == x_list_middle_item:
+            print("Task 2: Result is: " + str(x_list_middle_item) + ", correct answer.")
+            value = True
+            break
+
+        elif number < x_list_middle_item:
+            y = x[0:(len(x)//2)]
+            #print(y)
             y_list_middle_item = y[len(y)//2]
-            print("Middle of y list: " + str(y_list_middle_item))
-            if number < y_list_middle_item:
+            print("Just for information, middle of y list: " + str(y_list_middle_item))
+            if number == y_list_middle_item:
+                print("Task 2: Result is: " + str(y_list_middle_item) + ", correct answer.")
+                value = True
+                break
+            elif number < y_list_middle_item:
                 z = y[0]
-                print("Task 2: Result is: " + str(z))
                 if number not in x:
-                    print("Task 2: Incorrect answer")
                     value = False
-                    print(value)
                     continue
                 else:
                     print("Task 2: Correct answer")
                     value = True
-                    print(value)
-                break
+                    break
             else:
                 z = y[2]
-                print("Task 2: Result is: " + str(z))
                 if number not in x:
-                    print("Task 2: Incorrect answer")
                     value = False
-                    print(value)
                     continue
                 else:
                     print("Task 2: Correct answer")
                     value = True
-                    print(value)
-                break
+                    break
+
         else:
-            y = x[4:]
-            print(y)
+            y = x[((len(x)//2)+1):]
+            #print(y)
             y_list_middle_item = y[len(y)//2]
-            print("Middle of y list: " + str(y_list_middle_item))
-            if number < y_list_middle_item:
+            print("Just for information, middle of y list: " + str(y_list_middle_item))
+            if number == y_list_middle_item:
+                print("Task 2: Result is: " + str(y_list_middle_item) + ", correct answer.")
+                value = True
+                break
+            elif number < y_list_middle_item:
                 z = y[0]
-                print("Task 2: Result is: " + str(z))
                 if number not in x:
-                    print("Task 2: Incorrect answer")
                     value = False
-                    print(value)
                     continue
                 else:
                     print("Task 2: Correct answer")
                     value = True
-                    print(value)
-                break
+                    break
             else:
                 z = y[2]
-                print("Task 2: Result is: " + str(z))
                 if number not in x:
-                    print("Task 2: Incorrect answer")
                     value = False
-                    print(value)
                     continue
                 else:
                     print("Task 2: Correct answer")
                     value = True
-                    print(value)
-                break
+                    break
 
     return
 
