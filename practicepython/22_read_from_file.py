@@ -47,27 +47,21 @@ import requests
 # !!! RUN THIS FIRST (CMD)
 # pip install bs4
 from bs4 import BeautifulSoup
+# DICTIONARY COUNTING PURPOSES
+from collections import Counter
 
 
-my_dictionary = {}
-
-with open("test.txt", "r") as open_file:
+with open("test.txt", "r") as open_file_one:
     
     # This would read and print the whole file.
     # all_text = open_file.read()
     # print(all_text)
 
     # This reads and prints the whole file line by line.
-    line = open_file.readline()
-    
-    while line:
-        line_categories = line[3:-26]
-        print(line_categories)
-        # This counts the categories (e.g.: food_court : 50)
-        if line_categories in my_dictionary:
-            my_dictionary[line_categories] +=1
-        else:
-            my_dictionary[line_categories] =1
-        line = open_file.readline()
-        
-print(my_dictionary)
+    lines = open_file_one.readlines()
+    my_list = []
+    for l in lines:
+        print(l[3:-26])
+        my_list.append(l[3:-26])
+    my_list_dict = dict(Counter(my_list))
+    print(my_list_dict)

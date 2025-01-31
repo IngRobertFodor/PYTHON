@@ -53,22 +53,22 @@ import collections
 
 # First Code Example. Only words with unique letters are here.
 print("First way")
+print()
 
 count = 0
 # Words to pick up from in this game.
 # Only words with unique letters are here (e.g. "SLOVAKIA" has "A" and "A", therefore it is not here.).
 word_to_guess = ["BOAT", "USA", "HOME", "COMPUTER", "DOG"]
 word_to_guess = random.choice(word_to_guess)
-# Show word to find.
 print(word_to_guess)
 word_to_guess = list(word_to_guess)
 # This will be the "word from letters that user guessed".
 word_from_letters_guessed = list("_" * len(word_to_guess))
 # We have lists, where we can find items by its index now.
-print(word_to_guess)
-print(word_from_letters_guessed)
+print("Word to Guess:", word_to_guess)
+print("Word from letters guessed:", word_from_letters_guessed)
 # This shows each letter and number of its occurences in "word_to_guess".
-a = [[x,word_to_guess.count(x)] for x in set(word_to_guess)]
+a = [[x,word_to_guess.count(x)] for x in word_to_guess]
 print(a)
 
 while True:
@@ -76,7 +76,7 @@ while True:
     user_guessed_letter = input("Guess the LETTER: ")
     print(user_guessed_letter)
     
-    if user_guessed_letter not in string.ascii_uppercase or user_guessed_letter not in word_to_guess:   
+    if user_guessed_letter not in string.ascii_uppercase or user_guessed_letter not in word_to_guess:
         count +=1
         print(f"Not a letter, not in uppercase or other wrong guess. This was your {count} wrong guess.")
         # "count >= 7" wrong guesses (One per each letter in "hagnman".).
@@ -84,34 +84,30 @@ while True:
             print(f"You are hanged. This was your {count} wrong guess.")
             break
     elif user_guessed_letter in word_to_guess:
-        for i in range(0,len(word_from_letters_guessed)):
-            if user_guessed_letter in word_from_letters_guessed:
-                print("Already guessed.")
-                word_from_letters_guessed.remove(user_guessed_letter[i])
-                word_from_letters_guessed.append("_")
+        if user_guessed_letter in word_from_letters_guessed:
                 count +=1
-                if count >= 7:
-                    print(f"You are hanged. This was your {count} wrong guess.")
-                    break
-            elif word_from_letters_guessed[i] == "_":
+                print(f"Already guessed. This was your {count} wrong guess.")
+                continue
+        for i in range(0,len(word_to_guess)):
+            if word_from_letters_guessed[i] == "_":
                 word_from_letters_guessed[i] = user_guessed_letter
                 print(word_from_letters_guessed)
                 # This shows each letter and number of its occurences in "word_from_letters_guessed".
-                b = [[x,word_from_letters_guessed.count(x)] for x in set(word_from_letters_guessed)]
-                print(b)
-                print(f"Letter correct, {user_guessed_letter}. This was your {count} wrong guess.")    
+                print(f"Letter correct, {user_guessed_letter}. This was your {count} guess.")    
                 break
     wtg = set(word_to_guess)
     wflg = set(word_from_letters_guessed)
     if wtg == wflg:
-        print(f"You have found the word to guess: {''.join(word_to_guess)}. And you needed {count} guess.")
+        print(f"You have found the word to guess: {''.join(word_to_guess)}. And you needed {count} wrong guesses.")
         break
     elif count >= 7:
         break
+print()
 
 
 # Second Code Example
 print("Second way")
+print()
 # There is a shotcut. We will consider each letter as unique.
 
 # Open, read file and choose random word from file.

@@ -49,7 +49,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def max_of_three(a=None, b=None, c=None):
+def max_of_three(a=int, b=int, c=int):
 
     if a > b and a > c:
         print(a)

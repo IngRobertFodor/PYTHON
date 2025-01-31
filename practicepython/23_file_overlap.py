@@ -54,20 +54,14 @@ with open("prime_numbers.txt", "r") as open_file_one, open("other_numbers.txt", 
     # This would read and print the whole file.
     all_text_first = open_file_one.read()
     all_text_first = all_text_first.split()
-    for i in all_text_first:
-        all_text_first = list(all_text_first)
     print(all_text_first)
-
     # Empty row.
     print()
 
     # This would read and print the whole file.
     all_text_second = open_file_two.read()
     all_text_second = all_text_second.split()
-    for i in all_text_second:
-        all_text_second = list(all_text_second)
     print(all_text_second)
-
     # Empty row.
     print()
 
