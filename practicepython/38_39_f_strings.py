@@ -64,19 +64,21 @@ print(f"You are {age} years old.")
 age = int(age)
 diff_age = 100 - age
 diff_age = str(diff_age)
-print(f"You will turn 100 in {diff_age} years.") 
+print(f"You will turn 100 in {diff_age} years.")
 
 
-print("OPTION 1 to write: \"You will be \".")
+print("OPTION 1 to write: \"You will be\".")
 year_test_one = 2023 - age + 100
 year_test_one = str(year_test_one)
 print(f"You will be 100 years old in {year_test_one}.")
 
-print("OPTION 2 to write: \"You will be \".")
+print("OPTION 2 to write: \"You will be\".")
 current_date_time = datetime.datetime.now()
 actual_date = current_date_time.date()
-actual_year = actual_date.strftime("%Y")
+#actual_year = actual_date.strftime("%Y")
+actual_year = datetime.datetime.now().year
+print(f"Actual year is {actual_year}.")
 actual_year = int(actual_year)
 year_test_two = actual_year - age  + 100
 year_test_two = str(year_test_two)
-print(f"You will be 100 years old in {year_test_one}.")
+print(f"You will be 100 years old in {year_test_two}.")
