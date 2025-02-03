@@ -83,6 +83,7 @@ def play_game():
             elif int(guess_random_number) not in tuple_a:
                 # I won´t count these guesses.
                 print("Number not from interval (1 to 9). Guess again.")
+                continue
         
         except ValueError:
             # Testing whether guess is a number. Guess like e.g. testing will throw ValueError.
