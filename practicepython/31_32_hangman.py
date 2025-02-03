@@ -85,9 +85,12 @@ while True:
             break
     elif user_guessed_letter in word_to_guess:
         if user_guessed_letter in word_from_letters_guessed:
-                count +=1
-                print(f"Already guessed. This was your {count} wrong guess.")
-                continue
+            count +=1
+            print(f"Already guessed. This was your {count} wrong guess.")
+            if count >= 7:
+                print(f"You are hanged. This was your {count} wrong guess.")
+                break
+            continue
         for i in range(0,len(word_to_guess)):
             if word_from_letters_guessed[i] == "_":
                 word_from_letters_guessed[i] = user_guessed_letter
@@ -121,10 +124,9 @@ with open("sowpods.txt", "r") as open_file:
         for i in word:
              letters.append(i)
         print(letters)
-        letters.sort()
-        letters = set(letters)
-        # Sorted "letters" transfered to set.
-        print(letters)
+        set_letters = set(letters)
+        set_letters = sorted(set_letters)
+        print(set_letters)
         
 # Compare word from file with user´s guess.
 count = 0
@@ -142,24 +144,25 @@ while True:
             print(f"You are hanged. This was your {count} wrong guess.")
             break
         continue
-    elif user_letter_guess not in letters:
+    elif user_letter_guess not in set_letters:
         count +=1
         print(f"Wrong guess. This was your {count} wrong guess.")
         if count >= 7:
             print(f"You are hanged. This was your {count} wrong guess.")
             break
         continue
-    elif user_letter_guess in letters:
-        hangman.append(user_letter_guess)
-        print(hangman)
-        print(f"Letter correct, {user_letter_guess}. This was your {count} wrong guess.")
-        if len(letters) == len(hangman):
+    elif user_letter_guess in set_letters:
+        if user_letter_guess in hangman:
+            count +=1
+            print(f"Already guessed. This was your {count} wrong guess.")
+            if count >= 7:
+                print(f"You are hanged. This was your {count} wrong guess.")
+                break
+        elif user_letter_guess not in hangman:
+            hangman.append(user_letter_guess)
             print(hangman)
-            hangman.sort()
-            hangman = set(hangman)
-            # Sorted "hangman" transfered to set.
-            print(hangman)
-            # Sorted "letters" can be compared to sorted "hangman".
-            if letters == hangman:
+            print(f"Letter correct, {user_letter_guess}. This was your {count} wrong guess.")
+            if len(set_letters) == len(hangman):
+                print(word)
                 print(f"You have found the word: {word}. And you needed {count} guess.")
                 break
