@@ -60,10 +60,16 @@ C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythono
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\automate_error_handling_part1.py
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\automate_error_handling_part2.py
 
-10. Files - open, read, write, close
+10. pytest
+    Folder:
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\pytest
+    Example Script
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\pytest\tests\test_divide_zero_function_zerodivisionerror.py
+
+11. Files - open, read, write, close
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\practicepython\21_write_to_a_file.py
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\files.py
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\parse_data_part1_from_txt.py
 
-11. Dictionaries
+12. Dictionaries
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\practicepython\33_birthday_dictionaries.py
