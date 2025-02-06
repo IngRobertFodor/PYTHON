@@ -22,16 +22,16 @@ def get_chess_square_color(row, column):
     print(chess_board)
     print()
 
-    # How many elements each list (in our case row) of chess_ board should have.
+    # How many elements each list (in our case row) of chess board should have.
     n = 8
     new_chess_board = []
     for i in range(0, len(chess_board), n):
-        new_chess_board.append(list(chess_board[i:i + n]))
+        new_chess_board.append(chess_board[i:i+n])
     print(new_chess_board)
     print()
 
     ### Using list comprehension.
-    new_chess_board_two = [chess_board[i:i + n] for i in range(0, len(chess_board), n)]
+    new_chess_board_two = [chess_board[i:i+n] for i in range(0, len(chess_board), n)]
     print(new_chess_board_two)
     print()
 

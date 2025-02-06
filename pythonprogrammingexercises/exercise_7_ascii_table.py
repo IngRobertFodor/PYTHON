@@ -1,5 +1,4 @@
 import string
-import collections
 
 
 # ASCII Table
@@ -14,21 +13,21 @@ def print_ascii_table(num):
 
     for character in x: 
         if ord(character) >= 32 and ord(character) <= 126:
-            print(ord(character), " ", character)
+            print(ord(character), character)
             id_char.append(ord(character))
             char.append(character)
     
     # To create dictionary.
-    my_dictionary=dict(zip(id_char,char))
-    # To order dictionary.
-    my_ordered_dictionary = collections.OrderedDict(sorted(my_dictionary.items()))
+    my_dictionary=dict(zip(id_char, char))
+    print(my_dictionary)
     
-    print("ASCII position", num, "is:", my_ordered_dictionary[num])
+    print("ASCII position", num, "is:", my_dictionary[num])
     
-    return my_ordered_dictionary[num]
+    return my_dictionary[num]
 
 
 result_one = print_ascii_table(35)
 print(result_one)
+print()
 result_two = print_ascii_table(126)
 print(result_two)
