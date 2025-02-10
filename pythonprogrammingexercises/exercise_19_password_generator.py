@@ -65,8 +65,6 @@ for character in pw:
 assert hasLowercase and hasUppercase and hasNumber and hasSpecial
 
 
-result_one = generate_password(10)
-print(result_one)
+print(generate_password(10))
 print()
-result_two = generate_password(15)
-print(result_two)
+print(generate_password(15))
