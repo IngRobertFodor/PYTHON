@@ -1,13 +1,13 @@
 #Pyramid Drawing
 
 def draw_pyramid(number_of_rows):
-    for row in range(0,number_of_rows):
+    for row in range(1,number_of_rows+1):
         # "." represents free space. I have used it, bacause I wanted the code to be more readable.
-        print("."*((number_of_rows-1)-row), end="")
-        print("#"*(row), end="")
-        print("#", end="")
-        print("#"*(row), end="")
-        print("."*((number_of_rows-1)-row), end="")
+        dot = "."
+        hashtag = "#"
+        print(dot * (number_of_rows-row), end="")
+        print(hashtag.rjust(2) * (row), end="")
+        print(dot * (number_of_rows-row), end="")
         print()
 
     

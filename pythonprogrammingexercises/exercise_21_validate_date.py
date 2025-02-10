@@ -2,6 +2,7 @@ import datetime
 from exercise_20_leap_year import leap_year
 
 
+print()
 # Validate Date
 
 def validate_date(year,month,day):
@@ -16,11 +17,11 @@ def validate_date(year,month,day):
     elif day in range(28,32) and month in range(1,13):
         if month == 2 and day == 28:
             return True
-        if month == 2 and day == 29 and leap_year_check == True:
+        elif month == 2 and day == 29 and leap_year_check == True:
             return True
-        if day in range(28,32) and month in (1, 3, 5, 7, 8, 10, 12):
+        elif day in [28, 29, 30, 31] and month in [1, 3, 5, 7, 8, 10, 12]:
             return True
-        if day in range(28,31) and month in (4, 6, 9, 11):
+        elif day in [28, 29, 30] and month in [4, 6, 9, 11]:
             return True
         else:
             return False
@@ -45,5 +46,7 @@ for i in range(1000000):
     d += oneDay
 
 
-result = validate_date(2000, 2, 15)
-print("Is the date valid?:",result)
+print(validate_date(2400, 2, 29))
+print(validate_date(2100, 2, 29))
+print(validate_date(2000, 2, 29))
+print(validate_date(2024, 8, 15))

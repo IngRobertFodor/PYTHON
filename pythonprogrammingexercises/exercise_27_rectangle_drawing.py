@@ -5,7 +5,7 @@ def draw_rectangle(width,height):
         return print("None")
     else:
         for row in range(0,height):
-            for hashtag in range(0,width):
+            for column in range(0,width):
                 print("#", end="")
             print()
         return
