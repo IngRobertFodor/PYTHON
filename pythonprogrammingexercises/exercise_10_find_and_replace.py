@@ -6,7 +6,9 @@ def find_and_replace(my_sentence, old_text, new_text):
     
     print("This is original sentence:", my_sentence)
     my_sentence_list = my_sentence.split()
+    print(my_sentence_list)
     word_index = my_sentence_list.index(old_text)
+    print(word_index)
     my_sentence_list[word_index] = new_text
     new_sentence = " ".join(my_sentence_list)
     return new_sentence

@@ -8,32 +8,32 @@ def calculate_sum(my_list):
     sum_number = 0
     for number in my_list:
         sum_number += number 
-    if len(my_list) == 0:
-        return 0
+    #if len(my_list) == 0:
+    #    return 0
+    if not my_list:
+        return print(0)
     else:
+        print(sum_number)
         return sum_number
 
 def calculate_product(my_list):
     multipl_number = 1
     for number in my_list:
         multipl_number *= number
-    if len(my_list) == 0:
-        return 1
+    #if len(my_list) == 0:
+    #    return 1
+    if not my_list:
+        return print(1)
     else:
+        print(multipl_number)
         return multipl_number
 
 
-result_one = calculate_sum(numbers_list_one)
-print(result_one)
-result_two = calculate_product(numbers_list_one)
-print(result_two)
+calculate_sum(numbers_list_one)
+calculate_product(numbers_list_one)
 
-result_three = calculate_sum(numbers_list_two)
-print(result_three)
-result_four = calculate_product(numbers_list_two)
-print(result_four)
+calculate_sum(numbers_list_two)
+calculate_product(numbers_list_two)
 
-result_five = calculate_sum(numbers_list_three)
-print(result_five)
-result_six = calculate_product(numbers_list_three)
-print(result_six)
+calculate_sum(numbers_list_three)
+calculate_product(numbers_list_three)

@@ -3,6 +3,10 @@
 numbers_list = [50, 986, 1, 25, 1000]
 
 def min_number(my_list):
+    # If list is empty, return None.
+    #if not my_list:
+    #    return None
+    # If list is empty, return None.
     if len(my_list) == 0:
         return None
     else:
@@ -12,6 +16,10 @@ def min_number(my_list):
         return my_list[0]
 
 def max_number(my_list):
+    # If list is empty, return None.
+    #if not my_list:
+    #    return None
+    # If list is empty, return None.
     if len(my_list) == 0:
         return None
     else:
@@ -28,7 +36,7 @@ def min_number_using_loop(my_list):
         for i in range(0, len(my_list)):
             if my_list[i] < my_smallest:
                 my_smallest = my_list[i]
-        print("The smallest number is:", my_smallest, ".")    
+        print("The smallest number is:",my_smallest,".")    
         return my_smallest
             
 def max_number_using_loop(my_list):
@@ -39,7 +47,7 @@ def max_number_using_loop(my_list):
         for i in range(0, len(my_list)):
             if my_list[i] > my_biggest:
                 my_biggest = my_list[i]
-        print("The biggest number is:", my_biggest, ".")
+        print("The biggest number is:",my_biggest,".")
         return my_biggest
         
 
