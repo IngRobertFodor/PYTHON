@@ -13,13 +13,12 @@ def convert_str_to_int(my_string_num):
             ii = my_dict.get(i)
             my_number_list_new.append(ii)
     #print(my_number_list_new)
-
+    
     result = 0
     for num in my_number_list_new:
-        result = result * 10 + num
+        result = num + result*10    
     if my_number_list[0] == "-":
         result = -1 * result
-    
     return result
 
 

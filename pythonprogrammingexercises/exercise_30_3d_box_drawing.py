@@ -6,17 +6,17 @@ def draw_3d_box(size):
     
     else:
         
-        print(" "*(size+1), "+", (size*2)*"-", "+", sep="")
+        print((size+1)*" ", "+", (size*2)*"-", "+", sep="")
         
         for i in range(0,size):
-            print(" "*(size-i), "/", (size*2)*" ", "/", sep="", end="")
-            print(" "*(i), "|", sep="")
+            print((size-i)*" ", "/", (size*2)*" ", "/", sep="", end="")
+            print((i)*" ", "|", sep="")
       
         print("+", (size*2)*"-", "+", size*" ", "+", sep="")
                 
         for j in range(0,size):
             print("|", (size*2)*" ", "|", sep="", end="")
-            print(" "*(size-j), "/", sep="")
+            print((size-j)*" ", "/", sep="")
         
         print("+", (size*2)*"-", "+", sep="")
 
