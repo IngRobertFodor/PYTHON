@@ -1,6 +1,3 @@
-from itertools import batched
-
-
 # Comma-Formated Numbers
 
 def comma_format(number):
@@ -28,7 +25,7 @@ def comma_format(number):
     count = 0
     for i in list_number:
         special_number.append(i)
-        count+=1
+        count += 1
         if count % 3 == 0:
             special_number.append(",")
     print(special_number)

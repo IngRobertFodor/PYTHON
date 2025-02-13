@@ -15,7 +15,6 @@ from selenium.webdriver.support import expected_conditions as EC
 # using these:
     # element = driver.find_element(By.ID, "passwd-id")
     # element = driver.find_element(By.NAME, "passwd")
-    # element = driver.find_element(By.XPATH, "//input[@id='passwd-id']")
     # element = driver.find_element(By.CSS_SELECTOR, "input#passwd-id")
 
 
