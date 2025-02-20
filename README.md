@@ -25,8 +25,10 @@ C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpy
 
 2. Classes - Basics and Inheritance
     "def __init__()",
+    "def __str__()"
     "super().__init__()"
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\create_classes_and_class_instances.py
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\classes__str__repr__.py
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\inheritance.py
 
 3. Classes -
@@ -59,6 +61,7 @@ C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythono
 9. try, except and assert
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\automate_error_handling_part1.py
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\automate_error_handling_part2.py
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\w3schools\16_try_except.py
 
 10. pytest
     Folder:

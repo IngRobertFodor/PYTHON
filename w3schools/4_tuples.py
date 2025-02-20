@@ -66,14 +66,14 @@ print(thistuple)
 # 3.1  FOR LOOP
 thistuple = ("apple", "banana", "cherry")
 for x in thistuple:
-  print(x)
+    print(x)
 
 # 3.2  WHILE LOOP
 thistuple = ("apple", "banana", "cherry")
 i = 0
 while i < len(thistuple):
-  print(thistuple[i])
-  i = i + 1
+    print(thistuple[i])
+    i += 1
 
 
 # 4  JOIN

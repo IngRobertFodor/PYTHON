@@ -40,7 +40,7 @@ print(x(8, 2))
 #
 # Result: 22.
 def myfunc(n):
-  return lambda a : a * n
+    return lambda a : a * n
 
 mydoubler = myfunc(2)
 
@@ -50,7 +50,7 @@ print(mydoubler(11))
 #
 # Results: 22 33.
 def myfunc(n):
-  return lambda a : a * n
+    return lambda a : a * n
 
 mydoubler = myfunc(2)
 mytripler = myfunc(3)

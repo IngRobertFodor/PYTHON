@@ -28,22 +28,22 @@ import random
 # Print each fruit in a fruit list.
 fruits = ["apple", "banana", "cherry"]
 for x in fruits:
-  print(x)
+    print(x)
 
 # Loop through the letters in the word "banana".
 for x in "banana":
-  print(x)
+    print(x)
 
 
 # range()
 # Result: 0 1 2 3 4 5.
 for x in range(6):
-  print(x)
+    print(x)
 
 # Increment the sequence with 3 (default is 1).
 # Result: 8 11 14 17 20 23 26 29.
 for x in range(8, 30, 3):
-  print(x)
+    print(x)
 
 
 # break continue
@@ -51,50 +51,50 @@ for x in range(8, 30, 3):
 # Result: apple banana.
 fruits = ["apple", "banana", "cherry"]
 for x in fruits:
-  print(x) 
-  if x == "banana":
-    break
+    print(x) 
+    if x == "banana":
+        break
 
 # Exit the loop when x is "banana", but this time the break comes before the print.
 # Result: apple.
 fruits = ["apple", "banana", "cherry"]
 for x in fruits:
-  if x == "banana":
-    break
-  print(x)
+    if x == "banana":
+        break
+    print(x)
 
 # Do not print banana.
 # Result: apple cherry.
 fruits = ["apple", "banana", "cherry"]
 for x in fruits:
-  if x == "banana":
-    continue
-  print(x)
+    if x == "banana":
+        continue
+    print(x)
 
 
 # else
 # Print all numbers from 0 to 5, and print a message when the loop has ended.
 # Result 0 1 2 3 4 5 Finally finished!.
 for x in range(6):
-  print(x)
+    print(x)
 else:
-  print("Finally finished!")
+    print("Finally finished!")
 
 # Result: 0 1 2.
 for x in range(6):
-  if x == 3:
-    break
-  print(x)
+    if x == 3:
+        break
+    print(x)
 else:
-  print("Finally finished!")
+    print("Finally finished!")
 # If the loop breaks, the else block is not executed.
 
 # Result: 0 1 2.
 for x in range(6):
-  if x == 3: break
-  print(x)
+    if x == 3: break
+    print(x)
 else:
-  print("Finally finished!")
+    print("Finally finished!")
 # If the loop breaks, the else block is not executed.
 
 
@@ -113,5 +113,5 @@ else:
 adj = ["red", "big", "tasty"]
 fruits = ["apple", "banana", "cherry"]
 for x in adj:
-  for y in fruits:
-    print(x, y)
+    for y in fruits:
+        print(x, y)

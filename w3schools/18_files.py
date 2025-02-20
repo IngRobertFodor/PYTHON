@@ -35,33 +35,25 @@ import os
 import matplotlib
 
 
-# Path should start like this: "C:\\".
-f = open("C:\\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\w3schools\TestFile.txt", "rt")
-print(f.read())
-
+try:
+    with open("C:\\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\w3schools\TestFile.txt", "rt") as f:
+        print(f.read())
+finally:
+    f.close()
+print()
 
 # Read first 5 characters.
 f = open("C:\\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\w3schools\TestFile.txt", "r")
 print(f.read(5))
-
+f.close()
+print()
 
 # Read first 2 lines.
 f = open("C:\\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\w3schools\TestFile.txt", "r")
 print(f.readline())
 print(f.readline())
-
-
-# Loop through the file line by line.
-f = open("C:\\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\w3schools\TestFile.txt", "r")
-for x in f:
-  print(x)
-
-
-#
-f = open("C:\\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\w3schools\TestFile.txt", "r")
-print(f.readline())
 f.close()
-
+print()
 
 # Add text to the end of the file.
 f = open("C:\\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\w3schools\TestFile.txt", "a")
@@ -70,8 +62,8 @@ f.close()
 # Open and read the file after the appending.
 f = open("C:\\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\w3schools\TestFile.txt", "r")
 print(f.read())
-# Result: Now the file has more content!Now the file has more content!.
-
+f.close()
+print()
 
 # Add text from the beginning of the file.
 f = open("C:\\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\w3schools\TestFile.txt", "w")
@@ -80,11 +72,9 @@ f.close()
 # Open and read the file after.
 f = open("C:\\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\w3schools\TestFile.txt", "r")
 print(f.read())
-# Result: Now the file has more content!.
+f.close()
 
-
-# Creates my new file.
+# Creates new file.
 # f = open("C:\\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\w3schools\myfile.txt", "x")
-
 
 # os.remove("C:\\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\w3schools\TestFile.txt")

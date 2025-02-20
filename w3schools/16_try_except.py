@@ -33,50 +33,51 @@ import re
 
 # 1
 try:
-  print(x)
+    print(x)
 except:
-  print("An exception occurred")
+    print("An exception occurred.")
 # Result: An exception occurred.
 
 # 2.
 try:
-  print(x)
+    print(x)
 except NameError:
-  print("Variable x is not defined")
+    print("Variable x is not defined.")
 except:
-  print("Something else went wrong")
+    print("Something else went wrong.")
 # Result: Variable x is not defined.
 
 # 3
 # The try block does not raise any errors, so the else block is executed.
 try:
-  print("Hello")
+    print("Hello")
 except:
-  print("Something went wrong")
+    print("Something went wrong.")
 else:
-  print("Nothing went wrong")
-# Result: Hello Nothing went wrong.
+    print("Nothing went wrong.")
+# Result: Hello
+# Result: Nothing went wrong.
 
 # 4
 # The finally block gets executed no matter if the try block raises any errors or not.
 try:
-  print(x)
+    print(x)
 except:
-  print("Something went wrong")
+    print("Something went wrong.")
 finally:
-  print("The 'try except' is finished")
-# Result: Something went wrong The 'try except' is finished.
+    print("The 'try except' is finished.")
+# Result: Something went wrong. 
+# Result: The 'try except' is finished.
 
 # 5
 x = -1
 if x < 0:
-  raise Exception("Sorry, no numbers below zero")
+    raise Exception("Sorry, no numbers below zero.")
 # Result: Exception: Sorry, no numbers below zero.
-
 '''
 # 6
 x = "hello"
 if not type(x) is int:
-  raise TypeError("Only integers are allowed")
+    raise TypeError("Only integers are allowed.")
 # Result: TypeError: Only integers are allowed.
 '''

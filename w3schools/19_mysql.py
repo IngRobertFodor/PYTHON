@@ -8,9 +8,9 @@ import mysql.connector
 
 
 mydb = mysql.connector.connect(
-  host="localhost",
-  user="Administrator",
-  password="Initial0"
+    host="localhost",
+    user="Administrator",
+    password="Initial0"
 )
 # Check connection.
 print(mydb)
@@ -27,13 +27,13 @@ mycursor.execute("CREATE DATABASE my_rf_database")
 mycursor.execute("SHOW DATABASES")
 
 for x in mycursor:
-  print(x)
+    print(x)
 
 
 # Connect to "my_rf_database".
 mydb = mysql.connector.connect(
-  host="localhost",
-  user="Administrator",
-  password="Initial0",
-  database="my_rf_database"
+    host="localhost",
+    user="Administrator",
+    password="Initial0",
+    database="my_rf_database"
   )

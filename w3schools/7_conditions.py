@@ -34,11 +34,11 @@ import random
 a = 200
 b = 33
 if b > a:
-  print("b is greater than a")
+    print("b is greater than a")
 elif a == b:
-  print("a and b are equal")
+    print("a and b are equal")
 else:
-  print("a is greater than b")
+    print("a is greater than b")
 
 # 1.2 Shortened version (= Ternary Operators or Conditional Expressions).
 # Example 1
@@ -56,29 +56,29 @@ a = 200
 b = 33
 c = 500
 if a > b and c > a:
-  print("Both conditions are True")
+    print("Both conditions are True")
 
 
 # 3  OR
 a = 200
 b = 33
 c = 500
-if a > b or a > c:
-  print("At least one of the conditions is True")
+if a > b or b > c:
+    print("At least one of the conditions is True")
 
 
 # 4  NOT
 a = 33
 b = 200
 if not a > b:
-  print("a is NOT greater than b")
+    print("a is NOT greater than b")
 
 
 # 5  NESTED IF
 x = 41
 if x > 10:
-  print("Above ten,")
-  if x > 20:
-    print("and also above 20!")
-  else:
-    print("but not above 20.")
+    print("Above ten,", end=" ")
+    if x > 20:
+        print("and also above 20!")
+    else:
+        print("but not above 20.")

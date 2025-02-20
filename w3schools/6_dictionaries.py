@@ -37,10 +37,10 @@ import random
 # len()
 # Shows the number of items in dictionary.
 thisdict = {
-  "brand": "Ford",
-  "electric": False,
-  "year": 1964,
-  "colors": ["red", "white", "blue"]
+    "brand": "Ford",
+    "electric": False,
+    "year": 1964,
+    "colors": ["red", "white", "blue"]
 }
 print(thisdict)
 print(len(thisdict))
@@ -50,37 +50,37 @@ print(len(thisdict))
 
 #
 thisdict =  {
-  "brand": "Ford",
-  "model": "Mustang",
-  "year": 1964
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
 }
 x = thisdict["model"]
 print(x)
 
 #
 thisdict =	{
-  "brand": "Ford",
-  "model": "Mustang",
-  "year": 1964
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
 }
 x = thisdict.get("model")
 print(x)
 
 # in
 thisdict = {
-  "brand": "Ford",
-  "model": "Mustang",
-  "year": 1964
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
 }
 if "model" in thisdict:
-  print("Yes, 'model' is one of the keys in the thisdict dictionary.")
+    print("Yes, 'model' is one of the keys in the thisdict dictionary.")
 
 # keys()
 # The keys() method will return a list of all the keys in the dictionary.
 car = {
-"brand": "Ford",
-"model": "Mustang",
-"year": 1964
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
 }
 print(car)
 x = car.keys()
@@ -92,9 +92,9 @@ print(x) #after the change
 # The values() method will return a list of all the values in the dictionary.
 # Example 1
 car = {
-"brand": "Ford",
-"model": "Mustang",
-"year": 1964
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
 }
 print(car)
 x = car.values()
@@ -103,9 +103,9 @@ car["year"] = 2020
 print(x) #after the change
 # Example 2
 car = {
-"brand": "Ford",
-"model": "Mustang",
-"year": 1964
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
 }
 print(car)
 x = car.values()
@@ -118,18 +118,18 @@ print(x) #after the change
 
 # Add new key:value pair or change the key:value pair.
 thisdict =	{
-  "brand": "Ford",
-  "model": "Mustang",
-  "year": 1964
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
 }
 thisdict["year"] = 2018
 print(thisdict)
 
 # update()
 thisdict = {
-  "brand": "Ford",
-  "model": "Mustang",
-  "year": 1964
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
 }
 thisdict.update({"year": 2020})
 print(thisdict)
@@ -140,9 +140,9 @@ print(thisdict)
 # pop()
 # It removes selected item from dictionary. In this case: "model".
 thisdict =	{
-  "brand": "Ford",
-  "model": "Mustang",
-  "year": 1964
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
 }
 thisdict.pop("model")
 print(thisdict)
@@ -150,9 +150,9 @@ print(thisdict)
 # popitem()
 # It removes last item from dictionary. In this case: "year": 1964.
 thisdict =	{
-  "brand": "Ford",
-  "model": "Mustang",
-  "year": 1964
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
 }
 thisdict.popitem()
 print(thisdict)
@@ -160,9 +160,9 @@ print(thisdict)
 # clear()
 # The clear() method empties the dictionary.
 thisdict =	{
-  "brand": "Ford",
-  "model": "Mustang",
-  "year": 1964
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
 }
 thisdict.clear()
 print(thisdict)
@@ -170,9 +170,9 @@ print(thisdict)
 # del
 # It removes selected item from dictionary. In this case: "year": 1964. 
 thisdict = {
-  "brand": "Ford",
-  "model": "Mustang",
-  "year": 1964
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
 }
 del thisdict["model"]
 print(thisdict)
@@ -185,46 +185,46 @@ print(thisdict)
 # 5.1  FOR LOOP
 #
 thisdict =	{
-  "brand": "Ford",
-  "model": "Mustang",
-  "year": 1964
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
 }
 for x in thisdict.keys():
-  print(x)
+    print(x)
 #
 thisdict =	{
-  "brand": "Ford",
-  "model": "Mustang",
-  "year": 1964
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
 }
 for x in thisdict.values():
-  print(x)
+    print(x)
 #
 thisdict =	{
-  "brand": "Ford",
-  "model": "Mustang",
-  "year": 1964
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
 }
 for x, y in thisdict.items():
-  print(x, y)
+    print(x, y)
 
 
 # 6  COPY
 
 # copy()
 thisdict = {
-  "brand": "Ford",
-  "model": "Mustang",
-  "year": 1964
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
 }
 mydict = thisdict.copy()
 print(mydict)
 
 # dict
 thisdict = {
-  "brand": "Ford",
-  "model": "Mustang",
-  "year": 1964
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
 }
 mydict = dict(thisdict)
 print(mydict)
@@ -232,18 +232,18 @@ print(mydict)
 
 # 7  NESTED DICTIONARIES
 myfamily = {
-  "child1" : {
+    "child1" : {
     "name" : "Emil",
     "year" : 2004
-  },
-  "child2" : {
+    },
+    "child2" : {
     "name" : "Steve",
     "year" : 2007
-  },
-  "child3" : {
+    },
+    "child3" : {
     "name" : "Linus",
     "year" : 2011
-  }
+    }
 }
 
 print(myfamily["child2"])

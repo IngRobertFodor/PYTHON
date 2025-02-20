@@ -138,14 +138,14 @@ print(list1)
 # 5.1  FOR LOOP
 thislist = ["apple", "banana", "cherry"]
 for x in thislist:
-  print(x)
+    print(x)
 
 # 5.2  WHILE LOOP
 thislist = ["apple", "banana", "cherry"]
 i = 0
 while i < len(thislist):
-  print(thislist[i])
-  i = i + 1
+    print(thislist[i])
+    i += 1
 
 
 # 6  LEN

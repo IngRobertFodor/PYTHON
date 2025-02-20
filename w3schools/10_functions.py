@@ -25,29 +25,22 @@ from selenium.webdriver.common.action_chains import ActionChains
 import random
 
 
-'''
-From a function's perspective:
-A parameter is the variable listed inside the parentheses in the function definition.
-An argument is the value that is sent to the function when it is called.
-'''
-
-
 # PASS
 def myfunction():
-  pass
+    pass
 # having an empty function definition like this, would raise an error without the pass statement
 
 
 #
 def my_function():
-  print("Hello from a function")
+    print("Hello from a function")
 
 my_function()
 
 
 #
 def my_function(fname):
-  print(fname + " Refsnes")
+    print(fname, "Refsnes")
 
 my_function("Tom")
 my_function("Tobias")
@@ -56,35 +49,35 @@ my_function("Linus")
 
 #
 def my_function(fname, lname):
-  print(fname + " " + lname)
+    print(fname, lname)
 
 my_function("Tom", "Refsnes")
 
 
 #
 def my_function(*kids):
-  print("The youngest child is " + kids[2])
+    print("The youngest child is", kids[2])
 
 my_function("Tom", "Tobias", "Linus")
 
 
 #
 def my_function(child3, child2, child1):
-  print("The youngest child is " + child3)
+    print("The youngest child is", child3)
 
 my_function(child1 = "Tom", child2 = "Tobias", child3 = "Linus")
 
 
 #
 def my_function(**kid):
-  print("His last name is " + kid["lname"])
+    print("His last name is", kid["lname"])
 
 my_function(fname = "Tom", lname = "Refsnes")
 
 
 # If we call the function without argument, it uses the default value.
 def my_function(country = "Norway"):
-  print("I am from " + country)
+    print("I am from", country)
 
 my_function("Sweden")
 my_function("India")
@@ -96,15 +89,16 @@ my_function("Brazil")
 food = ["apple", "banana", "cherry"]
 
 def my_function(food):
-  for x in food:
-    print(x)
+    for x in food:
+        print(x)
+    return
 
 my_function(food)
 
 
 #
 def my_function(x):
-  return 5 * x
+    return 5 * x
 
 print(my_function(3))
 print(my_function(5))
@@ -119,7 +113,7 @@ age = get_integer("Tell me your age: ")
 school_year = get_integer()
 
 if age > 15:
-  print("You are over the age of 15")
+    print("You are over the age of 15")
 
 print("You are in grade " + str(school_year))
 
@@ -130,26 +124,27 @@ print("You are in grade " + str(school_year))
 
 # Examples 2.1
 def make_even(num):
-  if num % 2 == 1:
-    return num + 1
-  else:
-    return num
+    if num % 2 == 1:
+        return num + 1
+    else:
+        return num
 
 x = [551, 641, 891, 122, 453, 223, 234, 343, 562, 115, 554, 679, 516]
 
 y = []
 for num in x:
-  y.append(make_even(num))
+    num = make_even(num)
+    y.append(num)
 
 print(y)
 
 
 # Examples 2.2
 def make_even(num):
-  if num % 2 == 1:
-    return num + 1
-  else:
-    return num
+    if num % 2 == 1:
+        return num + 1
+    else:
+        return num
 
 x = [551, 641, 891, 122, 453, 223, 234, 343, 562, 115, 554, 679, 516]
 
@@ -163,10 +158,10 @@ print(y)
 # 2 parameters - 1. function (required), 2. iterable (e.g. list) (required)
 # The map() function executes a specified function for each item in an iterable. 
 def make_even(num):
-  if num % 2 == 1:
-    return num + 1
-  else:
-    return num
+    if num % 2 == 1:
+        return num + 1
+    else:
+        return num
 
 x = [551, 641, 891, 122, 453, 223, 234, 343, 562, 115, 554, 679, 516]
 

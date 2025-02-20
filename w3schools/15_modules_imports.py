@@ -110,36 +110,36 @@ print(x)
 txt = "The rain in Spain"
 x = re.search("^The.*Spain$", txt)
 if x:
-  print("YES! We have a match!")
+    print("YES! We have a match!")
 else:
-  print("No match")
-# Result: YES! We have a match!.
+    print("No match")
+# Result: YES! We have a match!
 
 # 4.2 split()
 # The split() function returns a list where the string has been split at each match.
 txt = "The rain in Spain"
 x = re.split("\s", txt)
 print(x)
-# Result: ['The', 'rain', 'in', 'Spain'].
+# Result: ['The', 'rain', 'in', 'Spain']
 
 # Split the string only at the first occurrence.
 txt = "The rain in Spain"
 x = re.split("\s", txt, 1)
 print(x)
-# Result: ['The', 'rain in Spain'].
+# Result: ['The', 'rain in Spain']
 
 # 4.3 sub()
 # Replace all white-space characters with the digit "8".
 txt = "The rain in Spain"
 x = re.sub("\s", "8", txt)
 print(x)
-# Result: [The8rain8in8Spain].
+# Result: [The8rain8in8Spain]
 
 # Replace the first 2 occurrences.
 txt = "The rain in Spain"
 x = re.sub("\s", "8", txt, 2)
 print(x)
-# Result: [The8rain8in Spain].
+# Result: [The8rain8in Spain]
 
 # 4.4 # search() span()
 # The Match object has properties and methods used to retrieve information about the search, and the result.
@@ -147,7 +147,7 @@ print(x)
 txt = "The rain in Spain"
 x = re.search(r"\bS\w+", txt)
 print(x.span())
-# Result: (12, 17).
+# Result: (12, 17)
 
 # 4.5 search() string()
 # The Match object has properties and methods used to retrieve information about the search, and the result.
@@ -155,7 +155,7 @@ print(x.span())
 txt = "The rain in Spain"
 x = re.search(r"\bS\w+", txt)
 print(x.string)
-# Result: The rain in Spain.
+# Result: The rain in Spain
 
 # 4.6 search() group()
 # The Match object has properties and methods used to retrieve information about the search, and the result.
@@ -163,4 +163,4 @@ print(x.string)
 txt = "The rain in Spain"
 x = re.search(r"\bS\w+", txt)
 print(x.group())
-# Result: Spain.
+# Result: Spain

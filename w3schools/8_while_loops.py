@@ -28,8 +28,8 @@ import random
 # Result: 1 2 3 4 5.
 i = 1
 while i < 6:
-  print(i)
-  i = i + 1
+    print(i)
+    i = i + 1
 # i = i + 1
 # is the same like
 # i += 1
@@ -40,10 +40,10 @@ while i < 6:
 # Result: 1 2 3.
 i = 1
 while i < 6:
-  print(i)
-  if (i == 3):
-    break
-  i += 1
+    print(i)
+    if (i == 3):
+        break
+    i += 1
 
 
 # continue
@@ -51,10 +51,10 @@ while i < 6:
 # Result: 1 2 4 5 6.
 i = 0
 while i < 6:
-  i += 1
-  if i == 3:
-    continue
-  print(i)
+    i += 1
+    if i == 3:
+        continue
+    print(i)
 # Note that number 3 is missing in the result.
 
 
@@ -62,10 +62,10 @@ while i < 6:
 # Result: 3 4 5 i is no longer less than 6.
 i = 3
 while i < 6:
-  print(i)
-  i += 1
+    print(i)
+    i += 1
 else:
-  print("i is no longer less than 6")
+    print("i is no longer less than 6")
 
 
 
@@ -77,7 +77,7 @@ else:
 # Result: 9 11 12 13 14 15.
 i = 8
 while i < 15:
-  i = i + 1
-  if i == 10:
-    continue
-  print(i)
+    i = i + 1
+    if i == 10:
+        continue
+    print(i)

@@ -28,72 +28,73 @@ import random
 # 0  CLASS
 
 class MyClass:
-  x = 5
+    x = 5
 
 p1 = MyClass()
 print(p1.x)
-# Result: 5.
+# Result: 5
 
 
 # 1  Class __init__() Function
 
 class Person:
-  def __init__(self, name, age):
-    self.myname = name
-    self.myage = age
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
 
 p1 = Person("John", 36)
-print(p1.myname)
-print(p1.myage)
-# Result: John 36.
+print(p1.name)
+print(p1.age)
+# Result: John 36
 
 
 # 2  Class __str__() Function
 
 class Person:
-  def __init__(self, name, age):
-    self.myname = name
-    self.myage = age
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
 
-  def __str__(self):
-    return f"{self.myname}({self.myage})"    
+    def __str__(self):
+        return f"{self.name}, age({self.age})"    
 
 p1 = Person("John", 36)
 print(p1)
-# Result: John(36).
+# Result: John, age(36)
 
 
 # 3  Object METHODS
 # Methods are functions in the objects.
 
 class Person:
-  def __init__(self, name, age):
-    self.myname = name
-    self.myage = age
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
 
-  def myfunc(self):
-    print("Hello my name is " + self.myname)
+    def myfunc(self):
+        print("Hello my name is", self.name)
 
 p1 = Person("John", 36)
 p1.myfunc()
-# Result: Hello my name is John.
+# Result: Hello my name is John
 
 
 # 4  Modify Object Properties
 
 class Person:
-  def __init__(self, name, age):
-    self.myname = name
-    self.myage = age
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
 
-  def myfunc(self):
-    print("Hello my name is " + self.myname)
+    def myfunc(self):
+        print("Hello my name is " + self.name)
 
 p1 = Person("John", 36)
-p1.myage = 35
-print(p1.myage)
+p1.age = 35
+print(p1.age)
 p1.myfunc()
-# Result: 35 Hello my name is John.
+# Result: 35
+# Result: Hello my name is John
 
 
 # 5  del
@@ -111,72 +112,72 @@ p1.myfunc()
 
 # 6.1  PARENT CLASS
 class Person:
-  def __init__(self, fname, lname):
-    self.firstname = fname
-    self.lastname = lname
+    def __init__(self, fname, lname):
+        self.fname = fname
+        self.lname = lname
 
-  def bothnames(self):
-    print(self.firstname, self.lastname)
+    def bothnames(self):
+        print(self.fname, self.lname)
 
 #Use the Person class to create an object, and then execute the bothnames method.
 x = Person("John", "Doe")
 x.bothnames()
-# Result: John Doe.
+# Result: John Doe
 
 # 6.2  CHILD CLASS
 class Person:
-  def __init__(self, fname, lname):
-    self.firstname = fname
-    self.lastname = lname
+    def __init__(self, fname, lname):
+        self.fname = fname
+        self.lname = lname
 
-  def bothnames(self):
-    print(self.firstname, self.lastname)
+    def bothnames(self):
+        print(self.fname, self.lname)
 
 class Student(Person):
-  pass
+    pass
 
 x = Student("Steve", "Olsen")
 x.bothnames()
-# Result: Steve Olsen.
+# Result: Steve Olsen
 
 # 6.3
 # The __init__() function is called automatically every time the class is being used to create a new object.
 # The child's __init__() function overrides the inheritance of the parent's __init__() function.
 # To keep the inheritance of the parent's __init__() function, add a call to the parent's __init__() function.
 class Person:
-  def __init__(self, fname, lname):
-    self.firstname = fname
-    self.lastname = lname
+    def __init__(self, fname, lname):
+        self.fname = fname
+        self.lname = lname
 
-  def bothnames(self):
-    print(self.firstname, self.lastname)
+    def bothnames(self):
+        print(self.fname, self.lname)
 
 class Student(Person):
-  def __init__(self, fname, lname):
-    Person.__init__(self, fname, lname)
+    def __init__(self, fname, lname):
+        Person.__init__(self, fname, lname)
 
 x = Student("Steve", "Olsen")
 x.bothnames()
-# Result: Steve Olsen.
+# Result: Steve Olsen
 
 # 6.4  Class super() Function
 class Person:
-  def __init__(self, fname, lname):
-    self.firstname = fname
-    self.lastname = lname
+    def __init__(self, fname, lname):
+        self.fname = fname
+        self.lname = lname
 
-  def bothnames(self):
-    print(self.firstname, self.lastname)
+    def bothnames(self):
+        print(self.fname, self.lname)
 
 class Student(Person):
-  def __init__(self, fname, lname, year):
-# Using super() to access __init__() method of Person (PARENT CLASS).
-    super().__init__(fname, lname)
-    self.graduationyear = year
+    def __init__(self, fname, lname, graduationyear):
+# Using super() to access __init__() method of Person(PARENT CLASS).
+        super().__init__(fname, lname)
+        self.graduationyear = graduationyear
 
-  def welcome(self):
-    print("Welcome", self.firstname, self.lastname, "to the class of", self.graduationyear)
+    def welcome(self):
+        print("Welcome", self.fname, self.lname, "to the class of", self.graduationyear)
 
 x = Student("Steve", "Olsen", 2019)
 x.welcome()
-# Result: Welcome Steve Olsen to the class of 2019.
+# Result: Welcome Steve Olsen to the class of 2019

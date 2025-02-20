@@ -31,10 +31,13 @@ import random
 
 # Example 1
 
+# Default value would be: end='\n'. It means go to new line.
+print("Hello", end = '')
+print("World!")
+# Result: HelloWorld!
 print("Hello", end = ' ')
 print("World!")
 # Result: Hello World!
-# Default value would be: end='\n'. It means go to new line.
 
 # Example 2
 
@@ -50,7 +53,7 @@ print("World!")
 x = range(6)
 
 for n in x:
-  print(n)
+    print(n)
 
 
 # 2
@@ -84,6 +87,7 @@ print(a.replace("H", "J"))
 age = 36
 txt = "My name is Robert, and I am {}"
 print(txt.format(age))
+print(f"My name is Robert, and I am {age}")
 
 
 # 7

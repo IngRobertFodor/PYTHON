@@ -49,7 +49,7 @@ print(len(thisset))
 # 2.1  FOR LOOP
 thisset = {"apple", "banana", "cherry"}
 for x in thisset:
-  print(x)
+    print(x)
 
 
 # 3  Add items to set

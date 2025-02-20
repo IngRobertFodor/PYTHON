@@ -48,14 +48,14 @@ print(next(myit))
 
 # 1.3
 class MyNumbers:
-  def __iter__(self):
-    self.a = 1
-    return self
+    def __iter__(self):
+        self.a = 1
+        return self
 
-  def __next__(self):
-    x = self.a
-    self.a += 1
-    return x
+    def __next__(self):
+        x = self.a
+        self.a += 1
+        return x
 
 myclass = MyNumbers()
 myiter = iter(myclass)
@@ -69,21 +69,21 @@ print(next(myiter))
 
 # 1.4
 class MyNumbers:
-  def __iter__(self):
-    self.a = 2
-    return self
+    def __iter__(self):
+        self.a = 2
+        return self
 
-  def __next__(self):
-    if self.a <= 8:
-      x = self.a
-      self.a += 2
-      return x
-    else:
-      raise StopIteration
+    def __next__(self):
+        if self.a <= 8:
+            x = self.a
+            self.a += 2
+            return x
+        else:
+            raise StopIteration
 
 myclass = MyNumbers()
 myiter = iter(myclass)
 
 for x in myiter:
-  print(x)
+    print(x)
 # Result: 2 4 6 8.
