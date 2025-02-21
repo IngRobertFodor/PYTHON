@@ -44,29 +44,7 @@ try:
     iframe_link.click()
 
     headert_text_check = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='content']/div/h3")))
-    print(headert_text_check.text)  
-   
-
-    # 3.2  This clicks on File on selected web page.
-    click_file = wait.until(EC.presence_of_element_located((By.XPATH, "//button[@class='tox-mbtn tox-mbtn--select' and @tabindex=-1]")))
-    click_file.click()
-    time.sleep(2)
-
-
-    # 3.3  This clicks on New document on selected web page.
-    click_newdocument = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@class='tox-collection__item-icon']"))).click()
-    time.sleep(2)
-
-
-    # 3.4  This will add my text there.
-    driver.switch_to.frame("mce_0_ifr")
-    driver.find_element(By.ID, "tinymce").send_keys("My Text!")
-    time.sleep(2)
-    
-
-    # 3.5  This will check my text there.
-    check_text = wait.until(EC.presence_of_element_located((By.XPATH, "//body[@id='tinymce']/p")))
-    print("My text is: ",check_text.text,".")
+    print(headert_text_check.text)
 
 finally:
     driver.quit()
