@@ -5,9 +5,7 @@ from selenium import webdriver
 # webdriver.Safari()
 # webdriver.Edge()
 
-driver = webdriver.Firefox(
-    firefox_binary="C:\\Program Files\\Mozilla Firefox\\firefox.exe"
-)
+driver = webdriver.Firefox()
 
 try:
     driver.get("http://www.google.com")
