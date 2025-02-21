@@ -105,7 +105,8 @@ number=int(number)
 print("Number for Exercise 7 is:", number)
 for number_in_first_row in range(1,number+1):
     for row in range(1,number+1):
-        print(number_in_first_row*row, "", end="")
+        my_num = str(number_in_first_row*row)
+        print(my_num.rjust(2), "", end="")
     print()
 
 # EMPTY ROW
@@ -126,7 +127,7 @@ number=input("Give me number: ")
 number=int(number)
 print("Number for Exercise 8.1 is:", number)
 for row_number in range(1,number+1):
-    print(row_number*str(row_number), "", end="")
+    print(row_number*str(row_number), " ", end="")
     print()
 
 # EMPTY ROW
@@ -152,7 +153,7 @@ for row_number in range(1, number + 1):
         for a in range(number - row_number):
             print(" ", end="")
         # Print numbers
-        for b in range(row_number):
+        for b in range(1, row_number + 1):
             print(row_number, "", end="")
         # Move to the next line
         print()
@@ -181,13 +182,13 @@ print("Number for Exercise 9.1 is:", number)
 for row_number in range(1,number+1):
     for space in range(number-row_number):
         print(" ", end="")
-    for asterisk in range(row_number):
+    for asterisk in range(1, row_number + 1):
         print("*", "", end="")
     print()
 for row_number in range(number-1,0,-1):
     for space in range(number-row_number):
         print(" ", end="")
-    for asterisk in range(row_number):
+    for asterisk in range(1, row_number + 1):
         print("*", "", end="")
     print()
     
@@ -211,7 +212,7 @@ print("Number for Exercise 9.2 is:", number)
 for row_number in range(1,number+1):
     for space in range(number-row_number):
         print(" ", end="")
-    for asterisk in range(row_number):
+    for asterisk in range(1, row_number + 1):
         if int(row_number)%2 == 0:
             continue
         else:
@@ -220,7 +221,7 @@ for row_number in range(1,number+1):
 for row_number in range(number-1,0,-1):
     for space in range(number-row_number):
         print(" ", end="")
-    for asterisk in range(row_number):
+    for asterisk in range(1, row_number + 1):
         if int(row_number)%2 == 0:
             continue
         else:
@@ -232,7 +233,6 @@ print()
 
 
     # Exercise  10
-# Nested Loop - Lists - Vowels
 # Nested Loop - Lists - Vowels
 string = "Geeks for Geeks"
 vowels = "AaEeIiOoUu"
