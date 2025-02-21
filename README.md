@@ -22,6 +22,7 @@ C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythona
     from selenium.webdriver.support.ui import WebDriverWait
     from selenium.webdriver.support import expected_conditions as EC
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\selenium_web_automation_wait.py
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\web
 
 2. Classes - Basics and Inheritance
     "def __init__()",

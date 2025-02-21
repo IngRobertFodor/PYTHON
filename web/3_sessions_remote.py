@@ -14,6 +14,7 @@ And then back in the first CMD Terminal to run:
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 
+
 options = Options()
 options.page_load_strategy = 'normal'
 options.binary_location = r"C:\\Program Files\\Mozilla Firefox\\firefox.exe"

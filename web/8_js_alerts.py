@@ -9,7 +9,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-driver = webdriver.Chrome()
+driver = webdriver.Firefox()
 try:
     # WAIT PURPOSES
     wait = WebDriverWait(driver, 10)
@@ -21,16 +21,12 @@ try:
 
 
     # 0.1  This clicks on  "JavaScript Alerts"  link on selected web page, when it loads.
-    js_alert_link = wait.until(EC.presence_of_element_located(
-        (By.LINK_TEXT, "JavaScript Alerts")                                           
-    ))
+    js_alert_link = wait.until(EC.presence_of_element_located((By.LINK_TEXT, "JavaScript Alerts")))
     js_alert_link.click()
 
 
     # 1.1  This clicks on  "Click for JS Alert"  button.
-    alert_first_button = wait.until(EC.presence_of_element_located(
-        (By.CSS_SELECTOR, "div div div ul li button")                                          
-    ))
+    alert_first_button = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div div div ul li button")))
     alert_first_button.click()
     
     alert = driver.switch_to.alert
@@ -39,16 +35,12 @@ try:
     alert.accept()
 
     # 1.2  This shows result text on web page.
-    result_first_text = wait.until(EC.presence_of_element_located(
-        (By.CSS_SELECTOR, "#result")
-    ))
+    result_first_text = wait.until(EC.presence_of_element_located((By.ID, "result")))
     print(result_first_text.text) 
 
 
     # 2.1  This clicks on  "Click for JS Confirm"  button.
-    alert_second_button = wait.until(EC.presence_of_element_located(
-        (By.CSS_SELECTOR, "div div div ul li:nth-child(2) button")                                         
-    ))
+    alert_second_button = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div div div ul li:nth-child(2) button")))
     alert_second_button.click()
     
     alert = driver.switch_to.alert
@@ -57,16 +49,12 @@ try:
     alert.dismiss()
 
     # 2.2  This shows result text on web page.
-    result_second_text = wait.until(EC.presence_of_element_located(
-        (By.CSS_SELECTOR, "#result")
-    ))
+    result_second_text = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#result")))
     print(result_second_text.text) 
 
 
     # 3.1  This clicks on  "Click for JS Prompt"  button.
-    alert_third_button = wait.until(EC.presence_of_element_located(
-        (By.CSS_SELECTOR, "div div div ul li:nth-child(3) button")                                         
-    ))
+    alert_third_button = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div div div ul li:nth-child(3) button")))
     alert_third_button.click()
     
     alert = driver.switch_to.alert
@@ -76,11 +64,8 @@ try:
     alert.accept()
 
     # 3.2  This shows result text on web page.
-    result_third_text = wait.until(EC.presence_of_element_located(
-        (By.CSS_SELECTOR, "#result")
-    ))
+    result_third_text = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#result")))
     print(result_third_text.text) 
-
 
 finally:
     driver.quit()

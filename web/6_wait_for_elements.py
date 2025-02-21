@@ -9,7 +9,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-driver = webdriver.Chrome()
+driver = webdriver.Firefox()
 try:
     # WAIT PURPOSES
     wait = WebDriverWait(driver, 10)
@@ -18,12 +18,13 @@ try:
     # It converts this:
     # driver.find_element(By.LINK_TEXT, "Form Authentication")
     # for wait purposes.
-    wait.until(EC.presence_of_element_located(
-        (By.LINK_TEXT, "Form Authentication")                                           
-    ))
+    wait.until(EC.presence_of_element_located((By.LINK_TEXT, "Form Authentication")))
+    f_a = driver.find_element(By.LINK_TEXT, "Form Authentication")
+    f_a.click()
+    driver.back()
     # To check what actual url is, before "EC.url_to_be" check.
     print(driver.current_url)
-    wait.until(EC.url_to_be("https://the-internet.herokuapp.com/"))
+    wait.until(EC.url_to_be(("https://the-internet.herokuapp.com/")))
 
 finally:
     driver.quit()

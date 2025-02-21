@@ -1,7 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
-driver = webdriver.Chrome()
+
+driver = webdriver.Firefox()
 try:
     driver.get("https://the-internet.herokuapp.com")
     driver.find_element(By.LINK_TEXT, "Form Authentication")

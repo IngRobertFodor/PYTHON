@@ -11,7 +11,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 
 
-driver = webdriver.Chrome()
+driver = webdriver.Firefox()
 try:
     # WAIT PURPOSES
     wait = WebDriverWait(driver, 10)
@@ -19,9 +19,7 @@ try:
 
 
     # 0.1  This clicks on  "Dropdown"  link on selected web page, when it loads.
-    dropdown_link = wait.until(EC.presence_of_element_located(
-        (By.LINK_TEXT, "Dropdown")                                           
-    ))
+    dropdown_link = wait.until(EC.presence_of_element_located((By.LINK_TEXT, "Dropdown")))
     dropdown_link.click()
 
 
@@ -31,16 +29,15 @@ try:
 
     # 1.2  Setting ASSERTION
     # ASSERTION checks whether expected value is selected.
-    option_one = driver.find_element(By.CSS_SELECTOR, "option[value='1']")
+    option_two = driver.find_element(By.CSS_SELECTOR, "option[value='2']")
 
     # 1.3.1  OK
-    dropdown.select_by_index(1)
-    assert option_one.is_selected()
+    dropdown.select_by_index(2)
+    assert option_two.is_selected()
     
     # 1.3.2  ASSERTION ERROR
     dropdown.select_by_visible_text("Option 2")
-    assert option_one.is_selected()
-    
+    assert option_two.is_selected()
 
 finally:
     driver.quit()

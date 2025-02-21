@@ -21,18 +21,16 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.action_chains import ActionChains
 
 
-driver = webdriver.Chrome()
+driver = webdriver.Firefox()
+time.sleep(5)
 try:
     # WAIT PURPOSES
     wait = WebDriverWait(driver, 10)
     driver.get("https://the-internet.herokuapp.com")
     print("Web page title is:",driver.title,".")
 
-
     # 0.1  This clicks on  "File Download"  link on selected web page, when it loads.
-    file_download_link = wait.until(EC.presence_of_element_located(
-        (By.LINK_TEXT, "File Download")                                           
-    ))
+    file_download_link = wait.until(EC.presence_of_element_located((By.LINK_TEXT, "File Download")))
     file_download_link.click()
     
     
@@ -43,7 +41,6 @@ try:
     a = dom.find("a")
     for link in a:
         print(link.attr("href"))
-
 
 finally:
     driver.quit()
