@@ -1,9 +1,34 @@
-# RUN USING THIS COMMAND IN CMD:
-# python -m pytest pytest_web/tests
+# IN CMD:
+
+# PATH where to run my test:
+# C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\pytest_web
+
+# RUN THIS
+# python -m pytest
 
 
-def test_basic_duckduckgo_search(my_browser):
+from pages.search import DuckDuckSearchPages
+from pages.result import DuckDuckResultPages
+
+
+def test_basic_duckduckgo_search(driver):
     
+    search_page = DuckDuckSearchPages(driver)
+    result_page = DuckDuckResultPages(driver)
+    phrase = "panda"
+
     # Given the DuckDuckGo home page is displayed
-    my_browser.get("https://www.duckduckgo.com/")
-    assert "DuckDuckGo" in my_browser.title
+    search_page.load_page()
+
+    # When the user searches for "panda"
+    search_page.search_phrase(phrase)
+
+    # Then the search result query is "panda"
+    assert phrase == result_page.search_input_value()
+
+    # And the search result title contains "panda"
+    assert phrase in result_page.loaded_page_title()
+
+    # And the search result links are relevant to searched "panda"
+    titles = result_page.result_link_titles()
+    assert len(titles) > 0
