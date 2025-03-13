@@ -11,10 +11,10 @@ from pages.search import DuckDuckSearchPages
 from pages.result import DuckDuckResultPages
 
 
-def test_basic_duckduckgo_search(driver):
+def test_basic_duckduckgo_search(browser):
     
-    search_page = DuckDuckSearchPages(driver)
-    result_page = DuckDuckResultPages(driver)
+    search_page = DuckDuckSearchPages(browser)
+    result_page = DuckDuckResultPages(browser)
     phrase = "panda"
 
     # Given the DuckDuckGo home page is displayed
