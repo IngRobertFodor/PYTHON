@@ -11,7 +11,7 @@ from pages.search import DuckDuckSearchPages
 from pages.result import DuckDuckResultPages
 
 
-def test_basic_duckduckgo_search(browser):
+def test_basic_duckduckgo_web_search(browser):
     
     search_page = DuckDuckSearchPages(browser)
     result_page = DuckDuckResultPages(browser)

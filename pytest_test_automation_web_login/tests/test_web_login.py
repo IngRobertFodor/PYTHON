@@ -10,7 +10,7 @@
 from pages.the_internet_herokuapp import Web_Page
 
 
-def test_basic_duckduckgo_search(browser):
+def test_web_login(browser):
 
     username = "tomsmith"
     password = "SuperSecretPassword!"
