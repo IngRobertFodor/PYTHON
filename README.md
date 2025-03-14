@@ -77,3 +77,8 @@ C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpy
 
 12. Dictionaries
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\practicepython\33_birthday_dictionaries.py
+
+
+PYTEST
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\pytest_test_automation_web_login
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\pytest_test_automation_web_search_parallel_run

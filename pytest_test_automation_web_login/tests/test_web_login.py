@@ -1,9 +1,7 @@
 # IN CMD:
 
-# PATH where to run my test:
-# C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\pytest_test_automation_web_login
-
 # RUN THIS
+# cd C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\pytest_test_automation_web_login
 # python -m pytest
 
 
