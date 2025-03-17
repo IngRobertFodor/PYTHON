@@ -7,7 +7,7 @@ from selenium import webdriver
 def config():
     with open("config.json", "r") as config_file:
         config = json.load(config_file)
-        return config
+    return config
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ def browser(config):
         chrome_options.add_argument("--Headless")
         browser = webdriver.Chrome(options=chrome_options)
     else:
-        raise Exception("Browser from config file is not supported. Supported browsers are: Firefox, Chrome or Headless Firefox.")
+        raise Exception(f'Browser "{config["browser"]}" is not supported')
     browser.implicitly_wait(config["implicit_wait"])
     yield browser
     browser.quit()
