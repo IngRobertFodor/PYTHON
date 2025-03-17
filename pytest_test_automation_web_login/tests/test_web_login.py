@@ -5,7 +5,7 @@
 # python -m pytest
 
 
-from pages.the_internet_herokuapp import Web_Page
+from pages.page_with_login import Web_Page
 
 
 def test_web_login(browser):
