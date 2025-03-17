@@ -12,7 +12,7 @@
 
 
 import pytest
-from pages.the_internet_herokuapp import Web_Page
+from pages.page_with_input_field import Web_Page
 
 
 @pytest.mark.parametrize("my_input", [4, 1234])
