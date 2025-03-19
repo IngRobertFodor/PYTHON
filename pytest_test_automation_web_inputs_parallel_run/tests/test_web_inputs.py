@@ -10,6 +10,16 @@
 # pip install pytest-xdist
 # python -m pytest -n 2
 
+# OR
+# FOR MORE DETAILED OUTPUT
+# python -m pytest -n 2 --verbose
+# OR
+# FOR LESS DETAILED OUTPUT
+# python -m pytest -n 2 --quiet
+# OR
+# python -m pytest -n 2 --exitfirst
+# python -m pytest -n 2 --maxfail=2
+
 
 import pytest
 from pages.page_with_input_field import Web_Page
