@@ -1,0 +1,4 @@
+{
+    "browser": "Headless Firefox",
+    "implicit_wait": 10
+}

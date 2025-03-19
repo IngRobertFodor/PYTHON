@@ -5,8 +5,8 @@ from selenium import webdriver
 
 @pytest.fixture
 def config():
-    with open("config.json", "r") as config_file:
-        config = json.load(config_file)
+    with open("config.json", "r") as file:
+        config = json.load(file)
     return config
 
 
@@ -26,6 +26,5 @@ def browser(config):
         browser = webdriver.Chrome(options=chrome_options)
     else:
         raise Exception(f'Browser "{config["browser"]}" is not supported.')
-    browser.implicitly_wait(config["implicit_wait"])
     yield browser
     browser.quit()
