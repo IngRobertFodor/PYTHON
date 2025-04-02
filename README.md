@@ -1,5 +1,5 @@
 As a senior test automation QA specialist, I have been working on expanding my skill set by learning OOP: **Python** through various training projects on my GitHub.
-These projects showcase my journey in exploring the different concepts and techniques. From basic scripts to more complex automation frameworks, including web automation using Selenium.
+These projects showcase my journey in exploring the different concepts and techniques. From basic scripts to more complex automation frameworks, including web automation using Selenium and pytest.
 My GitHub repositories reflect my dedication to mastering Python and applying it to the field of quality assurance.
 
 
@@ -51,8 +51,9 @@ C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\hackerrank\list_comprehe
 6. collections - Counter
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\practicepython\18_cows_and_bulls_2_cleaner_code.py
 
-7. map(), zip()
+7. map(), zip(), zip_longest(), enumerate()
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\practicepython\18_cows_and_bulls_2_cleaner_code.py
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\eightthingsyoumustknowinpython\enumerate_zip_functions.py
 
 8. Rounding
     round(book_one.price, 2)
