@@ -5,6 +5,7 @@ My GitHub repositories reflect my dedication to mastering Python and applying it
 
 
 
+
 How To Guide (Important Scripts)
 
 1. Web Automation basics
@@ -81,5 +82,4 @@ C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\practicepython\33_birthd
 
 
 PYTEST
-C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\pytest_test_automation_web_login
-C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\pytest_test_automation_web_search_parallel_run
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\pytest_test_
