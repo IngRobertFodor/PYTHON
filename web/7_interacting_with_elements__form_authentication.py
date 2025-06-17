@@ -20,7 +20,7 @@ try:
     form_auth_link.click()
     
     # This fills in username.
-    username = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#username")))
+    username = wait.until(EC.presence_of_element_located((By.ID, "username")))
     username.send_keys("tomsmith")
 
     # This fills in password.
