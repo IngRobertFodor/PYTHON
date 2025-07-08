@@ -36,5 +36,5 @@ class Web_Page:
         wait.until(EC.visibility_of_element_located((By.ID, "flash-messages")))
         pop_up_text = self.browser.find_element(By.ID, "flash-messages").text
         if "You logged into a secure area!" in pop_up_text:
-            return "You logged into a secure area!"'
+            return "You logged into a secure area!"
     '''
