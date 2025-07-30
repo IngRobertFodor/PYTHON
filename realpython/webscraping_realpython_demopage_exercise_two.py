@@ -16,19 +16,12 @@ soup = BeautifulSoup(web_html.content, "html.parser")
 #print(soup.prettify()[:1000])
 
 # Find all job listings
-all_jobs = list(soup.find_all("h2", class_="listing-company"))
-#print(all_jobs[:5])
+all_jobs = list(soup.find_all("span", class_="listing-company-name"))
+print(all_jobs[:5])
 #print()
 
-print("--Job Names--")
+print("--First 5 Job Names--")
 job_names_list = []
-for job in all_jobs:
-    job_title = job.find("span", class_="listing-company-name")
-    job_title.find("a").get("href")
-    job_title_text = job_title.get_text()
-    job_title_text = job_title_text.replace("\n", "").replace("New", "")
-    job_names_list.append(job_title_text)
-#print(job_names_list)
-for job in job_names_list:
-    job_list = list(job.split("    "))
-    print(job_list[0])
+for job in all_jobs[0:5]:
+    job_title = job.find("a").get_text()
+    print(job_title)
