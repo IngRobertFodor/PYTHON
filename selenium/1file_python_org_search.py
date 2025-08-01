@@ -7,8 +7,6 @@ from selenium.webdriver.common.by import By
 import time
 # EXPLICIT WAIT PURPOSES
 from selenium.webdriver.support.wait import WebDriverWait
-# WAIT PURPOSES
-# Shortened version of code (as).
 from selenium.webdriver.support import expected_conditions as EC
 
 
@@ -21,11 +19,13 @@ try:
     assert "Python" in driver.title
     assert "PPython" not in driver.title
 
-    my_element = driver.find_element(By.NAME, "q")
-    my_element.clear()
+    my_element_search_box = driver.find_element(By.NAME, "q")
+    my_element_search_box.clear()
     time.sleep(4)
-    my_element.send_keys("pycon")
-    my_element.send_keys(Keys.ENTER)
+    # Same is this:
+    # driver.implicitly_wait(4)
+    my_element_search_box.send_keys("pycon")
+    my_element_search_box.send_keys(Keys.ENTER)
     assert "No results found." not in driver.page_source
     button_text = driver.find_element(By.XPATH, "//*[@class='donate-button']")
     print(button_text.text)

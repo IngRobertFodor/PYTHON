@@ -7,8 +7,6 @@ from selenium.webdriver.common.by import By
 import time
 # EXPLICIT WAIT PURPOSES
 from selenium.webdriver.support.wait import WebDriverWait
-# WAIT PURPOSES
-# Shortened version of code (as).
 from selenium.webdriver.support import expected_conditions as EC
 
 
@@ -46,11 +44,12 @@ try:
     print(driver.find_element(By.LINK_TEXT, "Geolocation").is_displayed())
     print("Should be: Geolocation:",driver.find_element(By.LINK_TEXT, "Geolocation").text)
     driver.find_element(By.LINK_TEXT, "Geolocation").click()
+    wait.until(EC.presence_of_element_located((By.TAG_NAME, "button")))
     print(driver.find_element(By.TAG_NAME, "button").is_displayed())
-    print("Should be: Where am i?:", driver.find_element(By.TAG_NAME, "button").text)  
+    print("Should be: Where am i?:", driver.find_element(By.TAG_NAME, "button").text)
+    print(driver.find_element(By.TAG_NAME, "h3").text)
 
 finally:
-
     # Closes one tab.
     #driver.close()
     # Closes browser.
