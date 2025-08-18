@@ -10,12 +10,18 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-driver = webdriver.Firefox()
+# Shorter version of rows 14 and 15:
+# driver = webdriver.Firefox()
+options = webdriver.FirefoxOptions()
+driver = webdriver.Firefox(options=options)
 
 wait = WebDriverWait(driver, 10)
 
 try:
     driver.get("http://www.python.org")
+    # Maximize the window and delete all cookies.
+    driver.maximize_window()
+    driver.delete_all_cookies()
     assert "Python" in driver.title
     assert "PPython" not in driver.title
 
