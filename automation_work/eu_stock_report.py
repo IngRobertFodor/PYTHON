@@ -11,6 +11,7 @@ Autosize columns. Create target folder if missing and remove default Sheet1.
 Clear comments describe each section.
 """
 
+
 # --------------------------
 # Imports and configuration
 # --------------------------

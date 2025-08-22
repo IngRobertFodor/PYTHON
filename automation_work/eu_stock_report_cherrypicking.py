@@ -11,10 +11,11 @@ Each run:
  - highlights Actual price & Price Diff in green font when abs(diff) >= 1.0 EUR
  - autosizes columns and removes default Sheet1
 """
+
+
 from pathlib import Path
 from datetime import datetime
 import math
-
 import yfinance as yf # type: ignore
 import pandas as pd # type: ignore
 from openpyxl import load_workbook # type: ignore
