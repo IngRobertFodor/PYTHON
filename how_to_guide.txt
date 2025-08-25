@@ -1,0 +1,109 @@
+How To Guide (Important Scripts)
+
+
+1. Web Automation basics
+    Basics
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonautomationandtesting\locate_web_elements.py
+    Dropdown
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonautomationandtesting\web_elements_dropdown.py
+    Drag And Drop
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonautomationandtesting\web_elements_drag_and_drop.py
+    Waits
+    IMPLICIT WAIT
+    from time import sleep
+    "time.sleep(5)"
+    EXPLICIT WAIT
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\selenium_web_automation_wait.py
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\web
+
+2. Classes - Basics and Inheritance
+    "def __init__()",
+    "def __str__()"
+    "super().__init__()"
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\create_classes_and_class_instances.py
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\classes__str__repr__.py
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\inheritance.py
+
+3. Classes -
+    "def __str__()",
+    "def __repr__()",
+    "def __call__()"
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\classes__str__repr__.py
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\classes__call__.py
+
+4. Classes - dataclass
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\data_class.py
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\data_class_default_values.py
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\immutable_data_class.py
+
+5. itertools - combinations, permutations, product
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\learningthepythonthreestandardlibrary\import_itertools.py
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\hackerrank\list_comprehensions.py
+
+6. collections - Counter
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\practicepython\18_cows_and_bulls_2_cleaner_code.py
+
+7. map(), zip(), zip_longest(), enumerate()
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\practicepython\18_cows_and_bulls_2_cleaner_code.py
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\eightthingsyoumustknowinpython\enumerate_zip_functions.py
+
+8. Rounding
+    round(book_one.price, 2)
+    "{:.2f}".format(newspaper_one.price)
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\pythonobjectorientedprogramming\inheritance.py
+
+9. try, except and assert
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\automate_error_handling_part1.py
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\automate_error_handling_part2.py
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\w3schools\16_try_except.py
+
+10. Files - open, read, write, close
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\practicepython\21_write_to_a_file.py
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\files.py
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpythonforautomation\parse_data_part1_from_txt.py
+
+11. Dictionaries
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\practicepython\33_birthday_dictionaries.py
+ 
+pytest
+    Folder:
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\pytest
+    Example Script
+C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\pytest\tests\test_divide_zero_function_zerodivisionerror.py
+
+Selenium
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+try:
+    driver.maximize_window()
+    driver.delete_all_cookies()
+    driver.title
+    driver.current_url
+    driver.page_source
+    driver.implicitly_wait(10)
+    -----
+    wait = WebDriverWait(driver, 10)
+    driver.get("https://the-internet.herokuapp.com")
+    wait.until(EC.url_to_be("https://the-internet.herokuapp.com/"))
+    -----
+    python_button = wait.until(EC.element_to_be_clickable((By.ID, "tabs-02-01-tab")))
+    python_button.click()
+    -----
+    wait.until(EC.presence_of_element_located((By.LINK_TEXT, "Geolocation")))
+    -----
+    my_element_search_box.send_keys("pycon")
+    my_element_search_box.send_keys(Keys.ENTER)
+    -----
+    choose_file = driver.find_element(By.ID, "file-upload")
+    choose_file.send_keys("C:\\Users\\I070494\\Downloads\\Testing Pyramid.png")
+    -----
+    driver.find_elements(By.TAG_NAME, "code")
+finally:
+    driver.close()
+    driver.quit()
