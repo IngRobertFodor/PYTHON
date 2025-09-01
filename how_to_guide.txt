@@ -84,6 +84,7 @@ try:
     driver.maximize_window()
     driver.delete_all_cookies()
     driver.title
+    driver.switch_to.active_element.get_attribute("title")
     driver.current_url
     driver.page_source
     driver.implicitly_wait(10)
