@@ -106,6 +106,12 @@ try:
     choose_file.send_keys("C:\\Users\\I070494\\Downloads\\Testing Pyramid.png")
     -----
     driver.find_elements(By.TAG_NAME, "code")
+    -----
+    driver.find_element(By.TAG_NAME, "h1").text
+    -----
+    email_field_visible = driver.find_element(By.NAME, "email_input").is_displayed()
+    button_enabled = driver.find_element(By.NAME, "button_input").is_enabled()
+    checkbox_checked = driver.find_element(By.NAME, "checkbox_input").is_selected()
 finally:
     driver.close()
     driver.quit()
