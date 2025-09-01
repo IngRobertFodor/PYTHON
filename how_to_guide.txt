@@ -99,6 +99,7 @@ try:
     wait.until(EC.presence_of_element_located((By.LINK_TEXT, "Geolocation")))
     -----
     my_element_search_box.send_keys("pycon")
+    my_element_search_box.clear()
     my_element_search_box.send_keys(Keys.ENTER)
     -----
     choose_file = driver.find_element(By.ID, "file-upload")
