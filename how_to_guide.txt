@@ -88,6 +88,9 @@ try:
     driver.current_url
     driver.page_source
     driver.implicitly_wait(10)
+    driver.back()
+    driver.forward()
+    driver.refresh()
     -----
     wait = WebDriverWait(driver, 10)
     driver.get("https://the-internet.herokuapp.com")
