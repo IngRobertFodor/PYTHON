@@ -17,6 +17,10 @@ class SauceDemo_FirstPage:
         login_button = self.driver.find_element(By.ID, "login-button")
         login_button.click()
 
-    def webshop_firstpage_title(self):
+    def webshop_productspage_title(self):
         firstpage_title = self.driver.find_element(By.CLASS_NAME, "title").text
         return firstpage_title
+    
+    def webshop_lockedoutuser_error(self):
+        error_message = self.driver.find_element(By.TAG_NAME, "h3").text
+        return error_message
