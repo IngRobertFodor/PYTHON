@@ -66,12 +66,21 @@ C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\linkedinlearning\usingpy
 
 11. Dictionaries
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\practicepython\33_birthday_dictionaries.py
+
+
+AI
+from helpers_functions import print_llm_response
+
+response = print_llm_response("Explain the concept of polymorphism in object-oriented programming with examples.")
+print(response)
+
  
 pytest
     Folder:
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\pytest
     Example Script
 C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\pytest\tests\test_divide_zero_function_zerodivisionerror.py
+
 
 Selenium
 from selenium import webdriver
