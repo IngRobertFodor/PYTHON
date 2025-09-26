@@ -5,6 +5,10 @@ class SauceDemo_ProductsPage:
 
     def __init__(self, driver):
         self.driver = driver
+    
+    def webshop_productspage_title(self):
+        firstpage_title = self.driver.find_element(By.CLASS_NAME, "title").text
+        return firstpage_title
 
     def get_product_names(self):
         inventory_list = self.driver.find_elements(By.CLASS_NAME, "inventory_list")
