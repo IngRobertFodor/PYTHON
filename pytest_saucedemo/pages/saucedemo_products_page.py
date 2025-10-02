@@ -10,10 +10,10 @@ class SauceDemo_ProductsPage:
         firstpage_title = self.driver.find_element(By.CLASS_NAME, "title").text
         return firstpage_title
 
-    def get_product_names(self):
-        inventory_list = self.driver.find_elements(By.CLASS_NAME, "inventory_list")
-        product_names = []
-        for item in inventory_list:
-            name = item.find_element(By.CLASS_NAME, "inventory_item_name").text
-            product_names.append(name)
-        return product_names
+    def get_products_list(self):
+        products = self.driver.find_elements(By.CLASS_NAME, "inventory_item")
+        products_list = []
+        for product in products:
+            product_name = product.find_element(By.CLASS_NAME, "inventory_item_name").text
+            products_list.append(product_name)
+        return products_list

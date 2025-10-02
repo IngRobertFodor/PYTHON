@@ -46,6 +46,18 @@ def test_item_in_products(driver):
     webshop_fp.load_page("https://www.saucedemo.com/")
     webshop_fp.login("standard_user", "secret_sauce")
     driver.implicitly_wait(10)
-    product_names = webshop_pp.get_product_names()
-    assert "Sauce Labs Backpack" in product_names
-    assert "Sauce Labs Backpacc" not in product_names
+    p_name = webshop_pp.get_products_list()
+    assert "Sauce Labs Backpack" in p_name
+    assert "Sauce Labs Backpacc" not in p_name
+    assert len(p_name) == 6
+
+@pytest.mark.parametrize("expected_count", [(5, 6)])
+def test_number_of_items_in_products(driver, expected_count):
+    webshop_fp = SauceDemo_FirstPage(driver)
+    webshop_pp = SauceDemo_ProductsPage(driver)
+    webshop_fp.load_page("https://www.saucedemo.com/")
+    webshop_fp.login("standard_user", "secret_sauce")
+    driver.implicitly_wait(10)
+    p_name_len = webshop_pp.get_products_list()
+    assert len(p_name_len) != expected_count[0]
+    assert len(p_name_len) == expected_count[1]
