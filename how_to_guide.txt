@@ -71,14 +71,22 @@ C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\practicepython\33_birthd
 AI
 from helpers_functions import print_llm_response
 
+#AI1
 prompt_oneline = "Explain the print() function in Python."
 response_first_prompt = get_llm_response(prompt_oneline)
 print_llm_response(response_first_prompt)
 
+#AI2
 prompt_morelines = """Explain the print() function in Python.
 Also, provide a simple code snippet demonstrating its usage."""
 response_second_prompt = get_llm_response(prompt_morelines)
 print_llm_response(response_second_prompt)
+
+#AI3
+city="New York"
+prompt_with_variable = f"Explain the significance of {city} in global culture."
+response_third_prompt = get_llm_response(prompt_with_variable)
+print_llm_response(response_third_prompt)
 
  
 pytest
