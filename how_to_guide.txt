@@ -71,8 +71,14 @@ C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\practicepython\33_birthd
 AI
 from helpers_functions import print_llm_response
 
-response = print_llm_response("Explain the print() function in Python with an example.")
-print(response)
+prompt_oneline = "Explain the print() function in Python."
+response_first_prompt = get_llm_response(prompt_oneline)
+print_llm_response(response_first_prompt)
+
+prompt_morelines = """Explain the print() function in Python.
+Also, provide a simple code snippet demonstrating its usage."""
+response_second_prompt = get_llm_response(prompt_morelines)
+print_llm_response(response_second_prompt)
 
  
 pytest
