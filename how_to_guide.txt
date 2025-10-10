@@ -72,7 +72,7 @@ AI
 Install
     pip install aisetup
 import
-    from helpers_functions import print_llm_response
+    from aisetup import get_llm_response, print_llm_response
 
 AI1
     prompt_oneline = "Explain the print() function in Python."
