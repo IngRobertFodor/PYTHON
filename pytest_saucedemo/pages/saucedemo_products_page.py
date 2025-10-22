@@ -1,3 +1,4 @@
+from ast import For
 from selenium.webdriver.common.by import By
 
 
@@ -17,3 +18,17 @@ class SauceDemo_ProductsPage:
             product_name = product.find_element(By.CLASS_NAME, "inventory_item_name").text
             products_list.append(product_name)
         return products_list
+    
+    def open_side_menu(self):
+        self.driver.find_element(By.ID, "react-burger-menu-btn").click()
+
+    def goto_about_menuitem_from_sidebar(self):
+        url_about_menuitem = self.driver.find_element(By.LINK_TEXT, "About")
+        url_about_menuitem.click()
+        return self.driver.current_url
+    
+    def text_about_menuitem_from_sidebar(self):
+        list_text_about_menuitem = []
+        for item in self.driver.find_elements(By.XPATH, "//div/p[@class='MuiTypography-root MuiTypography-body2 css-88780t']"):
+            list_text_about_menuitem.append(item.text)
+        return list_text_about_menuitem
