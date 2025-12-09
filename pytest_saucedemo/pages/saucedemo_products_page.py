@@ -1,4 +1,3 @@
-from ast import For
 from selenium.webdriver.common.by import By
 
 
@@ -8,8 +7,8 @@ class SauceDemo_ProductsPage:
         self.driver = driver
     
     def webshop_productspage_title(self):
-        firstpage_title = self.driver.find_element(By.CLASS_NAME, "title").text
-        return firstpage_title
+        page_title = self.driver.find_element(By.CLASS_NAME, "title").text
+        return page_title
 
     def get_products_list(self):
         products = self.driver.find_elements(By.CLASS_NAME, "inventory_item")
