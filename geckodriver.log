@@ -537,3 +537,7 @@ JavaScript error: resource://services-settings/RemoteSettingsClient.sys.mjs, lin
 1757084952297	geckodriver	INFO	Listening on 127.0.0.1:57264
 1757085049810	geckodriver	INFO	Listening on 127.0.0.1:57350
 1757085373720	geckodriver	INFO	Listening on 127.0.0.1:57671
+1765321057691	geckodriver	INFO	Listening on 127.0.0.1:61476
+1765321065312	geckodriver	INFO	Listening on 127.0.0.1:54367
+1765321093433	geckodriver	INFO	Listening on 127.0.0.1:54897
+1765321211193	geckodriver	INFO	Listening on 127.0.0.1:58245
