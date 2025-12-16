@@ -81,3 +81,17 @@ def test_about_menuitem_from_sidebar(driver):
         if "mobile and web apps" in item:
             assert True
             break
+
+# Test Cases 7
+def test_dropdown_all_options(driver):
+    webshop_fp = SauceDemo_FirstPage(driver)
+    webshop_pp = SauceDemo_ProductsPage(driver)
+    webshop_fp.load_page("https://www.saucedemo.com/")
+    webshop_fp.login("standard_user", "secret_sauce")
+    driver.implicitly_wait(10)
+    dropdown_items = webshop_pp.dropdown_all_options()
+    assert len(dropdown_items) == 4
+    assert dropdown_items[0] == "Name (A to Z)"
+    for item in dropdown_items:
+        if item in ["Name (A to Z)", "Name (Z to A)", "Price (low to high)", "Price (high to low)"]:
+            assert True
