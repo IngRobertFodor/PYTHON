@@ -103,12 +103,16 @@ def test_dropdown_all_options(driver):
             assert True
 
 # Test Cases 8
-def test_add_first_item_to_cart(driver):
+def test_shopping_cart_item_count(driver):
     webshop_fp = SauceDemo_FirstPage(driver)
     webshop_pp = SauceDemo_ProductsPage(driver)
     webshop_fp.load_page("https://www.saucedemo.com/")
     webshop_fp.login("standard_user", "secret_sauce")
     driver.implicitly_wait(10)
-    cart_count = webshop_pp.add_first_item_to_cart()
+    webshop_pp.add_first_item_to_cart()
+    cart_count = webshop_pp.shopping_cart_item_count()
     assert cart_count == "1"
-    assert cart_count != "0"
+    webshop_pp.back_to_products_page()
+    webshop_pp.add_second_item_to_cart()
+    cart_count = webshop_pp.shopping_cart_item_count()
+    assert cart_count == "2"

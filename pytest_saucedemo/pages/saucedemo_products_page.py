@@ -46,5 +46,15 @@ class SauceDemo_ProductsPage:
         first_item.click()
         first_item_add_button = self.driver.find_element(By.ID, "add-to-cart")
         first_item_add_button.click()
+    
+    def back_to_products_page(self):
+        back_link = self.driver.find_element(By.ID, "back-to-products")
+        back_link.click()
+    
+    def add_second_item_to_cart(self):
+        second_item_add_button = self.driver.find_element(By.ID, "add-to-cart-sauce-labs-fleece-jacket")
+        second_item_add_button.click()
+    
+    def shopping_cart_item_count(self):
         shopping_cart = self.driver.find_element(By.CLASS_NAME, "shopping_cart_link")
         return shopping_cart.text
