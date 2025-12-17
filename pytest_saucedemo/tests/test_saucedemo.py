@@ -11,10 +11,16 @@
 # python -m pytest -n 2
 
 
+# OR
+# FOR MORE DETAILED OUTPUT
+# python -m pytest -n 2 --verbose
+
+
 from selenium import webdriver
 import pytest
 from pages.saucedemo_firstpage import SauceDemo_FirstPage
 from pages.saucedemo_products_page import SauceDemo_ProductsPage
+from pages.saucedemo_shoppingcart import SauceDemo_ShoppingCartPage
 
 
 @pytest.fixture
@@ -116,3 +122,19 @@ def test_shopping_cart_item_count(driver):
     webshop_pp.add_second_item_to_cart()
     cart_count = webshop_pp.shopping_cart_item_count()
     assert cart_count == "2"
+
+# Test Cases 9
+def test_review_shopping_cart(driver):
+    webshop_fp = SauceDemo_FirstPage(driver)
+    webshop_pp = SauceDemo_ProductsPage(driver)
+    webshop_scp = SauceDemo_ShoppingCartPage(driver)
+    webshop_fp.load_page("https://www.saucedemo.com/")
+    webshop_fp.login("standard_user", "secret_sauce")
+    driver.implicitly_wait(10)
+    webshop_pp.add_first_item_to_cart()
+    webshop_pp.back_to_products_page()
+    webshop_pp.add_second_item_to_cart()
+    items_in_cart = webshop_scp.review_shopping_cart()
+    assert len(items_in_cart) == 2
+    assert "Sauce Labs Backpack" in items_in_cart
+    assert "Sauce Labs Fleece Jacket" in items_in_cart
