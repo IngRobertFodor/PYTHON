@@ -40,3 +40,11 @@ class SauceDemo_ProductsPage:
         for option in select.options:
             dropdown_items.append(option.text)
         return dropdown_items
+    
+    def add_first_item_to_cart(self):
+        first_item = self.driver.find_element(By.CLASS_NAME, "inventory_item_name")
+        first_item.click()
+        first_item_add_button = self.driver.find_element(By.ID, "add-to-cart")
+        first_item_add_button.click()
+        shopping_cart = self.driver.find_element(By.CLASS_NAME, "shopping_cart_link")
+        return shopping_cart.text

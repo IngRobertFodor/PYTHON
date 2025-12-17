@@ -4,6 +4,12 @@
 # cd C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\pytest_saucedemo
 # python -m pytest
 
+# OR
+# RUN THIS TO RUN TESTS IN PARALLEL
+# cd C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\pytest_saucedemo
+# pip install pytest-xdist
+# python -m pytest -n 2
+
 
 from selenium import webdriver
 import pytest
@@ -95,3 +101,14 @@ def test_dropdown_all_options(driver):
     for item in dropdown_items:
         if item in ["Name (A to Z)", "Name (Z to A)", "Price (low to high)", "Price (high to low)"]:
             assert True
+
+# Test Cases 8
+def test_add_first_item_to_cart(driver):
+    webshop_fp = SauceDemo_FirstPage(driver)
+    webshop_pp = SauceDemo_ProductsPage(driver)
+    webshop_fp.load_page("https://www.saucedemo.com/")
+    webshop_fp.login("standard_user", "secret_sauce")
+    driver.implicitly_wait(10)
+    cart_count = webshop_pp.add_first_item_to_cart()
+    assert cart_count == "1"
+    assert cart_count != "0"
