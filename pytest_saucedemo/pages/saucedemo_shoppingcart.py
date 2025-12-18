@@ -14,3 +14,7 @@ class SauceDemo_ShoppingCartPage:
         for item in cart_items:
             cart_items_list.append(item.text)
         return cart_items_list
+    
+    def remove_first_item_from_cart(self):
+        remove_button = self.driver.find_element(By.XPATH, "//button[@id='remove-sauce-labs-backpack']")
+        remove_button.click()

@@ -138,3 +138,18 @@ def test_review_shopping_cart(driver):
     assert len(items_in_cart) == 2
     assert "Sauce Labs Backpack" in items_in_cart
     assert "Sauce Labs Fleece Jacket" in items_in_cart
+
+# Test Cases 10
+def test_remove_first_item_from_cart(driver):
+    webshop_fp = SauceDemo_FirstPage(driver)
+    webshop_pp = SauceDemo_ProductsPage(driver)
+    webshop_scp = SauceDemo_ShoppingCartPage(driver)
+    webshop_fp.load_page("https://www.saucedemo.com/")
+    webshop_fp.login("standard_user", "secret_sauce")
+    driver.implicitly_wait(10)
+    webshop_pp.add_first_item_to_cart()
+    webshop_pp.back_to_products_page()
+    webshop_pp.add_second_item_to_cart()
+    webshop_scp.remove_first_item_from_cart()
+    cart_count = webshop_pp.shopping_cart_item_count()
+    assert cart_count == "1"
