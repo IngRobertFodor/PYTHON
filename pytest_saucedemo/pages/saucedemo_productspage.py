@@ -42,7 +42,8 @@ class SauceDemo_ProductsPage:
         return dropdown_items
     
     def add_first_item_to_cart(self):
-        first_item = self.driver.find_element(By.CLASS_NAME, "inventory_item_name")
+        dropdown_elements = self.driver.find_elements(By.CLASS_NAME, "inventory_item_name")
+        first_item = dropdown_elements[0]
         first_item.click()
         first_item_add_button = self.driver.find_element(By.ID, "add-to-cart")
         first_item_add_button.click()
@@ -55,6 +56,10 @@ class SauceDemo_ProductsPage:
         second_item_add_button = self.driver.find_element(By.ID, "add-to-cart-sauce-labs-fleece-jacket")
         second_item_add_button.click()
     
-    def shopping_cart_item_count(self):
+    def shopping_cart_item_count_number(self):
         shopping_cart = self.driver.find_element(By.CLASS_NAME, "shopping_cart_link")
         return shopping_cart.text
+    
+    def click_shopping_cart(self):
+        shopping_cart = self.driver.find_element(By.CLASS_NAME, "shopping_cart_link")
+        shopping_cart.click()

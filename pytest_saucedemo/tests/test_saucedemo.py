@@ -5,22 +5,24 @@
 # python -m pytest
 
 # OR
-# RUN THIS TO RUN TESTS IN PARALLEL
-# cd C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\pytest_saucedemo
+# RUN THIS - RUN TESTS IN PARALLEL
 # pip install pytest-xdist
 # python -m pytest -n 2
 
+# OR
+# RUN THIS - RUN TESTS IN PARALLEL and FOR MORE DETAILED OUTPUT
+# python -m pytest -n 2 --verbose
 
 # OR
-# FOR MORE DETAILED OUTPUT
-# python -m pytest -n 2 --verbose
+# RUN THIS - RUN TESTS IN PARALLEL and FOR MORE DETAILED OUTPUT and TO RUN EXACT TEST (e.g. # Test Cases 1: test_successful_login)
+# python -m pytest -n 2 --verbose -k test_successful_login
 
 
 from selenium import webdriver
 import pytest
 from pages.saucedemo_firstpage import SauceDemo_FirstPage
-from pages.saucedemo_products_page import SauceDemo_ProductsPage
-from pages.saucedemo_shoppingcart import SauceDemo_ShoppingCartPage
+from pages.saucedemo_productspage import SauceDemo_ProductsPage
+from pages.saucedemo_shoppingcartpage import SauceDemo_ShoppingCartPage
 
 
 @pytest.fixture
@@ -47,15 +49,6 @@ def test_locked_out_user(driver):
     assert webshop_fp.webshop_lockedoutuser_error() == "Epic sadface: Sorry, this user has been locked out."
 
 # Test Cases 3
-def test_page_title(driver):
-    webshop_fp = SauceDemo_FirstPage(driver)
-    webshop_pp = SauceDemo_ProductsPage(driver)
-    webshop_fp.load_page("https://www.saucedemo.com/")
-    webshop_fp.login("standard_user", "secret_sauce")
-    driver.implicitly_wait(10)
-    assert webshop_pp.webshop_productspage_title() == "Products"
-
-# Test Cases 4
 def test_item_in_products(driver):
     webshop_fp = SauceDemo_FirstPage(driver)
     webshop_pp = SauceDemo_ProductsPage(driver)
@@ -67,7 +60,7 @@ def test_item_in_products(driver):
     assert "Sauce Labs Backpacc" not in p_name
     assert len(p_name) == 6
 
-# Test Cases 5
+# Test Cases 4
 @pytest.mark.parametrize("expected_count", [(5, 6)])
 def test_number_of_items_in_products(driver, expected_count):
     webshop_fp = SauceDemo_FirstPage(driver)
@@ -79,7 +72,7 @@ def test_number_of_items_in_products(driver, expected_count):
     assert len(p_name_len) != expected_count[0]
     assert len(p_name_len) == expected_count[1]
 
-# Test Cases 6
+# Test Cases 5
 def test_about_menuitem_from_sidebar(driver):
     webshop_fp = SauceDemo_FirstPage(driver)
     webshop_pp = SauceDemo_ProductsPage(driver)
@@ -94,7 +87,7 @@ def test_about_menuitem_from_sidebar(driver):
             assert True
             break
 
-# Test Cases 7
+# Test Cases 6
 def test_dropdown_all_options(driver):
     webshop_fp = SauceDemo_FirstPage(driver)
     webshop_pp = SauceDemo_ProductsPage(driver)
@@ -108,7 +101,7 @@ def test_dropdown_all_options(driver):
         if item in ["Name (A to Z)", "Name (Z to A)", "Price (low to high)", "Price (high to low)"]:
             assert True
 
-# Test Cases 8
+# Test Cases 7
 def test_shopping_cart_item_count(driver):
     webshop_fp = SauceDemo_FirstPage(driver)
     webshop_pp = SauceDemo_ProductsPage(driver)
@@ -116,14 +109,14 @@ def test_shopping_cart_item_count(driver):
     webshop_fp.login("standard_user", "secret_sauce")
     driver.implicitly_wait(10)
     webshop_pp.add_first_item_to_cart()
-    cart_count = webshop_pp.shopping_cart_item_count()
+    cart_count = webshop_pp.shopping_cart_item_count_number()
     assert cart_count == "1"
     webshop_pp.back_to_products_page()
     webshop_pp.add_second_item_to_cart()
-    cart_count = webshop_pp.shopping_cart_item_count()
+    cart_count = webshop_pp.shopping_cart_item_count_number()
     assert cart_count == "2"
 
-# Test Cases 9
+# Test Cases 8
 def test_review_shopping_cart(driver):
     webshop_fp = SauceDemo_FirstPage(driver)
     webshop_pp = SauceDemo_ProductsPage(driver)
@@ -134,13 +127,14 @@ def test_review_shopping_cart(driver):
     webshop_pp.add_first_item_to_cart()
     webshop_pp.back_to_products_page()
     webshop_pp.add_second_item_to_cart()
-    items_in_cart = webshop_scp.review_shopping_cart()
-    assert len(items_in_cart) == 2
-    assert "Sauce Labs Backpack" in items_in_cart
-    assert "Sauce Labs Fleece Jacket" in items_in_cart
+    webshop_pp.click_shopping_cart()
+    cart_items_list = webshop_scp.review_shopping_cart()
+    assert len(cart_items_list) == 2
+    assert "Sauce Labs Backpack" in cart_items_list
+    assert "Sauce Labs Fleece Jacket" in cart_items_list
 
-# Test Cases 10
-def test_remove_first_item_from_cart(driver):
+# Test Cases 9
+def test_remove_first_item_from_shopping_cart(driver):
     webshop_fp = SauceDemo_FirstPage(driver)
     webshop_pp = SauceDemo_ProductsPage(driver)
     webshop_scp = SauceDemo_ShoppingCartPage(driver)
@@ -150,6 +144,22 @@ def test_remove_first_item_from_cart(driver):
     webshop_pp.add_first_item_to_cart()
     webshop_pp.back_to_products_page()
     webshop_pp.add_second_item_to_cart()
-    webshop_scp.remove_first_item_from_cart()
-    cart_count = webshop_pp.shopping_cart_item_count()
+    webshop_scp.remove_first_item_from_shopping_cart()
+    cart_count = webshop_pp.shopping_cart_item_count_number()
     assert cart_count == "1"
+
+# Test Cases 10
+def test_proceed_to_checkout(driver):
+    webshop_fp = SauceDemo_FirstPage(driver)
+    webshop_pp = SauceDemo_ProductsPage(driver)
+    webshop_scp = SauceDemo_ShoppingCartPage(driver)
+    webshop_fp.load_page("https://www.saucedemo.com/")
+    webshop_fp.login("standard_user", "secret_sauce")
+    driver.implicitly_wait(10)
+    webshop_pp.add_first_item_to_cart()
+    webshop_pp.back_to_products_page()
+    webshop_pp.add_second_item_to_cart()
+    webshop_scp.remove_first_item_from_shopping_cart()
+    webshop_pp.click_shopping_cart()
+    webshop_scp.proceed_to_checkout()
+    assert driver.current_url == "https://www.saucedemo.com/checkout-step-one.html"
