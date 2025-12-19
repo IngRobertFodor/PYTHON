@@ -163,3 +163,17 @@ def test_proceed_to_checkout(driver):
     webshop_pp.click_shopping_cart()
     webshop_scp.proceed_to_checkout()
     assert driver.current_url == "https://www.saucedemo.com/checkout-step-one.html"
+    webshop_scp.form_filling_checkout_information("", "Doe", "12345")
+    assert webshop_scp.error_message_checkout_information() == "Error: First Name is required"
+    webshop_scp.cancel_checkout()
+    webshop_scp.proceed_to_checkout()
+    webshop_scp.form_filling_checkout_information("John", "", "12345")
+    assert webshop_scp.error_message_checkout_information() == "Error: Last Name is required"
+    webshop_scp.cancel_checkout()
+    webshop_scp.proceed_to_checkout()
+    webshop_scp.form_filling_checkout_information("John", "Doe", "")
+    assert webshop_scp.error_message_checkout_information() == "Error: Postal Code is required"
+    webshop_scp.cancel_checkout()
+    webshop_scp.proceed_to_checkout()
+    webshop_scp.form_filling_checkout_information("John", "Doe", "12345")
+    assert driver.current_url == "https://www.saucedemo.com/checkout-step-two.html"

@@ -20,3 +20,21 @@ class SauceDemo_ShoppingCartPage:
     def proceed_to_checkout(self):
         checkout_button = self.driver.find_element(By.ID, "checkout")
         checkout_button.click()
+    
+    def form_filling_checkout_information(self, first_name, last_name, postal_code):
+        first_name_field = self.driver.find_element(By.ID, "first-name")
+        first_name_field.send_keys(first_name)
+        last_name_field = self.driver.find_element(By.ID, "last-name")
+        last_name_field.send_keys(last_name)
+        postal_code_field = self.driver.find_element(By.ID, "postal-code")
+        postal_code_field.send_keys(postal_code)
+        continue_button = self.driver.find_element(By.ID, "continue")
+        continue_button.click()
+
+    def error_message_checkout_information(self):
+        error_message = self.driver.find_element(By.CLASS_NAME, "error-message-container.error")
+        return error_message.text
+    
+    def cancel_checkout(self):
+        cancel_button = self.driver.find_element(By.ID, "cancel")
+        cancel_button.click()
