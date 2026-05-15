@@ -1,0 +1,33 @@
+==================================================
+  PDF PASSWORD CONVERTER - TESTY
+==================================================
+
+[TEST 1] Generovanie nazvu suboru
+  Vygenerovany nazov: KM_Výplatná Páska_Apríl_2026.pdf
+  [OK] Test PRESIEL!
+
+[TEST 2] Konverzia .docx -> zaheslovane PDF
+  [OK] Testovaci .docx vytvoreny: C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\myapps_github_cline\pdf_password_converter\test_vyplatna_paska.docx
+  Vystupny subor: C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\myapps_github_cline\pdf_password_converter\KM_Výplatná Páska_Apríl_2026.pdf
+  [OK] PDF je zaheslovane!
+  Obsah (prvych 100 znakov): Vyplatna Paska - Maj 2026
+Meno: Jan Novak
+Pozicia: Senior Developer
+Hruba mzda: 2 500,00 EUR
+Odvody 
+  [OK] Obsah PDF je spravny!
+  [OK] Testovacie subory vycistene
+  [OK] Test PRESIEL!
+
+[TEST 3] Zaheslovanie existujuceho .pdf
+  [OK] Testovaci PDF vytvoreny: C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\myapps_github_cline\pdf_password_converter\test_input.pdf
+  Vystupny subor: C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\myapps_github_cline\pdf_password_converter\KM_Výplatná Páska_Apríl_2026.pdf
+  Obsah: Toto je testovaci PDF subor bez hesla.
+Specialne znaky: sctzyadie
+
+  [OK] Test PRESIEL!
+  [OK] Testovacie subory vycistene
+
+==================================================
+  VSETKY TESTY PRESLI USPESNE!
+==================================================

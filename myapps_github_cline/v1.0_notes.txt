@@ -1,0 +1,19 @@
+PDF Password Converter v1.0
+============================
+Datum: 15.05.2026
+
+Funkcionalita:
+- Konverzia .docx alebo .pdf na zaheslovane PDF
+- Heslo nacitane z config.json (21011988)
+- Automaticky nazov suboru: KM_Vyplatna Paska_[Mesiac]_[Rok].pdf
+  (mesiac = predchadzajuci oproti aktualnemu)
+- Vystup ukladany do priecinka "Vyplatne Pasky"
+- Jednoduche GUI (tkinter)
+- Podpora: Windows 10/11
+- Offline - ziadne pripojenie na internet
+
+Pouzitie:
+1. Spustit PDF_Password_Converter_v1.0.exe
+2. Vybrat vstupny subor (.docx alebo .pdf)
+3. Kliknut "Konvertovat do zaheslovaneho PDF"
+4. Vysledok najdete v priecinku "Vyplatne Pasky"
