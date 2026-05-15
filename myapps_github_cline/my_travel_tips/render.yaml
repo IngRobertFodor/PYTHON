@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: fodor-travel-tips
+    name: my-travel-tips
     runtime: python
     buildCommand: pip install -r backend/requirements.txt
     startCommand: cd backend && gunicorn app:app --bind 0.0.0.0:$PORT

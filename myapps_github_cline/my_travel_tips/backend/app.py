@@ -1,6 +1,6 @@
 """
-Fodor Travel TIPs - Main Flask Application
-============================================
+My Travel Tips - Main Flask Application
+=========================================
 A travel points-of-interest discovery app with weather integration.
 """
 
@@ -41,7 +41,7 @@ def serve_static(path):
 @app.route('/api/health')
 def health_check():
     """Health check endpoint."""
-    return jsonify({'status': 'ok', 'app': 'Fodor Travel TIPs'})
+    return jsonify({'status': 'ok', 'app': 'My Travel Tips'})
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-# ✈️ Fodor Travel TIPs
+# ✈️ My Travel Tips
 
 **Aplikácia na objavovanie bodov záujmu v oblasti kam cestujete.**
 
@@ -24,7 +24,7 @@ Zadáte destináciu (alebo kliknete na mapu), nastavíte okruh hľadania a aplik
 ### 1. Klonovať repozitár
 ```bash
 git clone <repo-url>
-cd fodor-travel-tips
+cd my_travel_tips
 ```
 
 ### 2. Vytvoriť virtuálne prostredie
@@ -60,7 +60,7 @@ http://localhost:5000
 ```bash
 git init
 git add .
-git commit -m "Initial commit - Fodor Travel TIPs"
+git commit -m "Initial commit - My Travel Tips"
 git remote add origin <your-github-repo-url>
 git push -u origin main
 ```
@@ -70,7 +70,7 @@ git push -u origin main
 2. Kliknúť **"New" → "Web Service"**
 3. Pripojiť GitHub repozitár
 4. Nastavenia:
-   - **Name:** fodor-travel-tips
+   - **Name:** my-travel-tips
    - **Runtime:** Python
    - **Build Command:** `pip install -r backend/requirements.txt`
    - **Start Command:** `cd backend && gunicorn app:app --bind 0.0.0.0:$PORT`
@@ -105,7 +105,7 @@ Na free plán server "zaspí" po 15 min nečinnosti. Prvé otvorenie po pauze tr
 ## 📁 Štruktúra projektu
 
 ```
-fodor-travel-tips/
+my_travel_tips/
 ├── backend/
 │   ├── app.py                    # Flask hlavný súbor
 │   ├── requirements.txt          # Python závislosti

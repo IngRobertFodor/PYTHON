@@ -1,10 +1,10 @@
-g@echo off
+@echo off
 REM ============================================
-REM  Fodor Travel TIPs v1.0 - LAUNCHER
+REM  My Travel Tips v1.0 - LAUNCHER
 REM  Double-click to start the app!
 REM ============================================
 echo.
-echo  ✈️  FODOR TRAVEL TIPs v1.0
+echo  ✈️  MY TRAVEL TIPS v1.0
 echo  ================================
 echo  Starting server...
 echo.

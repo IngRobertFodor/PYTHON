@@ -1,5 +1,5 @@
 """
-Pytest configuration and shared fixtures for Fodor Travel TIPs tests.
+Pytest configuration and shared fixtures for My Travel Tips tests.
 """
 
 import sys

@@ -1,8 +1,9 @@
 ============================================
- FODOR TRAVEL TIPs - v1.0 Release Notes
+ MY TRAVEL TIPS - v1.0 Release Notes
 ============================================
  Dátum: 15.05.2026
  Autor: Robert Fodor
+ Renamed: 16.05.2026 (fodor-travel-tips → my_travel_tips)
 ============================================
 
 POPIS APLIKÁCIE:

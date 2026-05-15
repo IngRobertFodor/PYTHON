@@ -18,7 +18,7 @@ class TestHTMLStructure:
     def test_html_has_title(self, client):
         response = client.get('/')
         html = response.data.decode('utf-8')
-        assert 'Fodor Travel TIPs' in html
+        assert 'My Travel Tips' in html
 
     def test_html_has_search_input(self, client):
         response = client.get('/')

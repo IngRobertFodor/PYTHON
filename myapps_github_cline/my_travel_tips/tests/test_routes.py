@@ -19,7 +19,7 @@ class TestHealthEndpoint:
         response = client.get('/api/health')
         data = response.get_json()
         assert data['status'] == 'ok'
-        assert data['app'] == 'Fodor Travel TIPs'
+        assert data['app'] == 'My Travel Tips'
 
 
 class TestGeocodingRoutes:
