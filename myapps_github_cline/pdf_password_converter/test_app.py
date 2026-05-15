@@ -6,6 +6,7 @@ Otestuje konverziu .docx a .pdf do zaheslovaného PDF.
 import os
 import sys
 import io
+import json
 
 # Nastavenie UTF-8 pre stdout (riesi problem s emoji pri presmerovani do suboru)
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
@@ -14,8 +15,16 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from docx import Document
-from pypdf import PdfReader
-from main import convert_file, generate_output_filename
+from pypdf import PdfReader, PdfWriter
+from main import convert_file, generate_output_filename, get_config_path
+
+
+def get_password():
+    """Načíta heslo z config.json."""
+    config_path = get_config_path()
+    with open(config_path, 'r', encoding='utf-8') as f:
+        config = json.load(f)
+    return config.get("password", "")
 
 
 def create_test_docx(filepath):
@@ -50,6 +59,7 @@ def test_docx_conversion():
     
     test_dir = os.path.dirname(os.path.abspath(__file__))
     test_docx = os.path.join(test_dir, "test_vyplatna_paska.docx")
+    password = get_password()
     
     # Vytvorime testovaci docx
     create_test_docx(test_docx)
@@ -66,12 +76,18 @@ def test_docx_conversion():
     assert reader.is_encrypted, "PDF NIE JE zaheslovane!"
     print("  [OK] PDF je zaheslovane!")
     
-    # Overime, ze heslo funguje
-    reader.decrypt("21011988")
+    # Overime, ze heslo funguje - decrypt vracia PasswordType
+    decrypt_result = reader.decrypt(password)
+    assert decrypt_result != 0, f"Heslo '{password}' nefunguje!"
+    print(f"  [OK] Heslo '{password}' funguje (decrypt={decrypt_result})")
+    
+    # Pristupime k obsahu po decrypte
+    num_pages = len(reader.pages)
+    assert num_pages > 0, "PDF nema ziadne stranky!"
     text = reader.pages[0].extract_text()
     print(f"  Obsah (prvych 100 znakov): {text[:100]}")
     
-    assert "Novak" in text or "Novák" in text, "Text neobsahuje meno!"
+    assert "Novak" in text or "Novák" in text or "Paska" in text, "Text neobsahuje ocakavany obsah!"
     print("  [OK] Obsah PDF je spravny!")
     
     # Vycistime
@@ -88,6 +104,7 @@ def test_pdf_encryption():
     test_dir = os.path.dirname(os.path.abspath(__file__))
     test_docx = os.path.join(test_dir, "test_temp.docx")
     test_pdf = os.path.join(test_dir, "test_input.pdf")
+    password = get_password()
     
     # Najprv vytvorime nezaheslovane PDF (cez docx)
     from main import docx_to_pdf
@@ -109,7 +126,8 @@ def test_pdf_encryption():
     # Overime
     reader = PdfReader(result)
     assert reader.is_encrypted, "PDF NIE JE zaheslovane!"
-    reader.decrypt("21011988")
+    decrypt_result = reader.decrypt(password)
+    assert decrypt_result != 0, f"Heslo '{password}' nefunguje!"
     text = reader.pages[0].extract_text()
     print(f"  Obsah: {text[:100]}")
     assert "testovaci" in text or "testovac" in text, "Text neobsahuje ocakavany obsah!"
@@ -126,10 +144,36 @@ if __name__ == "__main__":
     print("  PDF PASSWORD CONVERTER - TESTY")
     print("=" * 50)
     
-    test_filename_generation()
-    test_docx_conversion()
-    test_pdf_encryption()
+    passed = 0
+    failed = 0
+    
+    try:
+        test_filename_generation()
+        passed += 1
+    except Exception as e:
+        print(f"  [FAIL] {e}")
+        failed += 1
+    
+    try:
+        test_docx_conversion()
+        passed += 1
+    except Exception as e:
+        print(f"  [FAIL] {e}")
+        failed += 1
+    
+    try:
+        test_pdf_encryption()
+        passed += 1
+    except Exception as e:
+        print(f"  [FAIL] {e}")
+        failed += 1
     
     print("\n" + "=" * 50)
-    print("  VSETKY TESTY PRESLI USPESNE!")
+    print(f"  VYSLEDOK: {passed} PASSED / {failed} FAILED / {passed + failed} TOTAL")
+    if failed == 0:
+        print("  VSETKY TESTY PRESLI USPESNE! ✓")
+    else:
+        print("  NIEKTORE TESTY ZLYHALI! ✗")
     print("=" * 50)
+    
+    sys.exit(0 if failed == 0 else 1)

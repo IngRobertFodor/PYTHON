@@ -1,0 +1,39 @@
+PDF Password Converter v1.0
+============================
+Datum: 15.05.2026
+
+Funkcionalita:
+- Konverzia .docx alebo .pdf na zaheslovane PDF
+- Heslo nacitane z config.json
+- Automaticky nazov suboru: KM_Vyplatna Paska_[Mesiac]_[Rok].pdf
+  (mesiac = predchadzajuci oproti aktualnemu)
+- Vystup ukladany do priecinka "Vyplatne Pasky"
+- Jednoduche GUI (tkinter)
+- Podpora: Windows 10/11
+- Offline - ziadne pripojenie na internet
+
+Pouzitie:
+1. Spustit PDF_Password_Converter_v1.0.exe
+2. Vybrat vstupny subor (.docx alebo .pdf)
+3. Kliknut "Konvertovat do zaheslovaneho PDF"
+4. Vysledok najdete v priecinku "Vyplatne Pasky"
+
+Technologie:
+- Python 3.12
+- tkinter (GUI)
+- pypdf (citanie/zapisovanie/sifrovanie PDF)
+- python-docx (citanie .docx)
+- reportlab (generovanie PDF z textu)
+- PyInstaller (build .exe)
+
+Testovanie:
+===========
+[x] test_app.py - 3 testy (generovanie nazvu, docx konverzia, pdf sifrovanie)
+
+Spustenie testov:
+  python test_app.py
+
+Testy:
+  TEST 1: Generovanie nazvu suboru (KM_Vyplatna Paska_[Mesiac]_[Rok].pdf)
+  TEST 2: Konverzia .docx -> zaheslovane PDF (vytvorenie, sifrovanie, overenie obsahu)
+  TEST 3: Zaheslovanie existujuceho .pdf (sifrovanie, overenie obsahu)

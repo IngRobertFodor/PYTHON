@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fodor Travel TIPs</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/themes.css">
+</head>
+<body>
+    <!-- Hero Background -->
+    <div id="hero-bg" class="hero-background" style="background-image:url('https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1920&q=80')"></div>
+
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <h1 class="app-title">
+                <span class="title-icon">✈️</span>
+                Fodor Travel TIPs
+            </h1>
+            <div class="language-switch">
+                <button class="lang-btn active" data-lang="sk">SK</button>
+                <button class="lang-btn" data-lang="en">EN</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="search-container">
+                <h2 class="section-title" data-i18n="search_title">Kam cestujete?</h2>
+                
+                <!-- Location Input -->
+                <div class="input-group">
+                    <div class="search-input-wrapper">
+                        <input type="text" id="location-input" class="search-input" 
+                               placeholder="Zadajte názov miesta..."
+                               data-i18n-placeholder="search_placeholder" autocomplete="off">
+                        <button id="search-btn" class="btn btn-primary">
+                            <span data-i18n="search_btn">Hľadať</span>
+                        </button>
+                    </div>
+                    <div id="search-suggestions" class="search-suggestions hidden"></div>
+                    <p class="search-hint" data-i18n="search_hint">alebo kliknite na mapu</p>
+                </div>
+
+                <!-- Radius Input -->
+                <div class="radius-section">
+                    <h3 class="subsection-title" data-i18n="radius_title">Okruh hľadania</h3>
+                    <div class="radius-inputs">
+                        <div class="radius-option">
+                            <label for="radius-km" data-i18n="radius_km_label">Vzdialenosť (km)</label>
+                            <input type="number" id="radius-km" class="radius-input" value="25" min="1" max="200">
+                        </div>
+                        <span class="radius-divider" data-i18n="or">alebo</span>
+                        <div class="radius-option">
+                            <label for="radius-time" data-i18n="radius_time_label">Čas cestovania</label>
+                            <div class="time-input-group">
+                                <input type="text" id="radius-time" class="radius-input" placeholder="napr. 1h 30min">
+                                <select id="travel-mode" class="travel-mode-select">
+                                    <option value="car">🚗 Autom</option>
+                                    <option value="bike">🚴 Bicyklom</option>
+                                    <option value="walk">🚶 Pešo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date Picker -->
+                <div class="date-section">
+                    <h3 class="subsection-title" data-i18n="date_title">Dátum cestovania</h3>
+                    <input type="date" id="travel-date" class="date-input">
+                </div>
+
+                <!-- Categories Filter -->
+                <div class="categories-section">
+                    <h3 class="subsection-title" data-i18n="categories_title">Čo hľadáte?</h3>
+                    <div class="categories-actions">
+                        <button class="cat-action-btn" id="cat-select-all" data-i18n="select_all">Vybrať všetko</button>
+                        <button class="cat-action-btn" id="cat-deselect-all" data-i18n="deselect_all">Odznačiť všetko</button>
+                    </div>
+                    <div class="categories-grid" id="categories-grid">
+                        <!-- Historic & Cultural -->
+                        <div class="category-group">
+                            <label class="category-parent">
+                                <input type="checkbox" class="cat-parent" data-group="historic" checked>
+                                <span>🏛️ <span data-i18n="cat_historic">Historické & Kultúrne</span></span>
+                            </label>
+                            <div class="category-children">
+                                <label><input type="checkbox" class="cat-child" data-group="historic" data-tags="historic=castle,historic=palace" checked> 🏰 <span data-i18n="cat_castles">Hrady a zámky</span></label>
+                                <label><input type="checkbox" class="cat-child" data-group="historic" data-tags="historic=monument,historic=memorial" checked> 🏛️ <span data-i18n="cat_monuments">Historické budovy</span></label>
+                                <label><input type="checkbox" class="cat-child" data-group="historic" data-tags="historic=archaeological_site,historic=ruins" checked> ⛏️ <span data-i18n="cat_archaeology">Archeológia & ruiny</span></label>
+                                <label><input type="checkbox" class="cat-child" data-group="historic" data-tags="historic=mine,man_made=lighthouse,man_made=windmill" checked> 🏭 <span data-i18n="cat_industrial">Industriálne dedičstvo</span></label>
+                                <label><input type="checkbox" class="cat-child" data-group="historic" data-tags="building=church,historic=wayside_shrine" checked> ⛪ <span data-i18n="cat_churches">Kostoly & kaplnky</span></label>
+                                <label><input type="checkbox" class="cat-child" data-group="historic" data-tags="amenity=monastery" checked> 🕌 <span data-i18n="cat_monasteries">Kláštory</span></label>
+                            </div>
+                        </div>
+                        <!-- Culture & Education -->
+                        <div class="category-group">
+                            <label class="category-parent">
+                                <input type="checkbox" class="cat-parent" data-group="culture" checked>
+                                <span>🎭 <span data-i18n="cat_culture">Kultúra & Vzdelávanie</span></span>
+                            </label>
+                            <div class="category-children">
+                                <label><input type="checkbox" class="cat-child" data-group="culture" data-tags="tourism=museum,tourism=gallery" checked> 🏛️ <span data-i18n="cat_museums">Múzeá & galérie</span></label>
+                                <label><input type="checkbox" class="cat-child" data-group="culture" data-tags="amenity=theatre,amenity=arts_centre" checked> 🎭 <span data-i18n="cat_theatres">Divadlá & umenie</span></label>
+                                <label><input type="checkbox" class="cat-child" data-group="culture" data-tags="tourism=artwork" checked> 🎨 <span data-i18n="cat_artwork">Skulptúry & artworky</span></label>
+                            </div>
+                        </div>
+                        <!-- Nature & Outdoor -->
+                        <div class="category-group">
+                            <label class="category-parent">
+                                <input type="checkbox" class="cat-parent" data-group="nature" checked>
+                                <span>🌿 <span data-i18n="cat_nature">Príroda & Outdoor</span></span>
+                            </label>
+                            <div class="category-children">
+                                <label><input type="checkbox" class="cat-child" data-group="nature" data-tags="waterway=waterfall" checked> 🌊 <span data-i18n="cat_waterfalls">Vodopády</span></label>
+                                <label><input type="checkbox" class="cat-child" data-group="nature" data-tags="natural=cave_entrance" checked> 🦇 <span data-i18n="cat_caves">Jaskyne</span></label>
+                                <label><input type="checkbox" class="cat-child" data-group="nature" data-tags="natural=peak,tourism=viewpoint" checked> ⛰️ <span data-i18n="cat_peaks">Vrcholy & vyhliadky</span></label>
+                                <label><input type="checkbox" class="cat-child" data-group="nature" data-tags="leisure=park,leisure=garden" checked> 🌺 <span data-i18n="cat_parks">Parky & záhrady</span></label>
+                                <label><input type="checkbox" class="cat-child" data-group="nature" data-tags="natural=spring,natural=hot_spring" checked> 💧 <span data-i18n="cat_springs">Pramene & termály</span></label>
+                                <label><input type="checkbox" class="cat-child" data-group="nature" data-tags="geological=*,natural=arch" checked> 🪨 <span data-i18n="cat_geology">Geologické útvary</span></label>
+                            </div>
+                        </div>
+                        <!-- Fun & Activities -->
+                        <div class="category-group">
+                            <label class="category-parent">
+                                <input type="checkbox" class="cat-parent" data-group="fun" checked>
+                                <span>🎡 <span data-i18n="cat_fun">Zábava & Aktivity</span></span>
+                            </label>
+                            <div class="category-children">
+                                <label><input type="checkbox" class="cat-child" data-group="fun" data-tags="tourism=theme_park" checked> 🎢 <span data-i18n="cat_theme_parks">Zábavné parky</span></label>
+                                <label><input type="checkbox" class="cat-child" data-group="fun" data-tags="tourism=zoo,tourism=aquarium" checked> 🦁 <span data-i18n="cat_zoo">ZOO & akváriá</span></label>
+                                <label><input type="checkbox" class="cat-child" data-group="fun" data-tags="leisure=water_park" checked> 💦 <span data-i18n="cat_water_parks">Vodné parky</span></label>
+                                <label><input type="checkbox" class="cat-child" data-group="fun" data-tags="tourism=attraction" checked> ⭐ <span data-i18n="cat_attractions">Turistické atrakcie</span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Action -->
+                <button id="explore-btn" class="btn btn-explore" disabled>
+                    <span data-i18n="explore_btn">🔍 Objaviť miesta</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Map Section -->
+        <section class="map-section">
+            <div id="map" class="map-container"></div>
+        </section>
+
+        <!-- Weather Section -->
+        <section id="weather-section" class="weather-section hidden">
+            <h2 class="section-title" data-i18n="weather_title">🌤️ Počasie v oblasti</h2>
+            <div id="weather-content" class="weather-content">
+                <div id="weather-center" class="weather-center"></div>
+                <div id="weather-grid" class="weather-grid"></div>
+                <div id="weather-summary" class="weather-summary"></div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="results-section" class="results-section hidden">
+            <div class="results-category">
+                <h2 class="category-title mainstream-title">
+                    <span class="category-icon">🏆</span>
+                    <span data-i18n="mainstream_title">Mainstream – Top 10</span>
+                </h2>
+                <p class="category-description" data-i18n="mainstream_desc">Najpopulárnejšie a najnavštevovanejšie miesta v oblasti</p>
+                <div id="mainstream-results" class="poi-grid"></div>
+            </div>
+            <div class="results-category">
+                <h2 class="category-title alternative-title">
+                    <span class="category-icon">💎</span>
+                    <span data-i18n="alternative_title">Alternatívne & Zaujímavé – Top 10</span>
+                </h2>
+                <p class="category-description" data-i18n="alternative_desc">Skryté poklady, menej preskúmané a unikátne miesta</p>
+                <div id="alternative-results" class="poi-grid"></div>
+            </div>
+        </section>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p data-i18n="loading">Hľadám zaujímavé miesta...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>Fodor Travel TIPs &copy; 2026 | <span data-i18n="footer_data">Dáta: OpenStreetMap, Wikipedia, Open-Meteo</span></p>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/weather.js"></script>
+    <script src="js/poi.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

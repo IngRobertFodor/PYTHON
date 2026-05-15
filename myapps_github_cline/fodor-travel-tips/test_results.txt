@@ -1,0 +1,63 @@
+============================================
+ FODOR TRAVEL TIPs - TEST RESULTS
+============================================
+
+#1 | 2026-05-16 00:26 | 212 PASSED / 0 FAILED | 4.92s
+============================================
+platform: win32 | Python 3.12.10 | pytest 8.1.1
+
+test_frontend_files.py (40 tests)
+  TestHTMLStructure ............ 12 PASSED
+  TestCSSFiles ................. 8 PASSED
+  TestJSFiles .................. 12 PASSED
+  TestTimeParsing .............. 8 PASSED
+
+test_geocoding_service.py (21 tests)
+  TestGeocodePlace ............. 5 PASSED
+  TestReverseGeocode ........... 3 PASSED
+  TestCalculateTravelRadius .... 6 PASSED
+  TestHelperFunctions .......... 7 PASSED
+
+test_links_service.py (26 tests)
+  TestGenerateLinks ............ 11 PASSED
+  TestContextualLinks .......... 6 PASSED
+  TestLinkBuilders ............. 6 PASSED
+  TestTranslationHelper ........ 3 PASSED
+
+test_overpass_service.py (42 tests)
+  TestGetPois .................. 5 PASSED
+  TestGetQueryConfig ........... 4 PASSED
+  TestBuildQuery ............... 4 PASSED
+  TestProcessPois .............. 6 PASSED
+  TestDeterminePoiType ......... 12 PASSED
+  TestCalculateScore ........... 5 PASSED
+  TestIsOutdoor ................ 7 PASSED
+  TestHaversine ................ 4 PASSED
+  TestTagLists ................. 3 PASSED
+
+test_region_theme_service.py (17 tests)
+  TestGetThemeForLocation ...... 6 PASSED
+  TestGetAllThemes ............. 3 PASSED
+  TestDetectRegionTypeAdvanced . 3 PASSED
+  TestThemeDefinitions ......... 5 PASSED
+
+test_routes.py (26 tests)
+  TestHealthEndpoint ........... 2 PASSED
+  TestGeocodingRoutes .......... 9 PASSED
+  TestWeatherRoutes ............ 5 PASSED
+  TestPOIRoutes ................ 9 PASSED
+  TestStaticFiles .............. 1 PASSED
+
+test_weather_service.py (30 tests)
+  TestGetWeatherForPoint ....... 6 PASSED
+  TestGenerateGrid ............. 4 PASSED
+  TestAreaSummary .............. 3 PASSED
+  TestParseDate ................ 6 PASSED
+  TestIsOutdoorFriendly ........ 5 PASSED
+  TestOutdoorRecommendation .... 6 PASSED
+  TestWeatherCodes ............. 3 PASSED
+
+============================================
+ TOTAL: 212 PASSED / 0 FAILED
+ ALL TESTS PASSED ✓
+============================================

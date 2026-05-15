@@ -1,0 +1,131 @@
+============================================
+ FODOR TRAVEL TIPs - v1.0 Release Notes
+============================================
+ Dátum: 15.05.2026
+ Autor: Robert Fodor
+============================================
+
+POPIS APLIKÁCIE:
+================
+Webová aplikácia na objavovanie bodov záujmu (POI) v oblasti,
+kam cestujete. Kombinuje OpenStreetMap dáta, Wikipedia popisy,
+počasie z Open-Meteo a relevatné linky (Reddit, AllTrails, Wikivoyage).
+
+AKO APPKA FUNGUJE (FLOW):
+==========================
+
+1. POUŽÍVATEĽ ZADÁ DESTINÁCIU
+   - Napíše názov mesta/miesta do vyhľadávania
+   - ALEBO klikne priamo na mapu (Leaflet/OpenStreetMap)
+   → Backend: /api/geocoding/search (Nominatim API)
+   → Backend: /api/geocoding/reverse (pri kliku na mapu)
+
+2. NASTAVÍ OKRUH HĽADANIA
+   - Vzdialenosť v km (napr. 25 km)
+   - ALEBO čas cestovania (napr. "1h 30min autom")
+   → Backend: /api/geocoding/travel-radius (OSRM routing)
+   → Frontend: zobrazí kruh na mape
+
+3. VYBERIE DÁTUM CESTOVANIA
+   - Date picker (dnes až +16 dní)
+   - Pre predpoveď počasia v daný deň
+
+4. KLIKNE "OBJAVIŤ MIESTA"
+   → Frontend zobrazí loading
+   
+5. BACKEND SPRACUJE PARALELNE:
+   a) POČASIE (/api/weather/grid)
+      - Open-Meteo API
+      - 3x3 grid bodov v oblasti (9 bodov)
+      - Teplota, zrážky, vietor, UV, weathercode
+      - Vyhodnotenie outdoor-friendly
+      
+   b) BODY ZÁUJMU (/api/poi/search)
+      - Overpass API (OpenStreetMap databáza)
+      - Filtruje 14 mainstream tagov + 21 alternatívnych tagov
+      - Každý POI:
+        → Skórovanie (Wikipedia prítomnosť, počet tagov, vzdialenosť)
+        → Wikipedia API: popis + thumbnail
+        → Wikidata API: oficiálny web
+        → Links service: 5 linkov podľa typu POI
+
+6. FRONTEND ZOBRAZÍ VÝSLEDKY:
+   - Počasie v oblasti (center + 3x3 grid + summary)
+   - 10 Mainstream POI kariet
+   - 10 Alternatívnych POI kariet
+   - Každá karta: meno, popis, vzdialenosť, typ, 5 linkov
+   - POI markery na mape
+
+TECHNOLÓGIE:
+============
+- Python Flask (backend server)
+- HTML5 + CSS3 + Vanilla JavaScript (frontend)
+- Leaflet.js (interaktívna mapa)
+- Overpass API (OpenStreetMap POI dáta)
+- Wikipedia REST API (popisy)
+- Wikidata API (oficiálne weby)
+- Open-Meteo API (počasie, 16 dní, zadarmo)
+- Nominatim (geocoding, zadarmo)
+- OSRM (routing/čas cestovania, zadarmo)
+
+HOSTING:
+========
+- Render.com (free tier)
+- Automatický deploy z GitHub
+- Cold start: ~30s po 15 min nečinnosti
+
+v1.0 FUNKCIE:
+=============
+[x] Vyhľadávanie miesta (text + mapa klik)
+[x] Live suggestions pri písaní
+[x] Okruh v km alebo čase (h, hod, min, minuty...)
+[x] Mód cestovania (auto, bicykel, pešo)
+[x] Interaktívna mapa s kruhom
+[x] Počasie na vybraný dátum (max 16 dní)
+[x] 3x3 weather grid - vizualizácia počasia v oblasti
+[x] Weather summary (najlepšia/najhoršia oblasť)
+[x] 10 Mainstream POI (hrady, múzeá, parky, ZOO...)
+[x] 10 Alternatívnych POI (vodopády, jaskyne, viewpointy...)
+[x] Wikipedia popisy pre každé POI
+[x] 5 linkov pre každé POI (Ofic. web, Wikipedia, Google Maps + 2 kontextové)
+[x] Kontextové linky: AllTrails, Reddit, Wikivoyage, iNaturalist
+[x] Dynamické farby podľa oblasti (mountain/coastal/urban/rural)
+[x] SK + EN jazyk (prepínateľný)
+[x] Responzívny dizajn (mobil, tablet, desktop)
+[x] Outdoor/indoor odporúčanie podľa počasia
+[x] POI markery na mape
+
+TESTOVANIE:
+===========
+[x] Pytest test suite (212 testov)
+[x] Unit testy s mocking (bez potreby internetu, ~10s)
+[x] Pokrytie: geocoding, weather, overpass/POI, links, themes, routes, frontend
+
+Spustenie testov:
+  python -m pytest tests/ -v --rootdir=.
+
+Testové súbory:
+  tests/conftest.py              - shared fixtures
+  tests/test_geocoding_service.py - geocoding, reverse, travel radius
+  tests/test_weather_service.py   - počasie, grid, outdoor, date parsing
+  tests/test_overpass_service.py  - POI, scoring, queries, haversine
+  tests/test_links_service.py     - link generation, contextual links
+  tests/test_region_theme_service.py - themes, colors, detection
+  tests/test_routes.py            - API endpoints, validation (400 errors)
+  tests/test_frontend_files.py    - HTML/CSS/JS content + time parsing
+
+ZNÁME OBMEDZENIA v1.0:
+=======================
+- Overpass API timeout pri veľkom radiuse (>100km) v hustých oblastiach
+- Wikipedia popisy nie vždy dostupné pre menej známe miesta
+- Počasie max 16 dní dopredu
+- Render.com free = cold start po 15 min
+- Žiadne ukladanie histórie hľadania (plánované pre v1.1)
+
+PLÁNOVANÉ PRE v1.1:
+====================
+- Ukladanie obľúbených miest (localStorage)
+- Filtrovanie POI podľa typu
+- Export výsledkov do PDF
+- Zdieľanie linku s výsledkami
+- Dark mode

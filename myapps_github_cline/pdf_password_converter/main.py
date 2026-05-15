@@ -51,18 +51,37 @@ def get_output_folder():
 
 
 def load_password():
-    """Načíta heslo z konfiguračného súboru."""
+    """
+    Načíta heslo z konfiguračného súboru alebo environment premennej.
+    Priorita: 1. config.json  2. env PDF_PASSWORD
+    """
+    # Najprv skúsime config.json
     config_path = get_config_path()
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
             config = json.load(f)
-        return config.get("password", "")
+        password = config.get("password", "")
+        if password:
+            return password
     except FileNotFoundError:
-        messagebox.showerror("Chyba", f"Konfiguračný súbor nenájdený:\n{config_path}")
-        return None
+        pass
     except json.JSONDecodeError:
-        messagebox.showerror("Chyba", "Konfiguračný súbor je poškodený.")
-        return None
+        pass
+
+    # Fallback na environment premennú
+    env_password = os.environ.get("PDF_PASSWORD", "")
+    if env_password:
+        return env_password
+
+    # Nič nenájdené
+    messagebox.showerror(
+        "Chyba",
+        "Heslo nenájdené!\n\n"
+        "Možnosti:\n"
+        "1. Vytvorte config.json s kľúčom 'password'\n"
+        "2. Nastavte environment premennú PDF_PASSWORD"
+    )
+    return None
 
 
 def generate_output_filename():

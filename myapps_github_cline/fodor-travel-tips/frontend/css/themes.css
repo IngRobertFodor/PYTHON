@@ -1,0 +1,6 @@
+/* Dynamic Themes - Applied via CSS custom properties */
+body.theme-mountain{--primary:#2d5a27;--secondary:#5d8a54;--accent:#8fbc8f;--background:#f0f7f0;--text:#1a3a15;--gradient-start:#2d5a27;--gradient-end:#5d8a54}
+body.theme-coastal{--primary:#006994;--secondary:#40a8c4;--accent:#d4a574;--background:#f0f8ff;--text:#003d5c;--gradient-start:#006994;--gradient-end:#40a8c4}
+body.theme-urban{--primary:#1a237e;--secondary:#3949ab;--accent:#c9a227;--background:#f5f5f8;--text:#1a1a2e;--gradient-start:#1a237e;--gradient-end:#3949ab}
+body.theme-rural{--primary:#5d4037;--secondary:#8d6e63;--accent:#7cb342;--background:#faf8f5;--text:#3e2723;--gradient-start:#5d4037;--gradient-end:#7cb342}
+body.theme-default{--primary:#1b5e83;--secondary:#2e86ab;--accent:#f6a623;--background:#f8fafe;--text:#1a2a3a;--gradient-start:#1b5e83;--gradient-end:#2e86ab}

@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: fodor-travel-tips
+    runtime: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && gunicorn app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: FLASK_DEBUG
+        value: "False"
+    plan: free

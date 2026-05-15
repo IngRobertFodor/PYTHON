@@ -1,0 +1,21 @@
+# Heslo - NIKDY necommitovat!
+config.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Build
+build/
+dist/
+*.spec
+
+# Test artefakty
+test_vyplatna_paska.docx
+test_temp.docx
+test_input.pdf
+
+# IDE
+.vscode/
+.idea/
