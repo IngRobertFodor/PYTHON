@@ -2,13 +2,13 @@
  PDF PASSWORD CONVERTER - TEST RESULTS
 ============================================
 
-#1 | 2026-05-16 00:30 | 3 PASSED / 0 FAILED | ~2s
+#1 | 2026-05-16 00:43 | 3 PASSED / 0 FAILED | ~2s
 ============================================
 platform: win32 | Python 3.12.10
 
 [TEST 1] Generovanie nazvu suboru
   Vygenerovany nazov: KM_Výplatná Páska_Apríl_2026.pdf
-  [OK] Prefix + .pdf OK
+  [OK] PASSED
 
 [TEST 2] Konverzia .docx -> zaheslovane PDF
   [OK] Testovaci .docx vytvoreny
@@ -16,13 +16,15 @@ platform: win32 | Python 3.12.10
   [OK] Heslo funguje (decrypt=2)
   [OK] Obsah PDF je spravny (Jan Novak, mzda)
   [OK] Cleanup OK
+  [OK] PASSED
 
 [TEST 3] Zaheslovanie existujuceho .pdf
-  [OK] Testovaci PDF vytvoreny
+  [OK] Testovaci PDF vytvoreny (cez reportlab)
   [OK] PDF je zaheslovane
   [OK] Heslo funguje
   [OK] Obsah overeny (testovaci text)
   [OK] Cleanup OK
+  [OK] PASSED
 
 ============================================
  TOTAL: 3 PASSED / 0 FAILED

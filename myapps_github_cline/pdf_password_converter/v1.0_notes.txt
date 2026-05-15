@@ -1,10 +1,12 @@
 PDF Password Converter v1.0
 ============================
 Datum: 15.05.2026
+Autor: Robert Fodor
 
 Funkcionalita:
+==============
 - Konverzia .docx alebo .pdf na zaheslovane PDF
-- Heslo nacitane z config.json
+- Heslo nacitane z config.json alebo env premennej PDF_PASSWORD
 - Automaticky nazov suboru: KM_Vyplatna Paska_[Mesiac]_[Rok].pdf
   (mesiac = predchadzajuci oproti aktualnemu)
 - Vystup ukladany do priecinka "Vyplatne Pasky"
@@ -13,22 +15,35 @@ Funkcionalita:
 - Offline - ziadne pripojenie na internet
 
 Pouzitie:
+=========
 1. Spustit PDF_Password_Converter_v1.0.exe
 2. Vybrat vstupny subor (.docx alebo .pdf)
 3. Kliknut "Konvertovat do zaheslovaneho PDF"
 4. Vysledok najdete v priecinku "Vyplatne Pasky"
 
 Technologie:
+============
 - Python 3.12
 - tkinter (GUI)
 - pypdf (citanie/zapisovanie/sifrovanie PDF)
 - python-docx (citanie .docx)
-- reportlab (generovanie PDF z textu)
+- reportlab (generovanie PDF z textu, Arial font pre SK diakritiku)
 - PyInstaller (build .exe)
+
+Bezpecnost hesla:
+=================
+- config.json je v .gitignore (NIKDY sa necommitne)
+- config.json.example - sablona pre noveho pouzivatela
+- Fallback na environment premennu PDF_PASSWORD
+- Heslo odstranene z celej git historie (filter-branch)
+
+Priorita nacitania hesla:
+  1. config.json (lokalne)
+  2. env premenna PDF_PASSWORD
 
 Testovanie:
 ===========
-[x] test_app.py - 3 testy (generovanie nazvu, docx konverzia, pdf sifrovanie)
+[x] test_app.py - 3 testy
 
 Spustenie testov:
   python test_app.py
@@ -37,3 +52,14 @@ Testy:
   TEST 1: Generovanie nazvu suboru (KM_Vyplatna Paska_[Mesiac]_[Rok].pdf)
   TEST 2: Konverzia .docx -> zaheslovane PDF (vytvorenie, sifrovanie, overenie obsahu)
   TEST 3: Zaheslovanie existujuceho .pdf (sifrovanie, overenie obsahu)
+
+Subory projektu:
+================
+  main.py                - hlavna aplikacia (GUI + konverzia)
+  config.json            - heslo (LOKALNE, nie v git!)
+  config.json.example    - sablona pre config
+  .gitignore             - ignoruje config.json
+  test_app.py            - testy
+  test_results.txt       - vysledky testov
+  build_exe.bat          - build skript pre .exe
+  requirements.txt       - Python zavislosti
