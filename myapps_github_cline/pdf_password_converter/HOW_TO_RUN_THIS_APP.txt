@@ -6,8 +6,7 @@ HOW TO RUN THIS APP
 STEP 1: Extract WinPython
   - In this folder you will find a file like "WinPython64-....exe"
   - Double-click it
-  - When asked WHERE to extract, select THIS FOLDER:
-    (the folder where you see main.py, start_app.bat, etc.)
+  - When asked WHERE to extract, select "WinPython" in "pdf_password_converter" folder.
   - Click Extract. A new folder "WinPython" will appear.
 
 STEP 2: Install required libraries

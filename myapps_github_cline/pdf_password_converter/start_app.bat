@@ -1,16 +1,21 @@
 @echo off
-echo Starting PDF Password Converter...
-echo.
 
-REM Find python.exe in WinPython folder (any version)
-for /f "delims=" %%P in ('dir /s /b "%~dp0WinPython\python.exe" 2^>nul') do (
+REM Find python.exe in WinPython folder (skip Scripts folder)
+for /f "delims=" %%P in ('dir /s /b "%~dp0WinPython\python.exe" 2^>nul ^| findstr /i /v "Scripts"') do (
     set PYTHON=%%P
-    goto found
+    goto run
 )
 
-REM WinPython not found - try system Python
-echo WinPython not found, trying system Python...
+REM Fallback to system Python
 set PYTHON=python
 
-:found
+:run
 "%PYTHON%" "%~dp0main.py"
+if errorlevel 1 (
+    echo.
+    echo ===================================
+    echo  ERROR - App could not start.
+    echo  Check error message above.
+    echo ===================================
+    pause
+)
