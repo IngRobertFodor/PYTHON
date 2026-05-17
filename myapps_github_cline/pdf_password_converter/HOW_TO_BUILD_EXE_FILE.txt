@@ -1,0 +1,28 @@
+HOW TO BUILD EXE FILE
+=====================
+
+Prerequisites:
+  - Python 3.12 installed
+  - CMD opened in the project folder
+
+Step 1: Open CMD and navigate to the project folder
+  cd "c:\path\to\pdf_password_converter"
+
+Step 2: Install dependencies (only once)
+  pip install -r requirements.txt
+
+Step 3: Run the build
+  build_exe.bat
+  or manually:
+  pyinstaller --onefile --windowed --name "PDF_Password_Converter_v2.0" --hidden-import keyring.backends.Windows --add-data "converter.py;." main.py
+
+Step 4: Wait ~2-3 minutes until you see:
+  "Build complete! The results are available in: ...dist"
+
+Step 5: The finished .exe is located in the dist\ folder
+  Copy it wherever you need (e.g. USB drive)
+
+Antivirus note:
+  Windows Defender may delete or block the .exe file (false positive).
+  Solution: Add an exclusion for the project folder
+  Windows Security -> Virus & threat protection -> Manage settings -> Exclusions -> Add folder
