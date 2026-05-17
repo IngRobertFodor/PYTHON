@@ -9,10 +9,14 @@ build/
 # PyInstaller
 *.exe
 
-# Výstupné súbory
+# WinPython (portable, prilis velky pre git)
+WinPython/
+WinPython*.exe
+
+# Vystupne subory
 Výplatné Pásky/
 
-# Testovacie dočasné súbory
+# Testovacie docasne subory
 test_*.docx
 test_*.pdf
 !test_app.py

@@ -1,0 +1,28 @@
+HOW TO RUN THIS APP
+====================
+
+FIRST TIME SETUP (only once):
+  1. In this folder, find the file "WinPython64-3.14.5.0dot.exe"
+  2. Double-click it - it will extract to a folder called "WinPython"
+     (choose THIS folder as destination when asked)
+  3. Open CMD in this folder and run:
+     WinPython\python.exe -m pip install -r requirements.txt
+
+RUNNING THE APP:
+  Double-click "start_app.bat"
+  That's it!
+
+WHAT THE APP DOES:
+  - Takes a .docx or .pdf file
+  - Converts it to a password-protected PDF
+  - Saves it with the name: [Initials]_Vyplatna Paska_[Month]_[Year].pdf
+  - Each employee has their own password stored securely
+
+FIRST RUN OF THE APP:
+  - It will ask you to add an employee (initials + password)
+  - After that, select a file and click "Convert"
+
+TRANSFERRING TO ANOTHER PC:
+  Copy the entire "pdf_password_converter" folder to USB
+  On the new PC: double-click start_app.bat
+  First run will ask for employee setup again
