@@ -2,19 +2,15 @@
 echo Starting PDF Password Converter...
 echo.
 
-REM Try WinPython first (portable, in same folder)
-if exist "%~dp0WinPython\python-3.14.5.amd64\python.exe" (
-    "%~dp0WinPython\python-3.14.5.amd64\python.exe" "%~dp0main.py"
-    goto end
+REM Find python.exe in WinPython folder (any version)
+for /f "delims=" %%P in ('dir /s /b "%~dp0WinPython\python.exe" 2^>nul') do (
+    set PYTHON=%%P
+    goto found
 )
 
-REM Try WinPython alternative path
-if exist "%~dp0WinPython\python.exe" (
-    "%~dp0WinPython\python.exe" "%~dp0main.py"
-    goto end
-)
+REM WinPython not found - try system Python
+echo WinPython not found, trying system Python...
+set PYTHON=python
 
-REM Fallback to system Python
-python "%~dp0main.py"
-
-:end
+:found
+"%PYTHON%" "%~dp0main.py"
