@@ -1,0 +1,19 @@
+==================================================
+ PDF PASSWORD CONVERTER - TEST RESULTS
+==================================================
+
+#1 | 2026-05-18 00:21 | 12 PASSED / 0 FAILED / 12 TOTAL | ALL PASSED
+--------------------------------------------------
+  [TEST 1]  Importy                  - PASSED
+  [TEST 2]  Arial font              - PASSED
+  [TEST 3]  Vystupny priecinok      - PASSED
+  [TEST 4]  Keyring R/W             - PASSED
+  [TEST 5]  Zamestnanec CRUD        - PASSED
+  [TEST 6]  Viacero zamestnancov    - PASSED
+  [TEST 7]  Nazov - auto            - PASSED
+  [TEST 8]  Nazov - 12 mesiacov     - PASSED
+  [TEST 9]  Konverzia .docx         - PASSED
+  [TEST 10] Zaheslovanie .pdf       - PASSED
+  [TEST 11] Chyba - heslo nenajdene - PASSED
+  [TEST 12] Chyba - zly format      - PASSED
+==================================================
