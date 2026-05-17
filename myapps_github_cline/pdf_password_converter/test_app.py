@@ -1,179 +1,162 @@
-"""
-Test skript pre PDF Password Converter.
-Otestuje konverziu .docx a .pdf do zaheslovaného PDF.
-"""
-
-import os
-import sys
-import io
-import json
-
-# Nastavenie UTF-8 pre stdout (riesi problem s emoji pri presmerovani do suboru)
+"""Testy pre PDF Password Converter v2.0"""
+import os, sys, io, shutil
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+_dir = os.path.dirname(os.path.abspath(__file__))
+if _dir not in sys.path:
+    sys.path.insert(0, _dir)
 
-# Pridame cestu
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
+from datetime import datetime
 from docx import Document
-from pypdf import PdfReader, PdfWriter
-from main import convert_file, generate_output_filename, get_config_path
+from pypdf import PdfReader
+from converter import (
+    get_employees, add_employee, remove_employee,
+    get_employee_password, set_employee_password,
+    generate_output_filename, convert_file, docx_to_pdf,
+    get_output_folder, MESIACE
+)
 
+TS, TP = "TS", "test123"
 
-def get_password():
-    """Načíta heslo z config.json."""
-    config_path = get_config_path()
-    with open(config_path, 'r', encoding='utf-8') as f:
-        config = json.load(f)
-    return config.get("password", "")
+def setup():
+    add_employee(TS, TP)
+    print(f"  [SETUP] '{TS}' vytvoreny")
 
+def cleanup():
+    remove_employee(TS)
+    print(f"  [CLEANUP] '{TS}' odstraneny")
 
-def create_test_docx(filepath):
-    """Vytvori testovaci .docx subor."""
+def test_1_employee_crud():
+    print("\n[TEST 1] Zamestnanec CRUD")
+    assert TS in get_employees()
+    assert get_employee_password(TS) == TP
+    set_employee_password(TS, "new")
+    assert get_employee_password(TS) == "new"
+    set_employee_password(TS, TP)
+    print("  [OK] PASSED")
+
+def test_2_multiple_employees():
+    print("\n[TEST 2] Viacero zamestnancov")
+    add_employee("AB", "a1")
+    add_employee("CD", "c2")
+    assert "AB" in get_employees() and "CD" in get_employees()
+    assert get_employee_password("AB") == "a1"
+    remove_employee("AB")
+    remove_employee("CD")
+    assert "AB" not in get_employees()
+    print("  [OK] PASSED")
+
+def test_3_filename_auto():
+    print("\n[TEST 3] Nazov - automaticky")
+    name = generate_output_filename(TS)
+    now = datetime.now()
+    assert name.startswith(f"{TS}_") and name.endswith(".pdf")
+    if now.month == 1:
+        assert "December" in name and str(now.year-1) in name
+    else:
+        assert MESIACE[now.month-2] in name
+    print(f"  {name}")
+    print("  [OK] PASSED")
+
+def test_4_filename_all_months():
+    print("\n[TEST 4] Nazov - vsetky mesiace")
+    for i, m in enumerate(MESIACE):
+        n = generate_output_filename("KM", i, 2025)
+        assert n == f"KM_Výplatná Páska_{m}_2025.pdf", f"Zly: {n}"
+    print("  [OK] 12/12 mesiacov OK")
+    print("  [OK] PASSED")
+
+def test_5_convert_docx():
+    print("\n[TEST 5] Konverzia .docx -> zaheslovane PDF")
+    p = os.path.join(_dir, "t.docx")
     doc = Document()
-    doc.add_heading('Vyplatna Paska - Maj 2026', level=1)
-    doc.add_paragraph('Meno: Jan Novak')
-    doc.add_paragraph('Pozicia: Senior Developer')
-    doc.add_paragraph('Hruba mzda: 2 500,00 EUR')
-    doc.add_paragraph('Odvody zamestnanec: 335,00 EUR')
-    doc.add_paragraph('Dan z prijmu: 320,50 EUR')
-    doc.add_paragraph('Cista mzda: 1 844,50 EUR')
-    doc.add_paragraph('')
-    doc.add_paragraph('Datum vyplaty: 15.05.2026')
-    doc.save(filepath)
-    print(f"  [OK] Testovaci .docx vytvoreny: {filepath}")
+    doc.add_heading('Test', level=1)
+    doc.add_paragraph('Mzda: 1500 EUR')
+    doc.save(p)
+    r, e = convert_file(p, _dir, TS, 0, 2025)
+    assert r and os.path.exists(r), f"Err: {e}"
+    reader = PdfReader(r)
+    assert reader.is_encrypted
+    reader.decrypt(TP)
+    assert "1500" in reader.pages[0].extract_text()
+    os.remove(p)
+    os.remove(r)
+    print("  [OK] PASSED")
 
-
-def test_filename_generation():
-    """Test generovania nazvu suboru."""
-    print("\n[TEST 1] Generovanie nazvu suboru")
-    filename = generate_output_filename()
-    print(f"  Vygenerovany nazov: {filename}")
-    assert "KM_Výplatná Páska_" in filename, "Nazov neobsahuje prefix!"
-    assert ".pdf" in filename, "Nazov neobsahuje .pdf!"
-    print("  [OK] Test PRESIEL!")
-
-
-def test_docx_conversion():
-    """Test konverzie .docx na zaheslovane PDF."""
-    print("\n[TEST 2] Konverzia .docx -> zaheslovane PDF")
-    
-    test_dir = os.path.dirname(os.path.abspath(__file__))
-    test_docx = os.path.join(test_dir, "test_vyplatna_paska.docx")
-    password = get_password()
-    
-    # Vytvorime testovaci docx
-    create_test_docx(test_docx)
-    
-    # Konvertujeme
-    result = convert_file(test_docx, test_dir)
-    print(f"  Vystupny subor: {result}")
-    
-    assert result is not None, "Konverzia zlyhala!"
-    assert os.path.exists(result), "Vystupny subor neexistuje!"
-    
-    # Overime, ze PDF je zaheslovane
-    reader = PdfReader(result)
-    assert reader.is_encrypted, "PDF NIE JE zaheslovane!"
-    print("  [OK] PDF je zaheslovane!")
-    
-    # Overime, ze heslo funguje - decrypt vracia PasswordType
-    decrypt_result = reader.decrypt(password)
-    assert decrypt_result != 0, f"Heslo '{password}' nefunguje!"
-    print(f"  [OK] Heslo '{password}' funguje (decrypt={decrypt_result})")
-    
-    # Pristupime k obsahu po decrypte
-    num_pages = len(reader.pages)
-    assert num_pages > 0, "PDF nema ziadne stranky!"
-    text = reader.pages[0].extract_text()
-    print(f"  Obsah (prvych 100 znakov): {text[:100]}")
-    
-    assert "Novak" in text or "Novák" in text or "Paska" in text, "Text neobsahuje ocakavany obsah!"
-    print("  [OK] Obsah PDF je spravny!")
-    
-    # Vycistime
-    os.remove(test_docx)
-    os.remove(result)
-    print("  [OK] Testovacie subory vycistene")
-    print("  [OK] Test PRESIEL!")
-
-
-def test_pdf_encryption():
-    """Test zaheslovania existujuceho PDF."""
-    print("\n[TEST 3] Zaheslovanie existujuceho .pdf")
-    
-    test_dir = os.path.dirname(os.path.abspath(__file__))
-    test_docx = os.path.join(test_dir, "test_temp.docx")
-    test_pdf = os.path.join(test_dir, "test_input.pdf")
-    password = get_password()
-    
-    # Najprv vytvorime nezaheslovane PDF (cez docx)
-    from main import docx_to_pdf
+def test_6_convert_pdf():
+    print("\n[TEST 6] Zaheslovanie .pdf")
+    dp = os.path.join(_dir, "t2.docx")
+    pp = os.path.join(_dir, "t2.pdf")
     doc = Document()
-    doc.add_paragraph("Toto je testovaci PDF subor bez hesla.")
-    doc.add_paragraph("Specialne znaky: sctzyadie")
-    doc.save(test_docx)
-    docx_to_pdf(test_docx, test_pdf)
-    os.remove(test_docx)
-    print(f"  [OK] Testovaci PDF vytvoreny: {test_pdf}")
-    
-    # Konvertujeme (zaheslujeme)
-    result = convert_file(test_pdf, test_dir)
-    print(f"  Vystupny subor: {result}")
-    
-    assert result is not None, "Konverzia zlyhala!"
-    assert os.path.exists(result), "Vystupny subor neexistuje!"
-    
-    # Overime
-    reader = PdfReader(result)
-    assert reader.is_encrypted, "PDF NIE JE zaheslovane!"
-    decrypt_result = reader.decrypt(password)
-    assert decrypt_result != 0, f"Heslo '{password}' nefunguje!"
-    text = reader.pages[0].extract_text()
-    print(f"  Obsah: {text[:100]}")
-    assert "testovaci" in text or "testovac" in text, "Text neobsahuje ocakavany obsah!"
-    print("  [OK] Test PRESIEL!")
-    
-    # Vycistime
-    os.remove(test_pdf)
-    os.remove(result)
-    print("  [OK] Testovacie subory vycistene")
+    doc.add_paragraph("Test PDF obsah")
+    doc.save(dp)
+    docx_to_pdf(dp, pp)
+    os.remove(dp)
+    r, e = convert_file(pp, _dir, TS, 5, 2026)
+    assert r and os.path.exists(r), f"Err: {e}"
+    reader = PdfReader(r)
+    assert reader.is_encrypted
+    reader.decrypt(TP)
+    assert "Test" in reader.pages[0].extract_text()
+    os.remove(pp)
+    os.remove(r)
+    print("  [OK] PASSED")
 
+def test_7_error_no_password():
+    print("\n[TEST 7] Chyba - heslo nenajdene")
+    r, e = convert_file("fake.docx", _dir, "NEEXISTUJE", 0, 2025)
+    assert r is None
+    assert "nenájdené" in e
+    print("  [OK] PASSED")
+
+def test_8_error_bad_format():
+    print("\n[TEST 8] Chyba - nepodporovany format")
+    p = os.path.join(_dir, "t.txt")
+    with open(p, "w") as f:
+        f.write("test")
+    r, e = convert_file(p, _dir, TS, 0, 2025)
+    assert r is None
+    assert "Nepodporovaný" in e
+    os.remove(p)
+    print("  [OK] PASSED")
+
+def test_9_output_folder_created():
+    print("\n[TEST 9] Vystupny priecinok sa vytvori ak neexistuje")
+    out = get_output_folder()
+    # Zmazeme ak existuje
+    if os.path.exists(out):
+        shutil.rmtree(out)
+    assert not os.path.exists(out)
+    # Zavolame znova - musi sa vytvorit
+    out2 = get_output_folder()
+    assert os.path.exists(out2)
+    assert os.path.isdir(out2)
+    print(f"  Priecinok: {out2}")
+    print("  [OK] PASSED")
 
 if __name__ == "__main__":
     print("=" * 50)
-    print("  PDF PASSWORD CONVERTER - TESTY")
+    print("  PDF PASSWORD CONVERTER v2.0 - TESTY")
     print("=" * 50)
-    
-    passed = 0
-    failed = 0
-    
-    try:
-        test_filename_generation()
-        passed += 1
-    except Exception as e:
-        print(f"  [FAIL] {e}")
-        failed += 1
-    
-    try:
-        test_docx_conversion()
-        passed += 1
-    except Exception as e:
-        print(f"  [FAIL] {e}")
-        failed += 1
-    
-    try:
-        test_pdf_encryption()
-        passed += 1
-    except Exception as e:
-        print(f"  [FAIL] {e}")
-        failed += 1
-    
+    setup()
+    tests = [test_1_employee_crud, test_2_multiple_employees,
+             test_3_filename_auto, test_4_filename_all_months,
+             test_5_convert_docx, test_6_convert_pdf,
+             test_7_error_no_password, test_8_error_bad_format,
+             test_9_output_folder_created]
+    passed = failed = 0
+    for t in tests:
+        try:
+            t()
+            passed += 1
+        except Exception as ex:
+            print(f"  [FAIL] {ex}")
+            failed += 1
+    cleanup()
     print("\n" + "=" * 50)
-    print(f"  VYSLEDOK: {passed} PASSED / {failed} FAILED / {passed + failed} TOTAL")
+    print(f"  VYSLEDOK: {passed} PASSED / {failed} FAILED / {len(tests)} TOTAL")
     if failed == 0:
-        print("  VSETKY TESTY PRESLI USPESNE! ✓")
+        print("  VSETKY TESTY PRESLI USPESNE!")
     else:
-        print("  NIEKTORE TESTY ZLYHALI! ✗")
+        print("  NIEKTORE TESTY ZLYHALI!")
     print("=" * 50)
-    
     sys.exit(0 if failed == 0 else 1)

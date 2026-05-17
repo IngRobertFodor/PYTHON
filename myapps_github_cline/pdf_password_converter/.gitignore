@@ -1,20 +1,21 @@
-# Heslo - NIKDY necommitovat!
-config.json
-
 # Python
 __pycache__/
-*.pyc
-*.pyo
-
-# Build
-build/
+*.py[cod]
+*.egg-info/
 dist/
+build/
 *.spec
 
-# Test artefakty
-test_vyplatna_paska.docx
-test_temp.docx
-test_input.pdf
+# PyInstaller
+*.exe
+
+# Výstupné súbory
+Výplatné Pásky/
+
+# Testovacie dočasné súbory
+test_*.docx
+test_*.pdf
+!test_app.py
 
 # IDE
 .vscode/
