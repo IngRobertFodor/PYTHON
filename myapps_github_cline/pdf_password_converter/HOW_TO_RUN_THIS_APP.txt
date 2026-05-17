@@ -1,34 +1,47 @@
 HOW TO RUN THIS APP
 ====================
 
-FIRST TIME SETUP (only once):
+=== FIRST TIME SETUP (do this only once) ===
 
-  1. In this folder, find "WinPython64-....exe" file
-  2. Double-click it → choose THIS folder as extraction destination
-     Result: a "WinPython" folder appears with Python inside
-  3. Install dependencies - open CMD in this folder and run:
-     WinPython\WPy64-31450\python\python.exe -m pip install -r requirements.txt
-     (the exact path may vary - look inside WinPython folder for python.exe)
+STEP 1: Extract WinPython
+  - In this folder you will find a file like "WinPython64-....exe"
+  - Double-click it
+  - When asked WHERE to extract, select THIS FOLDER:
+    (the folder where you see main.py, start_app.bat, etc.)
+  - Click Extract. A new folder "WinPython" will appear.
 
-RUNNING THE APP:
+STEP 2: Install required libraries
+  - Double-click "install_dependencies.bat"
+  - Wait until it finishes (you will see "DONE" at the end)
+  - This only needs to be done once
 
-  Double-click "start_app.bat"
-  That's it! The .bat file automatically finds python.exe inside WinPython.
+=== RUNNING THE APP (every time) ===
 
-WHAT THE APP DOES:
+  - Double-click "start_app.bat"
+  - The app window will open
+  - Done!
 
-  - Takes a .docx or .pdf file
-  - Converts it to a password-protected PDF
-  - Saves it as: [Initials]_Vyplatna Paska_[Month]_[Year].pdf
-  - Each employee has their own password stored securely
+=== FIRST TIME USING THE APP ===
 
-FIRST RUN:
+  - The app will ask you to add an employee
+  - Enter initials (e.g. "KM") and a password
+  - Then select a .docx or .pdf file
+  - Click "Convert" button
+  - The encrypted PDF will be saved in "Vyplatne Pasky" folder
 
-  - App will ask you to add an employee (initials + password)
-  - After that, select a file and click "Convert"
+=== MOVING TO ANOTHER COMPUTER ===
 
-TRANSFERRING TO ANOTHER PC:
+  - Copy the ENTIRE "pdf_password_converter" folder to USB
+  - On the new computer, just double-click "start_app.bat"
+  - It will ask to add employee again (passwords are stored per computer)
 
-  Copy the entire "pdf_password_converter" folder (with WinPython inside) to USB
-  On the new PC: double-click start_app.bat
-  First run will ask for employee setup again (passwords are per-PC)
+=== TROUBLESHOOTING ===
+
+  Problem: "start_app.bat" shows error about python not found
+  Solution: Make sure you did Step 1 (extract WinPython)
+
+  Problem: App crashes with import error
+  Solution: Run "install_dependencies.bat" again
+
+  Problem: Nothing happens when double-clicking start_app.bat
+  Solution: Right-click start_app.bat -> Run as administrator
