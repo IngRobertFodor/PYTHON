@@ -105,13 +105,14 @@ class PDFConverterApp:
                                    textvariable=self.year_var, width=7,
                                    command=self._update_name)
         self.year_sb.pack(side=tk.LEFT)
-        self._toggle_date()
 
         # --- Názov výstupného súboru ---
         self.name_label = ttk.Label(f, text="", font=("Segoe UI", 9, "italic"),
                                     foreground="gray")
         self.name_label.pack(pady=5)
-        self._update_name()
+
+        # Inicializácia dátumu (musí byť AŽ po vytvorení name_label)
+        self._toggle_date()
 
         # --- Tlačidlo konverzie ---
         ttk.Button(f, text="Konvertovať do zaheslovaného PDF",
