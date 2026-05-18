@@ -1,0 +1,62 @@
+HOW TO RUN THIS APP
+====================
+
+=== FIRST TIME SETUP (do this only once) ===
+
+STEP 1: Make sure Python is installed
+  - Download Python from https://www.python.org/downloads/
+  - During installation, CHECK the box "Add Python to PATH"
+  - Restart your computer after installation
+
+STEP 2: Install required libraries
+  - Double-click "start_app.bat"
+  - It will automatically install dependencies (Flask, etc.)
+  - This happens only on first run
+
+=== RUNNING THE APP (every time) ===
+
+  - Double-click "start_app.bat"
+  - Wait a few seconds
+  - Your web browser will open automatically at http://localhost:5000
+  - Done!
+
+=== USING THE APP ===
+
+  1. Enter a destination (e.g. "Bratislava", "Paris", "Grand Canyon")
+     OR click directly on the map
+  2. Set search radius (km or travel time)
+  3. Select travel date (for weather forecast)
+  4. Choose categories (castles, hiking trails, waterfalls, etc.)
+  5. Click "Discover places" button
+  6. App shows 10 mainstream + 10 alternative POIs with weather info
+
+=== STOPPING THE APP ===
+
+  - Go to the CMD window (black window with text)
+  - Press Ctrl+C
+  - The server will stop
+
+=== RUNNING ON ANOTHER COMPUTER ===
+
+  - Copy the ENTIRE "my_travel_tips" folder
+  - Make sure the other computer has Python installed (Step 1)
+  - Double-click "start_app.bat"
+
+=== TROUBLESHOOTING ===
+
+  Problem: "start_app.bat" shows "Python nie je nainstalovany"
+  Solution: Install Python from python.org (check "Add to PATH")
+
+  Problem: Browser opens but shows "This site can't be reached"
+  Solution: Wait 5 seconds and refresh the page (server needs time to start)
+
+  Problem: "pip" errors during installation
+  Solution: Run CMD as administrator, then: python -m pip install --upgrade pip
+
+  Problem: Port 5000 is already in use
+  Solution: Close other applications using port 5000, or change port in backend/app.py
+
+=== RUNNING TESTS ===
+
+  Open CMD in this folder and run:
+  python -m pytest tests/ --rootdir=. -v

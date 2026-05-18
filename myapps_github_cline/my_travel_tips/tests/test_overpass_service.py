@@ -1,5 +1,5 @@
 """
-Unit Tests - Overpass Service (POI) v1.1
+Unit Tests - Overpass Service (POI)
 =========================================
 Tests POI discovery, scoring, categorization, query building, error handling.
 """

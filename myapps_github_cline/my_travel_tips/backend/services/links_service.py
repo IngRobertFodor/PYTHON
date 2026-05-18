@@ -4,8 +4,8 @@ Links Service
 Generates 5 relevant links for each POI based on its type.
 Each link is precisely targeted to the POI category for maximum usefulness.
 
-v1.1 - Complete rewrite with 18 POI type-specific link configurations.
-       Added Wikiloc, Komoot, Strava, TripAdvisor, Atlas Obscura links.
+Supports 15 POI type-specific link configurations.
+Sources: Wikiloc, Komoot, Strava, TripAdvisor, Atlas Obscura, AllTrails, iNaturalist, Wikivoyage, Reddit.
 """
 
 import urllib.parse

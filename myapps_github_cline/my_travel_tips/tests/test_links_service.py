@@ -1,5 +1,5 @@
 """
-Unit Tests - Links Service v1.1
+Unit Tests - Links Service
 ================================
 Tests link generation for POIs with type-specific configurations.
 """

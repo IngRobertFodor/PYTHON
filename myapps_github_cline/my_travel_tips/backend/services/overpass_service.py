@@ -7,7 +7,7 @@ Free, no API key required.
 
 Supports radius up to 150km with intelligent query scaling.
 
-v1.1 - Extended tags for hiking, cycling, nature, historic sites worldwide.
+Supports hiking/cycling routes, extended nature/historic tags worldwide.
 """
 
 import requests
