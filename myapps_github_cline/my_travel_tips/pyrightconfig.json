@@ -1,11 +1,5 @@
 {
-    "extraPaths": ["backend"],
     "pythonVersion": "3.12",
-    "reportMissingImports": false,
-    "executionEnvironments": [
-        {
-            "root": ".",
-            "extraPaths": ["backend"]
-        }
-    ]
+    "extraPaths": ["backend"],
+    "reportMissingImports": false
 }
