@@ -101,10 +101,30 @@ CYCLING_TAGS = [
 ]
 
 
+# Fallback tags used when primary results are insufficient
+FALLBACK_MAINSTREAM_TAGS = [
+    'tourism=viewpoint',
+    'leisure=garden',
+    'historic=memorial',
+    'amenity=place_of_worship',
+    'tourism=information',
+]
+
+FALLBACK_ALTERNATIVE_TAGS = [
+    'tourism=artwork',
+    'natural=spring',
+    'man_made=tower',
+    'building=church',
+    'historic=wayside_shrine',
+]
+
+
 def get_pois(lat, lon, radius_km, custom_tags=None):
     """
     Get POIs from Overpass API within given radius.
     Supports radius up to 150km.
+    Validates all results are within radius.
+    If fewer than 10 results, attempts to fill with fallback queries.
 
     Args:
         lat, lon: center coordinates
@@ -112,7 +132,7 @@ def get_pois(lat, lon, radius_km, custom_tags=None):
         custom_tags: optional list of OSM tags from frontend checkboxes
                      If provided, uses these instead of default MAINSTREAM/ALTERNATIVE split
 
-    Returns dict with 'mainstream' and 'alternative' lists.
+    Returns dict with 'mainstream' and 'alternative' lists (max 10 each).
     """
     radius_m = int(radius_km * 1000)
 
@@ -129,12 +149,12 @@ def get_pois(lat, lon, radius_km, custom_tags=None):
         # Query POI tags
         if poi_tags:
             poi_raw = _query_overpass(lat, lon, radius_m, poi_tags, config)
-            all_pois.extend(_process_pois(poi_raw, lat, lon, 'mainstream'))
+            all_pois.extend(_process_pois(poi_raw, lat, lon, 'mainstream', max_radius_km=radius_km))
 
         # Query route tags (different query structure for relations)
         if route_tags:
             route_raw = _query_overpass_routes(lat, lon, radius_m, route_tags, config)
-            all_pois.extend(_process_pois(route_raw, lat, lon, 'mainstream'))
+            all_pois.extend(_process_pois(route_raw, lat, lon, 'mainstream', max_radius_km=radius_km))
 
         # Sort by score
         all_pois.sort(key=lambda x: x.get('score', 0), reverse=True)
@@ -155,9 +175,9 @@ def get_pois(lat, lon, radius_km, custom_tags=None):
         time.sleep(0.5)
         alternative_raw = _query_overpass(lat, lon, radius_m, ALTERNATIVE_TAGS, config)
 
-        # Process and score
-        mainstream = _process_pois(mainstream_raw, lat, lon, 'mainstream')
-        alternative = _process_pois(alternative_raw, lat, lon, 'alternative')
+        # Process, score, and VALIDATE radius
+        mainstream = _process_pois(mainstream_raw, lat, lon, 'mainstream', max_radius_km=radius_km)
+        alternative = _process_pois(alternative_raw, lat, lon, 'alternative', max_radius_km=radius_km)
 
         # Remove duplicates between lists (prefer mainstream)
         mainstream_names = {poi['name'].lower() for poi in mainstream if poi.get('name')}
@@ -168,10 +188,38 @@ def get_pois(lat, lon, radius_km, custom_tags=None):
         mainstream.sort(key=lambda x: x.get('score', 0), reverse=True)
         alternative.sort(key=lambda x: x.get('score', 0), reverse=True)
 
+        # Fill if not enough results (try fallback tags)
+        mainstream = _fill_results(mainstream, lat, lon, radius_km, radius_m,
+                                   config, 'mainstream', FALLBACK_MAINSTREAM_TAGS, target=10)
+        alternative = _fill_results(alternative, lat, lon, radius_km, radius_m,
+                                    config, 'alternative', FALLBACK_ALTERNATIVE_TAGS, target=10)
+
     return {
         'mainstream': mainstream[:10],
         'alternative': alternative[:10]
     }
+
+
+def _fill_results(current_list, lat, lon, radius_km, radius_m, config, category, fallback_tags, target=10):
+    """
+    If current_list has fewer than target POIs, query fallback tags to fill.
+    Avoids duplicates with existing results.
+    """
+    if len(current_list) >= target:
+        return current_list
+
+    needed = target - len(current_list)
+    existing_names = {p['name'].lower() for p in current_list}
+
+    # Query fallback tags
+    fallback_raw = _query_overpass(lat, lon, radius_m, fallback_tags, config)
+    fallback_pois = _process_pois(fallback_raw, lat, lon, category, max_radius_km=radius_km)
+
+    # Filter duplicates
+    new_pois = [p for p in fallback_pois if p['name'].lower() not in existing_names]
+    new_pois.sort(key=lambda x: x.get('score', 0), reverse=True)
+
+    return current_list + new_pois[:needed]
 
 
 def _get_query_config(radius_km):
@@ -356,10 +404,11 @@ out center;"""
     return query
 
 
-def _process_pois(elements, center_lat, center_lon, category):
+def _process_pois(elements, center_lat, center_lon, category, max_radius_km=None):
     """
     Process raw Overpass elements into structured POI objects.
     Calculate a relevance/popularity score for sorting.
+    Filters out POIs beyond max_radius_km if specified.
     """
     pois = []
     seen_names = set()
@@ -392,6 +441,10 @@ def _process_pois(elements, center_lat, center_lon, category):
 
         # Calculate distance from center
         distance_km = _haversine(center_lat, center_lon, poi_lat, poi_lon)
+
+        # VALIDATE: Skip POIs outside the requested radius
+        if max_radius_km and distance_km > max_radius_km * 1.1:  # 10% tolerance for edge cases
+            continue
 
         # Determine POI type/category
         poi_type = _determine_poi_type(tags)

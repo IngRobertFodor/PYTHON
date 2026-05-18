@@ -47,11 +47,26 @@ class TestGetPois:
 
     @patch('services.overpass_service._query_overpass')
     def test_removes_duplicates_between_categories(self, mock_query):
-        mock_query.return_value = [{'type': 'node', 'id': 1, 'lat': 48.14, 'lon': 17.10,
-                                    'tags': {'name': 'Test Castle', 'historic': 'castle'}}]
+        """Same POI shouldn't appear in both mainstream and alternative."""
+        # Mainstream returns castles, alternative returns viewpoints
+        mainstream_elements = [{'type': 'node', 'id': i, 'lat': 48.14 + i * 0.001, 'lon': 17.10,
+                                'tags': {'name': f'Castle {i}', 'historic': 'castle', 'wikipedia': f'en:C{i}'}}
+                               for i in range(12)]
+        alt_elements = [{'type': 'node', 'id': 100 + i, 'lat': 48.14 + i * 0.001, 'lon': 17.10,
+                         'tags': {'name': f'View {i}', 'tourism': 'viewpoint'}}
+                        for i in range(12)]
+        # Also include one castle in alternative (should be deduplicated)
+        alt_elements.append({'type': 'node', 'id': 999, 'lat': 48.141, 'lon': 17.10,
+                             'tags': {'name': 'Castle 0', 'historic': 'castle'}})
+        # Mock returns: 1st call=mainstream, 2nd call=alternative, 3rd+=fallback (empty)
+        mock_query.side_effect = [mainstream_elements, alt_elements, [], []]
         result = get_pois(48.15, 17.11, 25)
-        all_names = [p['name'] for p in result['mainstream']] + [p['name'] for p in result['alternative']]
-        assert len(all_names) == len(set(n.lower() for n in all_names))
+        mainstream_names = {p['name'].lower() for p in result['mainstream']}
+        alternative_names = {p['name'].lower() for p in result['alternative']}
+        # 'Castle 0' should NOT appear in alternative (already in mainstream)
+        assert 'castle 0' not in alternative_names
+        # No overlap
+        assert len(mainstream_names & alternative_names) == 0
 
 
 class TestGetQueryConfig:
