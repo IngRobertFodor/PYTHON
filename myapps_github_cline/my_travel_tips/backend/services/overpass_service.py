@@ -6,6 +6,8 @@ Separates results into mainstream (well-known) and alternative (hidden gems).
 Free, no API key required.
 
 Supports radius up to 150km with intelligent query scaling.
+
+v1.1 - Extended tags for hiking, cycling, nature, historic sites worldwide.
 """
 
 import requests
@@ -18,49 +20,84 @@ OVERPASS_SERVERS = [
     "https://overpass.kumi.systems/api/interpreter",
 ]
 
-USER_AGENT = "FodorTravelTIPs/1.0 (travel-poi-discovery)"
+USER_AGENT = "MyTravelTips/1.1 (travel-poi-discovery)"
 
 # Tags that indicate MAINSTREAM / popular POIs
 MAINSTREAM_TAGS = [
+    # Tourism & Attractions
     'tourism=attraction',
     'tourism=museum',
-    'historic=castle',
-    'historic=monument',
-    'historic=memorial',
-    'leisure=park',
+    'tourism=gallery',
     'tourism=theme_park',
     'tourism=zoo',
-    'amenity=theatre',
     'tourism=aquarium',
-    'leisure=water_park',
+    'tourism=resort',
+    # Historic
+    'historic=castle',
     'historic=palace',
-    'tourism=gallery',
+    'historic=monument',
+    'historic=memorial',
+    'historic=city_gate',
+    'historic=city_wall',
+    'historic=manor',
+    # Leisure & Parks
+    'leisure=park',
+    'leisure=water_park',
+    'leisure=nature_reserve',
+    # Culture
+    'amenity=theatre',
     'amenity=arts_centre',
+    'amenity=marketplace',
+    # Protected areas
+    'boundary=national_park',
+    'boundary=protected_area',
 ]
 
 # Tags that indicate ALTERNATIVE / unique / hidden gem POIs
 ALTERNATIVE_TAGS = [
+    # Unique nature
     'tourism=artwork',
     'tourism=viewpoint',
-    'historic=ruins',
-    'historic=archaeological_site',
     'natural=cave_entrance',
     'waterway=waterfall',
+    'waterway=rapids',
     'geological=*',
     'natural=peak',
     'natural=spring',
+    'natural=hot_spring',
     'natural=arch',
-    'man_made=lighthouse',
-    'man_made=windmill',
+    'natural=geyser',
+    'natural=volcano',
+    'natural=glacier',
+    'natural=beach',
+    'natural=rock',
+    # Unique historic
+    'historic=ruins',
+    'historic=archaeological_site',
+    'historic=aqueduct',
+    'historic=wreck',
     'historic=wayside_shrine',
     'historic=boundary_stone',
+    'historic=mine',
+    # Unique man-made
+    'man_made=lighthouse',
+    'man_made=windmill',
+    'man_made=tower',
+    # Other unique
     'amenity=monastery',
     'building=church',
-    'natural=hot_spring',
     'leisure=garden',
-    'historic=mine',
-    'historic=farm',
     'tourism=wilderness_hut',
+]
+
+# Tags for hiking & cycling routes (special handling)
+HIKING_TAGS = [
+    'route=hiking',
+    'route=foot',
+]
+
+CYCLING_TAGS = [
+    'route=bicycle',
 ]
 
 
@@ -68,13 +105,13 @@ def get_pois(lat, lon, radius_km, custom_tags=None):
     """
     Get POIs from Overpass API within given radius.
     Supports radius up to 150km.
-    
+
     Args:
         lat, lon: center coordinates
         radius_km: search radius in km
         custom_tags: optional list of OSM tags from frontend checkboxes
                      If provided, uses these instead of default MAINSTREAM/ALTERNATIVE split
-    
+
     Returns dict with 'mainstream' and 'alternative' lists.
     """
     radius_m = int(radius_km * 1000)
@@ -83,21 +120,30 @@ def get_pois(lat, lon, radius_km, custom_tags=None):
     config = _get_query_config(radius_km)
 
     if custom_tags:
-        # Custom tags from frontend checkboxes
-        # Single query with all selected tags, then split by score
-        all_raw = _query_overpass(lat, lon, radius_m, custom_tags, config)
-        
-        # Process all results
-        all_pois = _process_pois(all_raw, lat, lon, 'mainstream')
-        
+        # Separate route tags from POI tags (routes need different query)
+        route_tags = [t for t in custom_tags if t.startswith('route=')]
+        poi_tags = [t for t in custom_tags if not t.startswith('route=')]
+
+        all_pois = []
+
+        # Query POI tags
+        if poi_tags:
+            poi_raw = _query_overpass(lat, lon, radius_m, poi_tags, config)
+            all_pois.extend(_process_pois(poi_raw, lat, lon, 'mainstream'))
+
+        # Query route tags (different query structure for relations)
+        if route_tags:
+            route_raw = _query_overpass_routes(lat, lon, radius_m, route_tags, config)
+            all_pois.extend(_process_pois(route_raw, lat, lon, 'mainstream'))
+
         # Sort by score
         all_pois.sort(key=lambda x: x.get('score', 0), reverse=True)
-        
+
         # Top 10 = mainstream (most notable/popular)
         mainstream = all_pois[:10]
         for poi in mainstream:
             poi['category'] = 'mainstream'
-        
+
         # Next 10 = alternative (less known but interesting)
         alternative = all_pois[10:20]
         for poi in alternative:
@@ -149,6 +195,9 @@ def _query_overpass(lat, lon, radius_m, tags, config):
     Uses GET method with proper headers.
     Tries fallback servers on failure.
     """
+    if not tags:
+        return []
+
     # Build compact query using regex for multiple values of same key
     query = _build_query(lat, lon, radius_m, tags, config)
 
@@ -191,8 +240,67 @@ def _query_overpass(lat, lon, radius_m, tags, config):
         except requests.RequestException as e:
             print(f"Overpass request error: {e}")
             continue
+        except (ValueError, KeyError) as e:
+            print(f"Overpass JSON parse error: {e}")
+            continue
 
     print("All Overpass servers failed!")
+    return []
+
+
+def _query_overpass_routes(lat, lon, radius_m, route_tags, config):
+    """
+    Query Overpass for route relations (hiking, cycling).
+    Routes are stored as relations in OSM, need different query structure.
+    """
+    if not route_tags:
+        return []
+
+    timeout = config['timeout']
+
+    # Build route-specific query
+    route_queries = []
+    for tag in route_tags:
+        if '=' in tag:
+            key, value = tag.split('=', 1)
+            route_queries.append(
+                f'relation["{key}"="{value}"](around:{radius_m},{lat},{lon});'
+            )
+
+    if not route_queries:
+        return []
+
+    query = f"""[out:json][timeout:{timeout}];
+(
+{chr(10).join('  ' + rq for rq in route_queries)}
+);
+out center;"""
+
+    headers = {
+        'User-Agent': USER_AGENT,
+        'Accept': 'application/json',
+    }
+
+    for server_url in OVERPASS_SERVERS:
+        try:
+            response = requests.get(
+                server_url,
+                params={'data': query},
+                headers=headers,
+                timeout=config['timeout'] + 10
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                elements = data.get('elements', [])
+                print(f"Overpass routes: got {len(elements)} elements")
+                return elements
+            else:
+                continue
+
+        except (requests.RequestException, ValueError):
+            continue
+
     return []
 
 
@@ -203,10 +311,9 @@ def _build_query(lat, lon, radius_m, tags, config):
     """
     timeout = config['timeout']
     maxsize = config['maxsize']
-    limit = config['limit']
 
     # Group tags by key for regex optimization
-    # e.g. tourism=attraction, tourism=museum → ["tourism"~"attraction|museum"]
+    # e.g. tourism=attraction, tourism=museum -> ["tourism"~"attraction|museum"]
     key_groups = {}
     wildcard_keys = []
 
@@ -236,6 +343,9 @@ def _build_query(lat, lon, radius_m, tags, config):
     # Wildcard keys
     for key in wildcard_keys:
         tag_queries.append(f'nwr["{key}"](around:{radius_m},{lat},{lon});')
+
+    if not tag_queries:
+        return f'[out:json][timeout:{timeout}];out;'
 
     query = f"""[out:json][timeout:{timeout}];
 (
@@ -317,6 +427,8 @@ def _process_pois(elements, center_lat, center_lon, category):
                 'man_made': tags.get('man_made', ''),
                 'geological': tags.get('geological', ''),
                 'waterway': tags.get('waterway', ''),
+                'route': tags.get('route', ''),
+                'boundary': tags.get('boundary', ''),
             },
             'is_outdoor': _is_outdoor(tags)
         }
@@ -328,28 +440,65 @@ def _process_pois(elements, center_lat, center_lon, category):
 
 def _determine_poi_type(tags):
     """Determine the type category for link generation."""
-    if tags.get('natural') in ['peak', 'cave_entrance', 'spring', 'arch', 'hot_spring']:
+    # Hiking/Cycling routes
+    if tags.get('route') in ['hiking', 'foot']:
+        return 'hiking'
+    if tags.get('route') == 'bicycle':
+        return 'cycling'
+
+    # Nature types
+    if tags.get('natural') == 'peak':
+        return 'peak'
+    if tags.get('tourism') == 'viewpoint':
+        return 'viewpoint'
+    if tags.get('natural') in ['cave_entrance', 'spring', 'hot_spring', 'arch']:
         return 'nature'
     if tags.get('waterway') == 'waterfall':
+        return 'waterfall'
+    if tags.get('waterway') == 'rapids':
         return 'nature'
+    if tags.get('natural') in ['geyser', 'volcano', 'glacier']:
+        return 'volcano'
+    if tags.get('natural') in ['beach']:
+        return 'beach'
+    if tags.get('natural') == 'rock':
+        return 'geology'
     if tags.get('geological'):
-        return 'nature'
-    if tags.get('tourism') == 'viewpoint':
-        return 'nature'
+        return 'geology'
     if tags.get('leisure') in ['park', 'garden', 'nature_reserve']:
         return 'nature'
-    if tags.get('historic') in ['castle', 'palace', 'ruins', 'archaeological_site',
-                                 'monument', 'memorial', 'mine']:
+    if tags.get('boundary') in ['national_park', 'protected_area']:
+        return 'national_park'
+
+    # Historic types
+    if tags.get('historic') in ['castle', 'palace', 'manor', 'city_gate', 'city_wall']:
         return 'historic'
+    if tags.get('historic') in ['ruins', 'archaeological_site', 'aqueduct', 'wreck']:
+        return 'archaeology'
+    if tags.get('historic') in ['monument', 'memorial', 'mine']:
+        return 'historic'
+
+    # Religious
     if tags.get('amenity') in ['monastery', 'place_of_worship']:
         return 'religious'
     if tags.get('building') == 'church':
         return 'religious'
+
+    # Cultural
     if tags.get('tourism') in ['museum', 'gallery', 'attraction', 'theme_park',
-                                'zoo', 'aquarium']:
+                                'zoo', 'aquarium', 'resort']:
         return 'cultural'
-    if tags.get('man_made') in ['lighthouse', 'windmill']:
+    if tags.get('amenity') in ['theatre', 'arts_centre', 'marketplace']:
+        return 'cultural'
+
+    # Man-made unique
+    if tags.get('man_made') in ['lighthouse', 'windmill', 'tower']:
         return 'historic'
+
+    # Wilderness hut
+    if tags.get('tourism') == 'wilderness_hut':
+        return 'hut'
+
     return 'cultural'
 
 
@@ -392,19 +541,34 @@ def _calculate_score(tags, distance_km, category):
     if tags.get('name:en'):
         score += 5
 
-    # For alternative: bonus for unique/unusual types
+    # Mainstream bonus: managed tourist attractions
+    if category == 'mainstream':
+        if tags.get('tourism') in ['attraction', 'museum', 'zoo', 'aquarium', 'theme_park']:
+            score += 15
+        if tags.get('boundary') in ['national_park', 'protected_area']:
+            score += 20
+        if tags.get('historic') in ['castle', 'palace']:
+            score += 10
+
+    # Alternative bonus: unique/unusual types
     if category == 'alternative':
         unusual_values = {
-            'natural': ['cave_entrance', 'hot_spring', 'arch'],
-            'man_made': ['lighthouse'],
-            'waterway': ['waterfall'],
+            'natural': ['cave_entrance', 'hot_spring', 'arch', 'geyser', 'volcano',
+                        'glacier', 'rock'],
+            'man_made': ['lighthouse', 'tower'],
+            'waterway': ['waterfall', 'rapids'],
             'geological': None,  # Any value
+            'historic': ['aqueduct', 'wreck', 'ruins', 'archaeological_site'],
         }
         for key, values in unusual_values.items():
             tag_val = tags.get(key)
             if tag_val:
                 if values is None or tag_val in values:
                     score += 15
+
+        # Penalty for too generic items
+        if tags.get('historic') in ['boundary_stone', 'wayside_shrine']:
+            score -= 10
 
     return score
 
@@ -419,6 +583,9 @@ def _is_outdoor(tags):
         tags.get('leisure') in ['park', 'garden', 'nature_reserve'],
         tags.get('man_made') in ['lighthouse', 'windmill'],
         tags.get('historic') == 'ruins',
+        tags.get('route') in ['hiking', 'foot', 'bicycle'],
+        tags.get('boundary') in ['national_park', 'protected_area'],
+        tags.get('tourism') == 'wilderness_hut',
     ]
     return any(outdoor_indicators)
 

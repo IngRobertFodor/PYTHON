@@ -51,13 +51,39 @@ const POIModule = {
             }
         }
 
-        // Type badge
-        const typeLabels = {
+        // Type badge (localized)
+        const typeLabels = currentLang === 'sk' ? {
+            nature: '🌿 Príroda',
+            historic: '🏛️ História',
+            cultural: '🎭 Kultúra',
+            religious: '⛪ Sakrálne',
+            geology: '🪨 Geológia',
+            hiking: '🥾 Turistika',
+            cycling: '🚴 Cyklo',
+            peak: '⛰️ Vrchol',
+            viewpoint: '👁️ Vyhliadka',
+            waterfall: '🌊 Vodopád',
+            volcano: '🌋 Sopka',
+            beach: '🏖️ Pláž',
+            archaeology: '⛏️ Archeológia',
+            national_park: '🌲 Nár. park',
+            hut: '🏕️ Chata',
+        } : {
             nature: '🌿 Nature',
             historic: '🏛️ Historic',
             cultural: '🎭 Cultural',
             religious: '⛪ Religious',
-            geology: '🪨 Geology'
+            geology: '🪨 Geology',
+            hiking: '🥾 Hiking',
+            cycling: '🚴 Cycling',
+            peak: '⛰️ Peak',
+            viewpoint: '👁️ Viewpoint',
+            waterfall: '🌊 Waterfall',
+            volcano: '🌋 Volcano',
+            beach: '🏖️ Beach',
+            archaeology: '⛏️ Archaeology',
+            national_park: '🌲 National Park',
+            hut: '🏕️ Mountain Hut',
         };
         const typeBadge = typeLabels[poi.type] || '📍 POI';
 

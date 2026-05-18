@@ -71,6 +71,8 @@ class TestHTMLStructure:
         assert 'data-group="historic"' in html
         assert 'data-group="nature"' in html
         assert 'data-group="culture"' in html
+        assert 'data-group="hiking"' in html
+        assert 'data-group="fun"' in html
 
 
 class TestCSSFiles:

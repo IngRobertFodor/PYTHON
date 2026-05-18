@@ -42,6 +42,8 @@ def sample_poi():
         'wikipedia': 'en:Bratislava Castle',
         'wikidata': 'Q168713',
         'website': 'https://www.bratislava-hrad.sk',
+        'official_website': 'https://www.bratislava-hrad.sk',
+        'wiki_url': 'https://en.wikipedia.org/wiki/Bratislava_Castle',
         'description': 'A castle in Bratislava',
         'opening_hours': 'Mo-Su 09:00-17:00',
         'tags': {
@@ -53,6 +55,8 @@ def sample_poi():
             'man_made': '',
             'geological': '',
             'waterway': '',
+            'route': '',
+            'boundary': '',
         },
         'is_outdoor': False
     }

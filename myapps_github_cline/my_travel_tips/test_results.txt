@@ -1,69 +1,48 @@
-============================================
+==================================================
  MY TRAVEL TIPS - TEST RESULTS
-============================================
+==================================================
 
-#1 | 2026-05-16 00:26 | 212 PASSED / 0 FAILED | 4.92s
-============================================
-platform: win32 | Python 3.12.10 | pytest 8.1.1
-(original run as fodor-travel-tips)
-
-#2 | 2026-05-16 01:05 | 212 PASSED / 0 FAILED | 13.28s
-============================================
-platform: win32 | Python 3.12.10 | pytest 8.1.1
-(after rename to my_travel_tips)
-
-test_frontend_files.py (40 tests)
-  TestHTMLStructure ............ 12 PASSED
-  TestCSSFiles ................. 8 PASSED
-  TestJSFiles .................. 12 PASSED
-  TestTimeParsing .............. 8 PASSED
-
-test_geocoding_service.py (21 tests)
-  TestGeocodePlace ............. 5 PASSED
-  TestReverseGeocode ........... 3 PASSED
-  TestCalculateTravelRadius .... 6 PASSED
-  TestHelperFunctions .......... 7 PASSED
-
-test_links_service.py (26 tests)
-  TestGenerateLinks ............ 11 PASSED
-  TestContextualLinks .......... 6 PASSED
-  TestLinkBuilders ............. 6 PASSED
-  TestTranslationHelper ........ 3 PASSED
-
-test_overpass_service.py (42 tests)
-  TestGetPois .................. 5 PASSED
-  TestGetQueryConfig ........... 4 PASSED
-  TestBuildQuery ............... 4 PASSED
-  TestProcessPois .............. 6 PASSED
-  TestDeterminePoiType ......... 12 PASSED
-  TestCalculateScore ........... 5 PASSED
-  TestIsOutdoor ................ 7 PASSED
-  TestHaversine ................ 4 PASSED
-  TestTagLists ................. 3 PASSED
-
-test_region_theme_service.py (17 tests)
-  TestGetThemeForLocation ...... 6 PASSED
-  TestGetAllThemes ............. 3 PASSED
-  TestDetectRegionTypeAdvanced . 3 PASSED
-  TestThemeDefinitions ......... 5 PASSED
-
-test_routes.py (26 tests)
-  TestHealthEndpoint ........... 2 PASSED
-  TestGeocodingRoutes .......... 9 PASSED
-  TestWeatherRoutes ............ 5 PASSED
-  TestPOIRoutes ................ 9 PASSED
-  TestStaticFiles .............. 1 PASSED
-
-test_weather_service.py (30 tests)
-  TestGetWeatherForPoint ....... 6 PASSED
-  TestGenerateGrid ............. 4 PASSED
-  TestAreaSummary .............. 3 PASSED
-  TestParseDate ................ 6 PASSED
-  TestIsOutdoorFriendly ........ 5 PASSED
-  TestOutdoorRecommendation .... 6 PASSED
-  TestWeatherCodes ............. 3 PASSED
-
-============================================
- TOTAL: 212 PASSED / 0 FAILED
- ALL TESTS PASSED ✓
-============================================
+#1 | 2026-05-18 14:31 | 226 PASSED / 0 FAILED / 226 TOTAL | ALL PASSED
+--------------------------------------------------
+  [TEST 01] Frontend - HTML struktura       - PASSED (12)
+  [TEST 02] Frontend - CSS subory           - PASSED (8)
+  [TEST 03] Frontend - JS subory            - PASSED (12)
+  [TEST 04] Frontend - Time parsing         - PASSED (8)
+  [TEST 05] Geocoding - Nominatim           - PASSED (5)
+  [TEST 06] Geocoding - reverse             - PASSED (3)
+  [TEST 07] Geocoding - travel radius       - PASSED (6)
+  [TEST 08] Geocoding - helper funkcie      - PASSED (7)
+  [TEST 09] Links - generate_links          - PASSED (13)
+  [TEST 10] Links - get_link_config         - PASSED (6)
+  [TEST 11] Links - link builders           - PASSED (13)
+  [TEST 12] Links - translation helper      - PASSED (3)
+  [TEST 13] Overpass - get_pois             - PASSED (5)
+  [TEST 14] Overpass - query config         - PASSED (4)
+  [TEST 15] Overpass - build query          - PASSED (4)
+  [TEST 16] Overpass - process POIs         - PASSED (5)
+  [TEST 17] Overpass - determine POI type   - PASSED (15)
+  [TEST 18] Overpass - calculate score      - PASSED (5)
+  [TEST 19] Overpass - is_outdoor           - PASSED (5)
+  [TEST 20] Overpass - Haversine            - PASSED (3)
+  [TEST 21] Overpass - tag lists            - PASSED (5)
+  [TEST 22] Overpass - error handling       - PASSED (3)
+  [TEST 23] Region theme - detekcia         - PASSED (6)
+  [TEST 24] Region theme - vsetky temy      - PASSED (3)
+  [TEST 25] Region theme - advanced         - PASSED (3)
+  [TEST 26] Region theme - definicie        - PASSED (5)
+  [TEST 27] Routes - /api/health            - PASSED (2)
+  [TEST 28] Routes - /api/geocoding         - PASSED (9)
+  [TEST 29] Routes - /api/weather           - PASSED (5)
+  [TEST 30] Routes - /api/poi/search        - PASSED (9)
+  [TEST 31] Routes - static files           - PASSED (1)
+  [TEST 32] Weather - get_weather_for_point - PASSED (6)
+  [TEST 33] Weather - generate grid         - PASSED (4)
+  [TEST 34] Weather - area summary          - PASSED (3)
+  [TEST 35] Weather - parse date            - PASSED (6)
+  [TEST 36] Weather - is_outdoor_friendly   - PASSED (5)
+  [TEST 37] Weather - outdoor recommendation- PASSED (6)
+  [TEST 38] Weather - weather codes         - PASSED (3)
+==================================================
+  platform: win32 | Python 3.12.10 | pytest 8.1.1
+  v1.1 - rozsirene POI, cielene linky, i18n opravy
+==================================================
