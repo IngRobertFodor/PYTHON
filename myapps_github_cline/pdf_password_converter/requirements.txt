@@ -1,5 +1,5 @@
 python-docx==1.1.2
-pypdf==4.3.1
+pypdf==6.0.0
 reportlab==4.2.5
 keyring==25.6.0
 pyinstaller==6.11.1
