@@ -1,45 +1,45 @@
 PDF Password Converter v2.0
 ============================
-Offline Windows app - konverzia .docx/.pdf do zaheslovaneho PDF.
-Hesla bezpecne v Windows Credential Manager (keyring).
+Offline Windows app - converts .docx/.pdf to password-protected PDF.
+Passwords stored securely in Windows Credential Manager (keyring).
 
-Poziadavky:
+Requirements:
   - Windows 10+
-  - Microsoft Word (pre konverziu .docx -> PDF)
+  - Microsoft Word (required for .docx to PDF conversion)
 
-Pouzitie:
-  1. Dvojklik na start_app.bat
-  2. Pridaj zamestnanca (inicialy + heslo)
-  3. Vyber vstupny subor (.docx / .pdf)
-  4. Klikni "Konvertovat"
-  5. Vysledok v priecinku "Výplatné Pásky"
+Usage:
+  1. Double-click start_app.bat
+  2. Add an employee (initials + password)
+  3. Select input file (.docx / .pdf)
+  4. Click "Convert"
+  5. Result saved in "Výplatné Pásky" folder
 
-Ako to funguje:
-  - .docx subory: Otvori sa vo Worde (skryte) a ulozi sa ako PDF
-    (rovnako ako Subor -> Ulozit ako -> PDF). Nasledne sa zasifruje.
-  - .pdf subory: Priamo sa zasifruju heslom zamestnanca.
-  - Hesla su ulozene v Windows Credential Manager (nie v suboroch).
+How it works:
+  - .docx files: Opened in Word (hidden) and saved as PDF
+    (identical to File -> Save As -> PDF). Then encrypted with password.
+  - .pdf files: Directly encrypted with employee's password.
+  - Passwords are stored in Windows Credential Manager (not in files).
 
-Bezpecnost:
-  - Ziadne hesla nie su ulozene v suboroch
-  - Ziadne vyplatne pasky nie su ulozene v git repozitari
-  - .gitignore vylucuje vystupny priecinok aj docasne subory
+Security:
+  - No passwords are stored in files
+  - No pay slips are stored in the git repository
+  - .gitignore excludes output folder and temporary files
 
-Struktura:
+Structure:
   main.py              - GUI (tkinter)
-  converter.py         - logika (Word COM konverzia, sifrovanie, keyring)
-  start_app.bat        - spustenie appky
-  install_dependencies.bat - instalacia kniznic
-  requirements.txt     - Python zavislosti
-  test_app.py          - testy
-  test_results.txt     - vysledky testov
-  README.txt           - tento subor
-  HOW_TO_RUN_THIS_APP.txt - navod pre pouzivatelov
-  WinPython/           - portable Python (neinstalovany = .exe instalator)
-  .gitignore           - vylucene subory z git
+  converter.py         - logic (Word COM conversion, encryption, keyring)
+  start_app.bat        - launch the app
+  install_dependencies.bat - install libraries
+  requirements.txt     - Python dependencies
+  test_app.py          - tests
+  test_results.txt     - test results
+  README.txt           - this file
+  HOW_TO_RUN_THIS_APP.txt - user guide
+  WinPython/           - portable Python (not installed = .exe installer)
+  .gitignore           - excluded files from git
 
-Technologie:
+Technologies:
   Python 3, tkinter, comtypes (Word COM), pypdf, keyring
 
-Spustenie testov:
+Running tests:
   python test_app.py
