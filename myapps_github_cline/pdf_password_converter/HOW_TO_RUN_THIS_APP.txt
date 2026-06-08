@@ -1,6 +1,12 @@
 HOW TO RUN THIS APP
 ====================
 
+=== REQUIREMENTS ===
+
+  - Microsoft Word must be installed on the computer
+    (needed for .docx to PDF conversion)
+  - Windows 10 or newer
+
 === FIRST TIME SETUP (do this only once) ===
 
 STEP 1: Extract WinPython
@@ -26,11 +32,21 @@ STEP 2: Install required libraries
   - Enter initials (e.g. "KM") and a password
   - Then select a .docx or .pdf file
   - Click "Convert" button
-  - The encrypted PDF will be saved in "Vyplatne Pasky" folder
+  - The encrypted PDF will be saved in "Výplatné Pásky" folder
+
+=== HOW IT WORKS ===
+
+  - For .docx files: The app opens the file in Microsoft Word (hidden)
+    and saves it as PDF (identical to File -> Save As -> PDF).
+    Then it encrypts the PDF with the employee's password.
+  - For .pdf files: The app directly encrypts with the password.
+  - Passwords are stored securely in Windows Credential Manager.
+  - No passwords or pay slips are stored in files or on GitHub.
 
 === MOVING TO ANOTHER COMPUTER ===
 
   - Copy the ENTIRE "pdf_password_converter" folder to USB
+  - The new computer must have Microsoft Word installed
   - On the new computer, just double-click "start_app.bat"
   - It will ask to add employee again (passwords are stored per computer)
 
@@ -44,3 +60,11 @@ STEP 2: Install required libraries
 
   Problem: Nothing happens when double-clicking start_app.bat
   Solution: Right-click start_app.bat -> Run as administrator
+
+  Problem: Conversion fails with "Word" error
+  Solution: Make sure Microsoft Word is installed and working.
+            Try opening the .docx file manually in Word first.
+
+  Problem: PDF is empty after conversion
+  Solution: Open the .docx in Word manually and check if it has content.
+            Try File -> Save As -> PDF in Word to test.

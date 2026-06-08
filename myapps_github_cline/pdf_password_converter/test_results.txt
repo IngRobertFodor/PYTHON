@@ -16,4 +16,4 @@
   [TEST 10] Zaheslovanie .pdf       - PASSED
   [TEST 11] Chyba - heslo nenajdene - PASSED
   [TEST 12] Chyba - zly format      - PASSED
-==================================================
+==================================================#2 | 2026-06-08 10:34 | 12 PASSED / 0 FAILED / 12 TOTAL | ALL PASSED

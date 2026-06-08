@@ -5,19 +5,20 @@ echo ==========================================
 echo.
 
 REM Find python.exe in WinPython folder
-for /f "delims=" %%P in ('dir /s /b "%~dp0WinPython\python.exe" 2^>nul') do (
+for /f "delims=" %%P in ('dir /s /b "%~dp0WinPython\python.exe" 2^>nul ^| findstr /i /v "Scripts"') do (
     set PYTHON=%%P
     goto found
 )
 
-echo ERROR: WinPython not found!
-echo Please extract WinPython first (see HOW_TO_RUN_THIS_APP.txt)
-pause
-exit /b 1
+REM Fallback to system Python
+set PYTHON=python
+goto install
 
 :found
 echo Found Python: %PYTHON%
 echo.
+
+:install
 echo Installing libraries...
 "%PYTHON%" -m pip install -r "%~dp0requirements.txt"
 echo.

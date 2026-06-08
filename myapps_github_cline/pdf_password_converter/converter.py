@@ -9,13 +9,6 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from pypdf import PdfReader, PdfWriter
-from docx import Document
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.units import cm
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
 import keyring
 
 # Konštanty
@@ -100,44 +93,46 @@ def generate_output_filename(initials, month_idx=None, year=None):
 
 # === PDF KONVERZIA ===
 
-def register_fonts():
-    """Arial font pre SK diakritiku."""
-    fd = os.path.join(os.environ.get('WINDIR', 'C:\\Windows'), 'Fonts')
-    a = os.path.join(fd, 'arial.ttf')
-    ab = os.path.join(fd, 'arialbd.ttf')
-    if os.path.exists(a):
-        pdfmetrics.registerFont(TTFont('Arial', a))
-    if os.path.exists(ab):
-        pdfmetrics.registerFont(TTFont('Arial-Bold', ab))
-
-
 def docx_to_pdf(docx_path, pdf_path):
-    """Konvertuje .docx na PDF."""
-    doc = Document(docx_path)
-    register_fonts()
-    pdf_doc = SimpleDocTemplate(pdf_path, pagesize=A4,
-                                rightMargin=2*cm, leftMargin=2*cm,
-                                topMargin=2*cm, bottomMargin=2*cm)
-    styles = getSampleStyleSheet()
-    normal = ParagraphStyle('SK', parent=styles['Normal'],
-                            fontName='Arial', fontSize=11, leading=14)
-    heading = ParagraphStyle('SKH', parent=styles['Heading1'],
-                             fontName='Arial-Bold', fontSize=14, leading=18)
-    story = []
-    for p in doc.paragraphs:
-        txt = p.text.strip()
-        if not txt:
-            story.append(Spacer(1, 0.3*cm))
-            continue
-        txt = txt.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-        if p.style.name.startswith('Heading'):
-            story.append(Paragraph(txt, heading))
-            story.append(Spacer(1, 0.3*cm))
-        else:
-            story.append(Paragraph(txt, normal))
-    if not story:
-        story.append(Paragraph("(Prázdny dokument)", normal))
-    pdf_doc.build(story)
+    """
+    Konvertuje .docx na PDF pomocou Microsoft Word (COM automation).
+    Funguje rovnako ako Súbor -> Uložiť ako -> PDF vo Worde.
+    Zachová celý vzhľad dokumentu vrátane tabuliek, obrázkov, formátovania.
+    """
+    import comtypes.client
+
+    # Absolutné cesty sú povinné pre Word COM
+    docx_path = os.path.abspath(docx_path)
+    pdf_path = os.path.abspath(pdf_path)
+
+    word = None
+    doc = None
+    try:
+        # Spustíme Word (alebo sa pripojíme k existujúcemu)
+        word = comtypes.client.CreateObject('Word.Application')
+        word.Visible = False
+
+        # Otvoríme dokument
+        doc = word.Documents.Open(docx_path)
+
+        # Uložíme ako PDF (wdFormatPDF = 17)
+        doc.SaveAs(pdf_path, FileFormat=17)
+
+    finally:
+        # Zatvoríme dokument a Word
+        if doc is not None:
+            doc.Close(0)  # 0 = wdDoNotSaveChanges
+        if word is not None:
+            word.Quit()
+
+    # Overíme, že PDF bolo vytvorené a nie je prázdne
+    if not os.path.exists(pdf_path):
+        raise RuntimeError("Word nevytvoril PDF súbor!")
+    if os.path.getsize(pdf_path) < 500:
+        raise RuntimeError(
+            "Word vytvoril prázdne PDF!\n"
+            "Skúste otvoriť .docx manuálne a uložiť ako PDF."
+        )
 
 
 def encrypt_pdf(input_path, output_path, password):

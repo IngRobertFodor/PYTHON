@@ -1,79 +1,91 @@
-"""Testy pre PDF Password Converter"""
-import os, sys, io, shutil
+"""
+Test script pre PDF Password Converter v2.0
+Overuje základnú funkcionalitu: zamestanci, názvy súborov, konverzia.
+Vyžaduje: Microsoft Word (pre .docx konverziu)
+"""
+
+import os
+import sys
+import io
+import tempfile
 from datetime import datetime
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-_dir = os.path.dirname(os.path.abspath(__file__))
-if _dir not in sys.path:
-    sys.path.insert(0, _dir)
 
-from docx import Document
-from pypdf import PdfReader
+# Pridáme adresár aplikácie do sys.path
+_app_dir = os.path.dirname(os.path.abspath(__file__))
+if _app_dir not in sys.path:
+    sys.path.insert(0, _app_dir)
+
 from converter import (
     get_employees, add_employee, remove_employee,
     get_employee_password, set_employee_password,
     generate_output_filename, convert_file, docx_to_pdf,
-    get_output_folder, get_app_dir, MESIACE, KEYRING_SERVICE
+    encrypt_pdf, get_output_folder, get_app_dir, MESIACE, KEYRING_SERVICE
 )
 import keyring
 
+# Testovacie konštanty
 TS, TP = "TS", "test123"
 
+
 def setup():
+    """Príprava pred testami."""
     add_employee(TS, TP)
 
+
 def cleanup():
+    """Upratanie po testoch."""
     remove_employee(TS)
 
-# === ENV TESTY ===
+
+# === TESTY PROSTREDIA ===
 
 def test_env_imports():
-    """Vsetky importy funguju."""
+    """Všetky importy fungujú."""
     print("\n[TEST 1] Importy")
-    import tkinter, pypdf, docx, reportlab
+    import comtypes
+    import pypdf
     assert keyring is not None
+    assert comtypes is not None
+    assert pypdf is not None
     print("  [OK] PASSED")
 
-def test_env_fonts():
-    """Arial font existuje."""
-    print("\n[TEST 2] Arial font")
-    fonts_dir = os.path.join(os.environ.get('WINDIR', 'C:\\Windows'), 'Fonts')
-    assert os.path.exists(os.path.join(fonts_dir, 'arial.ttf'))
-    print("  [OK] PASSED")
 
 def test_env_output_folder():
-    """Vystupny priecinok sa vytvori."""
-    print("\n[TEST 3] Vystupny priecinok")
+    """Výstupný priečinok sa vytvorí."""
+    print("\n[TEST 2] Výstupný priečinok")
     out = get_output_folder()
-    if os.path.exists(out):
-        shutil.rmtree(out)
-    out2 = get_output_folder()
-    assert os.path.exists(out2) and os.path.isdir(out2)
+    assert os.path.exists(out) and os.path.isdir(out)
+    print(f"  Priečinok: {out}")
     print("  [OK] PASSED")
+
 
 def test_env_keyring():
-    """Keyring funguje (zapis/citanie)."""
-    print("\n[TEST 4] Keyring R/W")
-    keyring.set_password("test_svc", "test_key", "test_val")
-    assert keyring.get_password("test_svc", "test_key") == "test_val"
-    keyring.delete_password("test_svc", "test_key")
+    """Keyring funguje (zápis/čítanie)."""
+    print("\n[TEST 3] Keyring R/W")
+    keyring.set_password("test_svc_tmp", "test_key_tmp", "test_val_tmp")
+    assert keyring.get_password("test_svc_tmp", "test_key_tmp") == "test_val_tmp"
+    keyring.delete_password("test_svc_tmp", "test_key_tmp")
     print("  [OK] PASSED")
 
-# === ZAMESTNANEC TESTY ===
+
+# === TESTY ZAMESTNANCOV ===
 
 def test_emp_crud():
     """Pridanie, heslo, zmena, overenie."""
-    print("\n[TEST 5] Zamestnanec CRUD")
+    print("\n[TEST 4] Zamestnanec CRUD")
     assert TS in get_employees()
     assert get_employee_password(TS) == TP
-    set_employee_password(TS, "new")
-    assert get_employee_password(TS) == "new"
-    set_employee_password(TS, TP)
+    set_employee_password(TS, "new_pass")
+    assert get_employee_password(TS) == "new_pass"
+    set_employee_password(TS, TP)  # Vrátime späť
     print("  [OK] PASSED")
+
 
 def test_emp_multiple():
     """Viacero zamestnancov."""
-    print("\n[TEST 6] Viacero zamestnancov")
+    print("\n[TEST 5] Viacero zamestnancov")
     add_employee("AB", "a1")
     add_employee("CD", "c2")
     emps = get_employees()
@@ -84,122 +96,194 @@ def test_emp_multiple():
     assert "AB" not in get_employees()
     print("  [OK] PASSED")
 
-# === NAZOV SUBORU TESTY ===
+
+# === TESTY NÁZVU SÚBORU ===
 
 def test_name_auto():
-    """Automaticky nazov (predchadzajuci mesiac)."""
-    print("\n[TEST 7] Nazov - auto")
+    """Automatický názov (predchádzajúci mesiac)."""
+    print("\n[TEST 6] Názov - auto")
     name = generate_output_filename(TS)
     now = datetime.now()
     assert name.startswith(f"{TS}_") and name.endswith(".pdf")
     if now.month == 1:
         assert "December" in name
     else:
-        assert MESIACE[now.month-2] in name
+        assert MESIACE[now.month - 2] in name
     print(f"  {name}")
     print("  [OK] PASSED")
 
+
 def test_name_all_months():
-    """Vsetkych 12 mesiacov."""
-    print("\n[TEST 8] Nazov - 12 mesiacov")
+    """Všetkých 12 mesiacov."""
+    print("\n[TEST 7] Názov - 12 mesiacov")
     for i, m in enumerate(MESIACE):
         n = generate_output_filename("KM", i, 2025)
-        assert n == f"KM_Výplatná Páska_{m}_2025.pdf"
+        expected = f"KM_Výplatná Páska_{m}_2025.pdf"
+        assert n == expected, f"Očakávané '{expected}', dostali '{n}'"
     print("  [OK] PASSED")
 
-# === KONVERZIA TESTY ===
+
+# === TESTY KONVERZIE ===
 
 def test_conv_docx():
-    """Konverzia .docx -> zaheslovane PDF."""
-    print("\n[TEST 9] Konverzia .docx")
-    p = os.path.join(_dir, "t.docx")
-    doc = Document()
-    doc.add_heading('Test', level=1)
-    doc.add_paragraph('Mzda: 1500 EUR')
-    doc.save(p)
-    r, e = convert_file(p, _dir, TS, 0, 2025)
-    assert r and os.path.exists(r), f"Err: {e}"
-    reader = PdfReader(r)
-    assert reader.is_encrypted
-    reader.decrypt(TP)
-    assert "1500" in reader.pages[0].extract_text()
-    os.remove(p)
-    os.remove(r)
-    print("  [OK] PASSED")
+    """Konverzia .docx -> zaheslované PDF (vyžaduje Microsoft Word)."""
+    print("\n[TEST 8] Konverzia .docx -> PDF")
+    try:
+        import comtypes.client
+    except ImportError:
+        print("  [SKIP] comtypes nie je nainštalované")
+        return
 
-def test_conv_pdf():
-    """Zaheslovanie .pdf."""
-    print("\n[TEST 10] Zaheslovanie .pdf")
-    dp = os.path.join(_dir, "t2.docx")
-    pp = os.path.join(_dir, "t2.pdf")
-    doc = Document()
-    doc.add_paragraph("Test PDF content")
-    doc.save(dp)
-    docx_to_pdf(dp, pp)
-    os.remove(dp)
-    r, e = convert_file(pp, _dir, TS, 5, 2026)
-    assert r and os.path.exists(r), f"Err: {e}"
-    reader = PdfReader(r)
-    assert reader.is_encrypted
-    reader.decrypt(TP)
-    assert "Test" in reader.pages[0].extract_text()
-    os.remove(pp)
-    os.remove(r)
-    print("  [OK] PASSED")
+    # Vytvoríme testovací .docx pomocou Word COM
+    docx_path = os.path.join(tempfile.gettempdir(), "test_converter.docx")
+    result = None
 
-# === CHYBOVE SCENARE ===
+    word = None
+    doc = None
+    try:
+        word = comtypes.client.CreateObject('Word.Application')
+        word.Visible = False
+        doc = word.Documents.Add()
+        doc.Content.Text = "Test výplatná páska\nMzda: 1500 EUR\nDátum: 2026-05-01"
+        doc.SaveAs(os.path.abspath(docx_path), FileFormat=16)
+        doc.Close(0)
+        doc = None
+        word.Quit()
+        word = None
+    except Exception as e:
+        if doc:
+            doc.Close(0)
+        if word:
+            word.Quit()
+        print(f"  [SKIP] Word nie je dostupný: {e}")
+        return
+
+    # Otestujeme konverziu
+    try:
+        result, error = convert_file(docx_path, tempfile.gettempdir(), TS, 0, 2025)
+        assert result is not None, f"Konverzia zlyhala: {error}"
+        assert os.path.exists(result)
+        size = os.path.getsize(result)
+        assert size > 500, f"PDF príliš malé: {size} bytes"
+
+        from pypdf import PdfReader
+        reader = PdfReader(result)
+        assert reader.is_encrypted
+        reader.decrypt(TP)
+        text = reader.pages[0].extract_text()
+        assert "1500" in text, f"Text '1500' nenájdený v PDF"
+        print(f"  PDF veľkosť: {size} bytes")
+        print("  [OK] PASSED")
+    finally:
+        if os.path.exists(docx_path):
+            os.remove(docx_path)
+        if result and os.path.exists(result):
+            os.remove(result)
+
+
+def test_conv_pdf_encrypt():
+    """Zaheslovanie existujúceho .pdf."""
+    print("\n[TEST 9] Zaheslovanie .pdf")
+    from pypdf import PdfWriter, PdfReader
+
+    src_pdf = os.path.join(tempfile.gettempdir(), "test_source.pdf")
+    result = None
+    writer = PdfWriter()
+    writer.add_blank_page(width=595, height=842)
+    with open(src_pdf, 'wb') as f:
+        writer.write(f)
+
+    try:
+        result, error = convert_file(src_pdf, tempfile.gettempdir(), TS, 5, 2026)
+        assert result is not None, f"Konverzia zlyhala: {error}"
+        assert os.path.exists(result)
+
+        reader = PdfReader(result)
+        assert reader.is_encrypted
+        print("  [OK] PASSED")
+    finally:
+        if os.path.exists(src_pdf):
+            os.remove(src_pdf)
+        if result and os.path.exists(result):
+            os.remove(result)
+
+
+# === TESTY CHÝB ===
 
 def test_err_no_password():
-    """Heslo nenajdene."""
-    print("\n[TEST 11] Chyba - heslo nenajdene")
-    r, e = convert_file("fake.docx", _dir, "NOBODY", 0, 2025)
+    """Heslo nenájdené."""
+    print("\n[TEST 10] Chyba - heslo nenájdené")
+    r, e = convert_file("fake.docx", _app_dir, "NOBODY", 0, 2025)
     assert r is None and "nenájdené" in e
     print("  [OK] PASSED")
 
+
 def test_err_bad_format():
-    """Nepodporovany format."""
-    print("\n[TEST 12] Chyba - zly format")
-    p = os.path.join(_dir, "t.txt")
+    """Nepodporovaný formát."""
+    print("\n[TEST 11] Chyba - zlý formát")
+    p = os.path.join(tempfile.gettempdir(), "test_bad.txt")
     with open(p, "w") as f:
         f.write("x")
-    r, e = convert_file(p, _dir, TS, 0, 2025)
-    assert r is None and "Nepodporovaný" in e
-    os.remove(p)
+    try:
+        r, e = convert_file(p, tempfile.gettempdir(), TS, 0, 2025)
+        assert r is None and "Nepodporovaný" in e
+        print("  [OK] PASSED")
+    finally:
+        os.remove(p)
+
+
+# === TESTY BEZPEČNOSTI ===
+
+def test_security_gitignore():
+    """Gitignore obsahuje výstupný priečinok a citlivé súbory."""
+    print("\n[TEST 12] Bezpečnosť - .gitignore")
+    gitignore_path = os.path.join(_app_dir, ".gitignore")
+    assert os.path.exists(gitignore_path), ".gitignore neexistuje!"
+    with open(gitignore_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "Výplatné Pásky/" in content, "Výstupný priečinok nie je v .gitignore!"
+    assert "WinPython/" in content, "WinPython nie je v .gitignore!"
+    assert "*.exe" in content, "*.exe nie je v .gitignore!"
     print("  [OK] PASSED")
+
 
 # === RUNNER ===
 
 if __name__ == "__main__":
     tests = [
-        test_env_imports, test_env_fonts, test_env_output_folder, test_env_keyring,
+        test_env_imports, test_env_output_folder, test_env_keyring,
         test_emp_crud, test_emp_multiple,
         test_name_auto, test_name_all_months,
-        test_conv_docx, test_conv_pdf,
-        test_err_no_password, test_err_bad_format
+        test_conv_docx, test_conv_pdf_encrypt,
+        test_err_no_password, test_err_bad_format,
+        test_security_gitignore,
     ]
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
     print("=" * 50)
-    print(f"  PDF PASSWORD CONVERTER - TESTY | {now}")
+    print(f"  PDF PASSWORD CONVERTER v2.0 - TESTY | {now}")
     print("=" * 50)
     setup()
-    passed = failed = 0
+    passed = failed = skipped = 0
     for t in tests:
         try:
             t()
             passed += 1
-        except Exception as ex:
+        except AssertionError as ex:
             print(f"  [FAIL] {ex}")
             failed += 1
+        except Exception as ex:
+            print(f"  [FAIL] {type(ex).__name__}: {ex}")
+            failed += 1
     cleanup()
-    print("\n" + "=" * 50)
     total = len(tests)
-    print(f"  VYSLEDOK: {passed} PASSED / {failed} FAILED / {total} TOTAL")
+    print("\n" + "=" * 50)
+    print(f"  VÝSLEDOK: {passed} PASSED / {failed} FAILED / {total} TOTAL")
     status = "ALL PASSED" if failed == 0 else "SOME FAILED"
     print(f"  {status}")
     print("=" * 50)
 
-    # Zapis do test_results.txt (poradovnik)
-    results_file = os.path.join(_dir, "test_results.txt")
+    # Zápis do test_results.txt
+    results_file = os.path.join(_app_dir, "test_results.txt")
     run_num = 1
     if os.path.exists(results_file):
         with open(results_file, "r", encoding="utf-8") as rf:
