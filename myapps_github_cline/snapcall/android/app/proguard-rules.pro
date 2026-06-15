@@ -9,3 +9,12 @@
 # Google ML Kit
 -keep class com.google.mlkit.** { *; }
 -dontwarn com.google.mlkit.**
+
+# Google Play Core (required by Flutter)
+-keep class com.google.android.play.core.** { *; }
+-dontwarn com.google.android.play.core.**
+
+# Keep Play Store split install classes
+-dontwarn com.google.android.play.core.splitcompat.SplitCompatApplication
+-dontwarn com.google.android.play.core.splitinstall.**
+-dontwarn com.google.android.play.core.tasks.**
