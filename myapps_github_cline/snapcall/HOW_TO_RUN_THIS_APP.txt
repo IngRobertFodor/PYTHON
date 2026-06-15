@@ -1,0 +1,227 @@
+================================================================
+  SNAPCALL - HOW TO RUN THIS APP
+  "Snap a number. Make the call."
+================================================================
+
+This guide will take you step-by-step from zero to running
+the SnapCall app on your Android device or emulator.
+
+================================================================
+STEP 1: INSTALL FLUTTER SDK
+================================================================
+
+If Flutter is already installed at C:\flutter, skip to Step 2.
+
+Option A - Already cloned (done automatically):
+  The Flutter SDK was cloned to C:\flutter
+
+Option B - Manual download:
+  1. Go to: https://flutter.dev/docs/get-started/install/windows
+  2. Download the Flutter SDK zip
+  3. Extract to C:\flutter
+  4. Do NOT place Flutter in a directory with spaces or special characters
+
+Add Flutter to PATH:
+  - Open Command Prompt as Administrator
+  - Run: setx PATH "%PATH%;C:\flutter\bin" /M
+  - Close and reopen terminal
+
+Verify installation:
+  > C:\flutter\bin\flutter --version
+  > C:\flutter\bin\flutter doctor
+
+================================================================
+STEP 2: INSTALL ANDROID STUDIO + SET ENVIRONMENT VARIABLES
+================================================================
+
+1. Download from: https://developer.android.com/studio
+2. Install with default settings
+3. Open Android Studio → More Actions → SDK Manager
+4. Install:
+   - Android SDK Platform 36 (API 36)
+   - Android SDK Build-Tools 36
+   - Android SDK Command-line Tools (latest)
+   - NDK (Side by side) 28.x
+
+5. Set environment variables (Command Prompt as Administrator):
+   > setx ANDROID_HOME "C:\Users\I070494\AppData\Local\Android\Sdk" /M
+   > setx JAVA_HOME "C:\Program Files\Android\Android Studio\jbr" /M
+
+6. Accept licenses:
+   > C:\flutter\bin\flutter doctor --android-licenses
+
+================================================================
+STEP 3: SET UP A PHYSICAL DEVICE (recommended for camera app)
+================================================================
+
+Physical Android device (recommended - camera works best):
+  1. Enable Developer Options on your phone:
+     Settings → About Phone → Tap "Build Number" 7 times
+  2. Enable USB Debugging:
+     Settings → Developer Options → USB Debugging → ON
+  3. Connect phone via USB cable (data cable, not charge-only!)
+  4. Allow USB debugging when prompted on phone
+  5. Set USB mode to "File Transfer" (MTP)
+
+Verify device is connected:
+  > C:\flutter\bin\flutter devices
+
+Note: Emulator can be used but camera testing is limited.
+
+================================================================
+STEP 4: RUN THE APP
+================================================================
+
+Open terminal in the project directory:
+
+  > cd "C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\myapps_github_cline\snapcall"
+
+Get dependencies:
+  > C:\flutter\bin\flutter pub get
+
+Run the app:
+  > C:\flutter\bin\flutter run
+
+If multiple devices are available:
+  > C:\flutter\bin\flutter run -d <device_id>
+
+To see available devices:
+  > C:\flutter\bin\flutter devices
+
+Hot reload (while app is running):
+  Press 'r' in terminal → app reloads with changes instantly
+
+================================================================
+STEP 5: BUILD RELEASE APK / AAB
+================================================================
+
+Build APK (for direct install/testing):
+  > C:\flutter\bin\flutter build apk --release
+
+Build App Bundle (for Google Play Store):
+  > C:\flutter\bin\flutter build appbundle --release
+
+Output locations:
+  - APK: build\app\outputs\flutter-apk\app-release.apk
+  - AAB: build\app\outputs\bundle\release\app-release.aab
+
+Install APK directly on device:
+  > C:\flutter\bin\flutter install
+
+================================================================
+STEP 6: PUBLISH TO GOOGLE PLAY STORE
+================================================================
+
+1. Create Google Play Developer Account:
+   - Go to: https://play.google.com/console
+   - Pay $25 one-time registration fee
+   - Fill in developer profile
+
+2. Create a new app in Play Console
+
+3. Upload the AAB file (app-release.aab)
+
+4. Fill required information:
+   - App name: SnapCall
+   - Short description: Scan phone numbers with your camera and call instantly.
+   - Full description: (use text from README.md)
+   - Screenshots (phone + tablet)
+   - App icon (512x512 px)
+   - Feature graphic (1024x500 px)
+   - Privacy policy URL
+   - App category: Tools / Utilities
+
+5. Content rating questionnaire
+
+6. Submit for review (usually 1-3 days)
+
+================================================================
+STEP 7: AFTER TESTING - DISABLE DEVELOPER OPTIONS
+================================================================
+
+IMPORTANT: After you finish testing, disable these on your phone:
+
+1. Disconnect USB cable
+2. Disable USB Debugging:
+   Settings → Developer Options → USB Debugging → OFF
+3. Disable Developer Options:
+   Settings → Developer Options → toggle OFF (at top)
+
+This ensures your phone remains secure.
+
+================================================================
+TROUBLESHOOTING
+================================================================
+
+Problem: "flutter" not recognized
+Solution: Use full path: C:\flutter\bin\flutter
+  Or add C:\flutter\bin to your PATH environment variable
+
+Problem: "JAVA_HOME not set"
+Solution: setx JAVA_HOME "C:\Program Files\Android\Android Studio\jbr"
+
+Problem: "ANDROID_HOME not set" or "SDK not found"
+Solution: setx ANDROID_HOME "C:\Users\I070494\AppData\Local\Android\Sdk"
+  Then run: C:\flutter\bin\flutter config --android-sdk "C:\Users\I070494\AppData\Local\Android\Sdk"
+
+Problem: "No connected devices"
+Solution: Start emulator or connect phone with USB debugging ON
+  Check USB cable is data-capable (not charge-only)
+
+Problem: Gradle build fails
+Solution: 
+  > cd "C:\Users\I070494\Desktop\TEST AUTOMATION\SCRIPTS\PYTHON\myapps_github_cline\snapcall"
+  > C:\flutter\bin\flutter clean
+  > C:\flutter\bin\flutter pub get
+  > C:\flutter\bin\flutter run
+
+Problem: Gradle cache lock error
+Solution:
+  1. Stop Gradle daemon:
+     > cd android
+     > set JAVA_HOME=C:\Program Files\Android\Android Studio\jbr
+     > gradlew.bat --stop
+  2. Delete cache: rmdir /s /q "%USERPROFILE%\.gradle\caches\8.14\transforms"
+  3. Retry build
+
+Problem: Camera not working in emulator
+Solution: Use a physical device (recommended for camera testing)
+
+================================================================
+QUICK COMMANDS REFERENCE
+================================================================
+
+  C:\flutter\bin\flutter doctor          - Check environment setup
+  C:\flutter\bin\flutter devices         - List connected devices
+  C:\flutter\bin\flutter pub get         - Download dependencies
+  C:\flutter\bin\flutter run             - Run in debug mode
+  C:\flutter\bin\flutter run --release   - Run in release mode
+  C:\flutter\bin\flutter build apk       - Build release APK
+  C:\flutter\bin\flutter build appbundle - Build AAB for Play Store
+  C:\flutter\bin\flutter clean           - Clean build files
+
+================================================================
+PROJECT INFO
+================================================================
+
+App: SnapCall v1.0.0
+Package: com.snapcall.app
+Min Android: API 26 (Android 8.0)
+Target Android: API 36 (Android 16)
+Flutter: 3.44.2
+Dart: 3.12.2
+Gradle: 8.14
+Kotlin: 2.2.20
+Android Gradle Plugin: 8.11.1
+NDK: 28.2.13676358
+
+Features:
+- Camera-based phone number OCR scanning
+- Google ML Kit (on-device, offline, free)
+- Supports international phone number formats
+- One-tap to call any detected number
+- No internet required for scanning
+- No backend server needed
+- Dark/Light mode support (Material 3)
+
+================================================================
