@@ -47,3 +47,9 @@ app.*.map.json
 /ios/Pods/
 /ios/Flutter/Flutter.framework
 /ios/Flutter/Flutter.podspec
+
+# 🔐 SENSITIVE - Never commit these!
+/android/key.properties
+/android/app/snapcall-release-key.jks
+*.jks
+*.keystore

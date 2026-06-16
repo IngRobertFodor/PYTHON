@@ -1,0 +1,28 @@
+CO JE TO KEYSTORE:
+  Keystore je digitálny podpisový kľúč pre Android appku.
+  Každá aktualizácia SnapCall MUSÍ byť podpísaná TÝMTO
+  kľúčom. Bez neho nemôžeš vydávať aktualizácie.
+
+SÚBOR:
+  Názov:           snapcall-release-key.jks
+  Záloha uložená:  [doplň kde - USB, cloud...]
+  Platnosť:        27 rokov (10 000 dní)
+
+PRIHLASOVACIE ÚDAJE:
+  Alias:           snapcall
+  Store password:  Sn@pC@ll#2026!Key
+  Key password:    Sn@pC@ll#2026!Key
+
+APPKA:
+  Názov:           SnapCall
+  Package name:    app.snapcall.android
+  Google Play:     https://play.google.com/console
+
+AKO POUŽIŤ (pri vydaní aktualizácie):
+  1. Súbor key.properties musí odkazovať na .jks
+  2. flutter build appbundle --release
+  3. Nahrať nový AAB do Play Console
+
+DÔLEŽITÉ:
+  - .jks súbor a key.properties NIE SÚ v Git-e (sú v .gitignore)
+  - Bez tohto kľúča = nemožno vydávať aktualizácie!
