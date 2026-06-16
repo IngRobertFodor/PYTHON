@@ -23,7 +23,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.snapcall.app"
+    namespace "app.snapcall.android"
     compileSdk 36
     ndkVersion = "28.2.13676358"
 
@@ -41,7 +41,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.snapcall.app"
+        applicationId "app.snapcall.android"
         minSdk 26
         targetSdk 36
         versionCode flutterVersionCode.toInteger()
