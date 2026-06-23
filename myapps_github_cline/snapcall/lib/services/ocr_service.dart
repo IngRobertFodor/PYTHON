@@ -13,13 +13,59 @@ class OcrService {
 
       final String fullText = recognizedText.text;
 
-      // Extract phone numbers from the recognized text
-      final List<String> phoneNumbers = _findPhoneNumbers(fullText);
+      // Pre-process text for better number detection
+      final String processedText = _preProcessText(fullText);
+
+      // Extract phone numbers from the processed text
+      final List<String> phoneNumbers = _findPhoneNumbers(processedText);
 
       return phoneNumbers;
     } finally {
       textRecognizer.close();
     }
+  }
+
+  /// Pre-processes OCR text to fix common issues:
+  /// 1. Join multi-line numbers (e.g. "+421 2\n20608080")
+  /// 2. Fix common OCR character substitutions (O→0, l→1, etc.)
+  String _preProcessText(String text) {
+    String processed = text;
+
+    // Replace newlines with spaces when surrounded by digits/phone chars
+    // This helps with numbers split across lines
+    processed = processed.replaceAllMapped(
+      RegExp(r'(\d)\n(\d)'),
+      (m) => '${m.group(1)} ${m.group(2)}',
+    );
+
+    // Fix common OCR substitutions in digit contexts
+    // Only fix when character is surrounded by digits (to avoid false positives)
+    processed = processed.replaceAllMapped(
+      RegExp(r'(\d)[Oo](\d)'),
+      (m) => '${m.group(1)}0${m.group(2)}',
+    );
+    processed = processed.replaceAllMapped(
+      RegExp(r'(\d)[lI](\d)'),
+      (m) => '${m.group(1)}1${m.group(2)}',
+    );
+    processed = processed.replaceAllMapped(
+      RegExp(r'(\d)[Bb](\d)'),
+      (m) => '${m.group(1)}8${m.group(2)}',
+    );
+    processed = processed.replaceAllMapped(
+      RegExp(r'(\d)[Ss](\d)'),
+      (m) => '${m.group(1)}5${m.group(2)}',
+    );
+    processed = processed.replaceAllMapped(
+      RegExp(r'(\d)[Zz](\d)'),
+      (m) => '${m.group(1)}2${m.group(2)}',
+    );
+    processed = processed.replaceAllMapped(
+      RegExp(r'(\d)[Gg](\d)'),
+      (m) => '${m.group(1)}6${m.group(2)}',
+    );
+
+    return processed;
   }
 
   /// Finds all phone number patterns in the given text.
@@ -46,7 +92,6 @@ class OcrService {
       // === LOCAL FORMATS ===
 
       // Local with leading 0: 0912 345 678, 02 20608080, 0850 166 000
-      // Must have at least 2 digit groups to avoid matching random "0X" sequences
       RegExp(r'0\d{1,4}[\s\-.]?\d{2,8}[\s\-.]?\d{0,8}'),
 
       // Local with area code in parentheses: (02) 20608080
@@ -86,7 +131,7 @@ class OcrService {
         // Validate: must have at least 7 digits (ITU E.164) and max 15
         final digitsOnly = normalized.replaceAll(RegExp(r'[^\d]'), '');
         if (digitsOnly.length >= 7 && digitsOnly.length <= 15) {
-          // Additional validation: reject numbers that are all same digit (000000000, 1111111)
+          // Additional validation: reject fake numbers
           if (_isValidPhoneNumber(digitsOnly)) {
             if (!_isDuplicate(number, foundNumbers)) {
               foundNumbers.add(number);
