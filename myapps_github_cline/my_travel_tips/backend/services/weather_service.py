@@ -1,230 +1,107 @@
-"""
-Weather Service
-===============
-Uses Open-Meteo API for weather forecasts.
-Completely free, no API key required.
-Supports up to 16-day forecast and multi-point grid for area visualization.
-"""
-
-import requests
-import math
+"""Weather Service - Open-Meteo API. Batch grid."""
+import requests, math
 from datetime import datetime, timedelta
 
-OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
+URL = "https://api.open-meteo.com/v1/forecast"
+WC = {0:{"s":"Jasno","e":"Clear","i":"sunny"},1:{"s":"Jasno","e":"Clear","i":"sunny"},
+2:{"s":"Oblacno","e":"Cloudy","i":"cloud"},3:{"s":"Zamracene","e":"Overcast","i":"cloud"},
+45:{"s":"Hmla","e":"Fog","i":"fog"},51:{"s":"Mrholenie","e":"Drizzle","i":"rain"},
+61:{"s":"Dazd","e":"Rain","i":"rain"},63:{"s":"Dazd","e":"Rain","i":"rain"},
+65:{"s":"Silny dazd","e":"Heavy rain","i":"rain"},71:{"s":"Sneh","e":"Snow","i":"snow"},
+73:{"s":"Sneh","e":"Snow","i":"snow"},80:{"s":"Prehanky","e":"Showers","i":"rain"},
+95:{"s":"Burka","e":"Storm","i":"storm"},96:{"s":"Burka","e":"Storm","i":"storm"}}
+D = "temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode,windspeed_10m_max,uv_index_max"
 
-# Weather code descriptions
-WEATHER_CODES = {
-    0: {'sk': 'Jasno', 'en': 'Clear sky', 'icon': '☀️'},
-    1: {'sk': 'Prevažne jasno', 'en': 'Mainly clear', 'icon': '🌤️'},
-    2: {'sk': 'Čiastočne zamračené', 'en': 'Partly cloudy', 'icon': '⛅'},
-    3: {'sk': 'Zamračené', 'en': 'Overcast', 'icon': '☁️'},
-    45: {'sk': 'Hmla', 'en': 'Fog', 'icon': '🌫️'},
-    48: {'sk': 'Námraza', 'en': 'Rime fog', 'icon': '🌫️'},
-    51: {'sk': 'Mrholenie slabé', 'en': 'Light drizzle', 'icon': '🌦️'},
-    53: {'sk': 'Mrholenie', 'en': 'Moderate drizzle', 'icon': '🌦️'},
-    55: {'sk': 'Mrholenie silné', 'en': 'Dense drizzle', 'icon': '🌧️'},
-    61: {'sk': 'Dážď slabý', 'en': 'Slight rain', 'icon': '🌦️'},
-    63: {'sk': 'Dážď', 'en': 'Moderate rain', 'icon': '🌧️'},
-    65: {'sk': 'Dážď silný', 'en': 'Heavy rain', 'icon': '🌧️'},
-    66: {'sk': 'Mrznúci dážď slabý', 'en': 'Light freezing rain', 'icon': '🌨️'},
-    67: {'sk': 'Mrznúci dážď silný', 'en': 'Heavy freezing rain', 'icon': '🌨️'},
-    71: {'sk': 'Sneženie slabé', 'en': 'Slight snow', 'icon': '🌨️'},
-    73: {'sk': 'Sneženie', 'en': 'Moderate snow', 'icon': '❄️'},
-    75: {'sk': 'Sneženie silné', 'en': 'Heavy snow', 'icon': '❄️'},
-    77: {'sk': 'Snehové zrná', 'en': 'Snow grains', 'icon': '❄️'},
-    80: {'sk': 'Prehánky slabé', 'en': 'Slight rain showers', 'icon': '🌦️'},
-    81: {'sk': 'Prehánky', 'en': 'Moderate rain showers', 'icon': '🌧️'},
-    82: {'sk': 'Prehánky silné', 'en': 'Violent rain showers', 'icon': '⛈️'},
-    85: {'sk': 'Snehové prehánky slabé', 'en': 'Slight snow showers', 'icon': '🌨️'},
-    86: {'sk': 'Snehové prehánky silné', 'en': 'Heavy snow showers', 'icon': '❄️'},
-    95: {'sk': 'Búrka', 'en': 'Thunderstorm', 'icon': '⛈️'},
-    96: {'sk': 'Búrka s krupobitím', 'en': 'Thunderstorm with hail', 'icon': '⛈️'},
-    99: {'sk': 'Búrka so silným krupobitím', 'en': 'Thunderstorm with heavy hail', 'icon': '⛈️'},
-}
-
-
-def get_weather_for_point(lat, lon, date=''):
-    """
-    Get weather forecast for a single point.
-    If date is provided, returns forecast for that specific date.
-    Otherwise returns today's forecast.
-    """
-    target_date = _parse_date(date)
-
-    params = {
-        'latitude': lat,
-        'longitude': lon,
-        'daily': 'temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode,windspeed_10m_max,uv_index_max',
-        'timezone': 'auto',
-        'start_date': target_date.strftime('%Y-%m-%d'),
-        'end_date': target_date.strftime('%Y-%m-%d')
-    }
-
+def get_weather_for_point(lat, lon, date=""):
+    td = _parse_date(date); ds = td.strftime("%Y-%m-%d")
+    params = {"latitude":lat,"longitude":lon,"daily":D,"timezone":"auto","start_date":ds,"end_date":ds}
     try:
-        response = requests.get(OPEN_METEO_URL, params=params, timeout=10)
-        response.raise_for_status()
-        data = response.json()
+        r = requests.get(URL, params=params, timeout=10); r.raise_for_status()
+        d = r.json().get("daily",{})
+        if not d.get("time"): return {"error":"No data"}
+        wc = d.get("weathercode",[0])[0]; wi = WC.get(wc, WC[0])
+        return {"date":ds,"lat":lat,"lon":lon,
+            "temperature_max":d.get("temperature_2m_max",[0])[0],
+            "temperature_min":d.get("temperature_2m_min",[0])[0],
+            "precipitation_mm":d.get("precipitation_sum",[0])[0],
+            "wind_speed_max":d.get("windspeed_10m_max",[0])[0],
+            "uv_index":d.get("uv_index_max",[0])[0],
+            "weather_code":wc,"weather_description_sk":wi.get("s",""),
+            "weather_description_en":wi.get("e",""),"weather_icon":wi.get("i",""),
+            "is_outdoor_friendly":_isof(wc,d),
+            "outdoor_recommendation_sk":_rec(wc,"sk"),
+            "outdoor_recommendation_en":_rec(wc,"en")}
+    except requests.RequestException as e: return {"error":str(e)}
 
-        daily = data.get('daily', {})
-        if not daily.get('time'):
-            return {'error': 'No weather data available for this date'}
-
-        weather_code = daily.get('weathercode', [0])[0]
-        weather_info = WEATHER_CODES.get(weather_code, WEATHER_CODES[0])
-
-        return {
-            'date': target_date.strftime('%Y-%m-%d'),
-            'lat': lat,
-            'lon': lon,
-            'temperature_max': daily.get('temperature_2m_max', [0])[0],
-            'temperature_min': daily.get('temperature_2m_min', [0])[0],
-            'precipitation_mm': daily.get('precipitation_sum', [0])[0],
-            'wind_speed_max': daily.get('windspeed_10m_max', [0])[0],
-            'uv_index': daily.get('uv_index_max', [0])[0],
-            'weather_code': weather_code,
-            'weather_description_sk': weather_info.get('sk', ''),
-            'weather_description_en': weather_info.get('en', ''),
-            'weather_icon': weather_info.get('icon', '🌤️'),
-            'is_outdoor_friendly': _is_outdoor_friendly(weather_code, daily),
-            'outdoor_recommendation_sk': _outdoor_recommendation(weather_code, 'sk'),
-            'outdoor_recommendation_en': _outdoor_recommendation(weather_code, 'en'),
-        }
-
-    except requests.RequestException as e:
-        return {'error': f'Weather fetch failed: {str(e)}'}
-
-
-def get_weather_grid(lat, lon, radius_km, date=''):
-    """
-    Get weather for a 3x3 grid of points covering the search area.
-    This provides weather visualization for the entire travel region.
-    """
-    target_date = _parse_date(date)
-
-    # Generate 9 points (3x3 grid) within the radius
-    grid_points = _generate_grid(lat, lon, radius_km, 3)
-
-    # Fetch weather for all grid points in one efficient request
+def get_weather_grid(lat, lon, radius_km, date=""):
+    td = _parse_date(date); ds = td.strftime("%Y-%m-%d")
+    pts = _grid(lat, lon, radius_km); pos = ["NW","N","NE","W","C","E","SW","S","SE"]
+    lats = ",".join(str(p[0]) for p in pts)
+    lons = ",".join(str(p[1]) for p in pts)
+    params = {"latitude":lats,"longitude":lons,"daily":D,"timezone":"auto","start_date":ds,"end_date":ds}
     results = []
-    for point in grid_points:
-        weather = get_weather_for_point(point['lat'], point['lon'], target_date.strftime('%Y-%m-%d'))
-        if not weather.get('error'):
-            weather['grid_position'] = point.get('position', '')
-            results.append(weather)
+    try:
+        r = requests.get(URL, params=params, timeout=15); r.raise_for_status()
+        data = r.json(); items = data if isinstance(data, list) else [data]
+        for i, item in enumerate(items):
+            d = item.get("daily",{})
+            if d and d.get("time"):
+                wc = d.get("weathercode",[0])[0]; wi = WC.get(wc, WC[0])
+                results.append({"lat":pts[i][0] if i<len(pts) else lat,
+                    "lon":pts[i][1] if i<len(pts) else lon,
+                    "grid_position":pos[i] if i<len(pos) else "",
+                    "temperature_max":d.get("temperature_2m_max",[0])[0],
+                    "temperature_min":d.get("temperature_2m_min",[0])[0],
+                    "precipitation_mm":d.get("precipitation_sum",[0])[0],
+                    "wind_speed_max":d.get("windspeed_10m_max",[0])[0],
+                    "weather_code":wc,"weather_icon":wi.get("i",""),
+                    "weather_description_sk":wi.get("s",""),
+                    "weather_description_en":wi.get("e",""),
+                    "is_outdoor_friendly":_isof(wc,d)})
+    except requests.RequestException:
+        for i, pt in enumerate(pts):
+            w = get_weather_for_point(pt[0], pt[1], ds)
+            if not w.get("error"):
+                w["grid_position"] = pos[i] if i<len(pos) else ""
+                results.append(w)
+    sm = _summary(results)
+    return {"date":ds,"center":{"lat":lat,"lon":lon},"radius_km":radius_km,"grid_points":results,"summary":sm}
 
-    # Determine overall area weather summary
-    summary = _area_summary(results)
+def _grid(clat, clon, rkm):
+    lo = rkm/111.0; la = rkm/(111.0*math.cos(math.radians(clat)))
+    return [(round(clat+lo*(1-i),4), round(clon+la*(j-1),4)) for i in range(3) for j in range(3)]
 
-    return {
-        'date': target_date.strftime('%Y-%m-%d'),
-        'center': {'lat': lat, 'lon': lon},
-        'radius_km': radius_km,
-        'grid_points': results,
-        'summary': summary
-    }
+def _summary(results):
+    if not results: return {"message":"No data"}
+    tm = [r["temperature_max"] for r in results if r.get("temperature_max") is not None]
+    pr = [r["precipitation_mm"] for r in results if r.get("precipitation_mm") is not None]
+    oc = sum(1 for r in results if r.get("is_outdoor_friendly"))
+    return {"avg_temp_max":round(sum(tm)/len(tm),1) if tm else 0,
+            "max_precipitation_mm":round(max(pr),1) if pr else 0,
+            "outdoor_friendly_ratio":str(oc)+"/"+str(len(results))}
 
-
-def _generate_grid(center_lat, center_lon, radius_km, grid_size=3):
-    """
-    Generate a grid of points covering the area.
-    Returns list of {lat, lon, position} dicts.
-    """
-    points = []
-    # Convert km to degrees (approximate)
-    lat_offset = radius_km / 111.0
-    lon_offset = radius_km / (111.0 * math.cos(math.radians(center_lat)))
-
-    positions = ['NW', 'N', 'NE', 'W', 'C', 'E', 'SW', 'S', 'SE']
-    idx = 0
-
-    for i in range(grid_size):
-        for j in range(grid_size):
-            lat = center_lat + lat_offset * (1 - i)  # Top to bottom
-            lon = center_lon + lon_offset * (j - 1)  # Left to right
-            points.append({
-                'lat': round(lat, 4),
-                'lon': round(lon, 4),
-                'position': positions[idx] if idx < len(positions) else f'{i},{j}'
-            })
-            idx += 1
-
-    return points
-
-
-def _area_summary(grid_results):
-    """Generate a summary of weather across the area."""
-    if not grid_results:
-        return {'message_sk': 'Údaje nedostupné', 'message_en': 'Data unavailable'}
-
-    temps_max = [r['temperature_max'] for r in grid_results if r.get('temperature_max') is not None]
-    temps_min = [r['temperature_min'] for r in grid_results if r.get('temperature_min') is not None]
-    precipitation = [r['precipitation_mm'] for r in grid_results if r.get('precipitation_mm') is not None]
-    outdoor_count = sum(1 for r in grid_results if r.get('is_outdoor_friendly'))
-
-    avg_temp_max = sum(temps_max) / len(temps_max) if temps_max else 0
-    avg_temp_min = sum(temps_min) / len(temps_min) if temps_min else 0
-    max_precip = max(precipitation) if precipitation else 0
-    total_points = len(grid_results)
-
-    # Find best/worst areas
-    best_area = min(grid_results, key=lambda x: x.get('precipitation_mm', 999))
-    worst_area = max(grid_results, key=lambda x: x.get('precipitation_mm', 0))
-
-    return {
-        'avg_temp_max': round(avg_temp_max, 1),
-        'avg_temp_min': round(avg_temp_min, 1),
-        'max_precipitation_mm': round(max_precip, 1),
-        'outdoor_friendly_ratio': f'{outdoor_count}/{total_points}',
-        'best_weather_area': best_area.get('grid_position', ''),
-        'worst_weather_area': worst_area.get('grid_position', ''),
-        'best_weather_icon': best_area.get('weather_icon', ''),
-        'worst_weather_icon': worst_area.get('weather_icon', ''),
-    }
-
-
-def _parse_date(date_str):
-    """Parse date string or return today."""
-    if date_str:
+def _parse_date(ds):
+    if ds:
         try:
-            parsed = datetime.strptime(date_str, '%Y-%m-%d')
-            # Limit to 16 days from now
-            max_date = datetime.now() + timedelta(days=16)
-            if parsed > max_date:
-                return max_date
-            if parsed < datetime.now():
-                return datetime.now()
-            return parsed
-        except ValueError:
-            pass
+            p = datetime.strptime(ds, "%Y-%m-%d")
+            mx = datetime.now() + timedelta(days=16)
+            if p > mx: return mx
+            if p < datetime.now(): return datetime.now()
+            return p
+        except ValueError: pass
     return datetime.now()
 
-
-def _is_outdoor_friendly(weather_code, daily_data):
-    """Determine if weather is suitable for outdoor activities."""
-    # Good outdoor weather: clear, partly cloudy, light clouds
-    good_codes = [0, 1, 2, 3]
-    if weather_code in good_codes:
-        # Also check precipitation
-        precip = daily_data.get('precipitation_sum', [0])[0] or 0
-        wind = daily_data.get('windspeed_10m_max', [0])[0] or 0
-        return precip < 2 and wind < 40
+def _isof(wc, d):
+    if wc in [0,1,2,3]:
+        return (d.get("precipitation_sum",[0])[0] or 0) < 2 and (d.get("windspeed_10m_max",[0])[0] or 0) < 40
     return False
 
-
-def _outdoor_recommendation(weather_code, lang='en'):
-    """Generate outdoor activity recommendation based on weather."""
-    if weather_code in [0, 1]:
-        return 'Ideálne na outdoor aktivity' if lang == 'sk' else 'Ideal for outdoor activities'
-    elif weather_code in [2, 3]:
-        return 'Vhodné na outdoor, oblačno' if lang == 'sk' else 'Good for outdoor, cloudy'
-    elif weather_code in [45, 48]:
-        return 'Hmla – obmedená viditeľnosť' if lang == 'sk' else 'Fog – limited visibility'
-    elif weather_code in [51, 53, 61, 80]:
-        return 'Dážď – odporúčame indoor aktivity' if lang == 'sk' else 'Rain – indoor activities recommended'
-    elif weather_code in [55, 63, 65, 81, 82]:
-        return 'Silný dážď – len indoor' if lang == 'sk' else 'Heavy rain – indoor only'
-    elif weather_code in [71, 73, 75, 77, 85, 86]:
-        return 'Sneženie – zimné aktivity' if lang == 'sk' else 'Snow – winter activities'
-    elif weather_code in [95, 96, 99]:
-        return '⚠️ Búrka – zostaňte vnútri' if lang == 'sk' else '⚠️ Storm – stay indoors'
-    return 'Skontrolujte počasie' if lang == 'sk' else 'Check weather conditions'
+def _rec(wc, lang="en"):
+    if wc in [0,1]: return "Idealne na outdoor" if lang=="sk" else "Ideal for outdoor"
+    if wc in [2,3]: return "Vhodne, oblacno" if lang=="sk" else "Good, cloudy"
+    if wc in [45,48]: return "Hmla" if lang=="sk" else "Fog"
+    if wc in [51,53,61,80]: return "Dazd" if lang=="sk" else "Rain - indoor recommended"
+    if wc in [55,63,65,81,82]: return "Silny dazd" if lang=="sk" else "Heavy rain"
+    if wc in [71,73,75,85,86]: return "Sneh" if lang=="sk" else "Snow"
+    if wc in [95,96,99]: return "Burka!" if lang=="sk" else "Storm - stay indoors"
+    return "Skontrolujte pocasie" if lang=="sk" else "Check weather"
