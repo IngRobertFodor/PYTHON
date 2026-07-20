@@ -63,9 +63,25 @@ else:
     print("Adult")
 ```
 
+> 💡 **Evaluation order:** Python checks conditions top to bottom and runs **only the first one that is `True`** — the rest are skipped entirely. `else` only runs if *none* of the above matched.
+
 **Comparison operators:** `==`, `!=`, `<`, `>`, `<=`, `>=`
 
 **Logical operators:** `and`, `or`, `not`
+
+| Operator | Result is `True` when... |
+|---|---|
+| `and` | **both** conditions are `True` |
+| `or` | **at least one** condition is `True` |
+| `not` | **flips** the value (`True` → `False` and vice versa) |
+
+```python
+print(True and False)   # False – both must be True
+print(True or False)    # True  – only one needs to be True
+print(not True)         # False – flipped
+```
+
+> 💡 Priority: `not` is evaluated first, then `and`, then `or`. When unsure, use parentheses `()` for clarity.
 
 ```python
 age = 20
