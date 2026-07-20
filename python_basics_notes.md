@@ -5,13 +5,60 @@
 ---
 
 ## 📑 Contents
-1. [Data Types](#data-types)
-2. [Conditionals](#conditionals)
-3. [Loops](#loops)
-4. [Lists](#lists)
-5. [Tuples](#tuples)
-6. [Sets](#sets)
-7. [Dictionaries](#dictionaries)
+1. [Basics](#basics)
+2. [Data Types](#data-types)
+3. [Conditionals](#conditionals)
+4. [Loops](#loops)
+5. [Lists](#lists)
+6. [Tuples](#tuples)
+7. [Sets](#sets)
+8. [Dictionaries](#dictionaries)
+---
+
+## Basics
+
+**`print()`** — outputs text/values to the screen. Can take multiple values, separated by commas.
+
+```python
+print("Hello, world!")
+print("Age:", 25)          # multiple values -> "Age: 25"
+```
+
+**Comments** — ignored by Python, used to explain code. `#` for a single line, `'''` or `"""` for multi-line.
+
+```python
+# this is a single-line comment
+x = 5   # can also go at the end of a line
+
+"""
+This is a
+multi-line comment
+"""
+```
+
+**Indentation** — Python uses indentation (spaces) instead of `{}` to define code blocks (inside `if`, loops, functions...). Consistent indentation is **required**, not just style.
+
+```python
+if True:
+    print("indented – part of the if block")
+print("not indented – runs regardless")
+```
+
+**`=` vs `==`**
+
+| Operator | Meaning | Example |
+|---|---|---|
+| `=` | **assignment** – stores a value in a variable | `x = 5` |
+| `==` | **comparison** – checks if two values are equal, returns `True`/`False` | `x == 5` |
+
+```python
+x = 5        # assign 5 to x
+print(x == 5)   # True  – comparison
+print(x == 6)   # False
+```
+
+> 💡 A very common beginner mistake is writing `if x = 5:` instead of `if x == 5:` — Python will raise a `SyntaxError` for that, which helps catch it.
+
 ---
 
 ## Data Types
@@ -45,6 +92,24 @@ str(5)        # "5"
 float("3.2")  # 3.2
 bool(0)       # False
 ```
+
+### Adding strings (concatenation)
+
+**Theory:** Strings are joined with `+`. Only `str` + `str` works — numbers must be converted with `str()` first, or use an f-string instead.
+
+```python
+first = "John"
+last = "Smith"
+full = first + " " + last
+print(full)   # John Smith
+
+age = 30
+# print("Age: " + age)        # TypeError – can't add str + int
+print("Age: " + str(age))     # Age: 30   – convert first
+print(f"Age: {age}")          # Age: 30   – f-string is usually cleaner
+```
+
+> 💡 `*` also works on strings for repetition: `"ab" * 3` → `"ababab"`.
 
 ---
 
