@@ -50,7 +50,22 @@ bool(0)       # False
 
 ## Conditionals
 
-**Theory:** `if / elif / else` – run code based on whether a condition is met.
+**Theory:** `if / elif / else` – run code based on whether a condition is met. `elif` (short for "else if") lets you test multiple conditions in sequence without nesting separate `if` statements — you can chain as many `elif` blocks as needed between `if` and `else`.
+
+```python
+score = 75
+
+if score >= 90:
+    print("A")
+elif score >= 80:
+    print("B")
+elif score >= 70:
+    print("C")
+else:
+    print("F")
+```
+
+Python checks conditions top to bottom and stops at the **first** one that's `True` (here `75 >= 70` → prints `C`; the remaining `elif`/`else` are never even checked).
 
 ```python
 age = 18
@@ -144,21 +159,25 @@ while count < 3:
 
 | Keyword | Description | Example |
 |---|---|---|
-| `break` | exits the loop immediately | stop searching once found |
-| `continue` | skips to the next iteration | skip an item, keep looping |
+| `break` | **stops the loop entirely** – jumps out of it, nothing after it in the loop runs again | stop searching once found |
+| `continue` | **skips only the rest of the current iteration** – the loop keeps going with the next value | skip an item, keep looping |
 | `else` | runs after the loop finishes normally (no `break`) | often used with search loops |
 
 ```python
-for fruit in fruits:
-    if fruit == "banana":
-        break          # stop looping here
-    print(fruit)
+for i in range(5):
+    if i == 3:
+        break          # loop stops completely at 3
+    print(i)
+# output: 0 1 2
 
 for i in range(5):
-    if i == 2:
-        continue       # skip printing 2
+    if i == 3:
+        continue       # only skips printing 3, loop continues
     print(i)
+# output: 0 1 2 4
 ```
+
+> 💡 `break` = "stop, exit the loop". `continue` = "skip this one, but keep going".
 
 **List/dict/set comprehensions** are a compact way to build collections using a loop in one line — you'll see this exact pattern (`for x in range(5)`) again in the [Lists](#lists) chapter.
 
