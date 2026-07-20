@@ -24,6 +24,27 @@ print("Hello, world!")
 print("Age:", 25)          # multiple values -> "Age: 25"
 ```
 
+**`end=` parameter** — by default `print()` adds a newline (`\n`) after each call. You can change that with `end=`.
+
+```python
+print("Hello", end="")   # no newline – stays on the same line
+print("World")
+```
+Output:
+```
+HelloWorld
+```
+
+```python
+print("Hello", end="\n")   # explicit newline – this is the default behavior
+print("World")
+```
+Output:
+```
+Hello
+World
+```
+
 **Comments** — ignored by Python, used to explain code. `#` for a single line, `'''` or `"""` for multi-line.
 
 ```python
@@ -110,6 +131,21 @@ print(f"Age: {age}")          # Age: 30   – f-string is usually cleaner
 ```
 
 > 💡 `*` also works on strings for repetition: `"ab" * 3` → `"ababab"`.
+
+### Escape characters
+
+**Theory:** Special characters inside a string, written with a backslash `\`. Most common: `\n` (new line) and `\t` (tab).
+
+```python
+print("Line 1\nLine 2")
+# Line 1
+# Line 2
+
+print("Name:\tJohn")
+# Name:    John
+```
+
+> 💡 To print a literal backslash or quote, escape it too: `\\` or `\"`.
 
 ---
 
