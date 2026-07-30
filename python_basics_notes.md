@@ -308,6 +308,7 @@ print(fruits)          # ['apple', 'lemon', 'banana']
 | `.index(x)` | returns the index of the first match | `fruits.index("apple")` |
 | `.count(x)` | counts occurrences of a value | `fruits.count("apple")` |
 | `.extend(list2)` | adds items from another list | `fruits.extend(["kiwi"])` |
+| `.copy()` | returns a shallow copy of the list | `fruits.copy()` |
 | `.clear()` | empties the list | `fruits.clear()` |
 
 ### Useful built-in functions
@@ -377,6 +378,35 @@ print("name" in {"name": "John"})   # True  – checks dict keys
 ```
 
 > 💡 Often used inside `if` statements: `if "apple" in fruits:`
+
+### ⚠️ Never modify a list while iterating over it
+
+**Theory:** Changing a list's size (adding/removing items) *while* looping over it directly can skip items or cause bugs, because the loop tracks the list by index/position, and that position shifts as items are added/removed.
+
+```python
+numbers = [1, 2, 3, 4, 5]
+
+# ❌ Wrong – modifying while iterating
+for n in numbers:
+    if n % 2 == 0:
+        numbers.remove(n)   # skips items! result: [1, 3, 5] but not by design
+```
+
+```python
+# ✅ Correct – iterate over a copy instead
+numbers = [1, 2, 3, 4, 5]
+for n in numbers.copy():     # .copy() makes a copy
+    if n % 2 == 0:
+        numbers.remove(n)
+print(numbers)   # [1, 3, 5]
+```
+
+```python
+# ✅ Or, even better – build a new list instead of mutating
+numbers = [1, 2, 3, 4, 5]
+numbers = [n for n in numbers if n % 2 != 0]
+print(numbers)   # [1, 3, 5]
+```
 
 ---
 
