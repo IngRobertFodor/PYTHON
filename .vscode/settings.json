@@ -3,5 +3,6 @@
     "python.analysis.extraPaths": [
         "C:\\Users\\I070494\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python312\\site-packages"
     ],
-    "python.analysis.typeCheckingMode": "off"
+    "python.analysis.typeCheckingMode": "off",
+    "python-envs.defaultEnvManager": "ms-python.python:system"
 }
