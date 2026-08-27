@@ -1,17 +1,16 @@
 =====================================================================
   PDF PASSWORD CONVERTER - SECURITY FIX UPGRADE INSTRUCTIONS
-  Fix: pypdf Infinite Loop Vulnerability (High Severity)
+  Fix: pypdf CVE-2026-71852 and CVE-2026-71870 (Moderate Severity)
 =====================================================================
 
 WHAT CHANGED
 ------------
 requirements.txt was updated:
-  BEFORE: pypdf>=6.14.2
-  AFTER:  pypdf==6.14.2
+  BEFORE: pypdf==6.14.2
+  AFTER:  pypdf==6.15.0
 
-The version is now pinned exactly to 6.14.2, which is a safe version
-above the fix threshold of 5.1.0. This prevents any downgrade to a
-vulnerable version.
+The version is now pinned to 6.15.0, which resolves CVE-2026-71852
+and CVE-2026-71870 reported by GitHub Security Alert (Aug 20-27, 2026).
 
 
 HOW TO APPLY THE FIX
@@ -20,7 +19,7 @@ HOW TO APPLY THE FIX
 Option A: Using system Python / pip
 ------------------------------------
 1. Open a Command Prompt in this project folder
-2. Run: pip install --force-reinstall pypdf==6.14.2
+2. Run: pip install --force-reinstall pypdf==6.15.0
 3. Verify: pip show pypdf
 
 Option B: Using install_dependencies.bat (reinstall all dependencies)
@@ -32,7 +31,7 @@ Option B: Using install_dependencies.bat (reinstall all dependencies)
 Option C: Using the bundled WinPython
 --------------------------------------
 1. Open a Command Prompt in this project folder
-2. Run: WinPython\python-3.x.x.amd64\Scripts\pip.exe install --force-reinstall pypdf==6.14.2
+2. Run: WinPython\python-3.x.x.amd64\Scripts\pip.exe install --force-reinstall pypdf==6.15.0
 3. Verify: WinPython\python-3.x.x.amd64\Scripts\pip.exe show pypdf
 
 
@@ -43,7 +42,7 @@ After installation, check:
 
 Expected output:
   Name: pypdf
-  Version: 6.14.2
+  Version: 6.15.0
 
 
 REBUILD THE EXE (if distributing as standalone application)
