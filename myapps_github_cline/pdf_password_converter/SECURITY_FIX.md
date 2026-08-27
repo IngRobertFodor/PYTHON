@@ -12,7 +12,7 @@
 
 File: requirements.txt
 Before: pypdf==6.14.2
-After:  pypdf==6.15.0
+After:  pypdf==6.16.2 (latest stable)
 
 ---
 
@@ -46,9 +46,9 @@ A malicious PDF as input could trigger the infinite loop in encrypt_pdf().
 ## Current Version Status
 
 File: requirements.txt
-Current: pypdf==6.15.0
+Current: pypdf==6.16.2
 
-Pinning to exact version 6.15.0 ensures:
+Pinning to exact version 6.16.2 ensures:
 1. All known CVEs (CVE-2026-71852, CVE-2026-71870) are patched
 2. Version is well above the DoS patch threshold (5.1.0)
 3. No accidental downgrade to a vulnerable version is possible
@@ -57,11 +57,11 @@ Pinning to exact version 6.15.0 ensures:
 ## Verification
 
 Run: pip show pypdf
-Expected: Version: 6.15.0
+Expected: Version: 6.16.2
 
 ## References
 
 - GitHub Security Advisory: CVE-2026-71852, CVE-2026-71870
 - GitHub Security Advisory: pypdf infinite loop (ASCII85 and ASCIIHex filter)
-- Fixed in pypdf 6.15.0 release
+- Fixed in pypdf 6.15.0+ release
 - https://pypdf.readthedocs.io/en/stable/meta/changelog.html
