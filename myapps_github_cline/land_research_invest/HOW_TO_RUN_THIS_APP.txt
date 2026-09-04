@@ -1,0 +1,121 @@
+HOW TO RUN THIS APP
+====================
+
+=== FIRST TIME SETUP (do this only once) ===
+
+STEP 1: Make sure Python is installed
+  - Download Python from https://www.python.org/downloads/
+  - During installation, CHECK the box "Add Python to PATH"
+  - Restart your computer after installation
+
+STEP 2: Get a Google Gemini API key (free tier)
+  - Go to https://aistudio.google.com/app/apikey
+  - Click "Create API key" (free, no credit card needed)
+  - Copy the file ".env.example" to ".env"
+  - Open ".env" and paste your key:
+      GOOGLE_API_KEY=your_key_here
+  - Optionally add Anthropic key as fallback:
+      ANTHROPIC_API_KEY=your_key_here  (leave empty if not needed)
+
+STEP 3: Install required libraries
+  - Double-click "start_app.bat"
+  - It will automatically install dependencies
+    (Flask, LangChain, Gemini, GIS libraries, Playwright...)
+  - It will also run: playwright install chromium
+    (downloads Chromium browser for scraping — ~130 MB, one-time)
+  - This step may take a few minutes on first run
+
+=== RUNNING THE APP (every time) ===
+
+  - Double-click "start_app.bat"
+  - Wait a few seconds
+  - Your web browser will open automatically at http://localhost:5001
+  - Done!
+
+=== USING THE APP ===
+
+  1. Set your search criteria in the panel:
+       - Max price (EUR)
+       - Max distance from Bratislava (km, max 70)
+       - Min / max area (m2)
+       - Min parcel width (m, min 15)
+
+  2. Click "Start scan"
+       - The AI agent begins searching real estate portals
+       - Progress is shown in the log panel
+
+  3. Agent validates each found parcel automatically:
+       - geometry (width, shape, area) via ZBGIS
+       - flood zone Q100 via SHMU
+       - soil quality BPEJ via geodata.gov.sk
+       - road access, electricity, water via OpenStreetMap
+       - distance and drive time from Bratislava
+
+  4. Results appear on the interactive map + as scored cards (0-100):
+       - GREEN  card = score >= 85 (Strong Buy)
+       - YELLOW card = score >= 70 (Investigate)
+       - ORANGE card = score >= 50 (Consider)
+       - RED    card = score <  50 (Skip)
+
+  5. Click any card to see full analysis details
+
+  6. For top candidates (score >= 70):
+       - Download the CADASTRAL CHECKLIST (PDF/TXT)
+       - Use it to manually verify List vlastnictva on:
+         https://kataster.skgeodesy.sk
+
+=== IMPORTANT — MANUAL STEPS REQUIRED ===
+
+  Some checks CANNOT be automated and require your manual action:
+
+  ❌ List vlastnictva (sections B/C/D)
+       Blocked by CAPTCHA on katasterportal.sk
+       → Agent generates a filled checklist for you
+
+  ❌ UPI / zoning info (IBV zone confirmation)
+       Must be requested from the municipality (obec)
+       → Agent prepares a draft request letter
+
+  ⚠️  Transformer capacity (electricity)
+       Proximity is checked automatically
+       → Confirm actual capacity with ZSDIS distributor
+
+  ⚠️  Archaeological zone
+       → Check with KPU (Krajsky pamiatkovy urad)
+
+=== STOPPING THE APP ===
+
+  - Go to the CMD window (black window with text)
+  - Press Ctrl+C
+  - The server will stop
+
+=== TROUBLESHOOTING ===
+
+  Problem: "start_app.bat" shows "Python nie je nainstalovany"
+  Solution: Install Python from python.org (check "Add to PATH")
+
+  Problem: Agent returns "GOOGLE_API_KEY not set"
+  Solution: Make sure .env file exists next to start_app.bat
+            and contains a valid GOOGLE_API_KEY=...
+
+  Problem: Scraping returns no results or gets blocked
+  Solution: Real estate portals use anti-bot protection.
+            Try again in 10-15 minutes or update CSS selectors
+            in backend/services/realestate_scraper_service.py
+
+  Problem: GIS service error (ZBGIS / SHMU / BPEJ timeout)
+  Solution: Slovak state WMS/WFS endpoints can be temporarily down.
+            Retry later. Fallback values are used automatically.
+
+  Problem: Port 5001 is already in use
+  Solution: Change PORT value in backend/app.py line 1 or in .env
+
+  Problem: "playwright install" fails
+  Solution: Run as administrator:
+            cd backend
+            python -m playwright install chromium
+
+=== RUNNING TESTS ===
+
+  Open CMD in this folder and run:
+  python -m pytest tests/ --rootdir=. -v
