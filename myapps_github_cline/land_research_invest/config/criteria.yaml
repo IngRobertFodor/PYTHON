@@ -1,0 +1,152 @@
+# ============================================================
+# Land Research Invest - Kriteria vyhladavania
+# Zmente tuto hodnoty bez zasahu do kodu.
+# ============================================================
+
+search_criteria:
+
+  location:
+    center_lat: 48.1486        # Bratislava - stred
+    center_lon: 17.1077
+    max_distance_km: 70        # maximalna vzdialenost od BA
+
+  price:
+    min_eur: 10000
+    max_eur: 50000
+
+  parcel:
+    min_area_sqm: 600
+    max_area_sqm: 1500
+    min_width_m: 15            # minimalna sirka parcely (stavebna cara)
+
+  zoning:
+    required_zones:            # aspon jedna musi sediet
+      - "IBV"
+      - "rodinne domy"
+      - "obytna zona"
+    excluded_zones:
+      - "priemyselna"
+      - "commercial"
+      - "skladova"
+
+  infrastructure:
+    road:
+      min_width_m: 6           # minimum pre hasicov
+      max_distance_m: 100      # max vzdialenost pristupovej cesty
+    electricity:
+      max_distance_m: 200      # max vzdialenost vedenia
+    sewage_required: false     # zumpa/COV je OK ak nie je kanalizacia
+
+  risks:
+    flood_zone_q100: false     # nesmi byt v zaplavovom uzemi
+    landslide_zone: false      # nesmi byt v zosuvnom uzemi
+    max_soil_protection_class: 6   # BPEJ ochrana 1-9 (1=najcennejsia)
+
+
+# ============================================================
+# Skorovaci algoritmus - vahy (sucet musi byt 1.0)
+# ============================================================
+
+scoring:
+  weights:
+    price:          0.20
+    distance:       0.15
+    infrastructure: 0.25
+    legal_proxy:    0.20
+    flood_risk:     0.10
+    soil_quality:   0.10
+
+  thresholds:
+    strong_buy:   85    # >= 85 -> STRONG BUY
+    investigate:  70    # >= 70 -> INVESTIGATE
+    consider:     50    # >= 50 -> CONSIDER
+                        # <  50 -> SKIP
+
+  checklist_min_score: 70   # od tohto skore generovat kataster checklist
+
+
+# ============================================================
+# Zdroje inzeratov
+# ============================================================
+
+sources:
+  # ZELENA ZONA - bezpecne
+  nehnutelnosti_sk:
+    enabled: true
+    use_sitemap: true          # pouzit sitemap namiesto search
+    rate_limit_per_min: 30
+
+  topreality_sk:
+    enabled: true
+    rate_limit_per_min: 10     # z robots.txt: Request-rate: 10/1m
+
+  notarske_drazby:
+    enabled: true
+    rate_limit_per_min: 10
+
+  spf:
+    enabled: true
+    rate_limit_per_min: 10
+
+  # ZLTA ZONA - opatrne
+  reality_sk:
+    enabled: true
+    rate_limit_per_min: 15
+    use_neutral_useragent: true   # nesmie mat AI-bot hlavicku
+
+  bazos_sk:
+    enabled: false               # search blokovany - zapnut len ak mas priame linky
+    rate_limit_per_min: 10
+
+  bankove_drazby:
+    enabled: false               # individualne overit ToS pred zapnutim
+
+  # CERVENA ZONA
+  facebook_marketplace:
+    enabled: false               # ToS explicitne zakazuje scraping
+
+
+# ============================================================
+# Feature flags - zapni/vypni bez zasahu do kodu
+# ============================================================
+
+features:
+  use_distance:        true
+  use_flood:           true
+  use_terrain:         true
+  use_ortofoto:        false    # zatial vypnute - pridame neskor
+  use_llm_vision:      false    # vyzaduje ortofoto
+  use_zoning_ocr:      true
+  use_bpej:            true
+  use_overpass:        true
+  use_price_analysis:  true
+  use_cadastral_semi:  false    # poloautomat LV - zapnut ak chces
+  use_monitoring:      false    # periodicky sken - zapnut ak chces
+  use_notifications:   false    # email/telegram - zapnut ak chces
+
+
+# ============================================================
+# Notifikacie
+# ============================================================
+
+notifications:
+  min_score_to_notify: 75
+  channels:
+    telegram: false
+    email:    false
+
+
+# ============================================================
+# Externe endpointy (overit GetCapabilities pred pouzitim)
+# ============================================================
+
+endpoints:
+  zbgis_wfs:    "https://zbgis.skgeodesy.sk/wfs/default"
+  shmu_wms:     "https://geo.shmu.sk/wms"
+  bpej_wms:     "https://geodata.gov.sk/geoserver/wms"
+  sgudsh_wms:   "https://gis.geology.sk/arcgis/services"
+  dmr_wcs:      "https://zbgis.skgeodesy.sk/wcs"
+  ortofoto_wms: "https://zbgis.skgeodesy.sk/wms"
+  overpass:     "https://overpass-api.de/api/interpreter"
+  overpass_mirror: "https://overpass.kumi.systems/api/interpreter"
+  nominatim:    "https://nominatim.openstreetmap.org/search"
