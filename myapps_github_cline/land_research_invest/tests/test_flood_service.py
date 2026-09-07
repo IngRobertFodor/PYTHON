@@ -1,5 +1,5 @@
 """
-Unit Tests - Flood Service
+Testy - Sluzba zaplavovych uzemi
 ============================
 Testuje kontrolu Q100 zaplavoveho uzemia.
 HTTP requesty na SHMU WMS su mockované - 100% offline.

@@ -1,5 +1,5 @@
 """
-Unit Tests - Overpass Service
+Testy - Sluzba infrastruktury (Overpass)
 ================================
 Testuje analyzu infrastrukturnych prvkov cez OSM Overpass API.
 HTTP requesty su mockované - 100% offline.

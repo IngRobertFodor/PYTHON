@@ -1,6 +1,6 @@
 """
-Geocoding Service
-=================
+Geokodovacia sluzba
+===================
 Prevod textovej adresy na GPS suradnice (WGS-84) cez Nominatim.
 Rovnaky pristup ako v my_travel_tips - free, bez API kluca.
 """

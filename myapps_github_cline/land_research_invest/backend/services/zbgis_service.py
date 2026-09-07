@@ -1,6 +1,6 @@
 """
-ZBGIS Service
-=============
+Sluzba geometrie parciel (ZBGIS)
+=================================
 Geometricka analyza parcely z katastra SR cez ZBGIS WFS.
 
 Zistuje:

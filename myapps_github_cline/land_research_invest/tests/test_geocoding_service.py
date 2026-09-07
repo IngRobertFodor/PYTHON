@@ -1,5 +1,5 @@
 """
-Unit Tests - Geocoding Service
+Testy - Geokodovacia sluzba
 ================================
 Testuje prevod adresy na GPS suradnice.
 HTTP requesty su mockované - 100% offline.

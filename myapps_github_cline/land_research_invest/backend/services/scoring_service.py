@@ -1,6 +1,6 @@
 """
-Scoring Service
-===============
+Scoring sluzba
+==============
 Vypocita vazene celkove skore pozemku (0-100) zo vsetkych
 ServiceResult-ov nazbieranych validatormi.
 Cista logika - bez externe API, 100% offline a testovatelna.

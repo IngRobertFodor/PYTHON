@@ -1,6 +1,6 @@
 """
-BPEJ Service
-============
+Sluzba bonity pody (BPEJ)
+==========================
 Kontrola bonity pody (BPEJ) a odhad odvodov za vynatie z PPF.
 
 Ochranné triedy pody 1-9:

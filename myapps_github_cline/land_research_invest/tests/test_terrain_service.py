@@ -1,5 +1,5 @@
 """
-Unit Tests - Terrain Service
+Testy - Sluzba terenu
 ==============================
 Testuje analyzu terenu: sklon, orientacia, vyska, zosuvy, radon.
 HTTP requesty su mockované - 100% offline.

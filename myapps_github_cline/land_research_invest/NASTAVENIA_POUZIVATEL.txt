@@ -1,0 +1,146 @@
+NASTAVENIA — Ako prispôsobiť vyhľadávanie
+==========================================
+
+Všetko sa mení v JEDINOM súbore:  config/criteria.yaml
+Po každej zmene stačí reštartovať aplikáciu. Žiadna kompilácia.
+
+Formát YAML: odsadenie = medzery (NIE tabulátory).
+
+
+==============================================================
+1. CENA  (criteria -> price)
+==============================================================
+  max_eur: 50000             maximálna cena
+  min_eur: 10000             lacnejšie ignorovať
+  max_price_per_sqm_eur: 100 max za m²
+
+  >> max_eur: 70000           zvýšiť rozpočet na 70 000 EUR
+  >> max_price_per_sqm_eur: 60  prísnejší limit na m²
+
+
+==============================================================
+2. VZDIALENOSŤ  (criteria -> location)
+==============================================================
+  max_distance_km: 70
+
+  >> max_distance_km: 50      len do 50 km od BA
+  >> center_lat: 48.3774      iný stred (napr. Trnava)
+     center_lon: 17.5853
+
+
+==============================================================
+3. VEĽKOSŤ POZEMKU  (criteria -> parcel)
+==============================================================
+  min_area_sqm: 600    min. výmera v m²
+  max_area_sqm: 1500   max. výmera v m²
+  min_width_m: 15      min. šírka (stavebná čiara)
+
+  >> min_area_sqm: 800        len väčšie pozemky
+
+
+==============================================================
+4. ČO JE DÔLEŽITEJŠIE  (scoring -> weights)
+==============================================================
+!!! SÚČET MUSÍ BYŤ PRESNE 1.0 — ak zvýšite jednu, znížte inú !!!
+
+  price:            0.18   cena a hodnota za peniaze
+  distance:         0.12   vzdialenosť od Bratislavy
+  infrastructure:   0.20   cesta, elektrina, voda
+  legal_proxy:      0.18   čistý list vlastníctva
+  flood_risk:       0.10   nie v záplavovej zóne
+  soil_quality:     0.08   bonita pôdy (odvody za vyňatie)
+  terrain:          0.07   sklon, zosuvy, radón
+  protected_zones:  0.07   nie v NP ani Natura 2000
+                   -----
+  SÚČET:            1.00  ← musí zostať 1.00
+
+  >> cena najdôležitejšia:  price: 0.25, distance: 0.05
+  >> právna bezpečnosť:     legal_proxy: 0.25, terrain: 0.00
+
+
+==============================================================
+5. HODNOTENIE  (scoring -> thresholds)
+==============================================================
+  strong_buy:  85    top výber — konajte rýchlo
+  investigate: 70    dobrý tip — overte a navštívte
+  consider:    50    možné     — má určité nedostatky
+                     pod 50    = preskočiť
+  checklist_min_score: 70   od tohto skóre vygenerovať checklist
+
+  >> strong_buy: 90           byť selektívnejší
+
+
+==============================================================
+6. KDE HĽADAŤ  (sources -> enabled: true/false)
+==============================================================
+  nehnutelnosti_sk   ZAP   GREEN  hlavný portál
+  topreality_sk      ZAP   GREEN  limit 10 req/min
+  notarske_drazby    ZAP   GREEN  notárske dražby
+  spf                ZAP   GREEN  štátne pozemky
+  obchodny_vestnik   ZAP   GREEN  konkurzy a dražby  (!)
+  exekutorske_drazby ZAP   GREEN  exekučné predaje   (!)
+  drazby_net         ZAP   GREEN  agregátor dražieb
+  eks_statny_majetok ZAP   GREEN  majetok štátu
+  bsk_kraj           ZAP   GREEN  prebytočný majetok BSK
+  obce_uradne_tabule ZAP   GREEN  obecné predaje
+  reality_sk         ZAP   ŽLTÁ   opatrne
+  byty_sk            ZAP   ŽLTÁ   overiť robots.txt
+  bazos_sk           VYP   ŽLTÁ   vyhľadávanie blokované
+  bankove_drazby     VYP   ŽLTÁ   overiť podmienky banky
+  facebook_mktplace  VYP   ČERVENÁ  NIKDY — zakázané
+
+  (!) = najlepšie zdroje pre podhodnotené pozemky
+  >> vypnúť:  sources -> NAZOV -> enabled: false
+
+
+==============================================================
+7. KONTROLY  (features -> true/false)
+==============================================================
+  >> use_terrain: false          vynechať terén
+  >> use_cadastral_semi: true    zapnúť kataster (1 klik CAPTCHA)
+  >> use_notifications: true     e-mailové upozornenia
+
+
+==============================================================
+8. TERÉN  (criteria -> terrain)
+==============================================================
+  max_slope_percent: 15      max sklon v %
+  max_elevation_m: 400       max nadmorská výška
+  max_radon_risk_class: 2    radón: 1=nízky, 2=stredný, 3=vysoký
+
+  >> max_slope_percent: 8     len rovné pozemky
+
+
+==============================================================
+9. BONITA PÔDY  (criteria -> soil)
+==============================================================
+  max_protection_class: 6    (1=najdrahšia, 9=bez poplatkov)
+
+  >> max_protection_class: 9  len pôda bez odvodov
+
+
+==============================================================
+ČASTÉ CHYBY
+==============================================================
+  Zlý súčet váh:  scoring.weights musí dávať 1.0
+  min > max:      min_eur musí byť menšie ako max_eur
+  Zlý YAML:       python -c "import yaml; yaml.safe_load(open('config/criteria.yaml'))"
+  Zlé prahy:      strong_buy > investigate > consider
+
+  Overiť po každej zmene:
+    python -m pytest tests/test_config_validator.py -v
+
+
+==============================================================
+RÝCHLY PREHĽAD
+==============================================================
+  Lacnejšie:       criteria -> price -> max_eur
+  Ďalej od BA:     criteria -> location -> max_distance_km
+  Väčšie:          criteria -> parcel -> min_area_sqm
+  Váhy:            scoring -> weights  (súčet = 1.0)
+  Filter:          scoring -> thresholds -> strong_buy
+  Vypnúť zdroj:    sources -> NAZOV -> enabled: false
+  Vypnúť kontrolu: features -> use_XXX: false
+
+
+Autor: Robert Fodor | 2026

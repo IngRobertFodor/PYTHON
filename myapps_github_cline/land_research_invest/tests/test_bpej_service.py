@@ -1,5 +1,5 @@
 """
-Unit Tests - BPEJ Service
+Testy - Sluzba bonity pody (BPEJ)
 ===========================
 Testuje bonitu pody, ochranné triedy, odvody a scoring.
 HTTP requesty su mockované - 100% offline.

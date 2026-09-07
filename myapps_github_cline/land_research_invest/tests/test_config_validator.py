@@ -1,5 +1,5 @@
 """
-Unit Tests - Config Validator
+Testy - Validator konfiguracie
 ================================
 Testuje ze validate_config() zachyti kazdu chybu po slovensky
 a ze platny config preide bez chyb.

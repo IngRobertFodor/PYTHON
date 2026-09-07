@@ -1,6 +1,6 @@
 """
-Price Analysis Service
-======================
+Sluzba cenovej analyzy
+=======================
 Cenova analyza pozemku - porovnanie s lokalnym priemerom,
 vyhodnotenie podhodnotenia a motivacie predajcu.
 

@@ -1,0 +1,139 @@
+AKO SPUSTIŤ APLIKÁCIU
+======================
+
+=== PRVÉ SPUSTENIE (iba raz) ===
+
+KROK 1: Uistite sa, že máte nainštalovaný Python
+  - Stiahnite z https://www.python.org/downloads/
+  - Pri inštalácii zaškrtnite "Add Python to PATH"
+  - Po inštalácii reštartujte počítač
+
+KROK 2: Získajte API kľúč pre Google Gemini (bezplatne)
+  - Choďte na: https://aistudio.google.com/app/apikey
+  - Kliknite "Create API key" (zadarmo, bez kreditnej karty)
+  - Skopírujte súbor ".env.example" na ".env"
+  - Otvorte ".env" a vložte kľúč:
+        GOOGLE_API_KEY=váš_kľúč_tu
+  - Voliteľne: záložný kľúč Anthropic Claude:
+        ANTHROPIC_API_KEY=váš_kľúč_tu  (ak nemáte, nechajte prázdne)
+
+KROK 3: Nainštalujte potrebné knižnice
+  - Dvakrát kliknite na "spustit.bat"
+  - Automaticky sa nainštalujú všetky závislosti
+    (Flask, LangChain, Gemini, GIS knižnice, Playwright...)
+  - Prebehne aj: playwright install chromium
+    (stiahne Chromium prehliadač pre scraping — ~130 MB, len raz)
+  - Prvé spustenie môže trvať niekoľko minút
+
+
+=== SPUSTENIE APLIKÁCIE (každý raz) ===
+
+  - Dvakrát kliknite na "spustit.bat"
+  - Počkajte niekoľko sekúnd
+  - Webový prehliadač sa otvorí automaticky na: http://localhost:5001
+  - Hotovo!
+
+
+=== POUŽÍVANIE APLIKÁCIE ===
+
+  1. Nastavte kritériá vyhľadávania:
+       - Maximálna cena (EUR)
+       - Maximálna vzdialenosť od Bratislavy (km, max 70)
+       - Min. / max. výmera pozemku (m²)
+       - Minimálna šírka parcely (m, min 15)
+
+  2. Kliknite "Spustiť sken"
+       - Agent začne prehľadávať realitné portály
+       - Priebeh je zobrazený v paneli záznamu
+
+  3. Agent automaticky overí každý nájdený pozemok:
+       - geometria (šírka, tvar, výmera) — ZBGIS
+       - záplavová zóna Q100 — SHMÚ
+       - bonita pôdy BPEJ — geodata.gov.sk
+       - cesta, elektrina, voda — OpenStreetMap
+       - vzdialenosť a čas jazdy od Bratislavy
+
+  4. Výsledky sa zobrazia na mape + ako ohodnotené karty (0–100):
+       - ZELENÁ  karta = skóre >= 85 (Silná kúpa)
+       - ŽLTÁ    karta = skóre >= 70 (Preverit)
+       - ORANŽOVÁ karta = skóre >= 50 (Zvážiť)
+       - ČERVENÁ karta = skóre <  50 (Preskočiť)
+
+  5. Kliknite na kartu pre úplnú analýzu
+
+  6. Pre top kandidátov (skóre >= 70):
+       - Stiahnite KATASTER CHECKLIST
+       - Overte List vlastníctva ručne na:
+         https://kataster.skgeodesy.sk
+
+
+=== PRISPÔSOBENIE VYHĽADÁVANIA (voliteľné) ===
+
+  Chcete zmeniť cenový limit, okruh hľadania, veľkosť pozemku
+  alebo ktoré zdroje agent prehľadáva?
+
+  Všetko sa nastavuje v jednom súbore: config/criteria.yaml
+
+  Jednoduchý sprievodca čo a kde zmeniť:
+    → NASTAVENIA_POUZIVATEL.txt
+
+  Po zmene stačí reštartovať aplikáciu. Žiadna kompilácia.
+
+
+=== DÔLEŽITÉ — KROKY VYŽADUJÚCE VÁS ===
+
+  Niektoré overenia sa NEDAJÚ automatizovať:
+
+  ✗ List vlastníctva (sekcie B/C/D)
+       Blokovaný CAPTCHA na katasterportal.sk
+       → Agent vygeneruje vyplnený checklist pre vás
+
+  ✗ ÚPI / územné zaradenie (potvrdenie IBV zóny)
+       Musí vydať obec
+       → Agent pripraví žiadosť
+
+  ⚠  Kapacita trafostanice
+       Blízkosť sa overí automaticky
+       → Skutočnú kapacitu potvrďte u distribútora (ZSDIS)
+
+  ⚠  Archeologická zóna
+       → Overte na KPÚ (Krajský pamiatkový úrad)
+
+
+=== ZASTAVENIE APLIKÁCIE ===
+
+  - Otvorte CMD okno (čierne okno s textom)
+  - Stlačte Ctrl+C
+  - Server sa zastaví
+
+
+=== RIEŠENIE PROBLÉMOV ===
+
+  Problém: "spustit.bat" hlási "Python nie je nainštalovaný"
+  Riešenie: Nainštalujte Python z python.org (zaškrtnite "Add to PATH")
+
+  Problém: Agent hlási "GOOGLE_API_KEY nie je nastavený"
+  Riešenie: Uistite sa, že existuje súbor .env s platným GOOGLE_API_KEY=...
+
+  Problém: Scraping nenašiel výsledky alebo je blokovaný
+  Riešenie: Portály majú anti-bot ochranu.
+            Skúste znova o 10–15 minút alebo aktualizujte selektory
+            v backend/services/realestate_scraper_service.py
+
+  Problém: Chyba GIS služby (ZBGIS / SHMÚ / BPEJ timeout)
+  Riešenie: Slovenské štátne WMS/WFS endpointy môžu byť dočasne nedostupné.
+            Skúste neskôr. Záložné hodnoty sa použijú automaticky.
+
+  Problém: Port 5001 je obsadený
+  Riešenie: Zmeňte PORT v backend/app.py alebo v .env
+
+  Problém: "playwright install" zlyhá
+  Riešenie: Spustite ako správca:
+            cd backend
+            python -m playwright install chromium
+
+
+=== SPUSTENIE TESTOV ===
+
+  Otvorte CMD v tomto priečinku a spustite:
+  python -m pytest tests/ --rootdir=. -v

@@ -1,5 +1,5 @@
 """
-Unit Tests - Price Analysis Service
+Testy - Sluzba cenovej analyzy
 =====================================
 Testuje cenovu analyzu, porovnanie s priemerom, scoring.
 100% offline - ziadne externe API ani HTTP.

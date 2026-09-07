@@ -1,5 +1,5 @@
 """
-Unit Tests - Distance Service
+Testy - Sluzba vzdialenosti
 ==============================
 Testuje Haversine vzdialenost, scoring, odhad casu jazdy,
 konverziu suradnic a integraciu s config_loader.

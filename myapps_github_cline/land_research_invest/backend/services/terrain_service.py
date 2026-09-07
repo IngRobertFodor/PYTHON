@@ -1,6 +1,6 @@
 """
-Terrain Service
-===============
+Sluzba terenu
+=============
 Analyza terenu pozemku: sklon, orientacia svahu, nadmorska vyska,
 zosuvne uzemia a radonove riziko.
 

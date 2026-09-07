@@ -1,6 +1,6 @@
 """
-Distance Service
-================
+Sluzba vzdialenosti
+===================
 Vypocet vzdialenosti pozemku od Bratislavy a konverzia suradnic.
 Pouziva Haversine formulu (bez externe API - 100% offline).
 Koordinaty: WGS-84 (GPS) a S-JTSK (slovensky kataster EPSG:5514).

@@ -1,5 +1,5 @@
 """
-Unit Tests - Protected Service
+Testy - Sluzba chranenych uzemi
 ================================
 Testuje kontrolu ochrannych pasiem (Natura 2000, CHKO, NPR, NP).
 HTTP requesty su mockované - 100% offline.

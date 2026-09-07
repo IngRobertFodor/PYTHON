@@ -1,5 +1,5 @@
 """
-Unit Tests - ZBGIS Service
+Testy - Sluzba geometrie parciel (ZBGIS)
 ============================
 Testuje geometricku analyzu parcely z ZBGIS WFS.
 HTTP requesty su mockované - 100% offline.

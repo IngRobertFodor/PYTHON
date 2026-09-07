@@ -1,6 +1,6 @@
 """
-Overpass Service
-================
+Sluzba infrastruktury (Overpass)
+=================================
 Analyza infrastrukturnych prvkov okolo pozemku cez OpenStreetMap Overpass API.
 Kontroluje: cesta, elektrina, voda, kanalizacia, plyn,
 ochrane pasma (VVN, VTL, les), hluk, prostredie.

@@ -1,6 +1,6 @@
 """
-Flood Service
-=============
+Sluzba zaplavovych uzemi
+========================
 Kontrola ci sa pozemok nachadza v 100-rocnom zaplavovom uzemi (Q100).
 Pouziva SHMU WMS GetFeatureInfo - free, bez API kluca.
 Kriticky bloker: pozemok v Q100 ziskava score 0.

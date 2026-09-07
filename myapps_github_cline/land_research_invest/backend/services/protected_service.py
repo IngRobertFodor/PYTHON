@@ -1,6 +1,6 @@
 """
-Protected Service
-=================
+Sluzba chranených uzemi
+========================
 Kontrola ochrannych pasiem a chranenych uzemi okolo pozemku.
 
 Kontroluje:

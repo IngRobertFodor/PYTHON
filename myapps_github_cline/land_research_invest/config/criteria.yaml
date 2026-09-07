@@ -1,9 +1,10 @@
 # ================================================================
-# Land Research Invest - criteria.yaml
+# Land Research Invest - kriteria.yaml (config/criteria.yaml)
 # Kompletne kriteria, zdroje a nastavenia agenta.
+# Zmeny robte tu - po ulozeni staci restartovat aplikaciu.
 #
 # LEGENDA automatizacie:
-#   AUTO   = agent vyriesí plne sam, bez brzdenia, bezi paralelne
+#   AUTO   = agent vyriesi plne sam, bezi paralelne bez cakania
 #   SEMI   = agent pripravi 90%, ty spravís 1 krok (napr. CAPTCHA)
 #   MANUAL = agent vygeneruje checklist/ziadost, kontrola rucna
 # ================================================================

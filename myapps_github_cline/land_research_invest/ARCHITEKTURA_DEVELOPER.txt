@@ -1,0 +1,178 @@
+ARCHITEKTURA — Technicka dokumentacia
+=======================================
+
+Pre vyvojarov a AI agentov.
+
+
+==============================================================
+1. TECHNOLOGICKY STACK
+==============================================================
+
+  Komponent             | Technologia
+  ----------------------|-------------------------------------
+  Backend               | Python Flask
+  AI agent              | LangChain + Google Gemini (primarny)
+  AI zaloha             | Anthropic Claude
+  Frontend              | HTML5 + CSS3 + Vanilla JS
+  Mapa                  | Leaflet.js + OpenStreetMap
+  Realtne data          | Playwright scraping
+  Kataster / geometria  | ZBGIS WFS (UGKK)
+  Zaplavy Q100          | SHMU WMS
+  Teren / vyskopis      | DMR 5.0 (UGKK) + SRTM (Copernicus)
+  Zosuvne uzemia        | SGUDSH WMS
+  Ortofoto              | Ortofotomozaika SR (UGKK WMS)
+  Bonita pody BPEJ      | geodata.gov.sk WMS
+  Infrastruktura        | Overpass API (OpenStreetMap)
+  Geokodovanie          | Nominatim (OpenStreetMap)
+  GIS spracovanie       | geopandas, shapely, pyproj, owslib
+  OCR (uzemne plany)    | pytesseract
+  Planovanie            | APScheduler
+  Notifikacie           | python-telegram-bot / SMTP
+
+
+==============================================================
+2. VRSTVY SYSTEMU
+==============================================================
+
+  +----------------------------------------------------------+
+  |     AI ORCHESTRATOR  (llm_agent_service.py)              |
+  |     Google Gemini (primarny) / Claude (zaloha)           |
+  |     LangChain agent + tools                              |
+  +-----------------+----------------------------------------+
+                    | vola nastroje (@tool)
+     +--------------+-----------+---------------+
+     v              v           v               v
+  [Scrapery]  [GIS validatory]  [Scoring]  [Checklist]
+  realestate  zbgis/flood/      scoring_   cadastral_
+  auction     terrain/bpej/     service    service
+  scraper     overpass/zoning_pdf
+
+
+==============================================================
+3. TOK DAT (WORKFLOW)
+==============================================================
+
+  1. Pouzivatel nastavi kriteria (config/criteria.yaml alebo UI)
+  2. Agent vola: search_real_estate_portals + search_auctions
+  3. Pre KAZDY pozemok:
+       geocoding_service       -> GPS suradnice z adresy
+       zbgis_service           -> geometria (sirka, tvar, vymera)
+       distance_service        -> vzdialenost od BA
+       flood_service           -> Q100 zaplavova zona
+       terrain_service         -> sklon, zosuvy, radon
+       overpass_service        -> cesta, elektrina, voda, okolie
+       bpej_service            -> bonita pody, ochrana, odvody
+       price_analysis_service  -> EUR/m2 vs. priemer, historia
+  4. scoring_service           -> vazene skore 0-100
+  5. Ak skore >= 70:
+       cadastral_service       -> manualny LV checklist (B/C/D)
+  6. notifier_service          -> email / Telegram notifikacia
+
+
+==============================================================
+4. SCORING ALGORITMUS
+==============================================================
+
+  Kriterium             | Vaha (predvolena, menitelna v YAML)
+  ----------------------|--------
+  Cena (EUR/m2)         | 18 %
+  Vzdialenost od BA     | 12 %
+  Infrastruktura        | 20 %
+  Pravna proxy          | 18 %
+  Zaplavove riziko      | 10 %
+  Bonita pody (BPEJ)    |  8 %
+  Teren                 |  7 %
+  Chranene uzemia       |  7 %
+
+  >= 85 -> SILNA KUPA     >= 70 -> PREVERIT
+  >= 50 -> ZVAZIT         <  50 -> PRESKOCIT
+
+  Vahy:   config/criteria.yaml -> scoring -> weights
+  Prahy:  config/criteria.yaml -> scoring -> thresholds
+
+
+==============================================================
+5. SURADNICOVE SYSTEMY A LLM
+==============================================================
+
+  WGS-84 (EPSG:4326)   GPS, Nominatim, Leaflet.js
+  S-JTSK (EPSG:5514)   Slovensky kataster (ZBGIS)
+  Konverzia: pyproj    distance_service.wgs84_to_jtsk()
+
+  Primarny  | Google Gemini (gemini-1.5-flash)
+            | langchain-google-genai >= 4.4.0  |  GOOGLE_API_KEY (povinny)
+  Zaloha    | Anthropic Claude (claude-3-5-sonnet)
+            | langchain-anthropic >= 1.0.0     |  ANTHROPIC_API_KEY (volitelny)
+  Teplota: 0.2  |  Max. iteracii: 50
+
+
+==============================================================
+6. EXTERNE ENDPOINTY
+==============================================================
+
+  Vzdy overit cez GetCapabilities pred implementaciou sluzby.
+  SK statne WMS/WFS endpointy sa mozu menit bez upozornenia.
+
+  ZBGIS WFS/WMS   | zbgis.skgeodesy.sk
+  DMR 5.0 WCS     | zbgis.skgeodesy.sk/wcs
+  SHMU WMS        | geo.shmu.sk/wms
+  BPEJ WMS        | geodata.gov.sk/geoserver/wms
+  SGUDSH WMS      | gis.geology.sk/arcgis/services
+  SOP SR WMS      | maps.sopsr.sk/geoserver/wms
+  Overpass API    | overpass-api.de/api/interpreter
+  Nominatim       | nominatim.openstreetmap.org/search
+
+
+==============================================================
+7. UROVNE AUTOMATIZACIE
+==============================================================
+
+  AUTO   = agent zvladne plne, bezi paralelne, bez cakania
+  SEMI   = agent pripravi 90%, vy spravite 1 krok (napr. CAPTCHA)
+  MANUAL = agent vygeneruje checklist/ziadost, vy overite rucne
+
+  AUTO:   vzdialenost, zaplavy, teren, BPEJ, chranene uzemia,
+          infrastruktura (OSM), bonita pody, cenova analyza
+  SEMI:   List vlastnictva B/C/D (CAPTCHA katasterportal.sk)
+          Uzemny plan (UP/UPI) — OCR + LLM extrakcia
+  MANUAL: kapacita trafostanice (ZSDIS)
+          archeologicka zona (KPU)
+
+
+==============================================================
+8. STRUKTURA PROJEKTU
+==============================================================
+
+  land_research_invest/
+  +-- backend/
+  |   +-- app.py, requirements.txt
+  |   +-- config_loader.py, config_validator.py
+  |   +-- routes/ search_routes.py, parcel_routes.py
+  |   +-- services/
+  |   |   +-- llm_agent_service.py
+  |   |   +-- realestate_scraper_service.py
+  |   |   +-- zbgis_service.py, flood_service.py
+  |   |   +-- terrain_service.py, bpej_service.py
+  |   |   +-- protected_service.py, overpass_service.py
+  |   |   +-- geocoding_service.py, distance_service.py
+  |   |   +-- price_analysis_service.py, scoring_service.py
+  |   |   +-- cadastral_service.py
+  |   |   +-- notifier_service.py, monitor_service.py
+  |   +-- models/ parcel.py, result.py
+  +-- frontend/ index.html, css/, js/
+  +-- config/ criteria.yaml
+  +-- tests/  341 testov, 0 zlyhanI
+  +-- README_TYMTO_ZACAT.txt, AKO_SPUSTIT_POUZIVATEL.txt
+  +-- NASTAVENIA_POUZIVATEL.txt, ARCHITEKTURA_DEVELOPER.txt
+
+
+==============================================================
+9. TESTOVANIE
+==============================================================
+
+  python -m pytest tests/ -v --rootdir=.
+  python -m pytest tests/test_config_validator.py -v
+
+
+Autor: Robert Fodor | 2026
+

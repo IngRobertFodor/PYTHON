@@ -1,5 +1,5 @@
 """
-Unit Tests - Scoring Service
+Testy - Scoring sluzba
 =============================
 Testuje vazeny scoring algoritmus, odporucania a prahove hodnoty.
 Cista logika - 100% offline, ziadne HTTP requesty ani mockovanie.
