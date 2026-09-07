@@ -153,116 +153,160 @@ Externe endpointy (overit pri implementacii)
   Vzdy overit GetCapabilities pred implementaciou danej sluzby.
 
 
+
 ==============================================================
 4. KRITERIA - AUTOMATIZACIA
 ==============================================================
 
-Legenda:
-  AUTO       = agent zvladne plne automaticky
-  CIASTOCNE  = agent poskytne indiciu, finalne potvrdenie manualny
-  MANUAL     = agent vygeneruje checklist, kontrola rucna (CAPTCHA/urad)
+LEGENDA:
+  AUTO   = agent vyriesí plne sam, bezi paralelne bez brzdenia
+  SEMI   = agent pripravi 90%, ty spravís 1 krok (napr. CAPTCHA)
+  MANUAL = agent vygeneruje checklist/ziadost, ty kontrolujes rucne
 
 
-1. Uzemno-pravne rizika
-  Vydana UPI - zona IBV               | cadastral_service   | MANUAL (obec)
-  Index zastavnosti (IZP >= 0.25)     | scoring_service     | CIASTOCNE (z UPI)
-  Sirka parcely min 15-16 m           | zbgis_service       | AUTO (WFS)
-  Stavebna cara a odstupy OK          | zbgis_service       | AUTO (WFS)
+1. LOKACIA A CENA
+  Max vzdialenost od BA (70 km)          | distance_service    | AUTO
+  Cena (10k-50k EUR, max EUR/m2)         | z inzeratu          | AUTO
+  Vymera (600-1500 m2), sirka min 15 m   | zbgis_service       | AUTO
 
-2. List vlastnictva a Kataster
-  Ziadna aktivna plomba (V, Z)        | cadastral_service   | MANUAL (CAPTCHA)
-  Cast C: bez kritickych tiarch       | cadastral_service   | MANUAL (CAPTCHA)
-  Max 2 spoluvlastnici, bez reg. E    | cadastral_service   | MANUAL (CAPTCHA)
-  Bez zalozneho / predkupneho prava   | cadastral_service   | MANUAL (CAPTCHA)
 
-  Poloautomat: Playwright otvori kataster, predvyplni parcelu;
-  vy kliknete CAPTCHA; agent precita a vyhodnoti LV automaticky.
+2. UZEMNO-PRAVNE (UPI, IZP, UPZ, odstupy)
+  IBV zona v uzemnom plane               | zoning_pdf_service  | SEMI (OCR+LLM ~80%)
+  Index zastavanosti (IZP >= 0.20)       | zoning_pdf_service  | SEMI (z UP dokumentu)
+  Absencia poziadavky na UPZ             | zoning_pdf_service  | SEMI (z UP dokumentu)
+  Stavebna cara, odstup od cesty (5m)    | zbgis_service       | AUTO
+  Odstupy od susedov (min 2m)            | zbgis_service       | AUTO
 
-3. Pristupova cesta a infrastruktura
-  Sirka cesty min 6 m (hasici)        | overpass_service    | AUTO (OSM width)
-  Pravny pristup (vec. bremeno)       | cadastral_service   | CIASTOCNE
-  Pristupova cesta nie je SPF         | cadastral_service   | MANUAL
 
-4. Inzinierske siete
-  Elektrina - blízkost vedenia        | overpass_service    | AUTO (OSM)
-  Elektrina - kapacita trafostanice   |                     | CIASTOCNE (ZSDIS)
-  Vzdialenost napojenia sieti         | overpass_service    | AUTO (metre)
-  Kanalizacia / zumpa OK              | overpass_service    | AUTO (OSM sewer)
+3. LIST VLASTNICTVA A KATASTER
+  Ziadna aktivna plomba (V, Z)           | cadastral_service   | SEMI (Playwright+CAPTCHA)
+  Cast C: bez zal. a predkupneho prava   | cadastral_service   | SEMI
+  Bez prava dozitia / neznameho bremena  | cadastral_service   | SEMI
+  Max 2 spoluvlastnici, bez reg. E       | cadastral_service   | SEMI
+  Zlomok podielu max 1/8                 | cadastral_service   | SEMI
+  Bez vlastnictva SPF                    | cadastral_service   | SEMI
+  Ziadni nezisti vlastnici               | cadastral_service   | SEMI
+  Pristupova cesta: vec. bremeno / obec  | cadastral_service   | SEMI
 
-5. Geologia, teren a ochrane pasma
-  Mimo zaplavoveho uzemia Q100        | flood_service       | AUTO (SHMU WMS)
+  -> Poloautomat: Playwright predvyplni kataster, ty kliknes CAPTCHA,
+     agent precita a vyhodnoti sekcie B/C/D automaticky.
+
+
+4. PRISTUPOVA CESTA A INFRASTRUKTURA
+  Sirka cesty min 6 m (hasici)           | overpass_service    | AUTO
+  Povrch cesty (asfalt, dlazba...)       | overpass_service    | AUTO
+  Elektrina - blízkost vedenia           | overpass_service    | AUTO
+  Elektrina - kapacita trafostanice      | -                   | MANUAL (ZSDIS)
+  Vodovod - blízkost                     | overpass_service    | AUTO
+  Kanalizacia / zumpa povolena           | overpass_service    | AUTO
+  Plyn (volitelny)                       | overpass_service    | AUTO
+
+
+5. TEREN, GEOLOGIA A HYDRO
+  Mimo zaplavoveho uzemia Q100           | flood_service       | AUTO (SHMU WMS)
+  Sklon max 15% (idealne do 5%)          | terrain_service     | AUTO (DMR 5.0)
+  Orientacia svahu (juh/juhovychod)      | terrain_service     | AUTO (DMR 5.0)
+  Nadmorska vyska max 400 m              | terrain_service     | AUTO (DMR 5.0)
+  Mimo zosuvneho uzemia                  | terrain_service     | AUTO (SGUDSH)
+  Radonove riziko max trieda 2           | terrain_service     | AUTO (SGUDSH)
+  Spodna voda - varovanie                | terrain_service     | SEMI (BPEJ proxy)
+
+
+6. OCHRANE PASMA A ENVIRONMENT
+  Mimo ochranneho pasma VVN (25 m)       | overpass_service    | AUTO
+  Mimo ochranneho pasma VTL plynu (50 m) | overpass_service    | AUTO
+  Mimo 50 m od lesa                      | overpass_service    | AUTO
+  Mimo Natura 2000 / CHKO / NPR          | protected_service   | AUTO (SOP SR WMS)
+  Mimo archeologickej zony               | -                   | MANUAL (KPU)
+  Bez skaldky v okolí 500 m              | overpass_service    | AUTO
+  Bez priemyslu v 300 m                  | overpass_service    | AUTO
+  Environmentalna zataz (SAZP)           | env_service         | SEMI
+
+
+7. BONITA PODY (BPEJ)
+  Ochrana trieda max 6 (1-4 = drahe)     | bpej_service        | AUTO (BPEJ WMS)
+  Odhad odvodov za vynatie z PPF         | bpej_service        | AUTO
+
+
+8. TRHOVA ANALYZA
+  EUR/m2 vs. lokalny priemer             | price_service       | AUTO
+  Dlzka inzercie (motivacia predajcu)    | price_service       | AUTO
+  Historia zmien ceny                    | price_service       | AUTO
+
+
+9. OKOLIE A DOSTUPNOST
+  Skola do 5 km                          | overpass_service    | AUTO
+  Obchod do 3 km                         | overpass_service    | AUTO
+  Autobusova zastavka do 2 km            | overpass_service    | AUTO
+  Dialnicny privazan do 20 km            | overpass_service    | AUTO
+  Hluk: min 50 m od dialnice/zeleznice   | overpass_service    | AUTO
+
+
+PREHLAD:
+  AUTO  (bez brzdenia) : 28 kriterii - GIS, OSM, teren, cena, okolie
+  SEMI  (1 krok od teba):  9 kriterii - kataster CAPTCHA, UP-OCR, spodna voda
+  MANUAL (checklist)   :  3 kriteria - kapacita trafo, archeologia, env. zataz
+
 
 ==============================================================
 5. RESEARCH STRATEGY - ZDROJE A LEGALNOST
 ==============================================================
 
-Inzertne zdroje (overene robots.txt)
--------------------------------------
-
-  ZELENA ZONA - bezpecne automatizovat:
-
-  Nehnutelnosti.sk  | Detaily + Sitemap OK, /api/ blokovane
-                    | -> pouzivat sitemap-listings pre URL zoznam
-  TopReality.sk     | Takmer vsetko OK, limit 10 req/min
-                    | -> dodriat Request-rate: 10/1m
-  Notarske drazby   | Verejny register (OVS, notar.sk)
-                    | -> zo zakona verejne, plne automatizovat
-  SPF               | Verejne obchodne sutaze (pozemkovyfond.sk)
-  Obce              | Uradne tabule (predaj obecnych pozemkov)
-                    | -> verejne, ale roztrocene po weboch obci
-
-  ZLTA ZONA - opatrne, s pravidlami:
-
-  Reality.sk        | Detaily OK, ale zakazuje AI-botov
-                    | -> neutralny User-Agent (nie AI-bot hlavicka)
-  Bazos.sk          | /search.php a filtre blokovane
-                    | -> len priame detail linky, nie vyhladavanie
-  Bankove drazby    | Rozne ToS podla banky
-                    | -> individualne overit pred zapojenim
-
-  CERVENA ZONA - nevyuzivat:
-
-  Facebook Marketplace  | ToS explicitne zakazuje scraping
+LEGENDA ZON:
+  GREEN  = bezpecne automatizovat (overene robots.txt)
+  YELLOW = opatrne (nutny neutralny User-Agent, obmedzenia)
+  RED    = nevyuzivat (ToS zakazuje automatizovany pristup)
 
 
-Hlbkove GIS zdroje (vsetky legalne - otvorene data SR)
--------------------------------------------------------
+GREEN ZONA - bezi naplno, bez brzdenia:
 
-  Teren a rizika:
-  DMR 5.0 (UGKK)       | Vyskopis SR (LiDAR) -> sklon, orientacia
-  SRTM/Copernicus DEM  | Globalny vyskopis 30m -> fallback
-  Zosuvne uzemia       | Register svahových deformacii (SGUDSH WMS)
-  Radonova mapa        | Radonove riziko (SGUDSH WMS)
+  Nehnutelnosti.sk   | AUTO | sitemap-listings; /api/ blokovane
+  TopReality.sk      | AUTO | limit 10 req/min podla robots.txt
+  Notarske drazby    | AUTO | notar.sk/drazby - verejny register zo zakona
+  SPF                | AUTO | pozemkovyfond.sk - verejne obchodne sutaze
+  Obchodny vestnik   | AUTO | justice.gov.sk - konkurzy, drazby, likvidacie (!)
+  Exekutorske drazby | AUTO | sexe.sk - zabavene pozemky pod trhovym cenou (!)
+  Drazby.net         | AUTO | agregator drazob - jeden zdroj, vela ponuk
+  EKS statny majetok | AUTO | eks.sk - statny a samospravny majetok
+  BSK kraj           | AUTO | regionbratislava.sk - prebytocny majetok
+  Obce uradne tabule | SEMI | roztrocene weby obci, parser per-obec
 
-  Vizualna analyza:
-  Ortofotomozaika SR   | Letecke snimky (UGKK WMS) -> vyrez parcely
-  LLM vision          | Analyza ortofota: pristup, zelen, stav parcely
+  (!) = obzvlast zaujimave pre lacne investicne pozemky
 
-  Uzemny plan (UP):
-  Weby obci            | PDF dokumenty UP -> HTTP download (info zakon)
-  OCR pipeline         | pytesseract -> text z PDF/skenu
-  LLM extrakcia        | IBV zona? IZP? (~70-85% presnost, vzdy overit)
-  Auto-draft ziadosti  | Agent vygeneruje email ziadost o UPI pre obec
+YELLOW ZONA - opatrne:
 
-  Cenovy kontext:
-  Vlastna DB           | EUR/m2 z nazbieranych dat -> lokalny priemer
-  Historia inzeratu    | Ako dlho visi, zmeny ceny -> motivacia predajcu
+  Reality.sk         | AUTO | robots.txt zakazuje AI-bot UA -> neutralny UA
+  Byty.sk            | AUTO | overit robots.txt pred spustenim
+  Bazos.sk           | SEMI | /search.php blokovany - len priame URL linky
+  Bankove drazby     | SEMI | ToS per-banka - overit individualne
 
-  Okolie:
-  Overpass (OSM)       | Skola, obchod, MHD, dialnica, priemysel v okoli
-  LLM web search       | Novinky, planovany rozvoj lokality (volitelne)
+RED ZONA - nevyuzivat:
+
+  Facebook Marketplace | --- | ToS explicitne zakazuje automatizovany pristup
 
 
-Zasady bezpecneho scrapingu (zabudovane do agenta)
---------------------------------------------------
+GIS ZDROJE (otvorene data SR - plne legalne):
+
+  ZBGIS WFS/WMS (UGKK)  | Geometria parciel, ortofoto
+  DMR 5.0 WCS (UGKK)    | LiDAR vyskopis - sklon, orientacia, vyska
+  SRTM/Copernicus DEM   | Globalny vyskopis 30m - fallback
+  SHMU WMS              | Zaplavove uzemia Q100
+  SGUDSH WMS            | Zosuvne uzemia, radonove riziko
+  BPEJ WMS (geodata)    | Bonita pody, ochranné triedy, odvody
+  SOP SR WMS            | Natura 2000, CHKO, NPR
+  SAZP WMS              | Environmentalna zataz (ak dostupne)
+  Overpass (OSM)        | Cesty, elektrina, voda, les, hluk, vybavenost
+  Nominatim (OSM)       | Geocoding adres
+
+
+ZASADY BEZPECNEHO SCRAPINGU:
 
   1. Kontrolovat robots.txt pred kazdym scrapom
-  2. Dodriat rate-limity portalov (napr. TopReality 10/min)
-  3. Pouzivat neutralny User-Agent (nie AI-bot hlavicka)
-  4. Preferovat sitemap / oficialne data pred agresivnym crawlom
+  2. Dodriat rate-limity (TopReality: 10/min, ostatne: 5-30/min)
+  3. Pouzivat neutralny User-Agent pre YELLOW zonu
+  4. Preferovat sitemap / oficialne API pred crawlovanim
   5. Cachovat - netahat tie iste data opakovane v kratkom case
-  6. Exponential backoff - pri chybe cakat a opakovat
-
+  6. Exponential backoff pri rate-limit / chybovej odpovedi
 
 ==============================================================
 6. STRUKTURA PROJEKTU

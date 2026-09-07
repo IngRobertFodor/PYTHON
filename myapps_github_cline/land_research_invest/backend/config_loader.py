@@ -41,8 +41,39 @@ def reload_config() -> dict:
 
 
 def get_criteria() -> dict:
-    """Vrati sekciu search_criteria."""
-    return get_config().get("search_criteria", {})
+    """Vrati sekciu criteria (vsetky kriteria vyhladavania)."""
+    return get_config().get("criteria", {})
+
+
+def get_criteria_section(section: str) -> dict:
+    """
+    Vrati konkretnu sekciu z criteria.
+
+    Args:
+        section: napr. 'location', 'terrain', 'cadastral', 'protected_zones'
+
+    Returns:
+        dict so sekciou, alebo prazdny dict ak neexistuje
+    """
+    return get_criteria().get(section, {})
+
+
+def get_enabled_sources() -> dict:
+    """Vrati len zapnute zdroje inzeratov (enabled: true)."""
+    return {
+        name: cfg
+        for name, cfg in get_sources().items()
+        if cfg.get("enabled", False)
+    }
+
+
+def get_green_sources() -> dict:
+    """Vrati len GREEN zona zdroje (bezpecne automatizovat)."""
+    return {
+        name: cfg
+        for name, cfg in get_enabled_sources().items()
+        if cfg.get("zone") == "GREEN"
+    }
 
 
 def get_scoring() -> dict:
