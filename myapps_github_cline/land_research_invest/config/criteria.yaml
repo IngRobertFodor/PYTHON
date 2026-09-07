@@ -29,6 +29,13 @@ criteria:
     automation: AUTO           # priamo z inzeratu
 
   parcel:
+    min_area_sqm: 600
+    max_area_sqm: 1500
+    min_width_m: 15
+    min_length_m: 20
+    preferred_shape: rectangular   # obdlznikovy tvar = mensie naklady
+    min_shape_regularity: 0.5      # 0-1, 1=dokonaly obdlznik
+    automation: AUTO               # ZBGIS WFS geometria
 
   # --- 2. UZEMNO-PRAVNE (UPI, IZP, UPZ, odstupy) ---
   zoning:
