@@ -64,6 +64,19 @@ STEP 3: Install required libraries
        - Use it to manually verify List vlastnictva on:
          https://kataster.skgeodesy.sk
 
+=== CUSTOMIZING YOUR SEARCH (optional) ===
+
+  Want to change the price limit, search radius, plot size,
+  or which sources the agent searches?
+
+  Everything is in one file:  config/criteria.yaml
+
+  For a plain-English guide on what to change:
+    -> SETTINGS.txt
+
+  No rebuild needed after changes. Just restart the app.
+
+
 === IMPORTANT — MANUAL STEPS REQUIRED ===
 
   Some checks CANNOT be automated and require your manual action:

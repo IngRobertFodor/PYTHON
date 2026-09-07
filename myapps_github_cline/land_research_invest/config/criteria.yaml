@@ -185,13 +185,6 @@ criteria:
 
 
 
-    min_area_sqm: 600
-    max_area_sqm: 1500
-    min_width_m: 15
-    preferred_shape: rectangular
-    automation: AUTO           # ZBGIS WFS geometria
-
-
 # ================================================================
 # B. SKOROVACI ALGORITMUS
 # ================================================================
