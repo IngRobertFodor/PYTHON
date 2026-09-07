@@ -43,8 +43,8 @@ WEIGHTS = {
 class TestWeightToSourceMapping:
     """Overuje ze mapovanie vah -> service names je spravne."""
 
-    def test_exactly_six_mappings(self):
-        assert len(WEIGHT_TO_SOURCE) == 6
+    def test_exactly_eight_mappings(self):
+        assert len(WEIGHT_TO_SOURCE) == 8
 
     def test_price_maps_correctly(self):
         assert WEIGHT_TO_SOURCE["price"] == "price_analysis_service"
@@ -63,6 +63,12 @@ class TestWeightToSourceMapping:
 
     def test_soil_quality_maps_correctly(self):
         assert WEIGHT_TO_SOURCE["soil_quality"] == "bpej_service"
+
+    def test_terrain_maps_correctly(self):
+        assert WEIGHT_TO_SOURCE["terrain"] == "terrain_service"
+
+    def test_protected_zones_maps_correctly(self):
+        assert WEIGHT_TO_SOURCE["protected_zones"] == "protected_service"
 
 
 class TestCalculateWeightedScore:

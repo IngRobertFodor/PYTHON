@@ -15,12 +15,14 @@ SERVICE_NAME = "scoring_service"
 
 # Mapovanie: nazov vahy v YAML -> nazov source v results dict
 WEIGHT_TO_SOURCE = {
-    "price":          "price_analysis_service",
-    "distance":       "distance_service",
-    "infrastructure": "overpass_service",
-    "legal_proxy":    "cadastral_service",
-    "flood_risk":     "flood_service",
-    "soil_quality":   "bpej_service",
+    "price":            "price_analysis_service",
+    "distance":         "distance_service",
+    "infrastructure":   "overpass_service",
+    "legal_proxy":      "cadastral_service",
+    "flood_risk":       "flood_service",
+    "soil_quality":     "bpej_service",
+    "terrain":          "terrain_service",
+    "protected_zones":  "protected_service",
 }
 
 
