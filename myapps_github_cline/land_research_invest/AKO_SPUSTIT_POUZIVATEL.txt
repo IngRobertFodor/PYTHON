@@ -56,7 +56,7 @@ KROK 3: Nainstalujte potrebne kniiznice
      Klik na kartu -> plny investicny report (text)
 
   3b. Agent automaticky overi kazdy pozemok
-     (cez pipeline_service -- cely tok prebehne automaticky):
+     (cez scraper_service + pipeline_service -- automaticky):
        - geometria (sirka, tvar, vymera)      -- ZBGIS
        - zaplavova zona Q100                  -- SHMU
        - bonita pody BPEJ                     -- geodata.gov.sk
@@ -201,7 +201,7 @@ KROK 3: Nainstalujte potrebne kniiznice
   Otvorte CMD v tomto priecinku a spustite:
   python -m pytest tests/ --rootdir=. -v
 
-  Rychle offline testy (572 testov, ~1 sekunda):
+  Rychle offline testy (679 testov, ~1 sekunda):
   python -m pytest tests/ -q
 
 

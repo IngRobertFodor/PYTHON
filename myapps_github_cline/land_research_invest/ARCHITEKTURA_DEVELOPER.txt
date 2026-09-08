@@ -154,7 +154,7 @@ Pre vyvojarov a AI agentov.
   +-- backend/
   |   +-- app.py, requirements.txt
   |   +-- config_loader.py, config_validator.py
-  |   +-- routes/ health_routes.py, config_routes.py, parcel_routes.py
+  |   +-- routes/ health_routes.py, config_routes.py, parcel_routes.py, monitor_routes.py
   |   +-- services/                        (* = este naimplementovane)
   |   |   +-- pipeline_service.py          ORCHESTRATOR toku
   |   |   +-- scoring_service.py           vazene skore 0-100
@@ -169,16 +169,21 @@ Pre vyvojarov a AI agentov.
   |   |   +-- zbgis_service.py             geometria parcely
   |   |   +-- geocoding_service.py         adresa -> GPS
   |   |   +-- price_analysis_service.py    cenova analyza
-  |   |   +-- llm_agent_service.py         (*) LangChain agent
-  |   |   +-- realestate_scraper_service.py (*) scraping portálov
+  |   |   +-- scraper_service.py           orchestrator scraperov
+  |   |   +-- scrapers/
+  |   |       +-- base_scraper.py, nehnutelnosti_scraper.py
+  |   |           (topreality, obchodny_vestnik... TODO)
+  |   |   +-- scraper_service.py            + scrapers/ (viz vyssie)
   |   |   +-- notifier_service.py          Telegram / email notifikacie
-  |   |   +-- monitor_service            (APScheduler periodicke skenovanie).py           (*) APScheduler
+  |   |   +-- monitor_service.py           APScheduler periodicky scan
+  |   |   +-- monitor_service            -- HOTOVO
+    llm_agent_service          (LangChain + Gemini) -- volitelne.py           (*) APScheduler
   |   +-- models/ parcel.py, result.py
   +-- frontend/
   |   +-- index.html, css/style.css
   |   +-- js/ config.js, api.js, demo.js, map.js, app.js
   +-- config/ criteria.yaml
-  +-- tests/  572 testov, 0 zlyhani
+  +-- tests/  679 testov, 0 zlyhani
   |   +-- test_pipeline_service.py  (34)
   |   +-- test_report_service.py    (68)
   |   +-- test_cadastral_service.py (47)
@@ -194,6 +199,9 @@ Pre vyvojarov a AI agentov.
   |   +-- test_price_analysis_service.py
   |   +-- test_notifier_service.py  (40)
   |   +-- test_app.py              (42)
+  |   +-- test_scraper_service.py  (36)
+  |   +-- test_monitor_service.py  (26)
+  |   +-- test_topreality_scraper.py  (45)
   |   +-- test_config_validator.py  (32)
   +-- README_TYMTO_ZACAT.txt
   +-- AKO_SPUSTIT_POUZIVATEL.txt
@@ -202,10 +210,10 @@ Pre vyvojarov a AI agentov.
 
 
 ==============================================================
-9. IMPLEMENTOVANE SLUZBY (16 / 17)
+9. IMPLEMENTOVANE SLUZBY (17 / 17)
 ==============================================================
 
-  Hotove (offline-testovatelne, 572 testov):
+  Hotove (offline-testovatelne, 679 testov):
     pipeline_service    -- orchestrator, analyze_parcel()
     scoring_service     -- vazene skore, get_recommendation()
     report_service      -- generate_report(), format_text_report()
@@ -222,12 +230,18 @@ Pre vyvojarov a AI agentov.
     notifier_service    -- Telegram / email notifikacie
     app.py + routes/    -- Flask REST API (5 endpointov)
     frontend/           -- HTML+CSS+JS UI (Leaflet mapa, karty, modal)
+    scraper_service     -- multi-zdrojovy scraper + nehnutelnosti_sk parser
+    scrapers/base       -- BaseScraper kontrakt (plugin architektura)
+    monitor_service     -- APScheduler scan + Flask /api/monitor endpoints
+    topreality_scraper  -- JSON-LD detail parser (RealEstateListing + BreadcrumbList)
+    scrapers/nehnut.    -- nehnutelnosti.sk JSON-LD parser (realne fixture) (Leaflet mapa, karty, modal)
 
   Zostava implementovat:
     llm_agent_service           -- LangChain + Gemini
     realestate_scraper_service  -- Playwright portály
     notifier_service            -- Telegram / email
-    monitor_service            (APScheduler periodicke skenovanie)             -- APScheduler
+    monitor_service            -- HOTOVO
+    llm_agent_service          (LangChain + Gemini) -- volitelne             -- APScheduler
     app.py + routes/            -- Flask REST API
 
 
@@ -250,8 +264,31 @@ Pre vyvojarov a AI agentov.
     { parcel: {...}, report: {text_report, recommendation, ...} }
 
 
+
 ==============================================================
-11. TESTOVANIE
+11. SCRAPER ARCHITEKTURA (plugin system)
+==============================================================
+
+  Pridanie noveho zdroja (napr. topreality_sk):
+  1. Vytvor: backend/services/scrapers/topreality_scraper.py
+     - Zdedi BaseScraper
+     - Implementuj parse_listings(html) -> list[Parcel]
+  2. Pridaj do SCRAPER_REGISTRY v scraper_service.py:
+     "topreality_sk": TopRealityScraper
+  3. Testy: tests/fixtures/topreality_listing.html + test tridy
+  scrape_all() sa NEMENI - automaticky vyzbie novy zdroj.
+
+  Planovane fazy:
+    Faza 2: topreality_sk      (rovnaky typ - HTML inzeraty)
+    Faza 3: obchodny_vestnik   (ZLATO - konkurzy)
+    Faza 4: spf                (statne verejne sutaze)
+    Faza 5: exekutorske_drazby + drazby_net
+    Faza 6: notarske_drazby + eks_statny_majetok
+    Faza 7: bsk_kraj + obce_uradne_tabule (najkomplexnejsie)
+
+
+==============================================================
+12. TESTOVANIE
 ==============================================================
 
   python -m pytest tests/ -v --rootdir=.

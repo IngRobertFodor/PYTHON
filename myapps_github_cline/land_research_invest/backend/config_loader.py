@@ -101,6 +101,11 @@ def get_notifications() -> dict:
     """Vrati sekciu notifications (prahy, kanaly, SMTP, Telegram)."""
     return get_config().get("notifications", {})
 
+
+def get_periodic_scan() -> dict:
+    """Vrati sekciu periodic_scan (interval, max_parcels, run_on_start)."""
+    return get_config().get("periodic_scan", {})
+
 def is_feature_enabled(feature_name: str) -> bool:
     """
     Overi ci je dana feature zapnuta.

@@ -398,6 +398,15 @@ notifications:
     password_env: EMAIL_PASSWORD
 
 
+# ================================================================
+# G. PERIODICKE SKENOVANIE
+# ================================================================
+
+periodic_scan:
+  interval_minutes: 60       # ako casto skenovat (min 5)
+  max_parcels_per_scan: 50   # ochrana pred pretazenim
+  run_on_start: false        # spustit scan hned pri starte
+
 # F. EXTERNE ENDPOINTY
 # Vzdy overit GetCapabilities pred implementaciou sluzby.
 # ================================================================

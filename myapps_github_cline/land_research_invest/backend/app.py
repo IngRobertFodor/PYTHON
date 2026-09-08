@@ -32,10 +32,18 @@ def create_app(test_config=None):
     from routes.health_routes import health_bp
     from routes.config_routes import config_bp
     from routes.parcel_routes import parcel_bp
+    from routes.monitor_routes import monitor_bp
 
     app.register_blueprint(health_bp, url_prefix="/api")
     app.register_blueprint(config_bp, url_prefix="/api/config")
-    app.register_blueprint(parcel_bp, url_prefix="/api")
+    app.register_blueprint(parcel_bp,  url_prefix="/api")
+    app.register_blueprint(monitor_bp, url_prefix="/api/monitor")
+
+    # Monitor start (ak use_monitoring=true)
+    from config_loader import is_feature_enabled as _ife
+    if _ife("use_monitoring"):
+        from services.monitor_service import start as _sm
+        _sm()
 
     # Frontend route - musime ulozit referenciu mimo closure
     # aby create_app() volane viackrat (v testoch) nevytvaralo

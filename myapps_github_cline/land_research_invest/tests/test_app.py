@@ -66,10 +66,10 @@ class TestCreateApp:
         app = create_app({"TESTING": True})
         assert app.config["TESTING"] is True
 
-    def test_three_blueprints_registered(self, client):
+    def test_four_blueprints_registered(self, client):
         from app import create_app
         app = create_app({"TESTING": True})
-        assert set(app.blueprints.keys()) == {"health", "config", "parcels"}
+        assert set(app.blueprints.keys()) == {"health", "config", "parcels", "monitor"}
 
 
 # ----------------------------------------------------------------
