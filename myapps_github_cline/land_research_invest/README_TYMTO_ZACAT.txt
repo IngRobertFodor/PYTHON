@@ -1,84 +1,97 @@
 Land Research Invest
 ====================
 
-AI agent, ktorý vyhľadáva dostupné stavebné pozemky
+AI agent, ktory vyhladava dostupne stavebne pozemky
 (do 70 km od Bratislavy) a automaticky ich preveruje
-podľa kritérií, ktoré sú pre vás dôležité.
+podla kriterii, ktore su pre vas dolezite.
 
-Vy nastavíte rozpočet a požiadavky. Agent urobí prieskum.
-Dostanete zoradený zoznam kandidátov — a checklist pre tých,
-ktorých sa oplatí navštíviť.
-
-
-==============================================================
-ČO AGENT OVERÍ ZA VÁS
-==============================================================
-
-Pri každom nájdenom pozemku agent automaticky skontroluje:
-
-  Cena              Je cena férová vs. okolité pozemky?
-  Vzdialenosť       Ako ďaleko od Bratislavy? Čas jazdy?
-  Záplavy           Je v záplavovej zóne? (100-ročné dáta SHMÚ)
-  Terén             Sklon, zosuvy, radónové riziko
-  Bonita pôdy       Výška štátnych odvodov za vyňatie z PPF
-  Prístupová cesta  Riadna cesta, min. šírka pre hasičov (6 m)
-  Siete             Vzdialenosť elektriny, vody, kanalizácie
-  Prostredie        Diaľnica, priemysel, skládka v okolí?
-  Chránené územia   Natura 2000, CHKO, národný park?
-  Tvar parcely      Šírka a pravidelnosť (pre stavebnú čiaru)
-
-Každý pozemok dostane skóre od 0 do 100:
-
-  85–100   SILNÁ KÚPA    — vynikajúci, konajte rýchlo
-  70–84    PREVERIT      — dobrý kandidát, overte a navštívte
-  50–69    ZVÁŽIŤ        — možné, má určité kompromisy
-   0–49    PRESKOČIŤ     — nespĺňa vaše kritériá
+Vy nastavite rozpocet a poziadavky. Agent urobi prieskum.
+Dostandte zoriadeny zoznam kandidatov -- a checklist pre tych,
+ktorych sa oplati navstivit.
 
 
 ==============================================================
-ČO MUSÍTE UROBIŤ RUČNE
+CO AGENT OVERI ZA VAS
 ==============================================================
 
-Agent všetko pripraví — vy dokončíte posledný krok:
+Pri kazdom najdenom pozemku agent automaticky skontroluje:
 
-  List vlastníctva (kataster)
-    Portál blokuje automatizáciu (CAPTCHA).
-    Agent vygeneruje checklist → vy overíte na:
+  Cena              Je cena ferova vs. okolite pozemky?
+  Vzdialenost       Ako daleko od Bratislavy? Cas jazdy?
+  Zaplavy           Je v zaplavovej zone? (100-rocne data SHMU)
+  Teren             Sklon, zosuvy, radonove riziko
+  Bonita pody       Vyska statnych odvodov za vynatie z PPF
+  Pristupova cesta  Riadna cesta, min. sirka pre hasicov (6 m)
+  Siete             Vzdialenost elektriny, vody, kanalizacie
+  Prostredie        Dialnica, priemysel, skladka v okoli?
+  Chranene uzemia   Natura 2000, CHKO, narodny park?
+  Tvar parcely      Sirka a pravidelnost (pre stavebnú ciaru)
+
+Kazdy pozemok dostane skore od 0 do 100:
+
+  85-100   STRONG BUY  -- vynikajuci, konajte rychlo
+  70-84    INVESTIGATE -- dobry kandidat, overte a navstivte
+  50-69    CONSIDER    -- mozne, ma urcite kompromisy
+   0-49    SKIP        -- nesplnĽa vase kriteria
+
+
+==============================================================
+CO MUSIITE UROBIT RUCNE
+==============================================================
+
+Agent vsetko pripravi -- vy dokoncite posledny krok:
+
+  List vlastnictva (kataster)
+    Portal blokuje automatizaciu (CAPTCHA).
+    Agent vygeneruje checklist -> vy overite na:
     https://kataster.skgeodesy.sk
 
-  Územnoplánovacia informácia (ÚPI od obce)
-    Písomné potvrdenie od obce (IBV zóna).
-    Agent pripraví žiadosť.
+  Uzemnoplanovacie informacia (UPI od obce)
+    Pisomne potvrdenie od obce (IBV zona).
+    Agent pripravi ziadost.
 
   Kapacita trafostanice
-    Blízkosť vedenia sa overí automaticky.
-    Kapacitu si potvrďte u distribútora (ZSDIS).
+    Blízkost vedenia sa overi automaticky.
+    Kapacitu si potvrdte u distributora (ZSDIS).
 
 
 ==============================================================
-KDE HĽADÁ
+KDE HLADA
 ==============================================================
 
-  Realitné portály    Nehnutelnosti.sk, TopReality.sk, Reality.sk
-  Štátne pozemky      SPF — Slovenský pozemkový fond
-  Notárske dražby     Často pod trhovou cenou
-  Exekučné predaje    Môžu byť výrazne podhodnotené
-  Obchodný vestník    Konkurzy a súdne dražby — zlatá baňa
-  Obecné predaje      Samosprávy predávajúce prebytočné pozemky
+  Realitne portaly    Nehnutelnosti.sk, TopReality.sk, Reality.sk
+  Statne pozemky      SPF -- Slovensky pozemkovy fond
+  Notarske drazby     Casto pod trhovou cenou
+  Exekucne predaje    Mozu byt vyrazne podhodnotene
+  Obchodny vestnik    Konkurzy a sudne drazby -- zlata bana
+  Obecne predaje      Samospravy predavajuce prebytocne pozemky
 
 
 ==============================================================
-AKO ZAČAŤ
+STAV PROJEKTU
 ==============================================================
 
-  Ako nainštalovať a spustiť:
-    → AKO_SPUSTIT_POUZIVATEL.txt
+  Backend sluzby:  13 z 17 naimplementovanych
+  Testy:           490 testov, 0 zlyhani
+  Pokrytie toku:   pipeline_service orchestruje cely tok
 
-  Ako nastaviť cenu, vzdialenosť, veľkosť a ďalšie požiadavky:
-    → NASTAVENIA_POUZIVATEL.txt
+  Zostatok:
+    llm_agent_service, realestate_scraper_service,
+    notifier_service, monitor_service, app.py + Flask routes
 
-  Technická dokumentácia (architektúra, služby, endpointy):
-    → ARCHITEKTURA_DEVELOPER.txt
+
+==============================================================
+AKO ZACAT
+==============================================================
+
+  Ako nainstalovat a spustit:
+    -> AKO_SPUSTIT_POUZIVATEL.txt
+
+  Ako nastavit cenu, vzdialenost, velkost a dalsie poziadavky:
+    -> NASTAVENIA_POUZIVATEL.txt
+
+  Technicka dokumentacia (architektura, sluzby, endpointy):
+    -> ARCHITEKTURA_DEVELOPER.txt
 
 
 Autor: Robert Fodor | 2026
