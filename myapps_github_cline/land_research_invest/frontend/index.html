@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Land Research Invest</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- App CSS -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>&#127968; Land Research Invest</h1>
+    <div class="subtitle">AI agent pre vyhladavanie stavebnych pozemkov do 70 km od Bratislavy</div>
+  </div>
+</header>
+
+<div class="main-layout">
+
+  <!-- BOCNY PANEL -->
+  <aside class="sidebar">
+
+    <!-- FORMULAR - 1 pozemok -->
+    <div class="form-section">
+      <h2>&#128269; Analyzovat pozemok</h2>
+
+      <div class="form-group">
+        <label for="f-title">Nazov / popis</label>
+        <input id="f-title" type="text" placeholder="napr. IBV pozemok Senec">
+      </div>
+      <div class="form-group">
+        <label for="f-url">URL inzeratu</label>
+        <input id="f-url" type="url" placeholder="https://nehnutelnosti.sk/...">
+      </div>
+      <div class="form-group">
+        <label for="f-location">Lokalita *</label>
+        <input id="f-location" type="text" placeholder="napr. Senec, Slovakia">
+      </div>
+      <div class="form-group">
+        <label for="f-price">Cena (EUR) *</label>
+        <input id="f-price" type="number" placeholder="35000">
+      </div>
+      <div class="form-group">
+        <label for="f-area">Vymera (m&sup2;) *</label>
+        <input id="f-area" type="number" placeholder="800">
+      </div>
+      <div class="form-group">
+        <label for="f-parcel">Cislo parcely</label>
+        <input id="f-parcel" type="text" placeholder="napr. 1234/5">
+      </div>
+
+      <div class="btn-row">
+        <button id="btn-analyze" class="btn btn-primary">&#128269; Analyzovat</button>
+        <button id="btn-demo"    class="btn btn-demo">&#9654; Demo</button>
+      </div>
+      <div id="status" class="status"></div>
+    </div>
+
+    <!-- LIMITY (z configu) -->
+    <div class="form-section">
+      <h2>&#9881; Limity (z criteria.yaml)</h2>
+      <div class="form-group">
+        <label>Max cena (EUR)</label>
+        <input id="f-price-max" type="number" readonly style="background:#f5f5f5">
+      </div>
+      <div class="form-group">
+        <label>Min / max vymera (m&sup2;)</label>
+        <div style="display:flex;gap:6px">
+          <input id="f-area-min" type="number" readonly style="background:#f5f5f5">
+          <input id="f-area-max" type="number" readonly style="background:#f5f5f5">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Max vzdialenost od BA (km)</label>
+        <input id="f-dist-max" type="number" readonly style="background:#f5f5f5">
+      </div>
+    </div>
+
+    <!-- VYSLEDKY -->
+    <div class="results-section">
+      <h2>VYSLEDKY <span id="results-count"></span></h2>
+      <div id="results-panel"></div>
+    </div>
+
+  </aside>
+
+  <!-- MAPA -->
+  <div class="map-panel">
+    <div id="map"></div>
+
+    <!-- LEGENDA -->
+    <div class="legend">
+      <h3>Legenda</h3>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#2d7a2d"></div>
+        <span>SILNA KUPA (85-100)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#c8a000"></div>
+        <span>PREVERIT (70-84)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#c85a00"></div>
+        <span>ZVAZIT (50-69)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#a02020"></div>
+        <span>PRESKOCIT (0-49)</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL - detail pozemku -->
+<div id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Detail pozemku</h2>
+      <button id="modal-close" title="Zatvorit">&times;</button>
+    </div>
+    <div class="modal-body">
+      <pre id="modal-body"></pre>
+    </div>
+  </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- App JS -->
+<script src="/static/js/config.js"></script>
+<script src="/static/js/api.js"></script>
+<script src="/static/js/demo.js"></script>
+<script src="/static/js/map.js"></script>
+<script src="/static/js/app.js"></script>
+
+</body>
+</html>

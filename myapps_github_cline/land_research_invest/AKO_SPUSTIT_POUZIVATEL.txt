@@ -46,7 +46,16 @@ KROK 3: Nainstalujte potrebne kniiznice
        - Agent zacne prehladavat realtne portaly
        - Priebeh je zobrazeny v paneli zaznamu
 
-  3. Agent automaticky overi kazdy najdeny pozemok
+  3. Agent automaticky overi kazdy pozemok.
+     Manualna analyza (tlacidlo Analyzovat):
+       - Zadaj lokalitu, cenu, vymeru -> klikni Analyzovat
+       - Zobrazi sa karta + marker na mape
+     Demo ukazka (tlacidlo Demo):
+       - Nacita 5 vzorovych pozemkov (Senec, Pezinok, Malacky...)
+       - Zobrazi farebné karty + markery na mape
+     Klik na kartu -> plny investicny report (text)
+
+  3b. Agent automaticky overi kazdy pozemok
      (cez pipeline_service -- cely tok prebehne automaticky):
        - geometria (sirka, tvar, vymera)      -- ZBGIS
        - zaplavova zona Q100                  -- SHMU
@@ -192,7 +201,7 @@ KROK 3: Nainstalujte potrebne kniiznice
   Otvorte CMD v tomto priecinku a spustite:
   python -m pytest tests/ --rootdir=. -v
 
-  Rychle offline testy (568 testov, ~1 sekunda):
+  Rychle offline testy (572 testov, ~1 sekunda):
   python -m pytest tests/ -q
 
 

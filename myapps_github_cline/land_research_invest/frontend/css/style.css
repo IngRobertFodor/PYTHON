@@ -1,0 +1,179 @@
+/* style.css - Land Research Invest */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f0f2f5;
+  color: #222;
+  min-height: 100vh;
+}
+
+/* HEADER */
+header {
+  background: #1a3a5c;
+  color: #fff;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+header h1 { font-size: 1.25rem; font-weight: 700; }
+header .subtitle { font-size: 0.85rem; opacity: .75; }
+
+/* HLAVNY LAYOUT */
+.main-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  grid-template-rows: auto 1fr;
+  height: calc(100vh - 54px);
+  gap: 0;
+}
+
+/* PANEL VLAVO */
+.sidebar {
+  background: #fff;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.form-section {
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+}
+.form-section h2 { font-size: .95rem; color: #1a3a5c; margin-bottom: 12px; }
+.form-group { margin-bottom: 10px; }
+.form-group label { display: block; font-size: .8rem; color: #555; margin-bottom: 3px; }
+.form-group input {
+  width: 100%; padding: 7px 10px;
+  border: 1px solid #ccc; border-radius: 6px;
+  font-size: .9rem;
+}
+.form-group input:focus { outline: none; border-color: #1a3a5c; }
+
+.btn-row { display: flex; gap: 8px; margin-top: 12px; }
+btn, .btn {
+  flex: 1; padding: 9px 0;
+  border: none; border-radius: 6px;
+  font-size: .9rem; font-weight: 600;
+  cursor: pointer; transition: opacity .15s;
+}
+btn:hover, .btn:hover { opacity: .88; }
+btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn-primary { background: #1a3a5c; color: #fff; }
+.btn-demo    { background: #2d7a2d; color: #fff; }
+
+.status {
+  font-size: .8rem; margin-top: 8px; padding: 6px 10px;
+  border-radius: 5px; min-height: 28px;
+}
+.status.ok    { background: #e6f4e6; color: #2d7a2d; }
+.status.error { background: #fdecea; color: #a02020; }
+.status.info  { background: #e8f0fe; color: #1a3a5c; }
+
+/* KARTY VYSLEDKOV */
+.results-section {
+  flex: 1; overflow-y: auto;
+  padding: 12px;
+}
+.results-section h2 { font-size: .9rem; color: #888; margin-bottom: 10px; }
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.12);
+  cursor: pointer;
+  transition: transform .1s, box-shadow .1s;
+  overflow: hidden;
+}
+.card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.18); }
+
+.card-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px;
+}
+.card-rec   { font-weight: 700; font-size: .85rem; }
+.card-score { font-size: 1.1rem; font-weight: 800; }
+
+.card-body  { padding: 10px 12px; }
+.card-title { font-weight: 600; font-size: .9rem; margin-bottom: 4px; }
+.card-loc   { font-size: .78rem; color: #666; margin-bottom: 6px; }
+.card-nums  { display: flex; flex-wrap: wrap; gap: 8px; font-size: .8rem; margin-bottom: 6px; }
+.card-link  { font-size: .78rem; color: #1a3a5c; text-decoration: none; }
+.card-link:hover { text-decoration: underline; }
+
+.card-flags { list-style: none; font-size: .75rem; margin-top: 4px; }
+.card-flags li { padding: 1px 0; }
+.flag-err  { color: #a02020; }
+.flag-warn { color: #a07800; }
+.flag-ok   { color: #2d7a2d; font-size: .75rem; }
+.no-results { color: #999; font-size: .85rem; padding: 12px 0; }
+
+/* MAPA */
+.map-panel { position: relative; }
+#map { width: 100%; height: 100%; min-height: 300px; }
+
+/* LEGENDA */
+.legend {
+  position: absolute; bottom: 24px; right: 10px; z-index: 999;
+  background: rgba(255,255,255,.92);
+  border-radius: 8px; padding: 10px 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+  font-size: .75rem;
+}
+.legend h3 { font-size: .78rem; margin-bottom: 6px; color: #333; }
+.legend-item { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.legend-dot {
+  width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+}
+
+/* MODAL */
+#modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 2000;
+  align-items: center; justify-content: center;
+}
+.modal {
+  background: #fff;
+  border-radius: 10px;
+  width: min(90vw, 680px);
+  max-height: 80vh;
+  display: flex; flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0,0,0,.35);
+}
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.modal-header h2 { font-size: 1rem; }
+#modal-close {
+  background: none; border: none; font-size: 1.4rem;
+  cursor: pointer; color: #666; line-height: 1;
+}
+#modal-close:hover { color: #222; }
+.modal-body {
+  flex: 1; overflow-y: auto;
+  padding: 16px 20px;
+}
+#modal-body {
+  white-space: pre-wrap;
+  font-family: "Courier New", monospace;
+  font-size: .8rem; line-height: 1.55;
+  color: #222;
+}
+
+/* RESPONZIVNE */
+@media (max-width: 768px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr;
+    height: auto;
+  }
+  .map-panel { height: 280px; }
+}

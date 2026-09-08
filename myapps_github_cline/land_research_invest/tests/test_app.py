@@ -288,3 +288,25 @@ class TestAnalyzeBatchRoute:
                                json={"parcels": [invalid, valid]}).get_json()
         assert len(data["errors"]) >= 1
         assert data["count"] == 1
+
+
+# ----------------------------------------------------------------
+# TestFrontendServing
+# ----------------------------------------------------------------
+
+class TestFrontendServing:
+    def test_root_returns_200(self, client):
+        r = client.get("/")
+        assert r.status_code == 200
+
+    def test_root_returns_html(self, client):
+        r = client.get("/")
+        assert b"<!DOCTYPE html>" in r.data or b"<!doctype html>" in r.data.lower()
+
+    def test_root_contains_app_title(self, client):
+        r = client.get("/")
+        assert b"Land Research Invest" in r.data
+
+    def test_root_content_type_html(self, client):
+        r = client.get("/")
+        assert "text/html" in r.content_type

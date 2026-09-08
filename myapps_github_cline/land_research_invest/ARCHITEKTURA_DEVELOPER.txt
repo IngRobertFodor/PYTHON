@@ -172,11 +172,13 @@ Pre vyvojarov a AI agentov.
   |   |   +-- llm_agent_service.py         (*) LangChain agent
   |   |   +-- realestate_scraper_service.py (*) scraping portálov
   |   |   +-- notifier_service.py          Telegram / email notifikacie
-  |   |   +-- monitor_service.py           (*) APScheduler
+  |   |   +-- monitor_service            (APScheduler periodicke skenovanie).py           (*) APScheduler
   |   +-- models/ parcel.py, result.py
-  +-- frontend/ (*) index.html, css/, js/
+  +-- frontend/
+  |   +-- index.html, css/style.css
+  |   +-- js/ config.js, api.js, demo.js, map.js, app.js
   +-- config/ criteria.yaml
-  +-- tests/  568 testov, 0 zlyhani
+  +-- tests/  572 testov, 0 zlyhani
   |   +-- test_pipeline_service.py  (34)
   |   +-- test_report_service.py    (68)
   |   +-- test_cadastral_service.py (47)
@@ -191,7 +193,7 @@ Pre vyvojarov a AI agentov.
   |   +-- test_geocoding_service.py
   |   +-- test_price_analysis_service.py
   |   +-- test_notifier_service.py  (40)
-  |   +-- test_app.py              (38)
+  |   +-- test_app.py              (42)
   |   +-- test_config_validator.py  (32)
   +-- README_TYMTO_ZACAT.txt
   +-- AKO_SPUSTIT_POUZIVATEL.txt
@@ -200,10 +202,10 @@ Pre vyvojarov a AI agentov.
 
 
 ==============================================================
-9. IMPLEMENTOVANE SLUZBY (15 / 17)
+9. IMPLEMENTOVANE SLUZBY (16 / 17)
 ==============================================================
 
-  Hotove (offline-testovatelne, 568 testov):
+  Hotove (offline-testovatelne, 572 testov):
     pipeline_service    -- orchestrator, analyze_parcel()
     scoring_service     -- vazene skore, get_recommendation()
     report_service      -- generate_report(), format_text_report()
@@ -219,12 +221,13 @@ Pre vyvojarov a AI agentov.
     price_analysis_service -- EUR/m2 vs. regional avg
     notifier_service    -- Telegram / email notifikacie
     app.py + routes/    -- Flask REST API (5 endpointov)
+    frontend/           -- HTML+CSS+JS UI (Leaflet mapa, karty, modal)
 
   Zostava implementovat:
     llm_agent_service           -- LangChain + Gemini
     realestate_scraper_service  -- Playwright portály
     notifier_service            -- Telegram / email
-    monitor_service             -- APScheduler
+    monitor_service            (APScheduler periodicke skenovanie)             -- APScheduler
     app.py + routes/            -- Flask REST API
 
 
