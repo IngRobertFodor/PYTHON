@@ -69,7 +69,7 @@ Pre vyvojarov a AI agentov.
   5. Ak skore >= 70:
        cadastral_service        -> manualny LV checklist (B/C/D)
   6. report_service             -> investicny report + text
-  7. notifier_service           -> email / Telegram notifikacia
+  7. notifier_service           -> email / Telegram (prah skore, feature flag)
 
   Odolnost pipeline:
     Vypnuta sluzba  -> ServiceResult.skip_result (neutralne 50)
@@ -171,12 +171,12 @@ Pre vyvojarov a AI agentov.
   |   |   +-- price_analysis_service.py    cenova analyza
   |   |   +-- llm_agent_service.py         (*) LangChain agent
   |   |   +-- realestate_scraper_service.py (*) scraping portálov
-  |   |   +-- notifier_service.py          (*) Telegram / email
+  |   |   +-- notifier_service.py          Telegram / email notifikacie
   |   |   +-- monitor_service.py           (*) APScheduler
   |   +-- models/ parcel.py, result.py
   +-- frontend/ (*) index.html, css/, js/
   +-- config/ criteria.yaml
-  +-- tests/  490 testov, 0 zlyhani
+  +-- tests/  530 testov, 0 zlyhani
   |   +-- test_pipeline_service.py  (34)
   |   +-- test_report_service.py    (68)
   |   +-- test_cadastral_service.py (47)
@@ -190,6 +190,7 @@ Pre vyvojarov a AI agentov.
   |   +-- test_zbgis_service.py
   |   +-- test_geocoding_service.py
   |   +-- test_price_analysis_service.py
+  |   +-- test_notifier_service.py  (40)
   |   +-- test_config_validator.py  (32)
   +-- README_TYMTO_ZACAT.txt
   +-- AKO_SPUSTIT_POUZIVATEL.txt
@@ -198,10 +199,10 @@ Pre vyvojarov a AI agentov.
 
 
 ==============================================================
-9. IMPLEMENTOVANE SLUZBY (13 / 17)
+9. IMPLEMENTOVANE SLUZBY (14 / 17)
 ==============================================================
 
-  Hotove (offline-testovatelne, 490 testov):
+  Hotove (offline-testovatelne, 530 testov):
     pipeline_service    -- orchestrator, analyze_parcel()
     scoring_service     -- vazene skore, get_recommendation()
     report_service      -- generate_report(), format_text_report()
@@ -215,6 +216,7 @@ Pre vyvojarov a AI agentov.
     zbgis_service       -- ZBGIS WFS geometria
     geocoding_service   -- Nominatim adresa -> GPS
     price_analysis_service -- EUR/m2 vs. regional avg
+    notifier_service    -- Telegram / email notifikacie
 
   Zostava implementovat:
     llm_agent_service           -- LangChain + Gemini

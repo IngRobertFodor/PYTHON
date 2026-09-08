@@ -96,6 +96,11 @@ def get_endpoints() -> dict:
     return get_config().get("endpoints", {})
 
 
+
+def get_notifications() -> dict:
+    """Vrati sekciu notifications (prahy, kanaly, SMTP, Telegram)."""
+    return get_config().get("notifications", {})
+
 def is_feature_enabled(feature_name: str) -> bool:
     """
     Overi ci je dana feature zapnuta.

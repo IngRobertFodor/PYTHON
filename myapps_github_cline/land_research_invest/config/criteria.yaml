@@ -383,13 +383,21 @@ features:
 # ================================================================
 
 notifications:
-  min_score_to_notify: 75
+  min_score_to_notify: 75     # 0-100, parcely s nizsim skorom sa nenotifikuju
   channels:
-    telegram: false
-    email:    false
+    telegram: false           # zapnut: true (vyzaduje TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID)
+    email:    false           # zapnut: true (vyzaduje EMAIL_FROM, EMAIL_TO, EMAIL_PASSWORD)
+  telegram:
+    bot_token_env: TELEGRAM_BOT_TOKEN   # nazov env premennej (nie hodnota!)
+    chat_id_env:   TELEGRAM_CHAT_ID
+  email:
+    smtp_host:    smtp.gmail.com
+    smtp_port:    587
+    from_env:     EMAIL_FROM
+    to_env:       EMAIL_TO
+    password_env: EMAIL_PASSWORD
 
 
-# ================================================================
 # F. EXTERNE ENDPOINTY
 # Vzdy overit GetCapabilities pred implementaciou sluzby.
 # ================================================================

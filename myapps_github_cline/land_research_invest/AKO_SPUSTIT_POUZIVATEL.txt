@@ -107,6 +107,35 @@ KROK 3: Nainstalujte potrebne kniiznice
        -> Overte na KPU (Krajsky pamiatkový urad)
 
 
+
+=== NASTAVENIE NOTIFIKACII (volitelne) ===
+
+  Ak chcete dostavat upozornenia ked agent najde dobry pozemok:
+
+  1. Telegram bot (odporucane):
+       - Vytvorte bota cez @BotFather na Telegrame
+       - Ziskajte Bot Token a Chat ID
+       - Pridajte do suboru .env:
+           TELEGRAM_BOT_TOKEN=vas_token
+           TELEGRAM_CHAT_ID=vas_chat_id
+       - Zapnite v criteria.yaml:
+           features -> use_notifications: true
+           notifications -> channels -> telegram: true
+
+  2. Email (Gmail):
+       - Vytvorte App Password v Google Account
+       - Pridajte do .env:
+           EMAIL_FROM=vas@gmail.com
+           EMAIL_TO=prijemca@gmail.com
+           EMAIL_PASSWORD=app_password
+       - Zapnite v criteria.yaml:
+           features -> use_notifications: true
+           notifications -> channels -> email: true
+
+  Prah pre notifikaciu:
+    notifications -> min_score_to_notify: 75  (len pozemky nad 75/100)
+
+
 === ZASTAVENIE APLIKACIE ===
 
   - Otvorte CMD okno (cierne okno s textom)
@@ -146,7 +175,7 @@ KROK 3: Nainstalujte potrebne kniiznice
   Otvorte CMD v tomto priecinku a spustite:
   python -m pytest tests/ --rootdir=. -v
 
-  Rychle offline testy (490 testov, ~1 sekunda):
+  Rychle offline testy (530 testov, ~1 sekunda):
   python -m pytest tests/ -q
 
 

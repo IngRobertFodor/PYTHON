@@ -98,7 +98,11 @@ Format YAML: odsadenie = medzery (NIE tabulatory).
 ==============================================================
   >> use_terrain: false          vynechat teren
   >> use_cadastral_semi: true    zapnut kataster (1 klik CAPTCHA)
-  >> use_notifications: true     e-mailove upozornenia
+  >> use_notifications: true     zapnut notifikacie (Telegram / email)
+
+  Notifikacie sa posielaju len ak skore >= min_score_to_notify.
+  Kanaly a kredencialy nastavte v .env (nie v YAML - bezpecnost).
+  Podrobny navod: AKO_SPUSTIT_POUZIVATEL.txt sekcia NOTIFIKACIE.
 
   Vypnuta sluzba automaticky dostane neutralne skore 50
   (skip_result) -- analyza prebehne bez nej.
