@@ -108,6 +108,23 @@ KROK 3: Nainstalujte potrebne kniiznice
 
 
 
+
+=== REST API (pre pokrocilych) ===
+
+  Po spusteni su dostupne endpointy:
+    GET  http://localhost:5001/api/health
+    GET  http://localhost:5001/api/config/
+    GET  http://localhost:5001/api/config/validate
+    POST http://localhost:5001/api/analyze
+    POST http://localhost:5001/api/parcels/analyze-batch
+
+  Priklad - analyza pozemku cez curl:
+    curl -X POST http://localhost:5001/api/analyze \
+         -H "Content-Type: application/json" \
+         -d '{"title":"Pozemok Senec","price_eur":35000,
+              "area_sqm":800,"location_text":"Senec, Slovakia"}'
+
+
 === NASTAVENIE NOTIFIKACII (volitelne) ===
 
   Ak chcete dostavat upozornenia ked agent najde dobry pozemok:
@@ -162,7 +179,7 @@ KROK 3: Nainstalujte potrebne kniiznice
             sa pouzije automaticky -- analyza prebehne aj bez nej.
 
   Problem: Port 5001 je obsadeny
-  Riesenie: Zmente PORT v backend/app.py alebo v .env
+  Riesenie: Zmente PORT v .env (predvoleny: 5001)
 
   Problem: "playwright install" zlyha
   Riesenie: Spustite ako spravca:
@@ -175,7 +192,7 @@ KROK 3: Nainstalujte potrebne kniiznice
   Otvorte CMD v tomto priecinku a spustite:
   python -m pytest tests/ --rootdir=. -v
 
-  Rychle offline testy (530 testov, ~1 sekunda):
+  Rychle offline testy (568 testov, ~1 sekunda):
   python -m pytest tests/ -q
 
 

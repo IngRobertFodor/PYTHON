@@ -71,13 +71,13 @@ KDE HLADA
 STAV PROJEKTU
 ==============================================================
 
-  Backend sluzby:  14 z 17 naimplementovanych
-  Testy:           530 testov, 0 zlyhani
+  Backend sluzby:  15 z 17 naimplementovanych
+  Testy:           568 testov, 0 zlyhani
   Pokrytie toku:   pipeline_service orchestruje cely tok
 
   Zostatok:
     llm_agent_service, realestate_scraper_service,
-    monitor_service, app.py + Flask routes
+    monitor_service
 
 
 ==============================================================

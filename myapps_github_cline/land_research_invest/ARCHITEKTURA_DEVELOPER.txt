@@ -152,9 +152,9 @@ Pre vyvojarov a AI agentov.
 
   land_research_invest/
   +-- backend/
-  |   +-- app.py (*), requirements.txt
+  |   +-- app.py, requirements.txt
   |   +-- config_loader.py, config_validator.py
-  |   +-- routes/ (*) search_routes.py, parcel_routes.py
+  |   +-- routes/ health_routes.py, config_routes.py, parcel_routes.py
   |   +-- services/                        (* = este naimplementovane)
   |   |   +-- pipeline_service.py          ORCHESTRATOR toku
   |   |   +-- scoring_service.py           vazene skore 0-100
@@ -176,7 +176,7 @@ Pre vyvojarov a AI agentov.
   |   +-- models/ parcel.py, result.py
   +-- frontend/ (*) index.html, css/, js/
   +-- config/ criteria.yaml
-  +-- tests/  530 testov, 0 zlyhani
+  +-- tests/  568 testov, 0 zlyhani
   |   +-- test_pipeline_service.py  (34)
   |   +-- test_report_service.py    (68)
   |   +-- test_cadastral_service.py (47)
@@ -191,6 +191,7 @@ Pre vyvojarov a AI agentov.
   |   +-- test_geocoding_service.py
   |   +-- test_price_analysis_service.py
   |   +-- test_notifier_service.py  (40)
+  |   +-- test_app.py              (38)
   |   +-- test_config_validator.py  (32)
   +-- README_TYMTO_ZACAT.txt
   +-- AKO_SPUSTIT_POUZIVATEL.txt
@@ -199,10 +200,10 @@ Pre vyvojarov a AI agentov.
 
 
 ==============================================================
-9. IMPLEMENTOVANE SLUZBY (14 / 17)
+9. IMPLEMENTOVANE SLUZBY (15 / 17)
 ==============================================================
 
-  Hotove (offline-testovatelne, 530 testov):
+  Hotove (offline-testovatelne, 568 testov):
     pipeline_service    -- orchestrator, analyze_parcel()
     scoring_service     -- vazene skore, get_recommendation()
     report_service      -- generate_report(), format_text_report()
@@ -217,6 +218,7 @@ Pre vyvojarov a AI agentov.
     geocoding_service   -- Nominatim adresa -> GPS
     price_analysis_service -- EUR/m2 vs. regional avg
     notifier_service    -- Telegram / email notifikacie
+    app.py + routes/    -- Flask REST API (5 endpointov)
 
   Zostava implementovat:
     llm_agent_service           -- LangChain + Gemini
@@ -226,8 +228,27 @@ Pre vyvojarov a AI agentov.
     app.py + routes/            -- Flask REST API
 
 
+
 ==============================================================
-10. TESTOVANIE
+10. REST API ENDPOINTY  (Flask, port 5001)
+==============================================================
+
+  GET  /api/health                 -> status, pocet sluzieb, verzia
+  GET  /api/config/                -> kriteria, vahy, prahy, features
+  GET  /api/config/validate        -> overenie criteria.yaml
+  POST /api/analyze                -> analyza 1 pozemku (JSON -> report)
+  POST /api/parcels/analyze-batch  -> analyza N pozemkov, zoradene
+
+  POST /api/analyze - vstup:
+    { title, price_eur, area_sqm, location_text,  <- povinne
+      url?, parcel_number?, lat?, lon? }           <- volitelne
+
+  POST /api/analyze - vystup:
+    { parcel: {...}, report: {text_report, recommendation, ...} }
+
+
+==============================================================
+11. TESTOVANIE
 ==============================================================
 
   python -m pytest tests/ -v --rootdir=.
