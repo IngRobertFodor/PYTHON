@@ -19,6 +19,7 @@ Pridanie noveho zdroja:
 from config_loader import get_green_sources
 from services.scrapers.nehnutelnosti_scraper import NehnutelnostiScraper
 from services.scrapers.topreality_scraper import TopRealityScraper
+from services.scrapers.obchodny_vestnik_scraper import ObchodnyVestnikScraper
 
 SERVICE_NAME = "scraper_service"
 
@@ -28,9 +29,9 @@ SERVICE_NAME = "scraper_service"
 # ----------------------------------------------------------------
 
 SCRAPER_REGISTRY = {
-    "nehnutelnosti_sk": NehnutelnostiScraper,
-    "topreality_sk":    TopRealityScraper,
-    # "obchodny_vestnik":   ObchodnyVestnikScraper, # TODO faza B2
+    "nehnutelnosti_sk":  NehnutelnostiScraper,
+    "topreality_sk":     TopRealityScraper,
+    "obchodny_vestnik":  ObchodnyVestnikScraper,
     # "spf":               SpfScraper,              # TODO faza B3
     # "exekutorske_drazby": ExekutorskeDrazbyScr,   # TODO faza B4
     # "drazby_net":        DrazbyNetScraper,         # TODO faza B4

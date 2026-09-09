@@ -13,7 +13,7 @@
 | Frontend (mapa, karty, modal, demo) | HOTOVO |
 | Scraper kostra (BaseScraper, registry, scrape_all) | HOTOVO |
 | nehnutelnosti_sk parser | HOTOVO |
-| Testy | **679, 0 zlyh** |
+| Testy | **723, 0 zlyh** |
 
 ---
 
@@ -64,11 +64,11 @@
 **Rate:** 10/min | **Zone:** GREEN
 **Poznamka:** Najlepsie podhodnotene pozemky!
 
-- [ ] B2.1: HTML vzorka od pouzivatela -> `tests/fixtures/obchodny_vestnik_listing.html`
-- [ ] B2.2: `backend/services/scrapers/obchodny_vestnik_scraper.py`
-- [ ] B2.3: Pridat do `SCRAPER_REGISTRY`
-- [ ] B2.4: `tests/test_obchodny_vestnik_scraper.py` (~15 testov)
-- [ ] B2.5: Aktualizacia dokumentacie
+- [x] B2.1: HTML vzorka od pouzivatela -> `tests/fixtures/obchodny_vestnik_listing.html`
+- [x] B2.2: `backend/services/scrapers/obchodny_vestnik_scraper.py`
+- [x] B2.3: Pridat do `SCRAPER_REGISTRY`
+- [x] B2.4: `tests/test_obchodny_vestnik_scraper.py` (~15 testov)
+- [x] B2.5: Aktualizacia dokumentacie
 
 ### B3 - spf (Slovensky pozemkovy fond)
 
@@ -173,8 +173,8 @@ Potom AI: precita fixture, extrahuje strukturu, napise presny parser.
 | HOTOVO | scraper kostra + nehnutelnosti_sk | ✅ | +36 |
 | **A** | monitor_service + periodicky scan | ✅ HOTOVO | +26 |
 | B1 | topreality_sk | ✅ HOTOVO | +45 |
-| B2 | obchodny_vestnik (ZLATO) | ⏳ NEXT | ~+15 |
-| B3 | spf | ❌ caka na HTML | ~+15 |
+| B2 | obchodny_vestnik (ZLATO) | ✅ HOTOVO | +44 |
+| B3 | spf | ⏳ NEXT | ~+15 |
 | B4 | exekutorske + drazby_net | ❌ caka na HTML | ~+20 |
 | B5 | notarske + eks | ❌ caka na HTML | ~+20 |
 | B6 | bsk_kraj + obce (najkomplexnejsie) | ❌ caka na HTML | ~+20 |

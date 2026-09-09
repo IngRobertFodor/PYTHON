@@ -201,7 +201,7 @@ KROK 3: Nainstalujte potrebne kniiznice
   Otvorte CMD v tomto priecinku a spustite:
   python -m pytest tests/ --rootdir=. -v
 
-  Rychle offline testy (679 testov, ~1 sekunda):
+  Rychle offline testy (723 testov, ~1 sekunda):
   python -m pytest tests/ -q
 
 
