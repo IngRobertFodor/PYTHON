@@ -72,7 +72,7 @@ STAV PROJEKTU
 ==============================================================
 
   Backend sluzby:  17 z 17 naimplementovanych
-  Testy:           723 testov, 0 zlyhani
+  Testy:           730 testov, 0 zlyhani
   Pokrytie toku:   pipeline_service orchestruje cely tok
 
   Zostatok:

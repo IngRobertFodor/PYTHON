@@ -13,7 +13,7 @@
 | Frontend (mapa, karty, modal, demo) | HOTOVO |
 | Scraper kostra (BaseScraper, registry, scrape_all) | HOTOVO |
 | nehnutelnosti_sk parser | HOTOVO |
-| Testy | **723, 0 zlyh** |
+| Testy | **730, 0 zlyh** |
 
 ---
 
