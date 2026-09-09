@@ -13,7 +13,7 @@
 | Frontend (mapa, karty, modal, demo) | HOTOVO |
 | Scraper kostra (BaseScraper, registry, scrape_all) | HOTOVO |
 | nehnutelnosti_sk parser | HOTOVO |
-| Testy | **730, 0 zlyh** |
+| Testy | **763, 0 zlyh** |
 
 ---
 
@@ -174,7 +174,7 @@ Potom AI: precita fixture, extrahuje strukturu, napise presny parser.
 | **A** | monitor_service + periodicky scan | ✅ HOTOVO | +26 |
 | B1 | topreality_sk | ✅ HOTOVO | +45 |
 | B2 | obchodny_vestnik (ZLATO) | ✅ HOTOVO | +44 |
-| B3 | spf | ⏳ NEXT | ~+15 |
+| B3 | spf | ✅ HOTOVO | +33 |
 | B4 | exekutorske + drazby_net | ❌ caka na HTML | ~+20 |
 | B5 | notarske + eks | ❌ caka na HTML | ~+20 |
 | B6 | bsk_kraj + obce (najkomplexnejsie) | ❌ caka na HTML | ~+20 |

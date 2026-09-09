@@ -20,6 +20,7 @@ from config_loader import get_green_sources
 from services.scrapers.nehnutelnosti_scraper import NehnutelnostiScraper
 from services.scrapers.topreality_scraper import TopRealityScraper
 from services.scrapers.obchodny_vestnik_scraper import ObchodnyVestnikScraper
+from services.scrapers.spf_scraper import SpfScraper
 
 SERVICE_NAME = "scraper_service"
 
@@ -32,7 +33,7 @@ SCRAPER_REGISTRY = {
     "nehnutelnosti_sk":  NehnutelnostiScraper,
     "topreality_sk":     TopRealityScraper,
     "obchodny_vestnik":  ObchodnyVestnikScraper,
-    # "spf":               SpfScraper,              # TODO faza B3
+    "spf":               SpfScraper,
     # "exekutorske_drazby": ExekutorskeDrazbyScr,   # TODO faza B4
     # "drazby_net":        DrazbyNetScraper,         # TODO faza B4
     # "notarske_drazby":   NotarskeDrazbyScr,        # TODO faza B5

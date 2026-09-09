@@ -197,7 +197,7 @@ KONVENCIA FIXTURES (tests/fixtures/):
     obchodny_vestnik_drazba.pdf
     spf_listing.html          (buduci)
     drazby_net_drazba.html    (buduci)
-+-- tests/  730 testov, 0 zlyhani
++-- tests/  763 testov, 0 zlyhani
   |   +-- test_pipeline_service.py  (34)
   |   +-- test_report_service.py    (68)
   |   +-- test_cadastral_service.py (47)
@@ -230,7 +230,7 @@ KONVENCIA FIXTURES (tests/fixtures/):
 9. IMPLEMENTOVANE SLUZBY (17 / 17)
 ==============================================================
 
-  Hotove (offline-testovatelne, 730 testov):
+  Hotove (offline-testovatelne, 763 testov):
     pipeline_service    -- orchestrator, analyze_parcel()
     scoring_service     -- vazene skore, get_recommendation()
     report_service      -- generate_report(), format_text_report()
