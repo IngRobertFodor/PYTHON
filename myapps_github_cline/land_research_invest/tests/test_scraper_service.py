@@ -9,7 +9,7 @@ import pytest
 import pathlib
 from unittest.mock import patch
 
-FIXTURE = pathlib.Path(__file__).parent / "fixtures" / "nehnut_detail.html"
+FIXTURE = pathlib.Path(__file__).parent / "fixtures" / "nehnutelnosti_sk_detail.html"
 
 from services.scrapers.base_scraper import BaseScraper
 from services.scrapers.nehnutelnosti_scraper import NehnutelnostiScraper
