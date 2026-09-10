@@ -260,6 +260,30 @@ def format_text_report(parcel):
         )
     lines.append("")
 
+    # Vysvetlivky stavov a odporucani - pre bezneho pouzivatela
+    lines += [
+        "VYSVETLIVKY (stav sluzby)",
+        SEP2,
+        "  [ok]      sluzba prebehla - skore je spolahlive",
+        "  [error]   statny GIS server neodpovedal (403/503)",
+        "            -> pouzite neutralne skore 50, pozemok NEBOL potrestany",
+        "  [missing] sluzba sa nespustila (napr. chybaju suradnice)",
+        "            -> nezapocitana do vysledneho skore",
+        "  [skip]    sluzba je vypnuta v nastaveniach (criteria.yaml)",
+        "",
+        "  POZNAMKA: [error] pri GIS je bezne - slovenske statne servery",
+        "  (SHMU, ZBGIS, geodata.gov.sk) casto blokuju automaticke dotazy.",
+        "  Analyza aj tak prebehne, chybajuce sluzby nahradi neutralne 50.",
+        "",
+        "VYSVETLIVKY (odporucanie)",
+        SEP2,
+        "  SILNA KUPA  [**]  skore >= 85  vyborny pozemok, konaj rychlo",
+        "  PREVERIT    [??]  skore >= 70  dobry kandidat, over detaily",
+        "  ZVAZIT      [..]  skore >= 50  priemer, zvaz rizika a naklady",
+        "  PRESKOCIT   [XX]  skore <  50  slab pozemok, radsej preskocit",
+        "",
+    ]
+
     if rf["has_blockers"] or rf["warnings"]:
         lines += ["RED FLAGS", SEP2]
         for b in rf["blockers"]:

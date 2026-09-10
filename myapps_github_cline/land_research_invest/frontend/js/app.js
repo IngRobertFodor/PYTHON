@@ -107,6 +107,20 @@ function buildCard(parcel, report) {
   const flags_html = blockers.map(b => `<li class='flag-err'>&#9888; ${b}</li>`).join("") +
                      warnings.map(w => `<li class='flag-warn'>&#9432; ${w}</li>`).join("");
 
+  // EUR/m2 - pouzij z parcely (nastavene pipeline) alebo vypocitaj lokalne
+  const ppsm = parcel.price_per_sqm > 0
+    ? parcel.price_per_sqm
+    : (parcel.area_sqm > 0 ? parcel.price_eur / parcel.area_sqm : 0);
+  const ppsmStr = ppsm > 0 ? ppsm.toFixed(2) : "N/A";
+
+  // Link - zobraz len ak URL je realna (nie demo/prazdna)
+  const isRealUrl = parcel.url && parcel.url.length > 0
+    && !parcel.url.includes("/demo/")
+    && parcel.url.startsWith("http");
+  const linkHtml = isRealUrl
+    ? `<a class="card-link" href="${parcel.url}" target="_blank">Inzerat &rarr;</a>`
+    : "";
+
   card.innerHTML = `
     <div class="card-header" style="background:${col.bg};color:${col.text}">
       <span class="card-rec">${recLabel(rec)}</span>
@@ -118,11 +132,11 @@ function buildCard(parcel, report) {
       <div class="card-nums">
         <span><b>${(parcel.price_eur||0).toLocaleString("sk-SK")} EUR</b></span>
         <span>${(parcel.area_sqm||0).toLocaleString("sk-SK")} m&sup2;</span>
-        <span>${(parcel.price_per_sqm||0).toFixed(0)} EUR/m&sup2;</span>
+        <span>${ppsmStr} EUR/m&sup2;</span>
         ${budget_st} ${sqm_st}
       </div>
       ${flags_html ? `<ul class="card-flags">${flags_html}</ul>` : ""}
-      ${parcel.url ? `<a class="card-link" href="${parcel.url}" target="_blank">Inzerat &rarr;</a>` : ""}
+      ${linkHtml}
     </div>
   `;
   card.addEventListener("click", () => openModal(parcel, report));

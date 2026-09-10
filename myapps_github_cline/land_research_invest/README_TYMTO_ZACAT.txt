@@ -89,6 +89,7 @@ AKO ZACAT
 
   Ako nastavit cenu, vzdialenost, velkost a dalsie poziadavky:
     -> NASTAVENIA_POUZIVATEL.txt
+    VYSVETLIVKY_POUZIVATEL.txt  <- komentare a vysvetlivky ku skore/stavom
 
   Technicka dokumentacia (architektura, sluzby, endpointy):
     -> ARCHITEKTURA_DEVELOPER.txt

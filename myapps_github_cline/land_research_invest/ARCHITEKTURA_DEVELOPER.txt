@@ -223,6 +223,7 @@ KONVENCIA FIXTURES (tests/fixtures/):
   +-- README_TYMTO_ZACAT.txt
   +-- AKO_SPUSTIT_POUZIVATEL.txt
   +-- NASTAVENIA_POUZIVATEL.txt
+VYSVETLIVKY_POUZIVATEL.txt  -- legenda stavov, farieb, GIS chyb
   +-- ARCHITEKTURA_DEVELOPER.txt
 
 

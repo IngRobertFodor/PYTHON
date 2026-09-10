@@ -1,0 +1,141 @@
+VYSVETLIVKY — Land Research Invest
+====================================
+Tento súbor vysvetľuje kódy, farby a stavy v investičnom reporte.
+Určené pre bežného používateľa (bez technických znalostí).
+
+
+==============================================================
+1. FARBY KARIET A ODPORÚČANIA
+==============================================================
+
+Každý pozemok dostane skóre 0-100 a farebnú kartu:
+
+  ZELENÁ  karta  =  SILNÁ KÚPA  [**]  skóre >= 85
+    Vynikajúci pozemok. Spĺňa všetky kritériá.
+    Odporúčanie: Konaj rýchlo, sú to vzácne nálezy.
+
+  ŽLTÁ    karta  =  PREVERIŤ    [??]  skóre >= 70
+    Dobrý kandidát. Odporúča sa overiť detaily.
+    Odporúčanie: Navštív parcelu, over LV na katastri.
+
+  ORANŽOVÁ karta =  ZVÁŽIŤ      [..]  skóre >= 50
+    Priemerný pozemok. Má niektoré nedostatky.
+    Odporúčanie: Zváž riziká a náklady pred rozhodnutím.
+
+  ČERVENÁ karta  =  PRESKOČIŤ   [XX]  skóre <  50
+    Slabý pozemok. Nevyhovuje dôležitým kritériám.
+    Odporúčanie: Hľadaj ďalej, existujú lepšie možnosti.
+
+
+==============================================================
+2. STAVY SLUŽIEB V ROZPADE SKÓRE
+==============================================================
+
+V sekcii "ROZPAD SKÓRE" uvidíš pri každej službe stav v []:
+
+  [ok]
+    Služba prebehla úspešne.
+    Skóre je spoľahlivé a zahrnuté do výsledku.
+
+  [error]
+    Štátny GIS server neodpovedal (napríklad SHMU, ZBGIS,
+    geodata.gov.sk vrátili chybu 403 alebo 503).
+    → Použité neutrálne skóre 50.
+    → Pozemok NEBOL potrestaný ani zvýhodnený.
+    → Toto je BEŽNÁ situácia — slovenské štátne servery
+      sú nestabilné a blokujú automatické dopyty.
+
+  [missing]
+    Služba sa nespustila — napríklad sa nepodarilo
+    zistiť GPS súradnice pozemku.
+    → Nezapočítaná do výsledného skóre.
+
+  [skip]
+    Služba je vypnutá v nastaveniach (criteria.yaml).
+    → Nezapočítaná do výsledného skóre.
+
+  DÔLEŽITÉ: Aj keď niektoré služby skončia [error] alebo
+  [missing], analýza vždy prebehne do konca a dá výsledok.
+  Chýbajúce dáta sa nahradia neutrálnym skóre 50.
+
+
+==============================================================
+3. ČÍSLA V ROZADE SKÓRE
+==============================================================
+
+  price           = cenová analýza (EUR a EUR/m²)
+  distance        = vzdialenosť od Bratislavy (km)
+  infrastructure  = blízkosť cesty, elektriny, vody (OSM)
+  legal_proxy     = geometria parcely (ZBGIS katastre)
+  flood_risk      = riziko povodní Q100 (SHMU)
+  soil_quality    = bonita pôdy BPEJ (ochranná trieda)
+  terrain         = terén (sklon, nadmorská výška)
+  protected_zones = chránené územia (Natura, CHKO, VVN)
+
+  Stĺpce:
+    Xpts    = skóre tejto služby (0-100)
+    váha    = dôležitosť v celkovom skóre (súčet = 1.00)
+    príspevok = koľko bodov táto služba pridala do výsledku
+
+
+==============================================================
+4. RED FLAGS (VAROVANIA)
+==============================================================
+
+  [!]  BLOKER — kritická chyba, pozemok je vážne problematický
+       Príklady: záplava Q100, chránené územie, príliš ďaleko
+
+  [?]  VAROVANIE — upozornenie, nie bloker
+       Príklady: vyššia cena, slabá infraštruktúra
+
+
+==============================================================
+5. PREČO GIS SERVERY ZLYHÁVAJÚ
+==============================================================
+
+Projekt používa tieto verejné slovenské štátne databázy:
+  • SHMU (geo.shmu.sk)          — záplavy
+  • ZBGIS (zbgis.skgeodesy.sk)  — geometria, terén
+  • geodata.gov.sk              — BPEJ bonita pôdy
+  • Nominatim (OSM)             — geocoding (adresa → GPS)
+  • Overpass API (OSM)          — infraštruktúra
+
+Tieto servery sú:
+  - Verejné a bezplatné (bez API kľúča)
+  - Niekedy pomalé alebo dočasne nedostupné
+  - Niektoré blokujú automatické dopyty (403 Forbidden)
+  - Občas menia adresy alebo názvy vrstiev
+
+Toto JE normálne. Aplikácia je navrhnutá tak, aby
+fungovala aj keď niektoré servery nereagujú.
+
+
+==============================================================
+6. ČO ROBIŤ PO ANALÝZE
+==============================================================
+
+  Skóre >= 70 (PREVERIŤ alebo SILNÁ KÚPA)?
+  1. Stiahni KATASTER CHECKLIST z karty pozemku
+  2. Over List vlastníctva manuálne na:
+     https://kataster.skgeodesy.sk
+     (sekcie B/C/D — vlastník, vecné bremená, záložné práva)
+  3. Navštív parcelu osobne
+  4. Overiť IBV zónu / územný plán u miestneho úradu
+  5. Pred kúpou: notár + overenie na katastrálnom odbore
+
+
+==============================================================
+7. NASTAVENIA (zmena kritérií)
+==============================================================
+
+Všetky limity (max. cena, vzdialenosť, výmera...) meníš v:
+    config/criteria.yaml
+
+Popis každého nastavenia nájdeš v:
+    NASTAVENIA_POUZIVATEL.txt
+
+Po zmene reštartuj aplikáciu (zastav a znova spusti).
+
+
+Autor: Robert Fodor | 2026
+Aplikácia: Land Research Invest v0.1

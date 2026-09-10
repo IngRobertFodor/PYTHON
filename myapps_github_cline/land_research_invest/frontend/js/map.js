@@ -36,10 +36,35 @@ function addParcelMarker(parcel, report, onClickCb) {
       display:flex; align-items:center; justify-content:center;
       font-weight:bold; font-size:11px;
       box-shadow:0 2px 6px rgba(0,0,0,.4);
+      cursor:pointer;
     ">${Math.round(score)}</div>`,
     iconSize: [36, 36],
     iconAnchor: [18, 18],
   });
+
+  // Hover tooltip - nazov + skore + odporucanie
+  const tooltipHtml = `
+    <div style="max-width:220px;line-height:1.4">
+      <b style="font-size:.9rem">${parcel.title || "Pozemok"}</b><br>
+      <span style="color:${col.bg};font-weight:bold">${recLabel(rec)}</span>
+      &nbsp;<span style="font-size:.85rem">${score.toFixed(1)}/100</span><br>
+      <span style="font-size:.8rem;color:#555">
+        ${(parcel.price_eur || 0).toLocaleString("sk-SK")} EUR &bull;
+        ${(parcel.area_sqm  || 0).toLocaleString("sk-SK")} m&sup2;
+      </span>
+    </div>
+  `;
+
+  // Popup pri kliknutí (zdroj + EUR/m2)
+  const ppsm = (parcel.price_per_sqm || 0);
+  const ppsmStr = ppsm > 0 ? ppsm.toFixed(2) : "N/A";
+  // Link zobraz len ak URL je realna (nie demo/prazdna)
+  const isRealUrl = parcel.url && parcel.url.length > 0
+    && !parcel.url.includes("/demo/")
+    && parcel.url.startsWith("http");
+  const linkHtml = isRealUrl
+    ? `<br><a href="${parcel.url}" target="_blank" style="font-size:.8rem">Inzerat &rarr;</a>`
+    : "";
 
   const popup = `
     <b>${parcel.title || "Pozemok"}</b><br>
@@ -47,12 +72,12 @@ function addParcelMarker(parcel, report, onClickCb) {
     &nbsp; ${score.toFixed(1)}/100<br>
     Cena: <b>${(parcel.price_eur || 0).toLocaleString("sk-SK")} EUR</b><br>
     Plocha: ${(parcel.area_sqm || 0).toLocaleString("sk-SK")} m&sup2;<br>
-    EUR/m&sup2;: ${(parcel.price_per_sqm || 0).toFixed(2)}<br>
-    <a href="${parcel.url || "#"}" target="_blank">Inzerat &rarr;</a>
+    EUR/m&sup2;: ${ppsmStr}${linkHtml}
   `;
 
   const marker = L.marker([lat, lon], { icon })
     .addTo(_map)
+    .bindTooltip(tooltipHtml, { direction: "top", sticky: false, offset: [0, -20] })
     .bindPopup(popup);
 
   if (onClickCb) marker.on("click", () => onClickCb(parcel, report));

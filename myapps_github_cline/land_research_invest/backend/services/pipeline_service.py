@@ -239,6 +239,10 @@ def analyze_parcel(parcel):
     # 3. Cenova analyza
     run_price_service(parcel)
 
+    # 3b. Vypocitaj price_per_sqm na objekte (pouziva frontend na kartach)
+    if parcel.area_sqm and parcel.area_sqm > 0:
+        parcel.price_per_sqm = round(parcel.price_eur / parcel.area_sqm, 2)
+
     # 4. Scoring
     _scoring.score_parcel(parcel)
 

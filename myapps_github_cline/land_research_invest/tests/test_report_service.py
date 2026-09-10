@@ -259,51 +259,51 @@ class TestBuildRedFlags:
 
 class TestBuildInvestmentView:
     def test_pass_verdict_for_good_parcel(self):
-        p = make_parcel(price_eur=35000.0, area_sqm=800.0)
+        p = make_parcel(price_eur=8000.0, area_sqm=700.0)
         assert build_investment_view(p)["verdict"] == "PASS"
 
     def test_over_budget_verdict(self):
-        p = make_parcel(price_eur=60000.0, area_sqm=800.0)
+        p = make_parcel(price_eur=15000.0, area_sqm=800.0)
         inv = build_investment_view(p)
         assert inv["over_budget"] is True
         assert inv["verdict"] == "OVER_BUDGET"
 
     def test_over_sqm_verdict(self):
-        # 40000 / 200 = 200 EUR/m2 > 100 limit
-        p = make_parcel(price_eur=40000.0, area_sqm=200.0)
+        # 8000 / 40 = 200 EUR/m2 > 100 limit; cena 8000 < max 10000 (nie over_budget)
+        p = make_parcel(price_eur=8000.0, area_sqm=40.0)
         inv = build_investment_view(p)
         assert inv["over_sqm_limit"] is True
         assert inv["verdict"] == "OVER_SQM"
 
     def test_fail_verdict_both_over(self):
-        # 60000 EUR budget + 60000/200 = 300 EUR/m2
-        p = make_parcel(price_eur=60000.0, area_sqm=200.0)
+        # 15000 EUR budget + 15000/40 = 375 EUR/m2
+        p = make_parcel(price_eur=15000.0, area_sqm=40.0)
         assert build_investment_view(p)["verdict"] == "FAIL"
 
     def test_area_mismatch_too_small(self):
-        # 400 m2 < min 600
-        p = make_parcel(price_eur=20000.0, area_sqm=400.0)
+        # 300 m2 < min 350
+        p = make_parcel(price_eur=8000.0, area_sqm=300.0)
         inv = build_investment_view(p)
         assert inv["area_ok"] is False
         assert inv["verdict"] == "AREA_MISMATCH"
 
     def test_area_mismatch_too_large(self):
-        # 2000 m2 > max 1500
-        p = make_parcel(price_eur=20000.0, area_sqm=2000.0)
+        # 1200 m2 > max 1000; cena 8000 < max 10000
+        p = make_parcel(price_eur=8000.0, area_sqm=1200.0)
         inv = build_investment_view(p)
         assert inv["area_ok"] is False
         assert inv["verdict"] == "AREA_MISMATCH"
 
     def test_area_ok_in_range(self):
-        p = make_parcel(price_eur=35000.0, area_sqm=800.0)
+        p = make_parcel(price_eur=8000.0, area_sqm=700.0)
         assert build_investment_view(p)["area_ok"] is True
 
     def test_price_per_sqm_calculated(self):
-        p = make_parcel(price_eur=40000.0, area_sqm=1000.0)
-        assert build_investment_view(p)["price_per_sqm"] == pytest.approx(40.0)
+        p = make_parcel(price_eur=8000.0, area_sqm=800.0)
+        assert build_investment_view(p)["price_per_sqm"] == pytest.approx(10.0)
 
     def test_zero_area_safe(self):
-        p = make_parcel(price_eur=35000.0, area_sqm=0.0)
+        p = make_parcel(price_eur=8000.0, area_sqm=0.0)
         inv = build_investment_view(p)
         assert inv["price_per_sqm"] == 0.0
         assert inv["area_ok"] is False
@@ -311,7 +311,7 @@ class TestBuildInvestmentView:
     def test_limits_read_from_config(self):
         p = make_parcel()
         inv = build_investment_view(p)
-        assert inv["max_eur"] == 50000
+        assert inv["max_eur"] == 10000
         assert inv["max_price_per_sqm"] == 100
 
 

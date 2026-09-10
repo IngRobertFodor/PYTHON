@@ -14,6 +14,7 @@
 | Scraper kostra (BaseScraper, registry, scrape_all) | HOTOVO |
 | nehnutelnosti_sk parser | HOTOVO |
 | Testy | **763, 0 zlyh** |
+| Limity v criteria.yaml (cena 0-10000, vymera 350-1000) | HOTOVO |
 
 ---
 

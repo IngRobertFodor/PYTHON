@@ -24,14 +24,14 @@ criteria:
     automation: AUTO           # Haversine offline
 
   price:
-    min_eur: 10000
-    max_eur: 50000
+    min_eur: 0
+    max_eur: 10000
     max_price_per_sqm_eur: 100
     automation: AUTO           # priamo z inzeratu
 
   parcel:
-    min_area_sqm: 600
-    max_area_sqm: 1500
+    min_area_sqm: 350
+    max_area_sqm: 1000
     min_width_m: 15
     min_length_m: 20
     preferred_shape: rectangular   # obdlznikovy tvar = mensie naklady
