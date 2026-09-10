@@ -44,8 +44,8 @@ function addParcelMarker(parcel, report, onClickCb) {
 
   // Hover tooltip - nazov + skore + odporucanie
   const tooltipHtml = `
-    <div style="max-width:220px;line-height:1.4">
-      <b style="font-size:.9rem">${parcel.title || "Pozemok"}</b><br>
+    <div style="line-height:1.4;white-space:nowrap">
+      <b style="font-size:.9rem;display:block;max-width:360px;overflow:hidden;text-overflow:ellipsis">${parcel.title || "Pozemok"}</b>
       <span style="color:${col.bg};font-weight:bold">${recLabel(rec)}</span>
       &nbsp;<span style="font-size:.85rem">${score.toFixed(1)}/100</span><br>
       <span style="font-size:.8rem;color:#555">
