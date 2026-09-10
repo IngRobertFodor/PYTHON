@@ -11,7 +11,7 @@ from models.result import ServiceResult
 from config_loader import is_feature_enabled, get_endpoints
 
 SERVICE_NAME = "flood_service"
-TIMEOUT = 15
+TIMEOUT = 8   # kratky timeout - pri blokujucich serveroch rychly fallback
 
 # WMS parametre pre SHMU Q100 vrstvu
 # Nazov vrstvy overit cez GetCapabilities pred pouzitim

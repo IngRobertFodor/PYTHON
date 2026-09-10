@@ -13,7 +13,7 @@ from models.result import ServiceResult
 from config_loader import is_feature_enabled, get_criteria_section, get_endpoints
 
 SERVICE_NAME = "overpass_service"
-TIMEOUT = 30
+TIMEOUT = 8   # kratky timeout - pri blokujucich serveroch rychly fallback na error_result
 
 OVERPASS_SERVERS = [
     "https://overpass-api.de/api/interpreter",

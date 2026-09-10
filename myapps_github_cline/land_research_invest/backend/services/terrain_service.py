@@ -17,7 +17,7 @@ from models.result import ServiceResult
 from config_loader import is_feature_enabled, get_criteria_section, get_endpoints
 
 SERVICE_NAME = "terrain_service"
-TIMEOUT = 20
+TIMEOUT = 8   # kratky timeout - pri blokujucich serveroch rychly fallback
 GRADIENT_OFFSET_DEG = 0.0009   # ~90m offset pre gradient
 
 ASPECT_SECTORS = [

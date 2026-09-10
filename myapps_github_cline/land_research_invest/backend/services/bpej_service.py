@@ -17,7 +17,7 @@ from models.result import ServiceResult
 from config_loader import is_feature_enabled, get_criteria_section, get_endpoints
 
 SERVICE_NAME = "bpej_service"
-TIMEOUT = 20
+TIMEOUT = 8   # kratky timeout - pri blokujucich serveroch rychly fallback
 
 # Orientacne odvody za vynatie z PPF (EUR/m2) podla ochrannej triedy
 ODVODY_PER_CLASS = {

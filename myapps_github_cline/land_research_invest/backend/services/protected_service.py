@@ -21,7 +21,7 @@ from models.result import ServiceResult
 from config_loader import is_feature_enabled, get_criteria_section, get_endpoints
 
 SERVICE_NAME = "protected_service"
-TIMEOUT = 20
+TIMEOUT = 8   # kratky timeout - pri blokujucich serveroch rychly fallback
 
 # SOP SR WMS vrstvy (overit GetCapabilities pred pouzitim)
 # Zdroj: https://maps.sopsr.sk/geoserver/wms
@@ -76,20 +76,29 @@ def check(lat: float, lon: float) -> ServiceResult:
 
 def _query_all_layers(lat: float, lon: float) -> dict[str, bool]:
     """
-    Dotaze sa na vsetky WMS vrstvy paralelne (sekvenčne, s fallback).
+    Dotaze sa na vsetky WMS vrstvy PARALELNE (ThreadPoolExecutor).
+    Bez paralelizmu by 6 vrstiev x 8s timeout = 48s blokovanie.
 
     Returns:
         {layer_key: bool} - True ak sa bod nachadza v danej oblasti
     """
-    findings = {}
-    errors = []
+    from concurrent.futures import ThreadPoolExecutor, as_completed
 
-    for layer_key in WMS_LAYERS:
+    def _query_one(layer_key):
         try:
-            findings[layer_key] = _query_wms_layer(lat, lon, layer_key)
-        except Exception as e:
-            findings[layer_key] = False
-            errors.append(f"{layer_key}: {e}")
+            return layer_key, _query_wms_layer(lat, lon, layer_key)
+        except Exception:
+            return layer_key, False
+
+    findings = {}
+    with ThreadPoolExecutor(max_workers=len(WMS_LAYERS)) as executor:
+        futures = {
+            executor.submit(_query_one, layer_key): layer_key
+            for layer_key in WMS_LAYERS
+        }
+        for future in as_completed(futures):
+            layer_key, result = future.result()
+            findings[layer_key] = result
 
     return findings
 

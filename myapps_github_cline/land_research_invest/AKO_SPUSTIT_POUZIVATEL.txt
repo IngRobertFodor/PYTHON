@@ -164,9 +164,22 @@ KROK 3: Nainstalujte potrebne kniiznice
 
 === ZASTAVENIE APLIKACIE ===
 
-  - Otvorte CMD okno (cierne okno s textom)
-  - Stlacte Ctrl+C
-  - Server sa zastavi
+  Sposob 1 (najjednoduchsi):
+    - Zavrite cierne CMD okno krizikom vpravo hore
+    - Server sa automaticky zastavi
+
+  Sposob 2 - dvojklik:
+    - Dvakrat kliknite na "STOP.bat" (v priecinku projektu)
+    - Server sa zastavi aj keby cierne okno uz bolo zavrete
+    - Funguje aj ked neviete kde je cierne okno
+
+  Sposob 3 - Ctrl+C:
+    - V ciernom CMD okne stlacte Ctrl+C
+    - Server sa zastavi
+
+  Poznamka: Ak zabudnete zastavit server a restartujete pocitac,
+  server sa sam neobnoví (nie je to systemova sluzba).
+  Po restarte staci znova dvojkliknut na spustit.bat.
 
 
 === RIESENIE PROBLEMOV ===

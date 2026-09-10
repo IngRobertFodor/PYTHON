@@ -30,6 +30,7 @@ import services.scoring_service       as _scoring
 import services.cadastral_service     as _cadastral
 import services.report_service        as _report
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from models.result  import ServiceResult
 from models.parcel  import Parcel
 from config_loader  import is_feature_enabled
@@ -138,6 +139,10 @@ def ensure_coordinates(parcel):
 def run_gis_services(parcel):
     """
     Prebehne vsetkych 7 GIS sluzieb (okrem price) podla feature flagov.
+    Sluzby sa spustaju PARALELNE (ThreadPoolExecutor) -- celkovy cas
+    je MAX(jednotlivych casov), nie SUM. GIS servery casto blokuju
+    HTTP (timeout 15-30s) -- bez paralelizmu by analyza trvala 120+ s.
+
     Kazda sluzba:
       - Ak feature flag = False -> skip_result (neutralne 50)
       - Ak vyhodi vynimku       -> error_result (pipeline pokracuje)
@@ -146,21 +151,42 @@ def run_gis_services(parcel):
     Args:
         parcel: Parcel s vyplnenym lat/lon
     """
-    for flag, source, fn, kwargs_fn in _service_map():
+    service_map = _service_map()
+
+    # Rozdelit na skip (bez HTTP) a aktivne (s HTTP)
+    skip_results = []
+    active_items = []
+    for flag, source, fn, kwargs_fn in service_map:
         if not is_feature_enabled(flag):
-            parcel.add_result(
+            skip_results.append(
                 ServiceResult.skip_result(source, f"{flag}=false")
             )
-            continue
+        else:
+            active_items.append((source, fn, kwargs_fn))
+
+    for sr in skip_results:
+        parcel.add_result(sr)
+
+    if not active_items:
+        return
+
+    # Paralelne HTTP volania
+    def _call(source, fn, kwargs_fn):
         try:
             kwargs = kwargs_fn(parcel)
             result = fn(**kwargs)
-            result.source = source   # zarucime spravny kluc
-            parcel.add_result(result)
+            result.source = source
+            return result
         except Exception as exc:
-            parcel.add_result(
-                ServiceResult.error_result(source, str(exc))
-            )
+            return ServiceResult.error_result(source, str(exc))
+
+    with ThreadPoolExecutor(max_workers=len(active_items)) as executor:
+        futures = {
+            executor.submit(_call, source, fn, kwargs_fn): source
+            for source, fn, kwargs_fn in active_items
+        }
+        for future in as_completed(futures):
+            parcel.add_result(future.result())
 
 
 def run_price_service(parcel):

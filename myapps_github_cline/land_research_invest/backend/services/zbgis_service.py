@@ -24,7 +24,7 @@ from models.result import ServiceResult
 from config_loader import is_feature_enabled, get_criteria_section, get_endpoints
 
 SERVICE_NAME = "zbgis_service"
-TIMEOUT = 20
+TIMEOUT = 8   # kratky timeout - pri blokujucich serveroch rychly fallback
 
 WFS_TYPENAME = "KN_PARCELY"    # overit GetCapabilities pred pouzitim
 WFS_VERSION  = "2.0.0"
