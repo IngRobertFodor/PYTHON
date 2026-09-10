@@ -1,0 +1,1276 @@
+
+
+<!DOCTYPE html>
+<html lang="sk">
+<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta charset="utf-8" /><meta name="distribution" content="Slovensko, Slovenská Republika, Slovakia, Slovak Republic" /><meta name="rating" content="general" /><meta name="copyright" content="Copyright (c) 2000 - 2016 Anasoft Apr." /><meta name="description" content="Webový portál ministerstva spravodlivosti SR, MS SR" /><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" /><meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" /><title>
+	Webový portál Ministerstva spravodlivosti SR
+</title><link rel="stylesheet" type="text/css" href="/Content/bootstrap.min.css" /><link rel="stylesheet" type="text/css" href="/Content/fontawesome-all.min.css" /><link rel="stylesheet" type="text/css" href="/Content/jquery-ui.css" /><link rel="stylesheet" type="text/css" href="/Content/css/select2.min.css" /><link rel="stylesheet" type="text/css" href="/Content/css/select2-bootstrap4.css" /><link rel="stylesheet" type="text/css" href="/Style%20Library/MSSR/CSS/main.css" media="all" /><link rel="stylesheet" type="text/css" href="/spsout/css/main.css?v=20181211" />
+
+    <script type="text/javascript">
+//<![CDATA[
+window["_csrf_"] = "08f6ffaac3843002a40b82ad806f710daac6b654c3909ef6a78eceb74750f04ddbd3b2de759b99cb2b6ac9a86aaf1e42083c41bd10c75e107d70ad72fac10a31fd13f7c188014876ead8b2605f28503d3830032a7ccd447bd72eac45cb7ac23c79618ecb3969fa94744a91cd0115bc804e66f989a3ac8734465afea853f5875dfaf106633e816b56e77ec97ea0f7c9068cf2328515200362e7312533ef73626302f3bae6f41f057058c134ca9e2235d9cf44c9833403e295c7b875407113aa1657995e79cd2b8a177841a80a548466d9c0ed8a99566d33ea5408c36ebd9aaeb84813a9436bc254ce020e3c5707456a24cacad2fe10f8a08769fcbe27f85dff7efa8e94c0444a4e6248b7b635307824e7beee788defb2a4967bcd3ab94aef5a59b7a68b738e7c4597a87aab3c945eb05d39aaf96a11a3ed3fcc2c6251b3d31d4647496c298e77d93096fb31155043e14ef96e3f055833c3a0eb525ebf9684b0749098854bdc6bf81b563fead200c4be9adcdd0f5b1d5af79bdc03f3e7932cb1c9cdcc2610d6b4224c6d01e7d964011f0f5d8480496e097e3dbe1df9c849d55ccaf5239cea7525796fe112d8d6ab7c7ae7f6792f6688a4525494f4a0ee1a825500b75ff563251bb8a3eeb9a652bc867f527764a48f8bc7fb785b25b457dba02c0d239a18a27d17c1247297616770fec6e95549a1c9e9da8070625436c29b4070dea54e9a22f0e832cc6ef4eccc573e977dbfaf9a8cde40eae4129baf651aca23ebb78ecbe7e3ccb09f2b9d7b712697d329a8122d8b999afeb8";
+//]]>
+</script><script type="text/javascript" src="/TSbd/0848c2b931ab2000d9fdbfdf64ec9172109df93146ebabb5975236c88b3e6e68420b10ab1302c434?type=2"></script><script src="/spsout/jscript/core.js?v20200518" type="text/javascript"></script>
+    <script src="/Scripts/jquery-3.3.1.min.js" type="text/javascript"></script>
+    <script src="/Scripts/bootstrap.min.js"></script>
+    <script src="/Scripts/jquery-ui.js" type="text/javascript"></script>
+    <script src="/Scripts/select2.min.js" type="text/javascript"></script>
+
+    
+
+    
+	
+    <script src="/spsout/jscript/jquery-ui/i18n/ui.datepicker-sk.js" type="text/javascript"></script>
+    <script src="/spsout/jscript/initDatepicker.js" type="text/javascript"></script>
+    <script src="/spsout/jscript/tooltip.js" type="text/javascript"></script>
+
+    <style type="text/css">
+        .blokDlhy .sprava ul.select2-selection__rendered,
+        .blokDlhy .sprava ul.select2-selection__rendered li{
+            list-style-image:none;
+        }
+
+        .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__rendered {
+            padding: 0.25rem;
+        }
+
+        .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice {
+            margin: 0.1rem;
+            padding: 0.2rem;
+        }
+    </style>
+
+    <script type="text/javascript">
+        function pageLoadPartial() {
+            $(document).ready(function () {
+                initDatePicker();
+                tooltip();
+
+                
+
+                    $("#cmbKapitola").select2({
+                        theme: 'bootstrap4'
+                    });
+
+                
+                                
+                $("#cmbTypPodania").select2({ theme: 'bootstrap4' });
+                $("#cmbDruhPodania").select2({ theme: 'bootstrap4' });
+
+                //check if filter is empty
+                var isEmpty = true;
+
+                var inputs = $("#advancedFilter input.form-control, #advancedFilter input[type='hidden']");
+
+                $(inputs).each(function () {
+                    if ($(this).val() != "") {
+                        isEmpty = false;
+                    }
+                });
+
+                var selects = $("#advancedFilter select.form-control-filter");
+
+                $(selects).each(function () {
+                    if (!($(this)[0].options[0]).selected) {
+                        isEmpty = false;
+                    }
+                });
+
+                if (!isEmpty) {
+                    $('#advancedFilter').collapse("show");
+                    $("#filterCollapse .filter-collapsed").css("display", "none");
+                    $("#filterCollapse .filter-uncollapsed").css("display", "block");
+                }
+            });
+        }
+    </script>
+
+    <style type="text/css">
+        .GridTable tr.highlight {
+            border-top: 0px;
+            background-color: #f6f6f6;
+        }
+
+            .GridTable tr.highlight + tr, .GridTable tr:nth-child(2) {
+                border-bottom: 0px !important;
+            }
+
+            .GridTable tr.highlight td {
+                background-color: inherit;
+            }
+
+        .GridTable tr.AlterRow + tr.highlight {
+            background-color: #ededee;
+        }
+
+        .server-not-responding {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            border: 1px solid #f6f6f6;
+            background-color: #f6f6f6;
+            padding: 5px;
+        }
+
+        /*Custom styles*/
+        .justice-label {
+            font-family: Georgia,'Times New Roman',Times,serif;
+            text-align: right;
+            background-color: #FFF;
+            text-transform: uppercase;
+            color: #772E71;
+            vertical-align: middle;
+            font-weight: 700;
+        }
+
+        .justice-icon {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #47275f;
+        }
+
+        .justice-btn {
+            background-color: transparent;
+            color: #47275f;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 0px;
+            cursor: pointer;
+        }
+
+            .justice-btn:hover {
+                text-decoration: underline;
+                font-weight: bold;
+            }
+
+        .select2-container {
+            width: 100% !important;
+        }
+
+        .justice-center-header {
+            width: 100%;
+        }
+
+        #advancedFilter {
+            border-top: 1px solid #eaeaea;
+        }
+
+        .filter-collapsed {
+            display: block;
+        }
+
+        .filter-uncollapsed {
+            display: none;
+        }
+    </style>
+
+
+    
+    <script type="text/javascript">
+    	function TopMenuMouseOver(thisObject) {
+    		if (thisObject.className != 'TopMenuSel') {
+    			thisObject.style.backgroundImage = thisObject.style.backgroundImage.replace('_normal', '_mouseover');
+    			thisObject.className = 'TopMenuHover';
+    		}
+        }
+
+    	function TopMenuMouseOut(thisObject) {
+    		if (thisObject.className != 'TopMenuSel') {
+    			thisObject.style.backgroundImage = thisObject.style.backgroundImage.replace('_mouseover', '_normal');
+    			thisObject.className = '';
+    		}
+    	}
+
+    	function LeftTopMenuMouseOver(thisObject) {
+    		if (thisObject.className != 'sel') {
+    			thisObject.className = 'LeftTopMenuHover';
+    			thisObject.style.backgroundImage = thisObject.style.backgroundImage.replace('_normal', '_mouseover');
+    			document.getElementById('IdPasikNadContentHeadLeftMenu').style.backgroundColor = '#d81920';
+    		}
+        }
+
+    	function LeftTopMenuMouseOut(thisObject) {
+    		if (thisObject.className != 'sel') {
+    			thisObject.className = '';
+    			thisObject.style.backgroundImage = thisObject.style.backgroundImage.replace('_mouseover', '_normal');
+    			document.getElementById('IdPasikNadContentHeadLeftMenu').style.backgroundColor = '#772E71';
+    		}
+    	}
+
+    	function VerziaPreSlabozrakych() {
+    		for (i = 0; i < document.styleSheets.length; i++) {
+    			void (document.styleSheets.item(i).disabled = true);
+    		}
+    		el = document.getElementsByTagName('*');
+    		for (i = 0; i < el.length; i++) {
+    			void (el[i].style.cssText = 'font-size:110%;');
+    		}
+    	}
+	</script>
+
+	<style type="text/css">
+		
+		form { height:100%; }
+		#content { height:100%; }
+		
+		#all
+		{
+			margin-bottom : -177px;
+		}
+		#topService
+		{
+			margin-top:0px;
+			padding-top:8px;
+		}
+		.blokDlhy {margin-bottom:0px;}
+	</style>
+</head>
+<body>
+    <script type="text/javascript">
+		function pageLoad() {
+			if (this.pageLoadPartial != undefined) {
+				this.pageLoadPartial();
+			}
+		}
+    </script>
+	<form name="aspnetForm" method="post" action="./FormulareVyhladavanie.aspx" onsubmit="javascript:return WebForm_OnSubmit();" onkeypress="javascript:return WebForm_FireDefaultButton(event, 'ctl00_ctl00_btnLoginOk')" id="aspnetForm">
+<div>
+<input type="hidden" name="ctl00_ctl00_toolkitScriptManager_HiddenField" id="ctl00_ctl00_toolkitScriptManager_HiddenField" value="" />
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" />
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" />
+<input type="hidden" name="__LASTFOCUS" id="__LASTFOCUS" value="" />
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="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" />
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['aspnetForm'];
+if (!theForm) {
+    theForm = document.aspnetForm;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<script src="/WebResource.axd?d=pynGkmcFUV13He1Qd6_TZBvl6vlaE4G6paUE1PdXUCKx5Fs_cCJRY4PbKOhBNJLhUHji3g2&amp;t=638459860569584809" type="text/javascript"></script>
+
+
+<script src="/ScriptResource.axd?d=nv7asgRUU0tRmHNR2D6t1NKi8OT7HTa846EGhvjPuctROGmi3fOLO4kcgaKFN6j4etPK26SNjx-44hITrxUWAoIJwKvXkzBVUVM2OPfd-w-zU3MdzdL-Ll8-wDKa-ZFkMMW1bw2&amp;t=ffffffffa8ad04d3" type="text/javascript"></script>
+<script src="/ScriptResource.axd?d=x6wALODbMJK5e0eRC_p1LT_7nGoCW7QaV_XbyNTB6cJarjVrVSQR23rV_KJj291MshNRaF4Xn90B9Qh3GKpFxGWgpzfDuSo6rU9OEWG10Vbk7RBj0&amp;t=ffffffffec54f2d7" type="text/javascript"></script>
+<script src="/ScriptResource.axd?d=P5lTttoqSeZXoYRLQMIScKQMKoEI11QsI8a3cRfmJmn23rMXcoNIVzGTM6YmIxEqfIfKuUJUW86OO893_chHie80WZ0U9feyXa3_2RLM9N_LYrCZ0&amp;t=ffffffffec54f2d7" type="text/javascript"></script>
+<script src="/WebResource.axd?d=JoBkLzP19aTuxbWOhHobYtKmlxOtU20gOmInwMtkeAa6NQJTR4QN4iqq8fFHXBgWAW7VpA2&amp;t=638459860569584809" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+function WebForm_OnSubmit() {
+if (typeof(ValidatorOnSubmit) == "function" && ValidatorOnSubmit() == false) return false;
+return true;
+}
+//]]>
+</script>
+
+<div>
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="DAB53042" />
+	<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="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" />
+</div>
+    <script type="text/javascript">
+//<![CDATA[
+Sys.WebForms.PageRequestManager._initialize('ctl00$ctl00$toolkitScriptManager', 'aspnetForm', ['tctl00$ctl00$CphMain$CphMain$upZakladneFiltre','','tctl00$ctl00$CphMain$CphMain$upDatumZverejnenia','','tctl00$ctl00$CphMain$CphMain$upVyhladavanieOV',''], [], [], 90, 'ctl00$ctl00');
+//]]>
+</script>
+
+            
+    <div id="all">
+        <div id="container">
+            <!--container begin -->
+            
+           <div id="topService">
+           <ul>
+                <li><a href="javascript:VerziaPreSlabozrakych()" title="Verzia pre slabozrakých">Verzia pre slabozrakých</a></li>
+                <li><a href="#" title="Slovenská verzia">Slovenčina</a></li>
+            </ul>
+            </div>
+            <!-- end div id=topService -->
+
+			<div class="cleaner" style="height: 0px;">
+			</div>
+            <div id="top">
+                <a href="https://www.justice.gov.sk" title="Hlavná stránka" class="topLogo" style="float: left; margin-left:32px;">
+                    <img src="/Style%20Library/MSSR/Images/LogoMSSR.png" alt="Logo MSSR" title="Logo Ministerstva spravodlivosti SR" style="width:225px;" />
+                </a>
+
+                <div style="float:right; width:600px; text-align:right; padding-top:5px;">
+                    <input name="ctl00$ctl00$txtUserLogin" type="text" id="ctl00_ctl00_txtUserLogin" tabindex="1" class="backButton" placeholder="Prihlasovacie meno:" />
+
+						<div style="clear:both;height: 4px;"></div>
+                        
+                        <a href='https://iam.justice.sk/ui/iam/Iam.Web?appId=PortalApp&returnUrl=https://obchodnyvestnik.justice.gov.sk/Page/Login.aspx' title="Prihlásenie eID" style="padding-right: 10px; line-height:25px;">Prihlásenie eID</a>
+                        
+                        <a href="/Page/Registracia.aspx" title="Registrácia" style="padding-right: 10px; line-height:25px;">Registrácia nového užívateľa</a>
+
+						<input type="image" name="ctl00$ctl00$btnLoginOk" id="ctl00_ctl00_btnLoginOk" tabindex="3" onmouseover="this.src=this.src.replace(&#39;-blue&#39;, &#39;-red&#39;);" onmouseout="this.src=this.src.replace(&#39;-red&#39;, &#39;-blue&#39;);" src="/Style%20Library/MSSR/Images/button/btn-ok-blue.png" style="height:25px;border-width:0px;" /><input name="ctl00$ctl00$txtUserPass" type="password" id="ctl00_ctl00_txtUserPass" tabindex="2" placeholder="Heslo:" style="width:204px;" />
+						
+					
+                </div>
+            </div>
+            
+            <div class="cleaner" style="height: 20px;">
+            </div>
+            
+            <!-- end div id=top -->
+            <div id="topMenu">
+                <ul><li style='margin-left: 1px; background-image: url("/Style%20Library/MSSR/Images/ico/registre_normal.png");' onmouseout="TopMenuMouseOut(this);" onmouseover="TopMenuMouseOver(this);"><a title='Obchodný vestník' href='https://obchodnyvestnik.justice.gov.sk/ObchodnyVestnik/Web/Zoznam.aspx'>Obchodný vestník</a></li><li style="padding:10px 0px 0px 0px;height:auto;"><img title="|" alt="|" src="/Style%20Library/MSSR/Images/TopMenuOddelovac.png"></li><li style='background-image: url("/Style%20Library/MSSR/Images/ico/registre_normal.png");' onmouseout="TopMenuMouseOut(this);" onmouseover="TopMenuMouseOver(this);"><a title='Zverejnené zmluvy MS SR' href='https://obchodnyvestnik.justice.gov.sk/Zmluva/Web/MSSRZmluvaZoznam.aspx'>Zverejnené zmluvy MS SR</a></li><li style="padding:10px 0px 0px 0px;height:auto;"><img title="|" alt="|" src="/Style%20Library/MSSR/Images/TopMenuOddelovac.png"></li><li style='background-image: url("/Style%20Library/MSSR/Images/ico/sudy_normal.png"); width: 182px;' onmouseout="TopMenuMouseOut(this);" onmouseover="TopMenuMouseOver(this);"><a title='eŽaloby' href='https://www.justice.gov.sk/eZaloby/'>eŽaloby</a></li><li style="padding:10px 0px 0px 0px;height:auto;"><img title="|" alt="|" src="/Style%20Library/MSSR/Images/TopMenuOddelovac.png"></li><li style='background-image: url("/Style%20Library/MSSR/Images/ico/registre_normal.png");' onmouseout="TopMenuMouseOut(this);" onmouseover="TopMenuMouseOver(this);"><a title='Vzory a formuláre' href='https://www.justice.gov.sk/Formulare/'>Vzory a formuláre</a></ul>
+            </div>
+            
+            <div class="cleaner" style="height: 8px;">
+            </div>
+            <!-- end div id=topMenu -->
+
+            <!--content begin -->
+            <div id="content">
+                
+
+	<div class="blokLavy">
+        
+
+<div class="blokDlhy">
+    <div class="blokDlhyHead">
+		<div class="headIco"><img src="/Style%20Library/MSSR/Images/ico/ministerstvo_mouseover.png" alt="ico" title="Menu" /></div>
+        <div class="headText">OBCHODNÝ VESTNÍK</div>
+        <div style="clear:both;"></div>
+    </div>
+
+    <div id="mainTextLiMenuMultiID" class="mainText" style="padding-left:0; padding-right:0;">
+        <ul class="LiMenuMulti">
+            <li class=''><a class='' href='/ObchodnyVestnik/Formular/FormulareVyhladavanie.aspx'>Vyhľadávanie v OV</a><div style='clear:both'></div></li><li class='ciara'>&nbsp;</li><li class=''><a class='' href='/ObchodnyVestnik/Web/Zoznam.aspx'>Archív OV od r. 2004/Aktuálne vydanie OV</a><div style='clear:both'></div></li><li class='ciara'>&nbsp;</li><li class=''><a class='' href='https://www.justice.gov.sk/ObchodnyVestnik/Stranky/Vseobecne-podmienky-zverejnovania.aspx'>Otázky súvisiace so zverejňovaním údajov v OV</a><div style='clear:both'></div></li><li class='ciara'>&nbsp;</li><li class=''><a class='' href='/Page/Registracia.aspx'>Registrácia nového užívateľa</a><div style='clear:both'></div></li><li class='ciara'>&nbsp;</li><li class=''><a class='' href='https://www.justice.gov.sk/ObchodnyVestnik/Stranky/Zverejnovanie-specifikacie-prijateho-podielu-zaplatenej-dane-z-prijmov.aspx'>Zverejňovanie špecifikácie použitia prijatého podielu zaplatenej dane z príjmov fyzických a právnických osôb (2%)</a><div style='clear:both'></div></li><li class='ciara'>&nbsp;</li><li class=''><a class='' href='https://www.justice.gov.sk/ObchodnyVestnik/Stranky/Zverejnovanie-zmluv-v-OV.aspx'>Zverejňovanie zmlúv v OV</a><div style='clear:both'></div></li><li class='ciara'>&nbsp;</li><li class=''><a class='' href='https://www.justice.gov.sk/ObchodnyVestnik/Stranky/Strukturovane-udaje.aspx'>Sprístupnenie štruktúrovaných údajov</a><div style='clear:both'></div></li><li class='ciara'>&nbsp;</li><li class=''><a class='' href='https://www.justice.gov.sk/ObchodnyVestnik/Stranky/Kontakt.aspx'>Kontakt</a><div style='clear:both'></div></li><li class='ciara'>&nbsp;</li><li class=''><a class='' href='/ObchodnyVestnik/Kontakt.aspx'>Napíšte Redakcii OV</a><div style='clear:both'></div></li><li class='ciara'>&nbsp;</li>
+        </ul>
+    </div>
+</div>
+
+	</div>
+    
+	<div class="blokDlhy blokPravy blokWidthLong">
+	    <div class="blokDlhyHead">
+            <div class="headIco">
+            </div>
+            <div class="headText">
+                <ul id="breadcrumb">
+                    <li><a href="/">Úvodná stránka</a></li>
+                </ul>
+            </div>
+        </div>
+        <div style="clear:both;">
+        </div>
+        <div class="mainText">
+    	    <div class="sprava">
+    	        
+    <div id="contentFull">
+        <a class="" style="padding-bottom: 25px; display: block; text-align: right" href="/ObchodnyVestnik/Formular/FormulareZverejnene.aspx" title="Pôvodné vyhľadávanie">Pôvodné vyhľadávanie</a>
+
+        <h1 class="text-center">Vyhľadávanie v Obchodnom vestníku</h1>
+        <h4 class="text-center">Aktualizované: <b>
+            <span id="ctl00_ctl00_CphMain_CphMain_lblvalidPeriodEndTime">10. 9. 2026</span>
+        </b></h4>
+        
+        <h4 class="text-center">Vyhľadávanie je funkčné od OV č. 140/2011.</h4>
+        <h4 class="text-center" style="text-align: left">Výsledky vyhľadávania závisia od údajov, ako ich zadala povinná osoba pri žiadosti o ich zverejnenie
+            v&nbsp;Obchodnom vestníku (vo výsledku sa neukážu hľadané údaje, ak ich povinná osoba nezadala alebo ich zadala nesprávne).</h4>
+
+
+
+        <div class="row">
+            <h4 class="text-center font-weight-bold justice-center-header">Vyhľadávanie&nbsp;vo&nbsp;všetkých zverejnených&nbsp;textoch&nbsp;(fulltext)
+                <a href="#" class="tooltip tooltipHyperLink" title="Vyhľadávacie kritérium „Značka, číslo a kód/IČO“ vyhľadá vždy jednu značku, jedno číslo alebo jeden kód, ktoré sa vyskytli buď v texte podania alebo v jeho prílohách. Vyhľadávať môžete údaje napr.  § 123, Ex 658/09, 1K23/11. Toto vyhľadávacie kritérium je vhodné aj na vyhľadanie IČO (napr. alfanumerické IČO, IČO/SID), obchodných mien/názvov, ktoré obsahujú špeciálne znaky (napr. V/I/A, F€D@a.s.), bodkou oddelené písmená ( napr. A.B.C., s r. o.) a pod.   Vyhľadávacie kritérium „Kľúčové slová“ hľadá bez ohľadu na diakritiku, veľkosť písmen a nevyžaduje dokončenie slova. Pri vyhľadávaní napr. „Drazba bytu“ sa vyhľadajú všetky podania, ktoré v texte podania alebo v prílohách obsahujú slová dražba, dražby, drazba, byt, byty, bytov a iné. Týmto vyhľadávacím kritériom možno hľadať aj obchodné mená/názvy, mená, mestá a ulice."><i class="fa fa-question-circle justice-icon"></i></a>
+            </h4>
+
+            <div class="col-6">
+                <div class="form-row">
+                    <label for="ctl00_ctl00_CphMain_CphMain_txtKlucoveSlova" id="ctl00_ctl00_CphMain_CphMain_lblKlucoveSlova" class="col-form-label justice-label">Kľúčové slová</label>
+                    <input name="ctl00$ctl00$CphMain$CphMain$txtKlucoveSlova" type="text" id="ctl00_ctl00_CphMain_CphMain_txtKlucoveSlova" class="form-control" />
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-row">
+                    <label for="ctl00_ctl00_CphMain_CphMain_txtZnackaCisloKod" id="ctl00_ctl00_CphMain_CphMain_lblZnackaCisloKod" class="col-form-label justice-label">Značka, číslo a kód/IČO</label>
+                    <input name="ctl00$ctl00$CphMain$CphMain$txtZnackaCisloKod" type="text" id="ctl00_ctl00_CphMain_CphMain_txtZnackaCisloKod" class="form-control" />
+                </div>
+            </div>
+            <button class="justice-btn mx-auto mt-4" id="filterCollapse" type="button" data-toggle="collapse" data-target="#advancedFilter" aria-expanded="false" aria-controls="advancedFilter">
+                <span class="filter-collapsed">Rozšírený filter
+                <i class="fa fa-arrow-circle-down"></i>
+                </span>
+                <span class="filter-uncollapsed">Skryť rozšírený filter
+                <i class="fa fa-arrow-circle-up"></i>
+                </span>
+            </button>
+        </div>
+        <div class="row collapse pt-3 mt-3" id="advancedFilter">
+            <div class="col-6">
+                <h4 class="text-center font-weight-bold">Vyhľadávanie podľa subjektu
+                    <a href="#" class="tooltip tooltipHyperLink" title="Tieto vyhľadávacie kritériá hľadajú len údaje o subjekte. Podľa týchto vyhľadávacích kritérií sa nevyhľadáva v prílohách. Na vyhľadávanie aj v prílohách použite vyhľadávacie kritériá v časti &#8222Vyhľadávanie vo všetkých zverejnených textoch (fulltext)&#8221."><i class="fa fa-question-circle justice-icon"></i></a>
+                </h4>
+
+                <div class="form-row">
+                    <label for="ctl00_ctl00_CphMain_CphMain_txtObchodneMenoMenoPriezvisko" id="ctl00_ctl00_CphMain_CphMain_lblObchodneMenoMenoPriezvisko" class="col-form-label justice-label" style="padding-right: 0px;">Obchodné meno/názov, meno a priezvisko</label>
+                    <input name="ctl00$ctl00$CphMain$CphMain$txtObchodneMenoMenoPriezvisko" type="text" id="ctl00_ctl00_CphMain_CphMain_txtObchodneMenoMenoPriezvisko" class="form-control" />
+                </div>
+                <div class="form-row">
+                    <label for="ctl00_ctl00_CphMain_CphMain_txtIco" id="ctl00_ctl00_CphMain_CphMain_lblIco" class="col-form-label justice-label">IČO</label>
+                    <a href="#" class="tooltip tooltipHyperLink" title="Táto kolónka vyhľadáva len numerické IČO. Netypické tvary IČO (napr. alfanumerické, IČO/SID), IČO, ktoré sa nachádza len v prílohách, vyhľadávajte cez kolónku &#8222Značka, číslo a kód/IČO&#8221."><i class="fa fa-question-circle justice-icon"></i></a>
+                    <input name="ctl00$ctl00$CphMain$CphMain$txtIco" type="text" id="ctl00_ctl00_CphMain_CphMain_txtIco" class="form-control" />
+                </div>
+                <div class="form-row">
+                    <label for="ctl00_ctl00_CphMain_CphMain_txtSidloBydlisko" id="ctl00_ctl00_CphMain_CphMain_lblSidloBydlisko" class="col-form-label justice-label">Sídlo/bydlisko</label>
+                    <input name="ctl00$ctl00$CphMain$CphMain$txtSidloBydlisko" type="text" id="ctl00_ctl00_CphMain_CphMain_txtSidloBydlisko" class="form-control" />
+                </div>
+            </div>
+            <div class="col-6">
+                <h4 class="text-center font-weight-bold">Základné filtre
+                    <a href="#" class="tooltip tooltipHyperLink" title="Vyhľadávanie pomocou vyhľadávacích kritérií (filtrov) vyberie zo zverejnených údajov len tie, ktoré sa vo všetkých zvolených vyhľadávacích kritériách zhodujú s vašou voľbou."><i class="fa fa-question-circle justice-icon"></i></a>
+                </h4>
+
+                <div class="form-row">
+                    <label for="ctl00_ctl00_CphMain_CphMain_cmbObchodnyVestnikRocnik" id="ctl00_ctl00_CphMain_CphMain_lblObchodnyVestnik" class="col-form-label justice-label">Obchodný vestník</label>
+                    <div class="input-group">
+                        <input name="ctl00$ctl00$CphMain$CphMain$txtObchodnyVestnikCislo" type="text" id="ctl00_ctl00_CphMain_CphMain_txtObchodnyVestnikCislo" class="form-control" placeholder="Číslo " />
+                        <div class="input-group-prepend input-group-append">
+                            <div class="input-group-text">/</div>
+                        </div>
+                        <select name="ctl00$ctl00$CphMain$CphMain$cmbObchodnyVestnikRocnik" id="ctl00_ctl00_CphMain_CphMain_cmbObchodnyVestnikRocnik" class="form-control input-sm">
+	<option selected="selected" value="">Všetky</option>
+	<option value="2026">2026</option>
+	<option value="2025">2025</option>
+	<option value="2024">2024</option>
+	<option value="2023">2023</option>
+	<option value="2022">2022</option>
+	<option value="2021">2021</option>
+	<option value="2020">2020</option>
+	<option value="2019">2019</option>
+	<option value="2018">2018</option>
+	<option value="2017">2017</option>
+	<option value="2016">2016</option>
+	<option value="2015">2015</option>
+	<option value="2014">2014</option>
+	<option value="2013">2013</option>
+	<option value="2012">2012</option>
+	<option value="2011">2011</option>
+
+</select>
+                    </div>
+                </div>
+
+                <div id="ctl00_ctl00_CphMain_CphMain_upZakladneFiltre">
+	
+                        <div class="form-row">
+                            <label for="cmbKapitola" id="ctl00_ctl00_CphMain_CphMain_lblKapitola" class="col-form-label justice-label">Kapitola</label>
+                            <select name="ctl00$ctl00$CphMain$CphMain$cmbKapitola" onchange="javascript:setTimeout(&#39;__doPostBack(\&#39;ctl00$ctl00$CphMain$CphMain$cmbKapitola\&#39;,\&#39;\&#39;)&#39;, 0)" id="cmbKapitola" class="form-control form-control-filter">
+		<option selected="selected" value="">Všetky</option>
+		<option value="OV_DOch">Dočasn&#225; ochrana</option>
+		<option value="OV_D">Dražby – dobrovoľn&#237; dražobn&#237;ci</option>
+		<option value="OV_D_SD">Dražby – spr&#225;vcovia dane</option>
+		<option value="OV_EP">Emisn&#233; podmienky</option>
+		<option value="OV_Ex">Exek&#250;cie – s&#250;dni exek&#250;tori</option>
+		<option value="OV_KaR">Konkurzy a reštrukturaliz&#225;cie</option>
+		<option value="OV_KaV">Konkurzy a vyrovnania</option>
+		<option value="OV_OR">Obchodn&#253; register</option>
+		<option value="OV_OR_25112021">Obchodn&#253; register - oprava zverejnenia 25.11.2021</option>
+		<option value="OV_OR_27052022">Obchodn&#253; register - oprava zverejnenia 27.05.2022</option>
+		<option value="OR_ZOnaV">Obchodn&#253; register – Zoznam os&#244;b, ktor&#233; m&#244;žu byť vymazan&#233; (&#167; 768s OBZ)</option>
+		<option value="OV_OPR">Oprava zverejnen&#253;ch &#250;dajov v Obchodnom vestn&#237;ku</option>
+		<option value="OV_O">Ozn&#225;menia</option>
+		<option value="OV_OaVL">Ozn&#225;menia a v&#253;zvy likvid&#225;torov</option>
+		<option value="OV_OZKZSADBL">Ozn&#225;menia s&#250;dov s&#250;visiace so zrušen&#237;m spoločnosti (družstva) a dodatočnou likvid&#225;ciou</option>
+		<option value="OV_PM">Predaj majetku</option>
+		<option value="OV_PR">Prevent&#237;vne reštrukturaliz&#225;cie</option>
+		<option value="OV_P">Prospekty</option>
+		<option value="OV_RaOOVM">Rozhodnutia a ozn&#225;menia org&#225;nov verejnej moci</option>
+		<option value="OV_RoP">Rozhodnutia o privatiz&#225;cii</option>
+		<option value="OV_RS">Rozsudky s&#250;dov</option>
+		<option value="OV_SoH">Spr&#225;vy o hospod&#225;ren&#237;</option>
+		<option value="OV_SPPZDzP">Špecifik&#225;cia prijat&#233;ho podielu zaplatenej dane z pr&#237;jmov</option>
+		<option value="OV_SPaIPP">Št&#225;tna pomoc a in&#233; programy podpory</option>
+		<option value="OV_TPaRoT">Transformačn&#233; projekty a rozhodnutia o transform&#225;cii</option>
+		<option value="OV_UZ">&#218;čtovn&#233; z&#225;vierky</option>
+		<option value="OV_UZRRU">&#218;daje z registra registrov&#253;ch &#250;radov</option>
+		<option value="OV_VZ">Valn&#233; zhromaždenia</option>
+		<option value="OV_VS">Verejn&#233; s&#250;ťaže</option>
+		<option value="OV_VV">Verejn&#233; vyhl&#225;šky</option>
+		<option value="OV_VZP">Verejn&#233; zdravotn&#233; poistenie</option>
+		<option value="OV_VAkUZN">V&#253;roky aud&#237;torov k &#250;čtovn&#253;m z&#225;vierkam nad&#225;ci&#237;</option>
+		<option value="OV_VNUNA">V&#253;zvy na upisovanie nov&#253;ch akci&#237;</option>
+		<option value="OV_ZL">Zbierka list&#237;n</option>
+		<option value="OV_ZMLUVA">Zmluvy</option>
+		<option value="OV_Zal_zamery">Žalobn&#233; z&#225;mery – ochrana kolekt&#237;vnych z&#225;ujmov spotrebiteľov</option>
+
+	</select>
+                            <input type="hidden" name="ctl00$ctl00$CphMain$CphMain$hfKapitola" id="ctl00_ctl00_CphMain_CphMain_hfKapitola" />
+                        </div>
+                        <div class="form-row">
+                            <label for="cmbTypPodania" id="ctl00_ctl00_CphMain_CphMain_lblTypPodania" class="col-form-label justice-label">Typ podania</label>
+                            <select name="ctl00$ctl00$CphMain$CphMain$cmbTypPodania" onchange="javascript:setTimeout(&#39;__doPostBack(\&#39;ctl00$ctl00$CphMain$CphMain$cmbTypPodania\&#39;,\&#39;\&#39;)&#39;, 0)" id="cmbTypPodania" class="form-control form-control-filter">
+		<option selected="selected" value="">Všetky</option>
+		<option value="OV_DOCASNA_OCHRANA">Dočasn&#225; ochrana</option>
+		<option value="OV_DRAZBA_OZNAMENIE_DOBROVOLNA_DODATOK">Dodatok k ozn&#225;meniu o dobrovoľnej dražbe</option>
+		<option value="OV_ZMLUVA_DODATOK">Dodatok k zmluve (Obchodn&#253; vestn&#237;k)</option>
+		<option value="OV_DRAZBA_SPRAVCA_DANE">Dražby - Spr&#225;vcovia dane</option>
+		<option value="UPVS_00166073.MSSR_OV_Drazobna_vyhlaska">Dražobn&#225; vyhl&#225;ška</option>
+		<option value="UPVS_00166073.MSSR_OV_Drazobna_vyhlaska_zmena">Dražobn&#225; vyhl&#225;ška – oprava/zmena/zrušenie-upustenie</option>
+		<option value="OV_OZNAMENIE_2_ZMENA_PRAVNEJ_FORMY">Druh&#233; ozn&#225;menie o zmene pr&#225;vnej formy</option>
+		<option value="OV_OZNAMENIE_2_ZMENA_PRAVNEJ_FORMY_PREMENY">Druh&#233; ozn&#225;menie o zmene pr&#225;vnej formy – podľa z&#225;kona č. 309/2023 Z. z.</option>
+		<option value="OV_OZNAMENIE_2_ZNIZENIE_ZAKLADNEHO_IMANIA_AS">Druh&#233; ozn&#225;menie o zn&#237;žen&#237; z&#225;kladn&#233;ho imania akciovej spoločnosti a upovedomenie veriteľov o ich pr&#225;ve požadovať zabezpečenie</option>
+		<option value="OV_OZNAMENIE_2_ZNIZENIE_ZAKLADNEHO_IMANIA_SRO">Druh&#233; ozn&#225;menie o zn&#237;žen&#237; z&#225;kladn&#233;ho imania spoločnosti s ručen&#237;m obmedzen&#253;m</option>
+		<option value="OV_EMISNE_PODMIENKY_DLHOPISOV">Emisn&#233; podmienky dlhopisov</option>
+		<option value="OV_OZNAMENIE_INE">In&#233; ozn&#225;menia</option>
+		<option value="OV_OZNAMENIE_CP_INE">In&#233; ozn&#225;menia emitentov cenn&#253;ch papierov</option>
+		<option value="OV_ZMLUVA_UZAVRETIE_INFO">Inform&#225;cia o uzatvoren&#237; zmluvy (Obchodn&#253; vestn&#237;k)</option>
+		<option value="OB_B_KONKURZY_A_VYROVNANIA">Konkurzy a&#160;vyrovnania</option>
+		<option value="OV_ROZHODNUTIE_ORGANOV_VEREJNEJ_MOCI_MINISTERSTVO">Ministerstv&#225;</option>
+		<option value="OV_ROZHODNUTIE_ORGANOV_VEREJNEJ_MOCI_NARODNA_BANKA">N&#225;rodn&#225; banka Slovenska</option>
+		<option value="OV_VEREJNA_SUTAZ">Obchodn&#233; verejn&#233; s&#250;ťaže/Verejn&#233; s&#250;ťaže</option>
+		<option value="OV_OR_PODANIE">Obchodn&#253; register</option>
+		<option value="OV_ROZHODNUTIE_ORGANOV_VEREJNEJ_MOCI_BANSKY_URAD">Obvodn&#233; bansk&#233; &#250;rady</option>
+		<option value="OV_ODOBRATIE_POVOLENIA">Odobratie povolenia</option>
+		<option value="OV_OPR">Oprava zverejnen&#253;ch alebo uverejnen&#253;ch &#250;dajov v OV</option>
+		<option value="OV_ROZHODNUTIE_ORGANOV_VEREJNEJ_MOCI_OSTATNE">Ostatn&#233; org&#225;ny verejnej moci</option>
+		<option value="OV_ROZHODNUTIE_ORGANOV_VEREJNEJ_MOCI_USTR_ORGAN">Ostatn&#233; &#250;stredn&#233; org&#225;ny št&#225;tnej spr&#225;vy</option>
+		<option value="OV_OZNAMENIA_SPRAVCOV_PREVENTIVNA_RESTRUKT">Ozn&#225;menia spr&#225;vcov</option>
+		<option value="OV_B_OZNAMENIA_SPRAVCOV">Ozn&#225;menia spr&#225;vcov</option>
+		<option value="OV_OZNAMENIE_SPRAVCOVSKE_SPOLOCNOSTI">Ozn&#225;menia spr&#225;vcovsk&#253;ch spoločnost&#237;</option>
+		<option value="OV_KONKURZY_A_RESTRUKT">Ozn&#225;menia s&#250;dov</option>
+		<option value="OV_OZNAMENIA_SUDOV_PREVENTIVNA_RESTRUKTURALIZACIA">Ozn&#225;menia s&#250;dov</option>
+		<option value="OV_LIKVIDATOR">Ozn&#225;menie a v&#253;zva likvid&#225;tora/likvid&#225;torov</option>
+		<option value="OV_LIKVIDATOR_STAT">Ozn&#225;menie a v&#253;zva likvid&#225;tora/likvid&#225;torov št&#225;tneho podniku</option>
+		<option value="OV_OZNAMENIE_CP_ODOVZDANIE">Ozn&#225;menie emitenta o povinnosti odovzdať (vr&#225;tiť) cenn&#233; papiere pri zmene podoby cenn&#233;ho papiera</option>
+		<option value="OV_OZNAMENIE_CP_ZMENA_PODOBY">Ozn&#225;menie emitenta o zmene podoby cenn&#253;ch papierov</option>
+		<option value="OV_DRAZBA_OZNAMENIE_DOBROVOLNA">Ozn&#225;menie o dobrovoľnej dražbe</option>
+		<option value="OV_LIKVIDATOR_DODATOCNA">Ozn&#225;menie o dodatočnej likvid&#225;cii a v&#253;zva likvid&#225;tora/likvid&#225;torov</option>
+		<option value="OV_DRAZBA_OZNAMENIE_DOBROVOLNA_OPAKOVANA">Ozn&#225;menie o opakovanej dobrovoľnej dražbe</option>
+		<option value="OV_OZNAMENIE_ULO_NAVR_ZML_CEL_ZLU_ZL">Ozn&#225;menie o uložen&#237; n&#225;vrhu Zmluvy o cezhraničnom zl&#250;čen&#237;/splynut&#237; do Zbierky list&#237;n</option>
+		<option value="OV_OZNAMENIE_ULO_NAVR_ZML_ZL">Ozn&#225;menie o uložen&#237; n&#225;vrhu Zmluvy o zl&#250;čen&#237;/splynut&#237;/Projektu rozdelenia do Zbierky list&#237;n</option>
+		<option value="OV_OZNAM_O_ULOZENI_OZNAMENIA_O_VYZNAM_OBCHOD_TRAN">Ozn&#225;menie o uložen&#237; ozn&#225;menia o v&#253;znamnej obchodnej transakcii s jej n&#225;vrhom do Zbierky list&#237;n</option>
+		<option value="OV_DRAZBA_OZNAMENIE_DOBROVOLNA_UPUSTENIE">Ozn&#225;menie o upusten&#237; od dobrovoľnej dražby</option>
+		<option value="OV_OZNAM_VYPLATE_PROTIPLNENIA_AKCIE">Ozn&#225;menie o v&#253;plate protiplnenia za akcie na z&#225;klade uplatnenia pr&#225;va v&#253;kupu</option>
+		<option value="OV_OZNAMENIE_ZACATIE_KONANIA_O_ZRUS_BEZ_LIKV">Ozn&#225;menie o začat&#237; konania o zrušen&#237; spoločnosti alebo družstva bez likvid&#225;cie</option>
+		<option value="OV_OZNAMENIE_EUR_ZOSKUPENIE_ZALOZENIE">Ozn&#225;menie o založen&#237; eur&#243;pskeho zoskupenia &#250;zemnej spolupr&#225;ce</option>
+		<option value="OV_DRAZBA_OZNAMENIE_DOBROVOLNA_ZMARENIE">Ozn&#225;menie o zmaren&#237;/neplatnosti dobrovoľnej dražby</option>
+		<option value="OV_OZNAMENIE_ZMENA_PRAVNEJ_FORMY">Ozn&#225;menie o zmene pr&#225;vnej formy</option>
+		<option value="OV_OZNAMENIE_ZMENA_PRAVNEJ_FORMY_PREMENY">Ozn&#225;menie o zmene pr&#225;vnej formy – podľa z&#225;kona č. 309/2023 Z. z.</option>
+		<option value="OV_OZNAMENIE_EUR_ZOSKUPENIE_ZMENA_UDAJOV">Ozn&#225;menie o zmene &#250;dajov o eur&#243;pskom zoskupen&#237; &#250;zemnej spolupr&#225;ce</option>
+		<option value="OV_OZNAMENIE_ZNIZENIE_ZAKLADNEHO_IMANIA_AS">Ozn&#225;menie o zn&#237;žen&#237; z&#225;kladn&#233;ho imania akciovej spoločnosti a upovedomenie veriteľov o ich pr&#225;ve požadovať zabezpečenie </option>
+		<option value="OV_OZNAMENIE_ZNIZENIE_ZAKLADNEHO_IMANIA_SRO">Ozn&#225;menie o zn&#237;žen&#237; z&#225;kladn&#233;ho imania spoločnosti s ručen&#237;m obmedzen&#253;m</option>
+		<option value="OV_OZNAMENIE_EUR_ZOSKUPENIE_ZRUSENIE">Ozn&#225;menie o zrušen&#237; eur&#243;pskeho zoskupenia &#250;zemnej spolupr&#225;ce</option>
+		<option value="OV_DRAZBA_OZNAMENIE_DOBROVOLNA_VYSLEDOK">Ozn&#225;menie o&#160;v&#253;sledku dobrovoľnej dražby</option>
+		<option value="OV_DRAZBA_OZNAMENIE_DOBROVOLNA_OPAKOVANA_VYSLEDOK">Ozn&#225;menie o&#160;v&#253;sledku opakovanej dobrovoľnej dražby</option>
+		<option value="OV_OZNAMY_VYHLASENIA_DLZNIKOV">Oznamy a vyhl&#225;senia dlžn&#237;kov</option>
+		<option value="UPVS_00166073.MSSR_OV_Ponuky_na_predaj_majetku">Ponuky na predaj majetku</option>
+		<option value="OV_PREDAJ_MAJETKU_LIKVIDATOR">Predaj majetku - likvid&#225;tor</option>
+		<option value="OV_PREDAJ_MAJETKU_SPRAVCA">Predaj majetku - spr&#225;vca konkurznej podstaty</option>
+		<option value="OV_PREROZDELENIE_KAPITALOVEHO_FONDU">Prerozdelenie kapit&#225;lov&#233;ho fondu</option>
+		<option value="OV_PROJEKT_PREMENY_ALEBO_ZMENY_PF">Projekt premeny/cezhraničnej premeny/cezhraničnej zmeny pr&#225;vnej formy</option>
+		<option value="OV_ROZHODNUTIE_ORGANOV_VEREJNEJ_MOCI_PROTIMONOPOL">Protimonopoln&#253; &#250;rad</option>
+		<option value="OV_ROZHODNUTIA_O_PRIVATIZACII">Rozhodnutia o privatiz&#225;cii</option>
+		<option value="OV_ROZSUDKY_SUDOV_OBCHODNY_ZAKONNIK">Rozsudky s&#250;dov - Obchodn&#253; z&#225;konn&#237;k</option>
+		<option value="OV_TREST_ZVEREJNENIA_ODSUDZUJUCEHO_ROZSUDKU">Rozsudky s&#250;dov - trest zverejnenia odsudzuj&#250;ceho rozsudku</option>
+		<option value="OV_ROZHODNUTIE_ORGANOV_VEREJNEJ_MOCI_SAMOSPRAVA">Samospr&#225;vne kraje</option>
+		<option value="OV_HOSP_SPRAVA_S_MAJETKOM_V_POD_FONDE">Spr&#225;va o hospod&#225;ren&#237; spr&#225;vcovskej spoločnosti/zahraničnej spr&#225;vcovskej spoločnosti/pobočky zahraničnej  spr&#225;vcovskej spoločnosti s majetkom v podielovom fonde</option>
+		<option value="OV_DRAZBA_SUDNY_EXEKUTOR">S&#250;dni exek&#250;tori</option>
+		<option value="OV_STATNA_POMOC_A_INE_PROGRAMY_PODPORY">Št&#225;tna pomoc a in&#233; programy podpory</option>
+		<option value="OV_TRANSFORMACNE_PROJEKTY">Transformačn&#233; projekty a rozhodnutia o transform&#225;cii</option>
+		<option value="OV_UCTOVNA_ZAVIERKA">&#218;čtovn&#233; z&#225;vierky podnikateľov &#250;čtuj&#250;cich v s&#250;stave podvojn&#233;ho &#250;čtovn&#237;ctva</option>
+		<option value="OV_UCTOVNA_ZAVIERKA_NEPODNIKATELIA">&#218;čtovn&#233; z&#225;vierky pre &#250;čtovn&#233; jednotky, ktor&#233; nie s&#250; založen&#233; alebo zriaden&#233; za &#250;čelom podnikania</option>
+		<option value="OV_UCTOVNA_ZAVIERKA_BANKA_POISTOVNA">&#218;čtovn&#233; z&#225;vierky &#250;čtovn&#253;ch jednotiek, ktorou je napr. banka, pobočka zahraničnej banky, EXIMBANKA SR, spr&#225;vcovsk&#225; spoločnosť a jej pobočka, poisťovňa, pobočka zahraničnej poisťovne, zaisťovňa a pobočka zahraničnej zaisťovne, Slovensk&#225; kancel&#225;ria poisťovateľov, d&#244;chodkov&#225; spr&#225;vcovsk&#225; spoločnosť, doplnkov&#225; d&#244;chodkov&#225; spoločnosť, Burza cenn&#253;ch papierov, platobn&#225; inštit&#250;cia, Železnice SR, zdravotn&#225; poisťovňa</option>
+		<option value="OV_UCTOVNA_ZAVIERKA_RTVS_TASR">&#218;čtovn&#233; z&#225;vierky &#250;čtovn&#253;ch jednotiek, ktorou je Rozhlas a telev&#237;zia Slovenska, Tlačov&#225; agent&#250;ra SR, Audiovizu&#225;lny fond, eur&#243;pske zoskupenie &#250;zemnej spolupr&#225;ce, manaž&#233;r infraštrukt&#250;ry a železničn&#253; podnik</option>
+		<option value="OV_UDAJE_Z_REGISTRA_REGISTROVYCH_URADOV">&#218;daje z Registra registrov&#253;ch &#250;radov</option>
+		<option value="UPVS_00166073.MSSR_OV_Upovedomenie_o_exekucii">Upovedomenia a v&#253;zvy exek&#250;torov</option>
+		<option value="OV_ROZHODNUTIE_ORGANOV_VEREJNEJ_MOCI_URAD_PDNZS">&#218;rad pre dohľad nad zdravotnou starostlivosťou</option>
+		<option value="OV_VALNE_ZHROMAZDENIE">Valn&#233; zhromaždenia</option>
+		<option value="OV_VEREJNE_VYHLASKY">Verejn&#233; vyhl&#225;šky</option>
+		<option value="OV_ROZHODNUTIE_ORGANOV_VEREJNEJ_MOCI_ZDRAVOTNA_P">Verejn&#233; zdravotn&#233; poistenie</option>
+		<option value="OV_VYDRZANIE_VYZYVACIE_UZNESENIE">Vydržanie – vyz&#253;vacie uznesenie</option>
+		<option value="OV_VYHLASKY_SUDOV">Vyhl&#225;šky s&#250;dov</option>
+		<option value="OV_HOSP_SPRAVA_VYROCNA">V&#253;ročn&#233; spr&#225;vy</option>
+		<option value="OV_UCTOVNA_ZAVIERKA_NADACIE_VYROK_AUDITORA">V&#253;roky aud&#237;torov k &#250;čtovnej z&#225;vierke nad&#225;cii</option>
+		<option value="OV_OZNAMENIE_CP_VYZVA_NA_PREDLOZENIE">V&#253;zva na predloženie listinn&#233;ho cenn&#233;ho papiera na doručiteľa, ak je majiteľ uveden&#233;ho cenn&#233;ho papiera v omeškan&#237; s jeho predložen&#237;m</option>
+		<option value="OV_VYZVA_UPISOVANIE_AKCII">V&#253;zva na upisovanie nov&#253;ch akci&#237;</option>
+		<option value="OV_VYZVA_UPISOVANIE_AKCII_UPLATNENIE_PRAVA">V&#253;zva na uplatnenie pr&#225;va na prednostn&#233; upisovanie akci&#237;</option>
+		<option value="OV_OZNAMENIE_CP_VYZVA_NA_VYZDVIHNUTIE">V&#253;zva na vyzdvihnutie listinn&#253;ch cenn&#253;ch papierov po zmene podoby cenn&#253;ch papierov zo zaknihovanej na listinn&#250; podobu</option>
+		<option value="OV_OR_PODANIE_ZBL">Zbierka list&#237;n</option>
+		<option value="OV_EMISNE_PODMIENKY_DLHOPISOV_ZMENY">Zmeny v emisn&#253;ch podmienkach dlhopisov</option>
+		<option value="OV_ZMLUVA">Zmluva (Obchodn&#253; vestn&#237;k)</option>
+		<option value="OR_ZOZNAM_OSOB_KTORE_MOZU_BYT_VYMAZANE">Zoznam os&#244;b, ktor&#233; m&#244;žu byť vymazan&#233; z obchodn&#233;ho registra (&#167; 768s Obchodn&#233;ho z&#225;konn&#237;ka)</option>
+		<option value="OV_ZRUSENIE_PROJEKTU_P_ALEBO_ZMENY_PF">Zrušenie schv&#225;len&#233;ho projektu premeny/zmeny pr&#225;vnej formy</option>
+		<option value="OV_ZVER_NAVR_ZML_ZLU_SPLY_PROJ_CEZ_ZLU_SPLY">Zverejnenie n&#225;vrhu Zmluvy o zl&#250;čen&#237;/splynut&#237;/Projektu rozdelenia/Zmluvy o cezhraničnom zl&#250;čen&#237;/splynut&#237;</option>
+		<option value="OV_ZVEREJNENIE_OZNAMENIA_O_VYZNAM_OBCHOD_TRANSAK">Zverejnenie ozn&#225;menia o v&#253;znamnej obchodnej transakcii s jej n&#225;vrhom</option>
+		<option value="OV_OZNAMENIE_MED_CEN_ZMENA_UDAJOV">Zverejnenie ozn&#225;menia zriaďovateľa mediačn&#233;ho centra o zmene &#250;dajov zverejnen&#253;ch v ozn&#225;men&#237; o zriaden&#237; mediačn&#233;ho centra, o zmene jeho pr&#237;loh</option>
+		<option value="OV_OZNAMENIE_MED_CEN_ZRIADENIE">Zverejnenie ozn&#225;menia zriaďovateľa mediačn&#233;ho centra o zriaden&#237; mediačn&#233;ho centra</option>
+		<option value="OV_OZNAMENIE_MED_CEN_ZRUSENIE">Zverejnenie ozn&#225;menia zriaďovateľa mediačn&#233;ho centra o zrušen&#237; mediačn&#233;ho centra</option>
+		<option value="OV_OZNAMENIE_MED_CEN_ZRUSENIE_POBOCKY">Zverejnenie ozn&#225;menia zriaďovateľa mediačn&#233;ho centra o zrušen&#237; pobočky mediačn&#233;ho centra</option>
+		<option value="OV_OZNAMENIE_ROZ_SUD_ZMENA_UDAJOV">Zverejnenie ozn&#225;menia zriaďovateľa st&#225;leho rozhodcovsk&#233;ho s&#250;du o zmene &#250;dajov zverejnen&#253;ch v ozn&#225;men&#237; o zriaden&#237; st&#225;leho rozhodcovsk&#233;ho s&#250;du, o zmene jeho pr&#237;loh</option>
+		<option value="OV_OZNAMENIE_ROZ_SUD_ZRIADENIE">Zverejnenie ozn&#225;menia zriaďovateľa st&#225;leho rozhodcovsk&#233;ho s&#250;du o zriaden&#237; st&#225;leho rozhodcovsk&#233;ho s&#250;du</option>
+		<option value="OV_OZNAMENIE_ROZ_SUD_ZRUSENIE_POBOCKY">Zverejnenie ozn&#225;menia zriaďovateľa st&#225;leho rozhodcovsk&#233;ho s&#250;du o zrušen&#237; pobočky st&#225;leho rozhodcovsk&#233;ho s&#250;du</option>
+		<option value="OV_OZNAMENIE_ROZ_SUD_ZRUSENIE">Zverejnenie ozn&#225;menia zriaďovateľa st&#225;leho rozhodcovsk&#233;ho s&#250;du o zrušen&#237; st&#225;leho rozhodcovsk&#233;ho s&#250;du </option>
+		<option value="OV_POUZITIE_PODIELU_DANE">Zverejnenie špecifik&#225;cie použitia prijat&#233;ho podielu zaplatenej dane z pr&#237;jmov fyzick&#253;ch os&#244;b a pr&#225;vnick&#253;ch os&#244;b</option>
+		<option value="OV_ZALOBNY_ZAMER">Žalobn&#253; z&#225;mer</option>
+
+	</select>
+                        </div>
+                        
+                    
+</div>
+                <div id="ctl00_ctl00_CphMain_CphMain_upDatumZverejnenia">
+	
+                        <div class="pb-2 form-row">
+                            <label for="ctl00_ctl00_CphMain_CphMain_txtDatumZverejnenia" id="ctl00_ctl00_CphMain_CphMain_lblDatumZverejnenia" class="col-form-label justice-label">Dátum zverejnenia</label>
+                            <div class="input-group">
+                                <div class="form-check form-check-inline">
+                                    <span class="form-check-input"><input id="ctl00_ctl00_CphMain_CphMain_rbDatumZverejneniaDen" type="radio" name="ctl00$ctl00$CphMain$CphMain$DatumZverejnenia" value="rbDatumZverejneniaDen" checked="checked" /></span>
+                                    <label for="ctl00_ctl00_CphMain_CphMain_rbDatumZverejneniaDen" class="form-check-label">Deň</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <span class="form-check-input"><input id="ctl00_ctl00_CphMain_CphMain_rbDatumZverejneniaRozsah" type="radio" name="ctl00$ctl00$CphMain$CphMain$DatumZverejnenia" value="ROZSAH" onclick="javascript:setTimeout(&#39;__doPostBack(\&#39;ctl00$ctl00$CphMain$CphMain$rbDatumZverejneniaRozsah\&#39;,\&#39;\&#39;)&#39;, 0)" /></span>
+                                    <label for="ctl00_ctl00_CphMain_CphMain_rbDatumZverejneniaRozsah" class="form-check-label">Rozsah dátumov</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="ctl00_ctl00_CphMain_CphMain_pnlDatumZverejnenia">
+		
+                            <div class="form-row form-inline">
+                                <input name="ctl00$ctl00$CphMain$CphMain$txtDatumZverejnenia" type="text" maxlength="10" id="ctl00_ctl00_CphMain_CphMain_txtDatumZverejnenia" class="myDatepicker form-control" style="width: 95%;" />
+                                <span id="ctl00_ctl00_CphMain_CphMain_rvDatumZapisu" style="color:Red;display:none;">Hodnota je mimo povoleného rozsahu</span>
+                            </div>
+                        
+	</div>
+
+                        
+                    
+</div>
+
+                <div class="form-row">
+                    <label for="ctl00_ctl00_CphMain_CphMain_txtCisloZverejnenia" id="ctl00_ctl00_CphMain_CphMain_lblCisloZverejnenia" class="col-form-label justice-label">Číslo zverejnenia</label>
+                    <input name="ctl00$ctl00$CphMain$CphMain$txtCisloZverejnenia" type="text" id="ctl00_ctl00_CphMain_CphMain_txtCisloZverejnenia" class="form-control" />
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="pt-4 pb-3 mx-auto">
+                <input type="submit" name="ctl00$ctl00$CphMain$CphMain$btnVyhladat" value="Vyhľadať" onclick="javascript:WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions(&quot;ctl00$ctl00$CphMain$CphMain$btnVyhladat&quot;, &quot;&quot;, true, &quot;&quot;, &quot;&quot;, false, false))" id="ctl00_ctl00_CphMain_CphMain_btnVyhladat" class="btn btn-primary" style="width:100px;" />
+                <input type="submit" name="ctl00$ctl00$CphMain$CphMain$btnVynuluj" value="Vyčistiť" onclick="javascript:WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions(&quot;ctl00$ctl00$CphMain$CphMain$btnVynuluj&quot;, &quot;&quot;, true, &quot;&quot;, &quot;&quot;, false, false))" id="ctl00_ctl00_CphMain_CphMain_btnVynuluj" class="btn" style="width:100px;" />
+            </div>
+        </div>
+
+        <br />
+
+        
+
+        <div id="ctl00_ctl00_CphMain_CphMain_upVyhladavanieOV">
+	
+                <div id="ctl00_ctl00_CphMain_CphMain_pnlVyhladavanieOV">
+		
+                    <div>
+			<table class="GridTable" cellspacing="0" rules="rows" border="1" id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV" style="width:100%;border-collapse:collapse;">
+				<tr class="HeaderRow">
+					<th scope="col">#</th><th scope="col" style="width:50%;">Typ podania</th><th scope="col" style="width:50%;">Subjekt</th><th scope="col" style="width:90px;"><a href="javascript:__doPostBack(&#39;ctl00$ctl00$CphMain$CphMain$gvVyhladavanieOV&#39;,&#39;Sort$OV_DATUM_ZVEREJNENIA&#39;)">Obchodný vestník</a><img src="/spsout/img/grid/sort_descending.png" align="right" style="border-width:0px;" /></th><th scope="col" style="width:60px;">Č&#237;slo zverejnenia</th><th scope="col" style="width:90px;"><a href="javascript:__doPostBack(&#39;ctl00$ctl00$CphMain$CphMain$gvVyhladavanieOV&#39;,&#39;Sort$OV_DATUM_ZVEREJNENIA&#39;)">D&#225;tum zverejnenia</a><img src="/spsout/img/grid/sort_descending.png" align="right" style="border-width:0px;" /></th><th scope="col">&nbsp;</th>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl02_lblPC">1</span>
+                                </td><td title="Typ podania">Zverejnenie špecifik&#225;cie použitia prijat&#233;ho podielu zaplatenej dane z pr&#237;jmov fyzick&#253;ch os&#244;b a pr&#225;vnick&#253;ch os&#244;b</td><td title="Subjekt">Naša Javorka</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">Š004264</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752718">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl03_lblPC">2</span>
+                                </td><td title="Typ podania">Zverejnenie špecifik&#225;cie použitia prijat&#233;ho podielu zaplatenej dane z pr&#237;jmov fyzick&#253;ch os&#244;b a pr&#225;vnick&#253;ch os&#244;b</td><td title="Subjekt">Do života s odvahou</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">Š004263</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752623">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl04_lblPC">3</span>
+                                </td><td title="Typ podania">Zmluva (Obchodn&#253; vestn&#237;k)</td><td title="Subjekt">Technick&#233; služby mesta Brezov&#225; pod Bradlom - Sabov&#225; Oľga</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">ZML000258</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4754064">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl05_lblPC">4</span>
+                                </td><td title="Typ podania">Zmluva (Obchodn&#253; vestn&#237;k)</td><td title="Subjekt">Slovensk&#225; sporiteľňa, a.s.  - BORINA, s.r.o.</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">ZML000257</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4754019">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl06_lblPC">5</span>
+                                </td><td title="Typ podania">Ozn&#225;menie o opakovanej dobrovoľnej dražbe</td><td title="Subjekt">U9, a.s.</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054568</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753694">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl07_lblPC">6</span>
+                                </td><td title="Typ podania">Dražobn&#225; vyhl&#225;ška</td><td title="Subjekt">JUDr. Sv&#228;toslav Mruškovič (Marek Pompa, nar. 1979)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054567</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4754141">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl08_lblPC">7</span>
+                                </td><td title="Typ podania">Dražobn&#225; vyhl&#225;ška</td><td title="Subjekt">JUDr. Sv&#228;toslav Mruškovič (Ing. J&#225;n Rusin, nar. 1965)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054566</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4754139">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl09_lblPC">8</span>
+                                </td><td title="Typ podania">Dražobn&#225; vyhl&#225;ška</td><td title="Subjekt">JUDr. Jozef Ivanč&#237;k (Varga Tibor)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054565</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753837">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl10_lblPC">9</span>
+                                </td><td title="Typ podania">Dražobn&#225; vyhl&#225;ška</td><td title="Subjekt">JUDr. Jozef Ivanč&#237;k (Varga Tibor)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054564</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753830">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl11_lblPC">10</span>
+                                </td><td title="Typ podania">Dražobn&#225; vyhl&#225;ška</td><td title="Subjekt">JUDr. Jozef Ivanč&#237;k (Slamka Jozef)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054563</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753820">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl12_lblPC">11</span>
+                                </td><td title="Typ podania">Dražobn&#225; vyhl&#225;ška</td><td title="Subjekt">JUDr. Jozef Ivanč&#237;k (Špek Gergely)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054562</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753805">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl13_lblPC">12</span>
+                                </td><td title="Typ podania">Dražobn&#225; vyhl&#225;ška</td><td title="Subjekt">JUDr. Jozef Ivanč&#237;k (Kotrus Michal)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054561</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753803">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl14_lblPC">13</span>
+                                </td><td title="Typ podania">Dražobn&#225; vyhl&#225;ška</td><td title="Subjekt">JUDr. Michal Brožina (Gabriel Doboš)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054560</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753721">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl15_lblPC">14</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Kriszti&#225;n Kov&#225;cs)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054559</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753032">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl16_lblPC">15</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Pavel Ol&#225;h)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054558</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753031">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl17_lblPC">16</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Peter Jašo)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054557</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753030">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl18_lblPC">17</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Koloman Kov&#225;č)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054556</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753029">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl19_lblPC">18</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Mgr. Miroslava Novotn&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054555</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753028">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl20_lblPC">19</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Slavom&#237;r Vyoral)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054554</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753027">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl21_lblPC">20</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Imre Ancs&#225;n)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054553</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753026">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl22_lblPC">21</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (M&#225;ria Cs&#243;kov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054552</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753025">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl23_lblPC">22</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Miroslav Rafael)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054551</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753024">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl24_lblPC">23</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Ľuboš Tor&#225;č)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054550</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753023">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl25_lblPC">24</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (R&#243;bert Simcsik)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054549</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753022">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl26_lblPC">25</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Ladislav Lakatoš)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054548</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753021">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl27_lblPC">26</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Pavel Vaňač)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054547</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753020">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl28_lblPC">27</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Roman M&#233;češ)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054546</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753019">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl29_lblPC">28</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Richard Cig&#225;ň)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054545</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753018">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl30_lblPC">29</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (J&#250;lius Jon&#225;š)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054544</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753017">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl31_lblPC">30</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Adam Rajtar)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054543</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753016">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl32_lblPC">31</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Ingrida Szil&#225;gyiov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054542</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753015">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl33_lblPC">32</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Martin Blaho)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054541</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753014">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl34_lblPC">33</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Erika Havl&#237;kov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054540</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753013">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl35_lblPC">34</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Ren&#225;ta Stojkov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054539</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753012">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl36_lblPC">35</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Eva Vr&#225;belov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054538</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753011">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl37_lblPC">36</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Ren&#233; Farkas)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054537</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753010">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl38_lblPC">37</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Sylvia Omanik)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054536</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753009">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl39_lblPC">38</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Milan Lipovsk&#253;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054535</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753008">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl40_lblPC">39</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Juraj Sov&#225;ny)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054534</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753007">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl41_lblPC">40</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Patrik Szab&#243;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054533</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753006">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl42_lblPC">41</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Zhongjun Ye)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054532</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753005">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl43_lblPC">42</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Ivana J&#225;ňov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054531</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753004">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl44_lblPC">43</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Michal Laz&#225;r)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054530</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753003">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl45_lblPC">44</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Sylvia Lakatosov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054529</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753002">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl46_lblPC">45</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Laura Bučkov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054528</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753001">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl47_lblPC">46</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Miroslav Rafaj)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054527</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4753000">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl48_lblPC">47</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Alexander Csics&#243;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054526</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752999">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl49_lblPC">48</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ivan Podhorec, PhD. (Mari&#225;n Banda)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054525</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752998">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl50_lblPC">49</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Miroslav Zahorjan (Patrik Gallovič)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054524</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752996">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl51_lblPC">50</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Miroslav Zahorjan (D&#225;rius G&#225;l)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054523</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752995">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl52_lblPC">51</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Miroslav Zahorjan (Tibor Ill&#233;š)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054522</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752994">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl53_lblPC">52</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Miroslav Zahorjan (Bianka Batiov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054521</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752993">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl54_lblPC">53</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Miroslav Zahorjan (Klaudia Andrejov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054520</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752992">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl55_lblPC">54</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Miroslav Zahorjan (Kristi&#225;n Bodrogi)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054519</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752991">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl56_lblPC">55</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Miroslav Zahorjan (Duc Khanh Nguyen)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054518</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752990">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl57_lblPC">56</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#225;n Ond&#225;š (Krist&#237;na Gombošov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054517</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752989">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl58_lblPC">57</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#225;n Ond&#225;š (Tibor Pecha)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054516</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752988">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl59_lblPC">58</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#225;n Ond&#225;š (Ľudov&#237;t Bart&#243;k)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054515</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752987">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl60_lblPC">59</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#225;n Ond&#225;š (Milan Richter)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054514</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752986">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl61_lblPC">60</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#225;n Ond&#225;š (L&#243;r&#225;nt B&#225;rczi)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054513</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752985">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl62_lblPC">61</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#225;n Ond&#225;š (Gabriela Ol&#225;hov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054512</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752984">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl63_lblPC">62</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#225;n Ond&#225;š (Beata Maria Dudek)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054511</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752983">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl64_lblPC">63</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#225;n Ond&#225;š (Branislav Galovič)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054510</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752982">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl65_lblPC">64</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#225;n Ond&#225;š (M&#225;ria Duždov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054509</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752981">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl66_lblPC">65</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#225;n Ond&#225;š (Peter N&#233;meth)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054508</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752980">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl67_lblPC">66</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#250;lius Rosina (Ingrid Štefankovičov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054507</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752979">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl68_lblPC">67</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#250;lius Rosina (Dušan Ol&#225;h)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054506</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752978">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl69_lblPC">68</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#250;lius Rosina (Lenka Tom&#225;šov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054505</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752977">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl70_lblPC">69</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#250;lius Rosina (Peter Ondro)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054504</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752976">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl71_lblPC">70</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#250;lius Rosina (Mari&#225;n Barta)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054503</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752975">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl72_lblPC">71</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#250;lius Rosina (J&#250;lius Nagy)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054502</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752974">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl73_lblPC">72</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#250;lius Rosina (Gabriel Somogyi)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054501</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752968">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl74_lblPC">73</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#250;lius Rosina (Andreas Sztojka)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054500</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752965">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl75_lblPC">74</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Peter Kuna (Veronika Chromcov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054499</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752964">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl76_lblPC">75</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Peter Kuna (Luk&#225;š Benčurik)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054498</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752963">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl77_lblPC">76</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Peter Kuna (Lucia Novakov)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054497</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752962">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl78_lblPC">77</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Peter Kuna (Edson Jozwik)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054496</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752961">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl79_lblPC">78</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#250;lius Rosina (R&#243;bert Stehl&#237;k)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054495</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752959">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl80_lblPC">79</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Adriana Sold&#225;n Steinerov&#225; (Monika Cinov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054494</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752958">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl81_lblPC">80</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Adriana Sold&#225;n Steinerov&#225; (R&#243;bert Dud&#225;š)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054493</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752957">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl82_lblPC">81</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Adriana Sold&#225;n Steinerov&#225; (M&#225;ria Horečn&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054492</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752956">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl83_lblPC">82</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ing. Roman Lišč&#225;k (J&#250;lia Stojkovičov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054491</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752955">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl84_lblPC">83</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ing. Roman Lišč&#225;k (Vladim&#237;r Dužek)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054490</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752954">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl85_lblPC">84</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ing. Roman Lišč&#225;k (Junghoon Lee)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054489</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752953">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl86_lblPC">85</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ing. Roman Lišč&#225;k (Constantin Lucian Ticu)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054488</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752952">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl87_lblPC">86</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Ing. Roman Lišč&#225;k (Jaroslav Daniš)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054487</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752951">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl88_lblPC">87</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Radovan Ferenc (Iveta Kov&#225;čov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054486</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752950">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl89_lblPC">88</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">Mgr. M&#225;ria &#193;ghov&#225; (Koloman K&#243;ša)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054485</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752949">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl90_lblPC">89</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Radovan Ferenc (Mat&#250;š Vravec)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054484</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752948">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl91_lblPC">90</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">Mgr. M&#225;ria &#193;ghov&#225; (Koloman K&#243;ša)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054483</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752947">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl92_lblPC">91</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">Mgr. M&#225;ria &#193;ghov&#225; (J&#225;n Šl&#233;z)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054482</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752946">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl93_lblPC">92</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">Mgr. M&#225;ria &#193;ghov&#225; (Anna Jalakšov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054481</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752945">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl94_lblPC">93</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Radovan Ferenc (Volodimir Shapovalov)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054480</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752944">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl95_lblPC">94</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. Radovan Ferenc (Michal Mariň&#225;k)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054479</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752943">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl96_lblPC">95</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. J&#250;lius Rosina (Nikola Bilov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054478</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752941">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl97_lblPC">96</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. M&#225;ria B&#237;la (Ľubom&#237;r Badžo)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054477</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752940">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl98_lblPC">97</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. M&#225;ria B&#237;la (Peter Kov&#225;č)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054476</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752939">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl99_lblPC">98</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. M&#225;ria B&#237;la (Frederika Vargov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054475</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752938">Detail</a></td>
+				</tr><tr>
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl100_lblPC">99</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. M&#225;ria B&#237;la (Andrea Jakabov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054474</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752937">Detail</a></td>
+				</tr><tr class="AlterRow">
+					<td title="#">
+                                    <span id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl101_lblPC">100</span>
+                                </td><td title="Typ podania">Upovedomenia a v&#253;zvy exek&#250;torov</td><td title="Subjekt">JUDr. M&#225;ria B&#237;la (J&#250;lia Horv&#225;thov&#225;)</td><td title="Obchodný vestník"><a href="/ObchodnyVestnik/Web/Detail.aspx?IdOVod=3919">176/2026</a></td><td title="Číslo zverejnenia">X054473</td><td title="Dátum zverejnenia">10.09.2026</td><td><a href="/ObchodnyVestnik/Formular/FormularDetail.aspx?IdFormular=4752936">Detail</a></td>
+				</tr><tr>
+					<td colspan="7">
+
+Aktuálna stránka: <select name="ctl00$ctl00$CphMain$CphMain$gvVyhladavanieOV$ctl103$ctl00$cmbAGVPager" onchange="javascript:setTimeout(&#39;__doPostBack(\&#39;ctl00$ctl00$CphMain$CphMain$gvVyhladavanieOV$ctl103$ctl00$cmbAGVPager\&#39;,\&#39;\&#39;)&#39;, 0)" id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl103_ctl00_cmbAGVPager">
+						<option selected="selected" value="1">1</option>
+						<option value="2">2</option>
+						<option value="3">3</option>
+						<option value="4">4</option>
+						<option value="5">5</option>
+						<option value="6">6</option>
+						<option value="7">7</option>
+						<option value="8">8</option>
+						<option value="9">9</option>
+						<option value="10">10</option>
+						<option value="11">11</option>
+						<option value="12">12</option>
+						<option value="13">13</option>
+						<option value="14">14</option>
+						<option value="15">15</option>
+						<option value="16">16</option>
+						<option value="17">17</option>
+						<option value="18">18</option>
+						<option value="19">19</option>
+						<option value="20">20</option>
+						<option value="21">21</option>
+						<option value="22">22</option>
+						<option value="23">23</option>
+						<option value="24">24</option>
+						<option value="25">25</option>
+						<option value="26">...</option>
+						<option value="41863">41863</option>
+						<option value="41864">41864</option>
+						<option value="41865">41865</option>
+						<option value="41866">41866</option>
+						<option value="41867">41867</option>
+						<option value="41868">41868</option>
+						<option value="41869">41869</option>
+						<option value="41870">41870</option>
+						<option value="41871">41871</option>
+						<option value="41872">41872</option>
+						<option value="41873">41873</option>
+						<option value="41874">41874</option>
+						<option value="41875">41875</option>
+						<option value="41876">41876</option>
+						<option value="41877">41877</option>
+						<option value="41878">41878</option>
+						<option value="41879">41879</option>
+						<option value="41880">41880</option>
+						<option value="41881">41881</option>
+						<option value="41882">41882</option>
+						<option value="41883">41883</option>
+						<option value="41884">41884</option>
+						<option value="41885">41885</option>
+						<option value="41886">41886</option>
+						<option value="41887">41887</option>
+
+					</select>
+    
+Počet záznamov na stránku:
+    <select name="ctl00$ctl00$CphMain$CphMain$gvVyhladavanieOV$ctl103$ctl00$cmbAGVCountOnPage" onchange="javascript:setTimeout(&#39;__doPostBack(\&#39;ctl00$ctl00$CphMain$CphMain$gvVyhladavanieOV$ctl103$ctl00$cmbAGVCountOnPage\&#39;,\&#39;\&#39;)&#39;, 0)" id="ctl00_ctl00_CphMain_CphMain_gvVyhladavanieOV_ctl103_ctl00_cmbAGVCountOnPage">
+						<option value="10">10</option>
+						<option value="20">20</option>
+						<option value="50">50</option>
+						<option selected="selected" value="100">100</option>
+
+					</select></td>
+				</tr>
+			</table>
+		</div>
+
+                    <div class="form-group form-check-inline mt-3">
+                        <span class="form-check-input"><input id="ctl00_ctl00_CphMain_CphMain_chbHideHighlights" type="checkbox" name="ctl00$ctl00$CphMain$CphMain$chbHideHighlights" onclick="javascript:setTimeout(&#39;__doPostBack(\&#39;ctl00$ctl00$CphMain$CphMain$chbHideHighlights\&#39;,\&#39;\&#39;)&#39;, 0)" /></span>
+                        <label for="ctl00_ctl00_CphMain_CphMain_chbHideHighlights" class="form-check-label">Skryť výskyty nájdených kľúčových slov v texte</label>
+                    </div>
+                
+	</div>
+
+                
+            
+</div>
+    </div>
+
+    <script type="text/javascript">
+        $("#filterCollapse").click(function () {
+            var isExpanded = $('#advancedFilter').is('.collapse.show');
+
+            if (isExpanded) {
+                $("#filterCollapse .filter-uncollapsed").css("display", "none");
+                $("#filterCollapse .filter-collapsed").css("display", "block");
+            }
+            else {
+                $("#filterCollapse .filter-collapsed").css("display", "none");
+                $("#filterCollapse .filter-uncollapsed").css("display", "block");
+            }
+        });
+    </script>
+ 
+    	        <div style="clear:both;">
+    	        </div>       
+    	    </div>
+	    </div>
+    </div>
+
+            </div>
+            <!--content end -->
+            
+        </div>
+        <!--end div id=container -->
+        <!--container end -->
+    </div>
+    
+    <!-- end div id=all -->
+	<div class="cleaner" style="height:16px;">
+	</div>
+	
+	<div style="background-color: #482760; height: 8px;">
+	</div>
+	
+	<div style="height: 1px;">
+	</div>
+	
+	<div id="bottomMenu">
+        <ul>
+			<li><a href="https://www.justice.gov.sk/Stranky/Informacie/Kontakty.aspx">Kontakty</a></li>
+			<li><img src="/Style%20Library/MSSR/Images/BottomMenuOddelovac.png" alt="" title="|"></li>
+			<li><a href="https://www.justice.gov.sk/Stranky/Informacie/Pre-media.aspx">Pre médiá</a></li>
+			<li><img src="/Style%20Library/MSSR/Images/BottomMenuOddelovac.png" alt="" title="|"></li>
+			<li><a href="https://www.justice.gov.sk/Stranky/Informacie/Kariera.aspx">Kariéra</a></li>
+			<li><img src="/Style%20Library/MSSR/Images/BottomMenuOddelovac.png" alt="" title="|"></li>
+			<li><a href="https://www.justice.gov.sk/Stranky/Informacie/Poskytovanie-informacii.aspx">Poskytovanie informácií</a></li>
+			<li><img src="/Style%20Library/MSSR/Images/BottomMenuOddelovac.png" alt="" title="|"></li>
+			<li><a href="https://www.justice.gov.sk/Stranky/Informacie/Analyticke-centrum.aspx">Analytické centrum MS SR</a></li>
+			<li><img src="/Style%20Library/MSSR/Images/BottomMenuOddelovac.png" alt="" title="|"></li>
+			<li><a href="https://www.justice.gov.sk/Stranky/Informacie/vyhlasenie-o-pristupnosti.aspx">Vyhlásenie o prístupnosti</a></li>
+		</ul>
+		
+		<div class="cleaner" style="height: 64px;">
+		</div>
+		
+		<div id="copyright">
+			<img src="/Style%20Library/MSSR/Images/EuMiniIco.png" title="Eu" alt="EU ico" style="float: left;" />
+			<span style="float: left; padding-left: 12px; color: #fff;">Part <i>of</i> European Union</span>
+			<span style="float: right; color: #fff;">COPYRIGHT 2011 © MINISTERSTVO SPRAVODLIVOSTI SR</span>
+		</div>
+	</div>
+		<!-- end div id=bottomMenu -->
+    
+<script type="text/javascript">
+//<![CDATA[
+var Page_Validators =  new Array(document.getElementById("ctl00_ctl00_CphMain_CphMain_rvDatumZapisu"));
+//]]>
+</script>
+
+<script type="text/javascript">
+//<![CDATA[
+var ctl00_ctl00_CphMain_CphMain_rvDatumZapisu = document.all ? document.all["ctl00_ctl00_CphMain_CphMain_rvDatumZapisu"] : document.getElementById("ctl00_ctl00_CphMain_CphMain_rvDatumZapisu");
+ctl00_ctl00_CphMain_CphMain_rvDatumZapisu.controltovalidate = "ctl00_ctl00_CphMain_CphMain_txtDatumZverejnenia";
+ctl00_ctl00_CphMain_CphMain_rvDatumZapisu.errormessage = "Hodnota je mimo povoleného rozsahu";
+ctl00_ctl00_CphMain_CphMain_rvDatumZapisu.display = "Dynamic";
+ctl00_ctl00_CphMain_CphMain_rvDatumZapisu.type = "Date";
+ctl00_ctl00_CphMain_CphMain_rvDatumZapisu.dateorder = "dmy";
+ctl00_ctl00_CphMain_CphMain_rvDatumZapisu.cutoffyear = "2049";
+ctl00_ctl00_CphMain_CphMain_rvDatumZapisu.century = "2000";
+ctl00_ctl00_CphMain_CphMain_rvDatumZapisu.evaluationfunction = "RangeValidatorEvaluateIsValid";
+ctl00_ctl00_CphMain_CphMain_rvDatumZapisu.maximumvalue = "31.12.9999";
+ctl00_ctl00_CphMain_CphMain_rvDatumZapisu.minimumvalue = "1.1.1753";
+//]]>
+</script>
+
+
+<script type="text/javascript">
+//<![CDATA[
+(function() {var fn = function() {$get("ctl00_ctl00_toolkitScriptManager_HiddenField").value = '';Sys.Application.remove_init(fn);};Sys.Application.add_init(fn);})();
+var Page_ValidationActive = false;
+if (typeof(ValidatorOnLoad) == "function") {
+    ValidatorOnLoad();
+}
+
+function ValidatorOnSubmit() {
+    if (Page_ValidationActive) {
+        return ValidatorCommonOnSubmit();
+    }
+    else {
+        return true;
+    }
+}
+        WebForm_AutoFocus('btnLoginOk');
+document.getElementById('ctl00_ctl00_CphMain_CphMain_rvDatumZapisu').dispose = function() {
+    Array.remove(Page_Validators, document.getElementById('ctl00_ctl00_CphMain_CphMain_rvDatumZapisu'));
+}
+//]]>
+</script>
+</form>
+
+    
+    
+</body>
+</html>

@@ -2,14 +2,14 @@
 ==================================================
 Testuje: parse_index (HTML), extract_pdf_text_spf, parse_pdf_pozemky,
          extract_okres_obec_from_pdf_url, SpfScraper (registry).
-100% offline - bezi na fixtures spf_listing.html + spf_pozemky.pdf.
+100% offline - bezi na fixtures spf_listing.html + spf_detail.pdf.
 """
 
 import pytest
 import pathlib
 
 FIX_HTML = pathlib.Path(__file__).parent / "fixtures" / "spf_listing.html"
-FIX_PDF  = pathlib.Path(__file__).parent / "fixtures" / "spf_pozemky.pdf"
+FIX_PDF  = pathlib.Path(__file__).parent / "fixtures" / "spf_detail.pdf"
 
 from services.scrapers.spf_scraper import (
     SpfScraper,

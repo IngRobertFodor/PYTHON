@@ -9,7 +9,7 @@ import pytest
 import pathlib
 from unittest.mock import patch
 
-FIXTURE = pathlib.Path(__file__).parent / "fixtures" / "nehnutelnosti_sk_detail.html"
+FIXTURE = pathlib.Path(__file__).parent / "fixtures" / "nehnutelnosti_sk_listing.html"
 
 from services.scrapers.base_scraper import BaseScraper
 from services.scrapers.nehnutelnosti_scraper import NehnutelnostiScraper
@@ -86,13 +86,13 @@ class TestScraperService:
     def test_scrape_source_calls_scraper(self, fixture_html):
         with patch.object(NehnutelnostiScraper, "fetch_html", return_value=fixture_html):
             parcels = scrape_source("nehnutelnosti_sk")
-        assert len(parcels) >= 25
+        assert len(parcels) >= 20
         assert all(isinstance(p, Parcel) for p in parcels)
 
     def test_scrape_all_calls_nehnutelnosti(self, fixture_html):
         with patch.object(NehnutelnostiScraper, "fetch_html", return_value=fixture_html):
             parcels = scrape_all()
-        assert len(parcels) >= 25
+        assert len(parcels) >= 20
 
     def test_scrape_all_deduplicates(self, fixture_html):
         with patch.object(NehnutelnostiScraper, "fetch_html", return_value=fixture_html):

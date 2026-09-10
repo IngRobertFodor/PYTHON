@@ -78,34 +78,47 @@ class NehnutelnostiScraper(BaseScraper):
 
 def extract_jsonld(html):
     """
-    Extrahuje a parsuje JSON-LD z RSC payloadu.
+    Extrahuje a parsuje JSON-LD z RSC payloadu (self.__next_f.push).
     Vracia dict (schema.org @context/@graph).
     Vyvolava ValueError ak nie je najdeny.
+
+    Poznamka: Next.js RSC format pouziva self.__next_f.push([1,"..."]) kde
+    JSON-LD je dvojnasobne escapovany string. Hladame blok obsahujuci
+    '@context' + 'priceSpecification' bez pevneho markera (meni sa s deployom).
     """
-    marker = "T23c11"
-    idx = html.find(marker)
-    if idx == -1:
-        raise ValueError(f"Marker '{marker}' nenajdeny v HTML")
+    # Najdi vsetky RSC push bloky s JSON obsahom
+    # Format: self.__next_f.push([1,"<escaped-json>"])
+    # aj varianty: self.__next_f.push([1,"<chunk-id>:<escaped-json>"])
+    candidates = re.finditer(
+        r'self\.__next_f\.push\(\[1,"((?:[^"\\]|\\.)*)"\]\)',
+        html, re.DOTALL
+    )
 
-    json_start = html.find('{', idx)
-    if json_start == -1:
-        raise ValueError("JSON objekt za markerom nenajdeny")
+    for m in candidates:
+        raw = m.group(1)
+        # Hladame blok ktory obsahuje schema.org JSON-LD s priceSpecification
+        if '"@context"' not in raw and '@context' not in raw:
+            continue
+        if 'priceSpecification' not in raw and 'itemListElement' not in raw:
+            continue
 
-    # Najdi koniec JSON objektu (pocitaj zavorky)
-    depth = 0
-    json_end = json_start
-    for i in range(json_start, min(json_start + 600_000, len(html))):
-        ch = html[i]
-        if ch == '{': depth += 1
-        elif ch == '}':
-            depth -= 1
-            if depth == 0:
-                json_end = i + 1
-                break
+        # Unescape dvojnasobne escapovany string
+        try:
+            unescaped = _unescape_rsc(raw)
+            # Ak je to chunk "ID:JSON", odroznime ID prefix
+            if unescaped.startswith('{'):
+                return json.loads(unescaped)
+            # Format "ChunkID:json" - najdi prvy {
+            brace = unescaped.find('{')
+            if brace >= 0:
+                return json.loads(unescaped[brace:])
+        except (json.JSONDecodeError, Exception):
+            continue
 
-    raw = html[json_start:json_end]
-    unescaped = _unescape_rsc(raw)
-    return json.loads(unescaped)
+    raise ValueError(
+        "JSON-LD blok s priceSpecification nenajdeny v RSC payloade. "
+        "Portál mohol zmenit strukturu HTML."
+    )
 
 
 def extract_items_from_graph(jsonld):
