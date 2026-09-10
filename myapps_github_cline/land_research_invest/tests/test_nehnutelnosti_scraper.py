@@ -140,15 +140,34 @@ class TestItemToParcel:
 
 class TestExtractLocation:
     def test_from_title_brackets(self):
-        assert _extract_location("Pozemok v slepej ulici (Chorvatsky Grob)", "") == "Chorvatsky Grob"
+        # Zoznam obci najde "Chorvatsky Grob" a vrati verziu s diakritikou
+        result = _extract_location("Pozemok v slepej ulici (Chorvatsky Grob)", "")
+        assert "grob" in result.lower()
 
-    def test_from_url(self):
-        url = "https://www.nehnutelnosti.sk/detail/JuBPL/predaj-pozemky-senec-nov\u00e1-lokalita"
+    def test_from_url_senec(self):
+        url = "https://www.nehnutelnosti.sk/detail/JuBPL/stavebny-pozemok-senec-nova-lokalita"
         result = _extract_location("Pozemok", url)
-        assert "senec" in result.lower() or result == ""
+        assert "senec" in result.lower()
+
+    def test_obec_z_url_slug_vajnory(self):
+        url = "https://www.nehnutelnosti.sk/detail/abc/pozemok-regrutska-vajnory"
+        assert _extract_location("Pozemok", url) == "Vajnory"
+
+    def test_obec_z_url_slug_lamac(self):
+        url = "https://www.nehnutelnosti.sk/detail/abc/pozemok-hodoninska-lamac"
+        result = _extract_location("Pozemok", url)
+        assert "lamac" in result.lower() or "lamaC" in result or "Lamač" in result or "Lamac" in result
+
+    def test_obec_z_url_slug_vinohrady(self):
+        url = "https://www.nehnutelnosti.sk/detail/abc/nova-koliba-bratislava-vinohrady"
+        assert _extract_location("", url) == "Vinohrady"
+
+    def test_obec_z_nazvu_malinovo(self):
+        result = _extract_location("Stavebný pozemok pre rodinný dom, Malinovo", "https://x.sk/d")
+        assert result == "Malinovo"
 
     def test_empty_when_no_info(self):
-        assert isinstance(_extract_location("Pozemok bez lokality", "https://example.com/detail/abc/pozemok"), str)
+        assert isinstance(_extract_location("Pozemok", "https://example.com/detail/abc/pozemok"), str)
 
 
 # ----------------------------------------------------------------

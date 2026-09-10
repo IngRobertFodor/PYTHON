@@ -19,6 +19,7 @@ Kluce v item:
 
 import re
 import json
+import unicodedata
 from services.scrapers.base_scraper import BaseScraper
 
 SOURCE_NAME = "nehnutelnosti_sk"
@@ -187,22 +188,92 @@ def item_to_parcel(item):
     )
 
 
-def _extract_location(title, url):
+# Znamy zoznam obci a mestskych casti v okruhu 70 km od Bratislavy.
+# Pouziva sa pri extrakcii lokality z nazvu/URL inzeratu.
+# Porovnanie je diakritika-necitlive (Lamac = Lamač).
+ZNAME_OBCE = [
+    # Bratislava - mestske casti
+    "Vajnory", "Lamac", "Lamač", "Devín", "Devin", "Rača", "Raca",
+    "Vinohrady", "Koliba", "Karlova Ves", "Ružinov", "Ruzinov",
+    "Petržalka", "Petrzalka", "Nové Mesto", "Nove Mesto",
+    "Staré Mesto", "Stare Mesto", "Dúbravka", "Dubravka",
+    "Podunajské Biskupice", "Podunajske Biskupice",
+    "Vrakuňa", "Vrakuna", "Záhorská Bystrica", "Zahorska Bystrica",
+    "Devínska Nová Ves", "Devinska Nova Ves",
+    "Rusovce", "Čunovo", "Cunovo", "Jarovce",
+    # Okres Senec
+    "Senec", "Ivanka pri Dunaji", "Ivanka",
+    "Bernolákovo", "Bernolakovo",
+    "Chorvátsky Grob", "Chorvatsky Grob",
+    "Malinovo", "Most pri Bratislave",
+    "Rovinka", "Dunajská Lužná", "Dunajska Luzna",
+    "Miloslavov", "Tomášov", "Tomasov",
+    "Nová Dedinka", "Nova Dedinka",
+    "Hamuliakovo", "Šamorín", "Samorin",
+    # Okres Pezinok
+    "Pezinok", "Modra", "Svätý Jur", "Svaty Jur",
+    "Slovenský Grob", "Slovensky Grob", "Limbach",
+    "Viničné", "Vinicne", "Šenkvice", "Senkvice",
+    "Budmerice", "Dubová", "Dubova",
+    # Okres Malacky
+    "Malacky", "Stupava", "Marianka", "Lozorno",
+    "Zohor", "Záhorská Ves", "Zahorska Ves",
+    "Plavecký Štvrtok", "Plavecky Stvrtok",
+    "Borinka", "Gajary", "Kuchyňa", "Kuchyna",
+    "Sološnica", "Solosnica", "Rohožník", "Rohoznik",
+    # Okolie (do 70 km)
+    "Svätý Jur", "Perneck", "Blatné", "Blatne",
+]
+
+# Normalizacna mapa: ASCII verzia -> originalny nazov
+_OBEC_NORM: dict[str, str] = {}
+for _o in ZNAME_OBCE:
+    _key = unicodedata.normalize("NFD", _o.lower())
+    _key = "".join(c for c in _key if unicodedata.category(c) != "Mn")
+    if _key not in _OBEC_NORM:
+        _OBEC_NORM[_key] = _o
+
+
+def _normalize(s: str) -> str:
+    """Odstrani diakritiku a vrati male pismena."""
+    n = unicodedata.normalize("NFD", s.lower())
+    return "".join(c for c in n if unicodedata.category(c) != "Mn")
+
+
+def _extract_location(title: str, url: str) -> str:
     """
-    Vytiahne lokalitu z nazvu inzeratu (v zatvorke) alebo z URL.
-    Priklady:
-      '... (Chorvatsky Grob)' -> 'Chorvatsky Grob'
-      '.../predaj-pozemky-senec-...' -> 'senec'
+    Vytiahne lokalitu z inzeratu v 3 urovniach (od najpresnejsej):
+
+    1. Zoznam znamych obci BA regionu - hlada v nazve aj URL slugu
+       (diakritika-necitlive): 'Vajnory', 'Lamac', 'Senec'...
+    2. Zatvorka v nazve: '... (Chorvatsky Grob)' -> 'Chorvatsky Grob'
+    3. Fallback: posledne slovo URL slugu (ocistene)
     """
-    # Z nazvu: hladaj poslednu zatvorku
+    title_n = _normalize(title)
+    # Z URL vytiahneme slug (posledna cast cesty)
+    slug = url.rstrip("/").split("/")[-1] if "/" in url else ""
+    slug_n = _normalize(slug.replace("-", " "))
+
+    # --- Uroven 1: zoznam znamych obci ---
+    # Hladame od najdlhsich nazov (Chorvátsky Grob pred Grob)
+    for obec_norm, obec_orig in sorted(
+        _OBEC_NORM.items(), key=lambda x: -len(x[0])
+    ):
+        if obec_norm in title_n or obec_norm in slug_n:
+            return obec_orig
+
+    # --- Uroven 2: zatvorka v nazve ---
     m = re.search(r'\(([^)]{3,40})\)\s*$', title)
     if m:
         return m.group(1).strip()
-    # Z URL: cast medzi 'pozemky-' a nasledujucim '-'
-    m2 = re.search(r'/pozemky[^/]*?-([a-z][a-z-]{2,30})(?:-[a-z]|-\d|/|$)', url)
-    if m2:
-        return m2.group(1).replace('-', ' ').title()
-    return ''
+
+    # --- Uroven 3: posledne slovo slugu ---
+    if slug:
+        parts = [p for p in slug.split("-") if len(p) > 2 and p.isalpha()]
+        if parts:
+            return parts[-1].title()
+
+    return ""
 
 
 def _unescape_rsc(raw):

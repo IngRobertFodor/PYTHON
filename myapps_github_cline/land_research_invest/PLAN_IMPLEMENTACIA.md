@@ -13,8 +13,11 @@
 | Frontend (mapa, karty, modal, demo) | HOTOVO |
 | Scraper kostra (BaseScraper, registry, scrape_all) | HOTOVO |
 | nehnutelnosti_sk parser | HOTOVO |
-| Testy | **763, 0 zlyh** |
+| Testy | **767, 0 zlyh** |
 | Limity v criteria.yaml (cena 0-10000, vymera 350-1000) | HOTOVO |
+| C0: nehnutelnosti.sk - oprava markera (T23c11 -> dynamic RSC) | HOTOVO - 46 pozemkov nazivo |
+| C0: nehnutelnosti.sk - lokalita (ZNAME_OBCE 70km od BA) | HOTOVO - 46/46 s lokalitou |
+| Fixtures aktualizovane (listing+detail, naming konvencia) | HOTOVO |
 
 ---
 
