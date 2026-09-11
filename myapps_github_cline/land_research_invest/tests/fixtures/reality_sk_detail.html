@@ -1,0 +1,2282 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html" lang="sk" xml:lang="sk" class="no-js">
+<head>
+    <script type="text/javascript">
+        (function () {
+    const QUEUE = {};
+
+    function queueAdd(type, data) {
+        if (QUEUE[type] === undefined) {
+            QUEUE[type] = [];
+        }
+
+        QUEUE[type].push(data);
+    }
+
+    function queueGetAll() {
+        const allItems = [];
+
+        for (const type in QUEUE) {
+            for (const item of QUEUE[type]) {
+                allItems.push({
+                    type,
+                    data: item,
+                });
+            }
+
+            QUEUE[type] = [];
+        }
+
+        return allItems;
+    }
+
+    let eventTrackingApiCalls = [];
+
+    function eventTrackingApiCall(data, type) {
+        eventTrackingApiCalls.push({
+            data,
+            type,
+        });
+    }
+
+    function fbConvApiMakeRandomId(length) {
+        const result = [];
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const charactersLength = characters.length;
+        for (let i = 0; i < length; i++) {
+            result.push(characters.charAt(Math.floor(Math.random()
+                * charactersLength)));
+        }
+        return result.join('');
+    }
+
+    function fbConvApiSendAjaxEvent(eventName, eventData = {}, eventId, contact = {}) {
+        let fbp = document.cookie.split(';')
+            .filter(c => c.includes('_fbp='))
+            .map(c => c.split('_fbp=')[1]);
+        let fbc = document.cookie.split(';')
+            .filter(c => c.includes('_fbc='))
+            .map(c => c.split('_fbc=')[1]);
+        fbp = (fbp.length && fbp[0]) || null;
+        fbc = (fbc.length && fbc[0]) || null;
+
+
+        const data = {
+            event_name: eventName,
+            event_id: eventId,
+            source_url: window.location.href,
+            fbp,
+            fbc,
+        };
+
+        // add custom eventData
+        for (const property in eventData) {
+            if (eventData?.hasOwnProperty(property)) {
+                data[property] = eventData[property];
+            }
+        }
+
+        if (Object.keys(contact).length !== 0) {
+            data.email = contact?.hasOwnProperty('email') ? contact.email : '';
+            data.phone = contact?.hasOwnProperty('phone') ? contact.phone : '';
+        }
+
+        const type = 'fbq';
+
+        eventTrackingApiCall(data, type);
+    }
+
+    function fbConvApi(eventName, eventData = {}, contact = {}) {
+        const eventId = fbConvApiMakeRandomId(100);
+
+        if (eventName === 'init') {
+            fbq(eventName, eventData);
+        } else {
+            fbq('track', eventName, eventData, { eventID: eventId });
+            fbConvApiSendAjaxEvent(eventName, eventData, eventId, contact);
+        }
+    }
+
+    function eventTracker(type, data) {
+        if (type === 'ga') {
+            if (typeof ga === 'undefined') {
+                queueAdd(type, data);
+                return;
+            }
+
+            ga(
+                data[0] ?? undefined, /* send */
+                data[1] ?? undefined, /* event */
+                data[2] ?? undefined, /* category */
+                data[3] ?? undefined, /* action */
+                data[4] ?? undefined, /* label */
+                data[5] ?? undefined, /* value */
+            );
+
+            return;
+        }
+
+        if (type === 'azTracker') {
+            if (typeof __azTracker === 'undefined') {
+                queueAdd(type, data);
+                return;
+            }
+
+            __azTracker.push(data);
+            return;
+        }
+
+        if (type === 'googleTagCmdPush') {
+            if (typeof googletag === 'undefined') {
+                queueAdd(type, data);
+                return;
+            }
+
+            googletag.cmd.push(data);
+            return;
+        }
+
+        if (type === 'dataLayer' && typeof data === 'object' ) {
+
+            if (typeof dataLayer === 'undefined') {
+                queueAdd(type, data);
+                return;
+            }
+
+            dataLayer.push(data);
+            return;
+        }
+
+        if (type === 'fbq') {
+            if (typeof fbq === 'undefined') {
+                queueAdd(type, data);
+                return;
+            }
+
+            fbConvApi(data[0], data[1] ?? {}, data[2] ?? {});
+        }
+        if (type === 'fbq-ajax-event') {
+            if (typeof fbq === 'undefined') {
+                queueAdd(type, data);
+                return;
+            }
+            $.ajax({url: `${data[0]}?eventId=${data[1]}`});
+        }
+        if (type === 'fbq-ajax') {
+            if (typeof fbq === 'undefined') {
+                queueAdd(type, data);
+                return;
+            }
+
+            $.ajax({url: data[0]});
+        }
+    }
+
+    document.addEventListener('eventTracker:refresh', () => {
+        const items = queueGetAll();
+
+        for (const item of items) {
+            eventTracker(item.type, item.data);
+        }
+    });
+
+    window.eventTracker = eventTracker;
+}());
+
+    </script>
+    <script>
+        document.documentElement.classList.remove("no-js");
+    </script>
+                <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+                    <meta name="robots" content="index, follow">
+                            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+                    
+
+                    <title>Pozemok pre rodinné domy, Bratislava-Nové Mesto, Slovensko, 339 €/m2, 1118 | Reality.sk</title>
+        <meta name="description" content="ProHome Real Estate vám prináša jedinečnú príležitosť na kúpu pozemku v jednej z najkrajších lokalít Bratislavy. 🏡 Ak túžite po relaxe v tesnom kontak">
+        <meta property="og:description" content="ProHome Real Estate vám prináša jedinečnú príležitosť na kúpu pozemku v jednej z najkrajších lokalít Bratislavy. 🏡 Ak túžite po relaxe v tesnom kontak">
+        <meta property="og:title" content="🌳 Stavebné pozemky na hranici lesa">
+    <meta property="og:image"
+          content="https://img.unitedclassifieds.sk/foto/MTgwMHgxMzUwL2ZpbHRlcnM6cXVhbGl0eSg4NSk6d2F0ZXJtYXJrKHB1cy84TkZBOW1CXzFfZnNzLC01LC01LDAsMzAsMzApL2p1bA==/nN0NN-Ys3_fss?st=M7bIArPctvAyp-GcQ9nIzR2HdFQaiyAuOCaLIDK4Cic&ts=1772736087&e=0">
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="sk_SK">
+    <link rel="shortcut icon" href="/build/images/favicon/favicon.ico" type="image/x-icon"/>
+    <link rel="apple-touch-icon" href="/build/images/favicon/apple-touch-icon.png"/>
+    <link rel="apple-touch-icon" sizes="72x72" href="/build/images/favicon/apple-touch-icon-72x72.png"/>
+    <link rel="apple-touch-icon" sizes="76x76" href="/build/images/favicon/apple-touch-icon-76x76.png"/>
+    <link rel="apple-touch-icon" sizes="114x114"
+          href="/build/images/favicon/apple-touch-icon-114x114.png"/>
+    <link rel="apple-touch-icon" sizes="120x120"
+          href="/build/images/favicon/apple-touch-icon-120x120.png"/>
+    <link rel="apple-touch-icon" sizes="144x144"
+          href="/build/images/favicon/apple-touch-icon-144x144.png"/>
+    <link rel="apple-touch-icon" sizes="152x152"
+          href="/build/images/favicon/apple-touch-icon-152x152.png"/>
+    <link rel="apple-touch-icon" sizes="180x180"
+          href="/build/images/favicon/apple-touch-icon-180x180.png"/>
+
+    
+    <link rel="stylesheet" href="/build/css/style.91b6785a.css">
+    
+    <script type="text/javascript">
+        /* <![CDATA[ */
+        const google_conversion_id = 935168861;
+        const google_custom_params = window.google_tag_params;
+        const google_remarketing_only = true;
+        /* ]]> */
+    </script>
+    <script>"use strict";function _typeof(t){return(_typeof="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t})(t)}!function(){var t=function(){var t,e,o=[],n=window,r=n;for(;r;){try{if(r.frames.__tcfapiLocator){t=r;break}}catch(t){}if(r===n.top)break;r=r.parent}t||(!function t(){var e=n.document,o=!!n.frames.__tcfapiLocator;if(!o)if(e.body){var r=e.createElement("iframe");r.style.cssText="display:none",r.name="__tcfapiLocator",e.body.appendChild(r)}else setTimeout(t,5);return!o}(),n.__tcfapi=function(){for(var t=arguments.length,n=new Array(t),r=0;r<t;r++)n[r]=arguments[r];if(!n.length)return o;"setGdprApplies"===n[0]?n.length>3&&2===parseInt(n[1],10)&&"boolean"==typeof n[3]&&(e=n[3],"function"==typeof n[2]&&n[2]("set",!0)):"ping"===n[0]?"function"==typeof n[2]&&n[2]({gdprApplies:e,cmpLoaded:!1,cmpStatus:"stub"}):o.push(n)},n.addEventListener("message",(function(t){var e="string"==typeof t.data,o={};if(e)try{o=JSON.parse(t.data)}catch(t){}else o=t.data;var n="object"===_typeof(o)&&null!==o?o.__tcfapiCall:null;n&&window.__tcfapi(n.command,n.version,(function(o,r){var a={__tcfapiReturn:{returnValue:o,success:r,callId:n.callId}};t&&t.source&&t.source.postMessage&&t.source.postMessage(e?JSON.stringify(a):a,"*")}),n.parameter)}),!1))};"undefined"!=typeof module?module.exports=t:t()}();</script>
+    <script>
+        window._sp_queue = [];
+        window._sp_ = {
+            config: {
+                accountId: 1688,
+                baseEndpoint: 'https://privacy.reality.sk',
+                custom: {},
+                consentLanguage: 'sk',
+                gdpr: {
+                    groupPmId: 916219
+                },
+                events: {},
+            }
+        }
+    </script>
+    <script src='https://privacy.reality.sk/unified/wrapperMessagingWithoutDetection.js' async></script>
+    <script type="text/javascript">
+        var pp_gemius_use_cmp = true;
+
+(function () {
+    const loaded = {
+        googleAnalytics: false,
+        fbPixel: false,
+        rsz: false,
+        azTracker: false,
+        gemius: false,
+    };
+
+    function eventTrackerRefresh() {
+        document.dispatchEvent(new Event('eventTracker:refresh'));
+    }
+
+    function loadGoogleAnalytics() {
+    if (loaded.googleAnalytics === true) {
+        return;
+    }
+
+    loaded.googleAnalytics = true;
+
+    (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({
+            'gtm.start':
+                new Date().getTime(),
+            event: 'gtm.js'
+        });
+        const f = d.getElementsByTagName(s)[0];
+        const j = d.createElement(s);
+        const dl = l !== 'dataLayer' ? `&l=${l}` : '';
+        j.async = true;
+        j.src = `https://www.googletagmanager.com/gtm.js?id=${i}${dl}`;
+        f.parentNode.insertBefore(j, f);
+    }(window, document, 'script', 'dataLayer', 'GTM-K5J8Z85'));
+
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://www.googleadservices.com/pagead/conversion_async.js';
+    document.getElementsByTagName('head')[0].appendChild(script);
+
+    eventTrackerRefresh();
+}
+
+    function loadFbPixel() {
+    if (loaded.fbPixel === true) {
+        return;
+    }
+
+    loaded.fbPixel = true;
+
+    window.fbAsyncInit = function () {
+        FB.init({
+            appId: '1899709733650016',
+            autoLogAppEvents: true,
+            xfbml: true,
+            version: 'v3.2',
+        });
+    };
+
+    (function (d, s, id) {
+        let js;
+        const fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) {
+            return;
+        }
+        js = d.createElement(s);
+        js.id = id;
+        js.src = 'https://connect.facebook.net/sk_SK/sdk.js';
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+
+
+    !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+            n.callMethod
+                ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = !0;
+        n.version = '2.0';
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+    }(window,
+        document, 'script', 'https://connect.facebook.net/en_US/fbevents.js'));
+
+    window.eventTracker('fbq', ['init', '652779955457172']);
+    window.eventTracker('fbq', ['PageView']);
+
+    eventTrackerRefresh();
+}
+
+    function loadRsz() {
+    if (loaded.rsz === true) {
+        return;
+    }
+    (function (w, d, t) {
+        var gt = d.createElement(t),
+            s = d.getElementsByTagName(t)[0];
+        gt.async = 1;
+        gt.src = 'https://rsz.sk/delivery/sd4.php';
+        gt.async = true;
+        s.parentNode.insertBefore(gt, s);
+        loaded.rsz = true;
+    })(window, document, 'script');
+
+    eventTrackerRefresh();
+}
+
+    function loadAzTracker() {
+    if (loaded.azTracker === true) {
+        return;
+    }
+
+    var __azTracker = __azTracker || [];
+    window.__azTracker = __azTracker;
+
+        let route = 'offer\u002Ddetail';
+    let categoryPage = '';
+    let id;
+    let page;
+    switch (route) {
+    case 'homepage':
+        page = 'hp-reality';
+        id = null;
+        break;
+    case 'foreign-hp':
+        page = 'hp-zahranicne-reality';
+        id = null;
+        break;
+    case 'agency-list':
+        page = 'hp-realitne-kancelarie';
+        id = null;
+        break;
+    case 'agency-detail':
+        page = 'agency';
+        id = '';
+        break;
+    case 'offer-list':
+        page = 'advert-' + categoryPage;
+        id = null;
+        break;
+    case 'offer-detail':
+        page = 'advert';
+        id = 'JufRf8UIobu';
+        break;
+    case 'offer-gallery':
+        page = 'advert-fotogaleria';
+        id = 'JufRf8UIobu';
+        break;
+    case 'magazin-homepage':
+        page = 'hp-magazin';
+        id = null;
+        break;
+    case 'magazin-category':
+        page = 'magazin-';
+        id = null;
+        break;
+    case 'magazin-detail':
+        page = 'article';
+        id = 0;
+        break;
+    case 'law-forum':
+        page = 'hp-pravna-poradna';
+        id = null;
+        break;
+    case 'taxes-forum':
+        page = 'hp-danova-poradna';
+        id = null;
+        break;
+    case 'law-forum-detail':
+        page = 'article';
+        id = 'stavebne\u002Dpozemky\u002Dna\u002Dhranici\u002Dlesa';
+        break;
+    case 'taxes-forum-detail':
+        page = 'article';
+        id = 'stavebne\u002Dpozemky\u002Dna\u002Dhranici\u002Dlesa';
+        break;
+    }
+
+    (function () {
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.async = true;
+        script.src = 'https://s.aimg.sk/livemonitor/js/aztracker.js?v=' + '1.0.0';
+        const s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(script, s);
+    }());
+    __azTracker.push({ p: ['setNamingStrategy', 'keep'] });
+    __azTracker.push({ p: ['setProjectName', 'reality'] });
+    if (id !== null) {
+        window.eventTracker('azTracker', {p: ['pageView', page, id]});
+    } else {
+        window.eventTracker('azTracker', {p: ['pageView', page]});
+    }
+
+    eventTrackerRefresh();
+}
+
+    function loadGemius() {
+    if (typeof pp_gemius_identifier === 'undefined') {
+        var pp_gemius_identifier = 'p8XrsLeA7J95QcaJ0qNIV6QO.fO6qu88_jrskNzheg7.r7';
+    }
+    function gemius_pending(i) {
+        window[i] = window[i] || function () {
+            var x = window[i + '_pdata'] = window[i + '_pdata'] || [];
+            x[x.length] = arguments;
+        };
+    };gemius_pending('gemius_hit');
+    gemius_pending('gemius_event');
+    gemius_pending('pp_gemius_hit');
+    gemius_pending('pp_gemius_event');
+    (function (d, t) {
+        try {
+            var gt = d.createElement(t),
+                s = d.getElementsByTagName(t)[0],
+                l = 'http' + ((location.protocol == 'https:') ? 's' : '');
+            gt.setAttribute('async', 'async');
+            gt.setAttribute('defer', 'defer');
+            gt.src = l + '://gask.hit.gemius.pl/xgemius.js';
+            s.parentNode.insertBefore(gt, s);
+        } catch (e) {
+        }
+    })(document, 'script');
+}
+
+
+            if (typeof __tcfapi === 'undefined') {
+            return;
+        }
+
+        __tcfapi('addEventListener', 2, (tcData, success) => {
+            loadGemius();
+
+            if (tcData.gdprApplies === true) {
+                if (success && (tcData.eventStatus === 'tcloaded' || tcData.eventStatus === 'useractioncomplete')) {
+                    __tcfapi('getCustomVendorConsents', 2, (vendorConsents, success) => {
+                        if (success) {
+                            if (vendorConsents.grants['5e542b3a4cd8884eb41b5a72'].vendorGrant === true) {
+                                loadGoogleAnalytics();
+                            }
+
+                            if (vendorConsents.grants['5fac56cd1ba05165880458ad'].vendorGrant === true) {
+                                loadFbPixel();
+                            }
+                        }
+                    });
+
+                    if (tcData.purpose.consents[3] === true && tcData.purpose.consents[4] === true && tcData.purpose.consents[6] === true) {
+                        loadRsz();
+                        loadAzTracker();
+                    }
+                }
+            } else {
+                loadGoogleAnalytics();
+                loadFbPixel();
+                loadRsz();
+                loadAzTracker();
+            }
+        });
+    
+}());
+
+    </script>
+
+        <script type="text/javascript">
+        adsPag = ['detail'];
+        adsSec = ["slovensko","kraj-bratislavsky","bratislava-iii","bratislava-nove-mesto","druh-pozemky","poddruh-pozemok-pre-rodinne-domy","transakcia-predaj","cena-339"] ;
+        adsCalcPrice = [339]
+    </script>
+            
+    
+      <script>
+    window.googletag = window.googletag || { cmd: [] };
+    window.pbjs = window.pbjs || { que: [] };
+    window.adsPag = window.adsPag || ['list'];
+    pbjs.currentAuctionId = 0;
+
+    function requestBids() {
+        const auctionId = ++pbjs.currentAuctionId;
+        const adUnits = pbjs.allAdUnits.filter(function (adUnit) {
+            if (adUnit.placement.indexOf("all") !== -1) {
+                return true;
+            }
+            return window.adsPag.some(function (pageValue) {
+                return adUnit.placement.indexOf(pageValue) !== -1;
+            });
+        });
+
+        pbjs.requestBids({
+            adUnits,
+            bidsBackHandler: function () {
+                if (auctionId !== pbjs.currentAuctionId) {
+                    console.log("newer auction was triggered");
+                    return;
+                }
+                googletag.cmd.push(function () {
+                    pbjs.setTargetingForGPTAsync();
+                    const slotsToRefresh = Object.values(window.sasSlots);
+                    googletag.pubads().refresh(slotsToRefresh);
+                });
+            }
+        });
+    }
+    function loadAdScripts() {
+        [
+            "https://securepubads.g.doubleclick.net/tag/js/gpt.js",
+            "https://imr.sk/ban/_prebid/build/prebid.js"
+        ].forEach((src) => {
+            const s = document.createElement("script");
+            s.src = src;
+            s.async = true;
+            document.head.appendChild(s);
+        });
+    }
+    if(window.location.host.includes('.work') || window.location.host.includes('.vag4') || window.location.host.includes('localhost')) {
+      loadAdScripts();
+    }
+</script>
+<script>
+    if (typeof window.__tcfapi === 'function') {
+        __tcfapi('addEventListener', 2, function(tcData, success) {
+            if (tcData.eventStatus === "useractioncomplete" || tcData.eventStatus === "tcloaded") {
+                const consents = tcData.purpose.consents;
+                if (!consents['1']) return;
+
+                loadAdScripts();
+            }
+        });
+    }
+</script>
+<script async src="https://imr.sk/ban/_prebid/config/realitysk.js"></script>
+  <script>
+      var sasSlots = []; var adsPrefix = 'c_'; var sasReqId = (Math.round(Math.random()*1e20)).toString(36);
+      googletag.cmd.push(function () {
+          googletag.pubads().disableInitialLoad();
+          var mobileTabletOnly = googletag.sizeMapping().addSize([0,0],[[300,250],[300,300]]).addSize([768,300],[]).build();
+          var responsiveBannerCalc = googletag.sizeMapping().addSize([0,0],[[300,250],[300,300]]).addSize([1200,300],[[770,160]]).build();
+          var desktopOnlyST = googletag.sizeMapping().addSize([0,0],[]).addSize([768,300],[[728,90],[728,180]]).addSize([1024,300],[[728,90],[728,180],[970,250],[990,250]]).build();
+          var desktopOnlySB = googletag.sizeMapping().addSize([0,0],[]).addSize([768,300],[[728,90],[728,180]]).addSize([1024,200],[[728,90],[728,180],[970,90],[970,100]]).build();
+          var desktopOnlySQ = googletag.sizeMapping().addSize([0,0],[]).addSize([1024,300],[[300,300],[300,600]]).build();
+          var desktopOnlyBL = googletag.sizeMapping().addSize([0,0],[]).addSize([1200,300],[[728, 90],[728, 150],'fluid']).build();
+          var desktopOnlySI = googletag.sizeMapping().addSize([0,0],[]).addSize([768,300],[[728,180]]).addSize([992,250],[[728,180],[970,250]]).build();
+          var desktopOnlyML = googletag.sizeMapping().addSize([0,0],[]).addSize([768,300],[[728,90],[728,180]]).addSize([1024,200],[[728,90],[728,180],[970,90],[970,100]]).build();
+  
+          if (adsPag && adsPag[0]) {
+              switch (adsPag[0]) {
+                  case 'hp':
+                      sasSlots['mobile-top'] = googletag.defineSlot('/31040149/reality/mobile/mobile-top', [[300,250]], 'div-gpt-ad-reality-mobile-mobile-top').defineSizeMapping(mobileTabletOnly).addService(googletag.pubads());
+                      sasSlots['mobile-middle'] = googletag.defineSlot('/31040149/reality/mobile/mobile-middle', [[300,250]], 'div-gpt-ad-reality-mobile-mobile-middle').defineSizeMapping(mobileTabletOnly).addService(googletag.pubads());
+                      sasSlots['mobile-bottom'] = googletag.defineSlot('/31040149/reality/mobile/mobile-bottom', [[300,250]], 'div-gpt-ad-reality-mobile-mobile-bottom').defineSizeMapping(mobileTabletOnly).addService(googletag.pubads());
+                      sasSlots['screen-top'] = googletag.defineSlot('/31040149/reality/desktop/screen-top', [[728,180],[970,250], [990,250]], 'div-gpt-ad-reality-desktop-screen-top').defineSizeMapping(desktopOnlyST).addService(googletag.pubads());
+                      sasSlots['screen-bottom'] = googletag.defineSlot('/31040149/reality/desktop/screen-bottom', [[728,90],[970,90]], 'div-gpt-ad-reality-desktop-screen-bottom').defineSizeMapping(desktopOnlySB).addService(googletag.pubads());
+                      break;
+                  case 'list':
+                      sasSlots['mobile-top'] = googletag.defineSlot('/31040149/reality/mobile/mobile-top', [[300,250]], 'div-gpt-ad-reality-mobile-mobile-top').defineSizeMapping(mobileTabletOnly).addService(googletag.pubads());
+                      sasSlots['mobile-middle'] = googletag.defineSlot('/31040149/reality/mobile/mobile-middle', [[300,250]], 'div-gpt-ad-reality-mobile-mobile-middle').defineSizeMapping(mobileTabletOnly).addService(googletag.pubads());
+                      sasSlots['mobile-bottom'] = googletag.defineSlot('/31040149/reality/mobile/mobile-bottom', [[300,250]], 'div-gpt-ad-reality-mobile-mobile-bottom').defineSizeMapping(mobileTabletOnly).addService(googletag.pubads());
+                      sasSlots['screen-top'] = googletag.defineSlot('/31040149/reality/desktop/screen-top', [[728,180],[970,250],[990,250]], 'div-gpt-ad-reality-desktop-screen-top').defineSizeMapping(desktopOnlyST).addService(googletag.pubads());
+                      sasSlots['square'] = googletag.defineSlot('/31040149/reality/desktop/square', [[300,300], [300,600]], 'div-gpt-ad-reality-desktop-square').defineSizeMapping(desktopOnlySQ).addService(googletag.pubads());
+                      sasSlots['square-2'] = googletag.defineSlot('/31040149/reality/desktop/square-2', [[300,300]], 'div-gpt-ad-reality-desktop-square-2').defineSizeMapping(desktopOnlySQ).addService(googletag.pubads());
+                      sasSlots['banner-list-1'] = googletag.defineSlot('/31040149/reality/desktop/banner-list-1', [[728, 90],[728, 150],'fluid'], 'div-gpt-ad-reality-desktop-banner-list-1').defineSizeMapping(desktopOnlyBL).addService(googletag.pubads());
+                      sasSlots['banner-list-2'] = googletag.defineSlot('/31040149/reality/desktop/banner-list-2', [[728, 90],[728, 150],'fluid'], 'div-gpt-ad-reality-desktop-banner-list-2').defineSizeMapping(desktopOnlyBL).addService(googletag.pubads());
+                      sasSlots['banner-list-3'] = googletag.defineSlot('/31040149/reality/desktop/banner-list-3', [[728, 90],[728, 150],'fluid'], 'div-gpt-ad-reality-desktop-banner-list-3').defineSizeMapping(desktopOnlyBL).addService(googletag.pubads());
+                      break;
+                  case 'detail':
+                      sasSlots['mobile-top'] = googletag.defineSlot('/31040149/reality/mobile/mobile-top', [[300,250]], 'div-gpt-ad-reality-mobile-mobile-top').defineSizeMapping(mobileTabletOnly).addService(googletag.pubads());
+                      sasSlots['mobile-bottom'] = googletag.defineSlot('/31040149/reality/mobile/mobile-bottom', [[300,250]], 'div-gpt-ad-reality-mobile-mobile-bottom').defineSizeMapping(mobileTabletOnly).addService(googletag.pubads());
+                      sasSlots['screen-top'] = googletag.defineSlot('/31040149/reality/desktop/screen-top', [[728,180],[970,250],[990,250]], 'div-gpt-ad-reality-desktop-screen-top').defineSizeMapping(desktopOnlyST).addService(googletag.pubads());
+                      sasSlots['square'] = googletag.defineSlot('/31040149/reality/desktop/square', [[300,300]], 'div-gpt-ad-reality-desktop-square').defineSizeMapping(desktopOnlySQ).addService(googletag.pubads());
+                      sasSlots['banner-calc'] = googletag.defineSlot('/31040149/reality/responsive/banner-calc', [[300,250], [300,300], [770,160]], 'div-gpt-ad-reality-responsive-banner-calc').defineSizeMapping(responsiveBannerCalc).addService(googletag.pubads());
+                      break;
+                  case 'magazine-hp':
+                      sasSlots['mobile-top'] = googletag.defineSlot('/31040149/reality/mobile/mobile-top', [[300,250]], 'div-gpt-ad-reality-mobile-mobile-top').defineSizeMapping(mobileTabletOnly).addService(googletag.pubads());
+                      sasSlots['mobile-middle'] = googletag.defineSlot('/31040149/reality/mobile/mobile-middle', [[300,250]], 'div-gpt-ad-reality-mobile-mobile-middle').defineSizeMapping(mobileTabletOnly).addService(googletag.pubads());
+                      sasSlots['mobile-bottom'] = googletag.defineSlot('/31040149/reality/mobile/mobile-bottom', [[300,250]], 'div-gpt-ad-reality-mobile-mobile-bottom').defineSizeMapping(mobileTabletOnly).addService(googletag.pubads());
+                      sasSlots['screen-top'] = googletag.defineSlot('/31040149/reality/desktop/screen-top', [[728,180],[970,250]], 'div-gpt-ad-reality-desktop-screen-top').defineSizeMapping(desktopOnlyST).addService(googletag.pubads());
+                      sasSlots['magazin-list-1'] = googletag.defineSlot('/31040149/reality/desktop/magazin-list-1', [[728,180],[970,90]], 'div-gpt-ad-reality-desktop-magazin-list-1').defineSizeMapping(desktopOnlyML).addService(googletag.pubads());
+                      sasSlots['magazin-list-2'] = googletag.defineSlot('/31040149/reality/desktop/magazin-list-2', [[728,180], [970,90]], 'div-gpt-ad-reality-desktop-magazin-list-2').defineSizeMapping(desktopOnlyML).addService(googletag.pubads());
+                      sasSlots['screen-bottom'] = googletag.defineSlot('/31040149/reality/desktop/screen-bottom', [[728,180],[970,90]], 'div-gpt-ad-reality-desktop-screen-bottom').defineSizeMapping(desktopOnlySB).addService(googletag.pubads());
+                      break;
+                  case 'magazine-list':
+                      sasSlots['mobile-top'] = googletag.defineSlot('/31040149/reality/mobile/mobile-top', [[300,250]], 'div-gpt-ad-reality-mobile-mobile-top').defineSizeMapping(mobileTabletOnly).addService(googletag.pubads());
+                      sasSlots['mobile-middle'] = googletag.defineSlot('/31040149/reality/mobile/mobile-middle', [[300,250]], 'div-gpt-ad-reality-mobile-mobile-middle').defineSizeMapping(mobileTabletOnly).addService(googletag.pubads());
+                      sasSlots['mobile-bottom'] = googletag.defineSlot('/31040149/reality/mobile/mobile-bottom', [[300,250]], 'div-gpt-ad-reality-mobile-mobile-bottom').defineSizeMapping(mobileTabletOnly).addService(googletag.pubads());
+                      sasSlots['magazin-list-1'] = googletag.defineSlot('/31040149/reality/desktop/magazin-list-1', [[728,180],[970,90]], 'div-gpt-ad-reality-desktop-magazin-list-1').defineSizeMapping(desktopOnlyML).addService(googletag.pubads());
+                      sasSlots['magazin-list-2'] = googletag.defineSlot('/31040149/reality/desktop/magazin-list-2', [[728,180],[970,90]], 'div-gpt-ad-reality-desktop-magazin-list-2').defineSizeMapping(desktopOnlyML).addService(googletag.pubads());
+                      sasSlots['screen-bottom'] = googletag.defineSlot('/31040149/reality/desktop/screen-bottom', [[728,90],[970,90]], 'div-gpt-ad-reality-desktop-screen-bottom').defineSizeMapping(desktopOnlySB).addService(googletag.pubads());
+                      break;
+                  case 'magazine-detail':
+                      sasSlots['mobile-top'] = googletag.defineSlot('/31040149/reality/mobile/mobile-top', [[300,250]], 'div-gpt-ad-reality-mobile-mobile-top').defineSizeMapping(mobileTabletOnly).addService(googletag.pubads());
+                      sasSlots['mobile-middle'] = googletag.defineSlot('/31040149/reality/mobile/mobile-middle', [[300,250]], 'div-gpt-ad-reality-mobile-mobile-middle').defineSizeMapping(mobileTabletOnly).addService(googletag.pubads());
+                      sasSlots['mobile-bottom'] = googletag.defineSlot('/31040149/reality/mobile/mobile-bottom', [[300,250]], 'div-gpt-ad-reality-mobile-mobile-bottom').defineSizeMapping(mobileTabletOnly).addService(googletag.pubads());
+                      sasSlots['screen-top'] = googletag.defineSlot('/31040149/reality/desktop/screen-top', [[728,180],[970,250]], 'div-gpt-ad-reality-desktop-screen-top').defineSizeMapping(desktopOnlyST).addService(googletag.pubads());
+                      sasSlots['screen-bottom'] = googletag.defineSlot('/31040149/reality/desktop/screen-bottom', [[728,180],[970,90]], 'div-gpt-ad-reality-desktop-screen-bottom').defineSizeMapping(desktopOnlySB).addService(googletag.pubads());
+                      break;
+              }
+          }
+  
+          var sasRefreshEligible = ['square', 'square-2'];
+          var sasRefreshList = [];
+          setInterval(function(){if(sasRefreshList.length!=0){googletag.pubads().refresh(sasRefreshList);sasRefreshList=[];}},45000);
+          googletag.pubads().addEventListener('impressionViewable', function(e) {
+            var slotId = e.slot.getSlotElementId();
+            var regEx = /div-gpt-ad-(\w*)-(\w*)-([\w-]*)/gm;
+            var slotName = regEx.exec(slotId)[3];
+            if (sasRefreshEligible.indexOf(slotName)>-1 && !!sasSlots[slotName]) {
+              sasRefreshList.push(sasSlots[slotName]);
+            }
+          });
+  
+          function checkUrlForBannerTest() {
+              if (window.location.hash.indexOf('displayTestBanners')>-1) { document.cookie='displayTestBanners=true; max-age=31536000; path=/'; window.location=window.location.href.substr(0, window.location.href.indexOf('#')); }
+              if (window.location.hash.indexOf('hideTestBanners')>-1) { document.cookie='displayTestBanners=true; max-age=0; path=/'; window.location=window.location.href.substr(0, window.location.href.indexOf('#')); }
+          }
+          window.addEventListener('hashchange', checkUrlForBannerTest, false);
+          window.onload = checkUrlForBannerTest;
+          if(document.cookie.indexOf('displayTestBanners=true')>-1) { googletag.pubads().setTargeting('a_oth', ['display-test-banners']); }
+  
+          ['adsPag', 'adsSec', 'adsCid', 'adsCat', 'adsKey', 'adsLoc', 'adsSeg'].forEach(function (param) {if (window[param]) { googletag.pubads().setTargeting(adsPrefix + param.substring(3).toLowerCase(), window[param]); }});
+          
+          //googletag.pubads().enableLazyLoad({fetchMarginPercent: -1, renderMarginPercent: 0, mobileScaling: 1.0});
+          googletag.pubads().enableSingleRequest();
+          googletag.pubads().collapseEmptyDivs();
+          googletag.enableServices();
+      }); // 2021-10-01 14:44 / lk
+  </script>
+  <style>.fc-header-image{width:auto;}</style>
+
+
+                                            
+
+
+    
+        <script>
+        let pp_gemius_identifier = 'nGs66My3Zv1Okku5C.ej3PTZ.uzFMe7oWvM5G4jjwlf.e7';
+    </script>
+    <script async>
+        window.eventTracker('ga', ['create', "UA-18479085-1", 'auto']);
+        window.eventTracker('ga', ['set', 'anonymizeIp', true]);
+        window.eventTracker('ga', ['require', 'displayfeatures']);
+                    window.eventTracker('ga', ['set', 'dimension1', 'ProHome Real Estate, s.r.o._JufRf8UIobu']);
+            window.eventTracker('ga', ['send', 'pageview']);
+        window.eventTracker('ga', ['create', 'UA-122504742-1', 'auto', {
+            'name': 'realitygroup',
+            'allowLinker': true,
+        }]);
+        window.eventTracker('ga', ['realitygroup.set', 'anonymizeIp', true]);
+        window.eventTracker('ga', ['realitygroup.require', 'linker']);
+        window.eventTracker('ga', ['realitygroup.linker:autoLink', ['nehnutelnosti.sk', 'topreality.sk', 'novostavby.sk', 'byty.sk', 'reality.bazar.sk', 'chaty.sk']]);
+        window.eventTracker('ga', ['realitygroup.send', 'pageview']);
+
+        function getCookie(name) {
+            const value = '; ' + document.cookie;
+            const parts = value.split('; ' + name + '=');
+            if (parts.length === 2) {
+                return parts.pop()
+                    .split(';')
+                    .shift();
+            }
+        }
+
+        function deleteCookie(name) {
+            document.cookie = name + '=true;domain=.reality.sk;path=/;max-age=0;';
+        }
+
+                        if (getCookie('visited-blog-detail')) {
+            if (!getCookie('visited-offer-detail')) {
+                window.eventTracker('ga', ['set', 'dimension2', 'blog-detail']);
+            }
+            document.addEventListener('DOMContentLoaded', function () {
+                let getPhone = document.getElementsByClassName('js-content-more');
+                let contactSeller = document.getElementsByClassName('contact-agent');
+                let numberClick = false;
+                let contactFormClick = false;
+                for (let i = 0; i < contactSeller.length; i++) {
+                    contactSeller[i].onclick = function () {
+                        contactFormClick = true;
+                        window.addEventListener('beforeunload', function (e) {
+                            e.preventDefault();
+                            if (contactFormClick && !numberClick && !getCookie('offer-detail-contact-click')) {
+                                window.eventTracker('ga', ['set', 'dimension2', 'blog-detail_kontaktovanie-emailom']);
+                                document.cookie = 'offer-detail-contact-click=true;domain=.reality.sk;path=/;max-age=1800;';
+                            }
+                        });
+                        if (numberClick && contactFormClick && !getCookie('offer-detail-number-and-contact-click')) {
+                            window.eventTracker('ga', ['set', 'dimension2', 'blog-detail_zobrazenie+email']);
+                            document.cookie = 'offer-detail-number-and-contact-click=true;domain=.reality.sk;path=/;max-age=1800;';
+                        }
+                    };
+                }
+                for (let i = 0; i < getPhone.length; i++) {
+                    getPhone[i].onclick = function () {
+                        numberClick = true;
+                        window.addEventListener('beforeunload', function (e) {
+                            e.preventDefault();
+                            if (numberClick && !contactFormClick && !getCookie('offer-detail-number-click')) {
+                                window.eventTracker('ga', ['set', 'dimension2', 'blog-detail_zobrazenie-cisla']);
+                                document.cookie = 'offer-detail-number-click=true;domain=.reality.sk;path=/;max-age=1800;';
+                            }
+                        });
+                        if (numberClick && contactFormClick && !getCookie('offer-detail-number-and-contact-click')) {
+                            window.eventTracker('ga', ['set', 'dimension2', 'blog-detail_zobrazenie+email']);
+                            document.cookie = 'offer-detail-number-and-contact-click=true;domain=.reality.sk;path=/;max-age=1800;';
+                        }
+                    };
+                }
+            });
+            document.cookie = 'visited-offer-detail=true;domain=.reality.sk;path=/;max-age=1800;';
+        }
+        
+
+    </script>
+    <!-- End Facebook Pixel Code -->
+
+                <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Reality.sk",
+        "alternateName": "Reality.sk",
+        "url": "https://www.reality.sk"
+    }
+</script>
+
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Reality.sk",
+        "url": "https://www.reality.sk/",
+        "sameAs": [
+            "https://www.facebook.com/www.reality.sk"
+        ],
+        "contactPoint": [
+            {
+                "@type": "ContactPoint",
+                "telephone": "+421 220 924 187",
+                "contactType": "customer service"
+            }
+        ]
+    }
+</script>
+
+        <link rel="canonical" href="https://www.reality.sk/pozemky/stavebne-pozemky-na-hranici-lesa/JufRf8UIobu/" />    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "🌳 Stavebné pozemky na hranici lesa",
+        "image": [
+                                                "https://img.unitedclassifieds.sk/foto/ZmlsdGVyczpxdWFsaXR5KDEwMCk6d2F0ZXJtYXJrKHB1cy84TkZBOW1CXzFfZnNzLC01LC01LDAsMzAsMzApL2p1bA==/nN0NN-Ys3_fss?st=81h_hkZHDVusqxhzkwEPkP82F4oiEgxQTOn4tmbGpkw&amp;ts=1772736087&amp;e=0",
+                                                        "https://img.unitedclassifieds.sk/foto/ZmlsdGVyczpxdWFsaXR5KDEwMCk6d2F0ZXJtYXJrKHB1cy84TkZBOW1CXzFfZnNzLC01LC01LDAsMzAsMzApL2p1bA==/4rROPhuDh_fss?st=QLs4gbtet96C082mO6wjFar14iaWegRV3jrZvveT950&amp;ts=1772736084&amp;e=0",
+                                                        "https://img.unitedclassifieds.sk/foto/ZmlsdGVyczpxdWFsaXR5KDEwMCk6d2F0ZXJtYXJrKHB1cy84TkZBOW1CXzFfZnNzLC01LC01LDAsMzAsMzApL2p1bA==/mjD6R0q4ZT_fss?st=isE5727p0xmsdf7yENe_Sx5d33cyXxMHrqQI4qxKiZ0&amp;ts=1772736085&amp;e=0",
+                                                        "https://img.unitedclassifieds.sk/foto/ZmlsdGVyczpxdWFsaXR5KDEwMCk6d2F0ZXJtYXJrKHB1cy84TkZBOW1CXzFfZnNzLC01LC01LDAsMzAsMzApL2p1bA==/VP30RL43L_fss?st=tS9GEEjXm7N3Lc64DKwz1JR2mItjcdWk5qqOCdh6nXQ&amp;ts=1772736085&amp;e=0",
+                                                        "https://img.unitedclassifieds.sk/foto/ZmlsdGVyczpxdWFsaXR5KDEwMCk6d2F0ZXJtYXJrKHB1cy84TkZBOW1CXzFfZnNzLC01LC01LDAsMzAsMzApL2p1bA==/m7wdOyGtM_fss?st=nqJTnIFDYCfFv1N-Gr9z9WGY9_Vr7QjRGKnwFy3REok&amp;ts=1772280259&amp;e=0",
+                                                        "https://img.unitedclassifieds.sk/foto/ZmlsdGVyczpxdWFsaXR5KDEwMCk6d2F0ZXJtYXJrKHB1cy84TkZBOW1CXzFfZnNzLC01LC01LDAsMzAsMzApL2p1bA==/Iwy3fF7J__fss?st=5eTaKsly-Ugugm5Dxs9B-HYxuWncbmRZtisSLYsU7kk&amp;ts=1772280262&amp;e=0",
+                                                        "https://img.unitedclassifieds.sk/foto/ZmlsdGVyczpxdWFsaXR5KDEwMCk6d2F0ZXJtYXJrKHB1cy84TkZBOW1CXzFfZnNzLC01LC01LDAsMzAsMzApL2p1bA==/w3Pcy52k2_fss?st=8ohIka536oPVr7fiB6DoJzJNb4EIPP8q17M51mItoRc&amp;ts=1772736088&amp;e=0",
+                                                        "https://img.unitedclassifieds.sk/foto/ZmlsdGVyczpxdWFsaXR5KDEwMCk6d2F0ZXJtYXJrKHB1cy84TkZBOW1CXzFfZnNzLC01LC01LDAsMzAsMzApL2p1bA==/RdFOydjyp_fss?st=J427eq4OvhdHx0jkmH8i8aQv3V9K7Cgu21tMzmttq_c&amp;ts=1772280258&amp;e=0"                                    ],
+        "description": "ProHome Real Estate vám prináša jedinečnú príležitosť na kúpu pozemku v jednej z najkrajších lokalít Bratislavy. 🏡 Ak túžite po relaxe v tesnom kontakte s prírodou, no s mestom na dosah ruky, táto ponuka je určená práve vám. 📍 LOKALITA, KTORÁ BERIE DYCHPozemky sa nachádzajú v Novom Meste (k.ú. Vinohrady), v lokalite Veľký Varan. Ide o výnimočné miesto priamo na hranici lesa 🌲, ktoré spája kľud Malých Karpát s nezastavateľnými panoramatickými výhľadmi a mestským komfortom.GPS súradnice: 48.192851, 17.119256https://maps.app.goo.gl/SY5GmN7xxj8oyS6UA📐 Pozemky pre rodinné domy od 458 do 2400 m²Vyberte si veľkosť, ktorá vám vyhovuje s možnosťou pospájania viacerých parciel do väčších. Geometrický plán na delenie pozemkov sa práve zapisuje na katastri a počíta s pozemkami od 460m² do 2400m², a stále máte možnosť zvoliť si vlastnú veľkosť pozemku.💰 Cena: 339 €/m² s možnosťou dohody na cene väčšieho pozemkuParcela 458 m² – 155 262 €Parcela 660 m² – 223 740 € 🏗️ MOŽNOSTI VÝSTAVBY (UPI)Pozemky sú pripravené na realizáciu vášho projektu. Podľa platnej Územnoplánovacej informácie (kód 1203):Využitie: Stavby pre individuálnu rekreáciu a záhrady (ideálne pre moderný rekreačný dom, slúžiaci ako celoročný únik z mesta).Podlažnosť: Možnosť výstavby objektu s plnohodnotným podkrovím a suterénom.Podlahová plocha: do 240m², obmedzená len podlažnosťou.Zastavaná základná plocha: do 80 m² ⚡ TECHNICKÉ INFORMÁCIEInžinierske siete: Elektrina je k dispozícii priamo na okraji pozemku. Kapacita trafostanice bola posilnená práve tento rok. 🔌Prístup: K pozemkom vedie prístupová cesta, ktorej posledných 30 metrov je nespevnených. Prístupová cesta je spevnená vrstvou kameňov a valcovaná, vďaka čomu je stabilná za každého počasia, bez blata či mlák. 🚗💨Voda a odpad: Riešené individuálne (vodný vrt septik/ČOV), čo je pre túto lokalitu štandardom.✨ PREČO INVESTOVAŤ PRÁVE TU?🌲 Susedstvo s lesom: Ranná káva za spevu vtákov a priamy vstup na turistické chodníky. ☕🏙️ Neodolateľné výhľady na mesto, ktoré v budúcnosti nie je možné zastavať.📈Rastúca hodnota: Pozemky v tejto časti Bratislavy sú nedostatkovým tovarom.🤫 Súkromie a kľud: Lokalita Vinohrady – Veľký varan s komornou atmosférou.🚗 Dostupnosť: Rýchle napojenie na Račiansku ulicu a do centra mesta. ",
+        "sku": "JufRf8UIobu",
+        "mpn": "JufRf8UIobu",
+        "brand": {
+              "@type": "Thing",
+              "name": "Reality.sk"
+        },
+        "offers": {
+            "@type": "Offer",
+            "url": "https://www.reality.sk/pozemky/stavebne-pozemky-na-hranici-lesa/JufRf8UIobu/",
+            "priceCurrency": "EUR",
+            "price": "339",
+            "priceValidUntil": "2027-09-11",
+            "itemCondition": "https://schema.org/UsedCondition",
+            "availability": "https://schema.org/InStock",
+            "seller": {
+                "@type": "Person",
+                "name": "Bc. Lukáš Novotný, LL.M"
+            }
+        }
+    }
+</script>
+
+    <script type="application/ld+json">
+    {
+        "@context":"https://schema.org",
+        "@type":"SingleFamilyResidence",
+                            "image":"https://admin.reality.sk/foto/ZmlsdGVyczpxdWFsaXR5KDEwMCk6d2F0ZXJtYXJrKHB1cy84TkZBOW1CXzFfZnNzLC01LC01LDAsMzAsMzApL2p1bA==/nN0NN-Ys3_fss",
+                    "address":{
+            "@type":"PostalAddress",
+            "name":"Reality Bratislava-Nové Mesto",
+            "addressRegion":"Bratislavský kraj",
+            "addressLocality":"Slovensko"
+        },
+                "floorSize":{
+            "@type":"QuantitativeValue",
+            "value":458,
+            "unitCode":"MTK"
+        }
+                                    ,"amenityFeature": [
+                                    {
+                        "@type":"LocationFeatureSpecification",
+                        "value":"Osobné",
+                        "name":"Vlastníctvo"
+                    },                                    {
+                        "@type":"LocationFeatureSpecification",
+                        "value":"Svahovitý",
+                        "name":"Terén pozemku"
+                    },                                    {
+                        "@type":"LocationFeatureSpecification",
+                        "value":"458",
+                        "unitCode":"MTK",
+                        "name":"Plocha pozemku"
+                    }                            ]
+            }
+</script>
+
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Residence",
+        "address": {
+            "@type": "PostalAddress",
+                    "streetAddress": "Bratislava-Nové Mesto",
+                    "addressLocality": "Bratislava-Nové Mesto",
+            "addressRegion": "Bratislavský kraj"
+        }
+    }
+</script>
+
+
+    </head>
+<body class="d-flex flex-column offer-detail"
+        >
+<div class="filter-locality-fading"></div>
+
+
+<div class="lg-icon"></div>
+
+
+    <nav class="pushy pushy-right">
+    <div class="pushy-content">
+        <div class="pushy-close">
+            <a href="#" class="js-pushy-close">
+                            <svg class="icon icon-dark icon-large">
+        <use xlink:href="/build/spritemap.svg#sprite-close"></use>
+    </svg>
+
+
+            </a>
+        </div>
+        <div class="ui link inverted list">
+            <a class="pushy-item"
+               href="#"
+               data-nsk-add-advert-modal>
+                            <svg class="icon icon-dark icon-medium">
+        <use xlink:href="/build/spritemap.svg#sprite-plus"></use>
+    </svg>
+
+
+                Pridať inzerát
+            </a>
+                                                <a class="pushy-item" href="#" data-nsk-login-modal>
+                                    <svg class="icon icon-dark  icon-medium">
+        <use xlink:href="/build/spritemap.svg#sprite-user"></use>
+    </svg>
+
+
+                        Prihlásiť
+                    </a>
+                                        
+                        <hr/>
+
+            <a class="pushy-item" href="/realitne-kancelarie/">Realitné kancelárie</a>
+            <a class="pushy-item" href="/novinky/">Magazín</a>
+            <div class="pushy-search">
+                
+<form name="offer_search_id" method="post" action="/hladanie-inzeratu/">
+<div class="form-row align-items-baseline">
+    <input type="text" id="offer_search_id_searchId" name="offer_search_id[searchId]" placeholder="Číslo inzerátu" class="searchOfferByIdInput" data-html="true" data-toogle="tooltip" data-placement="bottom" title="&lt;span class=&quot;search-offer-by-id-input-tooltip&quot;&gt;Zadajte číslo inzerátu&lt;/span&gt;" />
+    <button style=" background: transparent; border: 0; cursor: pointer">            <svg class="icon fill-white">
+        <use xlink:href="/build/spritemap.svg#sprite-search"></use>
+    </svg>
+
+</button>
+</div>
+<input type="hidden" id="offer_search_id__token" name="offer_search_id[_token]" value="c32dcb76c192b50220a61d3670db.uymu7a1Z2vOsjR2ee9PUW2NZ5mgQCpiNA2FRREfU6Ko.w2PGrN4IqonK51L3KJfmGihs311-b6HZaDInKwyjn9mDXp2I_QiCvsvqWA" /></form>
+
+            </div>
+        </div>
+    </div>
+</nav>
+<div class="site-overlay"></div>
+
+    
+<div class="sticky-navigation-wrapper d-block">
+    <ul class="nav sticky-navigation container">
+        <li class="logo-item mr-auto ml-auto ml-md-0">
+            <span>Reality.sk patria do skupiny </span>
+            <a href="https://www.nehnutelnosti.sk/?utm_source=reality&utm_medium=header&utm_campaign=sucast_siete#reality" target="_blank" class="nav-icon" id="nav-main-logo">
+                            <svg class="icon icon-logo__nehnutelnosti-white">
+        <use xlink:href="/build/spritemap.svg#sprite-logo-nehnutelnosti-white"></use>
+    </svg>
+
+
+            </a>
+        </li>
+        <li class="nav-item d-none d-md-flex">
+            <a href="/realitne-kancelarie/" class="nav-link">Realitné kancelárie</a>
+        </li>
+                    <li class="nav-item d-none d-md-flex">
+                <a href="https://www.nehnutelnosti.sk/magazin-o-byvani?utm_medium=stranky&utm_campaign=presmerovanie&utm_source=reality#reality" class="nav-link">Magazín</a>
+            </li>
+                <li class="nav-item search-item d-none d-md-flex">
+            
+<form name="offer_search_id" method="post" action="/hladanie-inzeratu/">
+<div class="form-row align-items-baseline">
+    <input type="text" id="offer_search_id_searchId" name="offer_search_id[searchId]" placeholder="Číslo inzerátu" class="searchOfferByIdInput" data-html="true" data-toogle="tooltip" data-placement="bottom" title="&lt;span class=&quot;search-offer-by-id-input-tooltip&quot;&gt;Zadajte číslo inzerátu&lt;/span&gt;" />
+    <button style=" background: transparent; border: 0; cursor: pointer">            <svg class="icon fill-white">
+        <use xlink:href="/build/spritemap.svg#sprite-search"></use>
+    </svg>
+
+</button>
+</div>
+<input type="hidden" id="offer_search_id__token" name="offer_search_id[_token]" value="47c9a6ef89a0c8400ca.kih5mv3wu8FTgcp96LscVLemYLQGZ7koX_vDAfJsI7k.6mIR246hy7s164UUu_8uFfyTWYFoAoB8NKi1brkbVMqqX0r_raHjjDTmjw" /></form>
+
+        </li>
+    </ul>
+</div>
+
+    
+<div class="header ">
+    <div class="container mb-2">
+        <div class="row align-items-center">
+            <a href="/" class="col-5 col-md-3 brand">
+                                            <svg class="icon icon-logo">
+        <use xlink:href="/build/spritemap.svg#sprite-logo"></use>
+    </svg>
+
+
+            </a>
+            <ul class="user-action-menu col-7 col-md-9">
+                <li class="nav-item group-start d-none d-md-inline-block">
+                    <a href="#"
+                       class="btn btn-primary btn-sm"
+                       data-nsk-add-advert-modal>
+                                    <svg class="icon fill-white">
+        <use xlink:href="/build/spritemap.svg#sprite-plus"></use>
+    </svg>
+
+
+                        <b>Pridať inzerát</b>
+                    </a>
+                </li>
+                <li class="nav-item d-none d-md-inline-block">
+
+                </li>
+                <li class="nav-item d-none d-md-inline-block login-menu-button">
+                                                                        <a href="#" class="btn btn-secondary btn-sm" data-nsk-login-modal>
+                                            <svg class="icon fill-white">
+        <use xlink:href="/build/spritemap.svg#sprite-user"></use>
+    </svg>
+
+
+                                <b>Prihlásiť</b>
+                            </a>
+                                                            </li>
+                <li class="nav-item d-inline-block d-md-none">
+                    <a href="#" class="nav-link btn font-weight-bold menu-btn">
+                        Menu
+                                    <svg class="icon fill-secondary icon-right">
+        <use xlink:href="/build/spritemap.svg#sprite-hamburger"></use>
+    </svg>
+
+
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+        <div class="section breadcrumbs-section bg-cool-grey d-lg-block">
+        <div class="container">
+            <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+                            {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Reality.sk",
+                    "item": "https://www.reality.sk/"
+                },                            {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Pozemky",
+                    "item": "https://www.reality.sk/pozemky/"
+                },                            {
+                    "@type": "ListItem",
+                    "position": 3,
+                    "name": "Pozemky Bratislava-Nové Mesto",
+                    "item": "https://www.reality.sk/pozemky/bratislava-nove-mesto/"
+                },                            {
+                    "@type": "ListItem",
+                    "position": 4,
+                    "name": "Pozemok pre rodinné domy Bratislava-Nové Mesto",
+                    "item": "https://www.reality.sk/pozemok-pre-rodinne-domy/bratislava-nove-mesto/"
+                },                            {
+                    "@type": "ListItem",
+                    "position": 5,
+                    "name": "Pozemok pre rodinné domy Bratislava-Nové Mesto Predaj",
+                    "item": "https://www.reality.sk/pozemok-pre-rodinne-domy/bratislava-nove-mesto/predaj/"
+                },                            {
+                    "@type": "ListItem",
+                    "position": 6,
+                    "name": "🌳 Stavebné pozemky na hranici lesa",
+                    "item": "https://www.reality.sk/pozemky/stavebne-pozemky-na-hranici-lesa/JufRf8UIobu/"
+                }                    ]
+    }
+</script>
+
+
+<ol class="breadcrumb breadcrumb--truncated">
+            <li class="breadcrumb-item">
+                            <a href="/"
+                   title="Reality.sk"
+                   class="breadcrumb-link ">
+                                                        <svg class="icon fill-primary">
+        <use xlink:href="/build/spritemap.svg#sprite-house"></use>
+    </svg>
+
+
+                                        Reality.sk
+                </a>
+                    </li>
+            <li class="breadcrumb-item">
+                            <a href="/pozemky/"
+                   title="Pozemky"
+                   class="breadcrumb-link  text-dark ">
+                                        Pozemky
+                </a>
+                    </li>
+            <li class="breadcrumb-item">
+                            <a href="/pozemky/bratislava-nove-mesto/"
+                   title="Pozemky Bratislava-Nové Mesto"
+                   class="breadcrumb-link  text-dark ">
+                                        Pozemky Bratislava-Nové Mesto
+                </a>
+                    </li>
+            <li class="breadcrumb-item">
+                            <a href="/pozemok-pre-rodinne-domy/bratislava-nove-mesto/"
+                   title="Pozemok pre rodinné domy Bratislava-Nové Mesto"
+                   class="breadcrumb-link  text-dark ">
+                                        Pozemok pre rodinné domy Bratislava-Nové Mesto
+                </a>
+                    </li>
+            <li class="breadcrumb-item">
+                            <a href="/pozemok-pre-rodinne-domy/bratislava-nove-mesto/predaj/"
+                   title="Pozemok pre rodinné domy Bratislava-Nové Mesto Predaj"
+                   class="breadcrumb-link  text-dark ">
+                                        Pozemok pre rodinné domy Bratislava-Nové Mesto Predaj
+                </a>
+                    </li>
+            <li class="breadcrumb-item">
+                            <span class="icon-left" title="🌳 Stavebné pozemky na hranici lesa">
+                    🌳 Stavebné pozemky na hranici lesa
+                </span>
+                    </li>
+                <button class="breadcrumb-expand" data-breadcrumb-expand title="Kliknutím zobrazíte celý breadcrumb"><span
+                    data-breadcrumb-arrow
+                    class="rotate-180">            <svg class="icon fill-info icon-medium">
+        <use xlink:href="/build/spritemap.svg#sprite-arrow"></use>
+    </svg>
+
+</span></button>
+    </ol>
+
+            <hr class="m-0">
+        </div>
+        <div class="container mt-3">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="zone-wrapper text-center" data-dfp-zone="reality-desktop-screen-top">
+    <style>#div-gpt-ad-reality-desktop-screen-top > div:first-child { display: inline-block; } </style>
+<div id='div-gpt-ad-reality-desktop-screen-top' style='text-align: center; width: 100%;margin-top: 20px !important'>
+    <script>
+        googletag.cmd.push(function() { googletag.display('div-gpt-ad-reality-desktop-screen-top'); });
+    </script>
+</div>
+
+</div>
+
+                    <div class="zone-wrapper " data-dfp-zone="reality-mobile-mobile-top">
+    <div id='div-gpt-ad-reality-mobile-mobile-top' style="text-align: center; width: 100%; padding: 10px 0; box-sizing: border-box;">
+    <script>
+        googletag.cmd.push(function() { googletag.display('div-gpt-ad-reality-mobile-mobile-top'); });
+    </script>
+</div>
+
+</div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section bg-part-gray">
+        <div id="page-info"
+             data-offer-id="JufRf8UIobu"
+             data-offer-cat1="Pozemky"
+             data-offer-cat2="Pozemok pre rodinné domy"
+             data-offer-cat3="Slovensko, Bratislavský kraj, okres Bratislava III, Bratislava-Nové Mesto"
+             data-offer-cat4="Predaj"
+             data-offer-cat5="undefined"
+
+             data-agency-display-name="ProHome Real Estate, s.r.o."
+             data-agency-id="20bf5fb3-e8bf-4140-af85-9c5b3c9cb038"
+             data-broker-display-name="Bc. Lukáš Novotný, LL.M"
+             data-broker-id="f1248786-ea67-4e2e-a92e-69ea1007fcd1"
+             data-is-logged-in="false"
+             data-subject-type="agent"
+             data-agency-company-id="54415641"
+
+             data-transaction-id="JufRf8UIobu_1789131413"
+             data-items-item-id="LT_JufRf8UIobu"
+             data-items-item-name="🌳 Stavebné pozemky na hranici lesa"
+             data-items-item-price="                 339"
+             data-items-item-category="Pozemky"
+             data-items-item-category2="Pozemok pre rodinné domy"
+             data-items-item-category3="Bratislava-Nové Mesto"
+             data-items-item-category4="Predaj"
+             data-items-item-category5="'undefined'"
+             data-items-item-variant="photo only"
+             data-items-item-location-Id="Slovensko, Bratislavský kraj, okres Bratislava III, Bratislava-Nové Mesto"
+
+        ></div>
+
+        <div class="container">
+            <div class="row pt-1">
+                <div class="col-lg-8 mb-5">
+                    
+
+
+<div class="lg-gallery mb-5">
+    <div class="lg-overlay">
+        <nav class="lg-nav">
+                                                                    </nav>
+                    <div class="list-type_list labels labels-detail">
+                                    <mark class="label-red">Top</mark>
+                                                                                            </div>
+        
+                    <nav class="lg-nav hackathon">
+                <a href="/pozemok-pre-rodinne-domy-foto/stavebne-pozemky-na-hranici-lesa/JufRf8UIobu/" class="btn btn-dark js-lg-gallery btn-circle btn-xl" title=" fotiek">
+                    <div class="flex-container column">
+                        <div class="flex-item">            <svg class="icon icon-medium fill-white">
+        <use xlink:href="/build/spritemap.svg#sprite-photo-camera"></use>
+    </svg>
+
+</div>
+                        <div class="flex-item">
+                            <span>8&nbsp;</span>
+                            <span class="d-none d-sm-inline">
+                                                                                                                                    fotiek
+                                                            </span>
+                        </div>
+                    </div>
+                </a>
+                            </nav>
+            </div>
+    <div class="offer-img-wrapper-detail">
+                    <a href="/pozemok-pre-rodinne-domy-foto/stavebne-pozemky-na-hranici-lesa/JufRf8UIobu/" data-gallery-url="/pozemok-pre-rodinne-domy-foto/stavebne-pozemky-na-hranici-lesa/JufRf8UIobu/" class="js-lg-gallery main-detail-img">
+                                        <img class="js-lazy mx-auto d-block img-fluid" data-lazy-src="https://img.unitedclassifieds.sk/foto/NDAweDMwMC9maWx0ZXJzOnF1YWxpdHkoODUpOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/nN0NN-Ys3_fss?st=IH95NYq6Lyx8L-M1URJ8FO0SPJYtznKLFgZGXfjUyqM&amp;ts=1772736087&amp;e=0"
+         srcset="https://img.unitedclassifieds.sk/foto/NDAweDMwMC9maWx0ZXJzOnF1YWxpdHkoODUpOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/nN0NN-Ys3_fss?st=IH95NYq6Lyx8L-M1URJ8FO0SPJYtznKLFgZGXfjUyqM&amp;ts=1772736087&amp;e=0 700w, https://img.unitedclassifieds.sk/foto/NjkweDUxNy9maWx0ZXJzOnF1YWxpdHkoODUpOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/nN0NN-Ys3_fss?st=16ifjXzev2plKxfsQG8vAZfPxLTDdwgXAYLzO7G6AzI&amp;ts=1772736087&amp;e=0 1000w, https://img.unitedclassifieds.sk/foto/MTgwMHgxMzUwL2ZpbHRlcnM6cXVhbGl0eSg4NSk6d2F0ZXJtYXJrKHB1cy84TkZBOW1CXzFfZnNzLC01LC01LDAsMzAsMzApL2p1bA==/nN0NN-Ys3_fss?st=M7bIArPctvAyp-GcQ9nIzR2HdFQaiyAuOCaLIDK4Cic&amp;ts=1772736087&amp;e=0 1800w" alt="Pozemok pre rodinné domy 458 m&sup2; "
+         title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    <noscript data-lazy-src="https://img.unitedclassifieds.sk/foto/MTgwMHgxMzUwL2ZpbHRlcnM6cXVhbGl0eSg4NSk6d2F0ZXJtYXJrKHB1cy84TkZBOW1CXzFfZnNzLC01LC01LDAsMzAsMzApL2p1bA==/nN0NN-Ys3_fss?st=M7bIArPctvAyp-GcQ9nIzR2HdFQaiyAuOCaLIDK4Cic&amp;ts=1772736087&amp;e=0">
+        <img class="mx-auto d-block img-fluid" src="https://img.unitedclassifieds.sk/foto/MTgwMHgxMzUwL2ZpbHRlcnM6cXVhbGl0eSg4NSk6d2F0ZXJtYXJrKHB1cy84TkZBOW1CXzFfZnNzLC01LC01LDAsMzAsMzApL2p1bA==/nN0NN-Ys3_fss?st=M7bIArPctvAyp-GcQ9nIzR2HdFQaiyAuOCaLIDK4Cic&amp;ts=1772736087&amp;e=0" alt="Pozemok pre rodinné domy 458 m&sup2; "
+             title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    </noscript>
+
+                            </a>
+            </div>
+</div>
+
+                    <div class="updated">
+    <p class="m-0"><strong>1118</strong>
+                    (JufRf8UIobu)
+                            <span>&bull;</span>
+            <span>Aktualizovaný: 11. 09. 2026</span>
+                            <span>&bull;</span>
+            <span>1. publikácia: 24. 07. 2026</span>
+            </p>
+</div>
+
+<h1 class="detail-title pt-4 pb-2">🌳 Stavebné pozemky na hranici lesa</h1>
+<table class="w-100">
+    <tbody>
+    <tr>
+        <td class="align-center well">
+            <div class="d-inline-block">
+                <a href="javascript:void(0);" class="js-scroll-to-map">
+                    <img src="/build/images/map-thumb.png" class="map-thumb-img">
+                </a>
+            </div>
+            <div class="d-inline-block ml-2">
+                                                            Horné Židiny 
+                        <br/>
+                                        Bratislava-Nové Mesto
+                    &bull;
+                    Slovensko
+                
+                <a href="javascript:void(0);" class="js-scroll-to-map d-block d-sm-none"><img
+                            src="/build/images/ui-icon-filter-mapa.svg" class="map-img"/> Ukázať na
+                    mape</a>
+            </div>
+        </td>
+        <td class="align-center text-right d-none d-sm-table-cell">
+            <a href="javascript:void(0);" class="js-scroll-to-map"><img
+                        src="/build/images/ui-icon-filter-mapa.svg" class="map-img"/> Ukázať na
+                mape</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<hr class="mb-4 mt-4">
+
+    <div class="d-flex flex-wrap no-gutters justify-content-between align-items-center">
+        <h3 class="contact-title big col-12 col-md-6 mb-0">339 €/m2
+            <small class="p-0 pl-xs-3 text-nowrap">
+                                    <small>339 €/m2 </small>
+                            </small>
+        </h3>
+                    <span class="col-12 col-md-6">
+                Poznámka k cene: <strong>vrátane provízie</strong>
+            </span>
+            </div>
+
+<div class="zone-wrapper text-center mb-4 mt-4" data-dfp-zone="reality-responsive-banner-calc">
+    <div id='div-gpt-ad-reality-responsive-banner-calc' style="text-align: center; width: 100%; padding: 10px 0;">
+    <script>
+        googletag.cmd.push(function() { googletag.display('div-gpt-ad-reality-responsive-banner-calc'); });
+    </script>
+</div>
+
+</div>
+
+<div>
+    <span class="base-inf-title">Základné informácie</span>
+    <div class="row no-gutters mt-1">
+        <hr class="mb-3 mt-3 col-sm-12">
+        <div class="col-sm-4 col-6 info-title">Druh: </div>
+        <div class="col-sm-8 col-6">Pozemok pre rodinné domy</div>
+        <hr class="mb-3 mt-3 col-sm-12">
+        <div class="col-sm-4 col-6 info-title">Typ: </div>
+        <div class="col-sm-8 col-6">Predaj</div>
+                    <hr class="mb-3 mt-3 col-sm-12">
+            <div class="col-sm-4 col-6 info-title">Plocha pozemku:</div>
+            <div class="col-sm-8 col-6">458 m&sup2;</div>
+            </div>
+</div>
+
+<div class="mt-4">
+    <div>
+        <span class="base-inf-title">Info</span>
+    </div>
+    <div class="cms-content content-hidden js-content-more-less">
+        <div class="show-more__container" data-show-more-container>
+            <div class="show-more__wrapper" data-show-more-wrapper>
+                <div class="show-more__inner" data-show-more-inner>
+                    <span class="content-preview">ProHome Real Estate vám prináša jedinečnú príležitosť na kúpu pozemku v jednej z najkrajších lokalít Bratislavy. 🏡 Ak túžite po relaxe v tesnom kontakte s prírodou, no s mestom na dosah ruky, táto ponuka je určená práve vám.<br />
+ <br />
+<br />
+📍 LOKALITA, KTORÁ BERIE DYCH<br />
+<br />
+Pozemky sa nachádzajú v Novom Meste (k.ú. Vinohrady), v lokalite Veľký Varan. Ide o výnimočné miesto priamo na hranici lesa 🌲, ktoré spája kľud Malých Karpát s nezastavateľnými panoramatickými výhľadmi a mestským komfortom.<br />
+GPS súradnice: 48.192851, 17.119256<br />
+https://maps.app.goo.gl/SY5GmN7xxj8oyS6UA<br />
+<br />
+📐 Pozemky pre rodinné domy od 458 do 2400 m²<br />
+<br />
+Vyberte si veľkosť, ktorá vám vyhovuje s možnosťou pospájania viacerých parciel do väčších. Geometrický plán na delenie pozemkov sa práve zapisuje na katastri a počíta s pozemkami od 460m² do 2400m², a stále máte možnosť zvoliť si vlastnú veľkosť pozemku.<br />
+<br />
+💰 Cena: 339 €/m² s možnosťou dohody na cene väčšieho pozemku<br />
+<br />
+Parcela 458 m² – 155 262 €<br />
+<br />
+Parcela 660 m² – 223 740 €<br />
+<br />
+ <br />
+<br />
+🏗️ MOŽNOSTI VÝSTAVBY (UPI)<br />
+<br />
+Pozemky sú pripravené na realizáciu vášho projektu. Podľa platnej Územnoplánovacej informácie (kód 1203):<br />
+<br />
+Využitie: Stavby pre individuálnu rekreáciu a záhrady (ideálne pre moderný rekreačný dom, slúžiaci ako celoročný únik z mesta).<br />
+<br />
+Podlažnosť: Možnosť výstavby objektu s plnohodnotným podkrovím a suterénom.<br />
+<br />
+Podlahová plocha: do 240m², obmedzená len podlažnosťou.<br />
+<br />
+Zastavaná základná plocha: do 80 m²<br />
+<br />
+ <br />
+<br />
+⚡ TECHNICKÉ INFORMÁCIE<br />
+<br />
+Inžinierske siete: Elektrina je k dispozícii priamo na okraji pozemku. Kapacita trafostanice bola posilnená práve tento rok. 🔌<br />
+<br />
+Prístup: K pozemkom vedie prístupová cesta, ktorej posledných 30 metrov je nespevnených. Prístupová cesta je spevnená vrstvou kameňov a valcovaná, vďaka čomu je stabilná za každého počasia, bez blata či mlák. 🚗💨<br />
+<br />
+Voda a odpad: Riešené individuálne (vodný vrt septik/ČOV), čo je pre túto lokalitu štandardom.<br />
+<br />
+<br />
+✨ PREČO INVESTOVAŤ PRÁVE TU?<br />
+<br />
+🌲 Susedstvo s lesom: Ranná káva za spevu vtákov a priamy vstup na turistické chodníky. ☕<br />
+🏙️ Neodolateľné výhľady na mesto, ktoré v budúcnosti nie je možné zastavať.<br />
+📈Rastúca hodnota: Pozemky v tejto časti Bratislavy sú nedostatkovým tovarom.<br />
+🤫 Súkromie a kľud: Lokalita Vinohrady – Veľký varan s komornou atmosférou.<br />
+🚗 Dostupnosť: Rýchle napojenie na Račiansku ulicu a do centra mesta.<br />
+<br />
+<br />
+ <br />
+</span>
+                </div>
+            </div>
+            <span class="show-more__button" data-show-more-btn
+                  data-show-more-text="Prečítať viac"
+                  data-show-less-text="Prečítať menej">Prečítať viac</span>
+        </div>
+    </div>
+</div>
+
+
+<div class="mt-4">
+    <span class="base-inf-title">Charakteristika</span>
+</div>
+<div class="cms-content content-hidden js-content-more-less characteristics">
+    <div class="show-more__container" data-show-more-container>
+
+        <div class="show-more__wrapper" data-show-more-wrapper>
+            <div class="show-more__inner" data-show-more-inner>
+
+                <div class="row no-gutters content-preview mt-1">                                                    <hr class="mb-3 mt-3 col-sm-12">
+                            <div class="col-6 col-sm-4 info-title">Vlastníctvo:
+                            </div>
+                            <div class="col-6 col-sm-8">Osobné</div>
+                                                                                                    <hr class="mb-3 mt-3 col-sm-12">
+                            <div class="col-6 col-sm-4 info-title">Terén pozemku:
+                            </div>
+                            <div class="col-6 col-sm-8">Svahovitý</div>
+                                                                                                    <hr class="mb-3 mt-3 col-sm-12">
+                            <div class="col-6 col-sm-4 info-title">Plocha pozemku:
+                            </div>
+                            <div class="col-6 col-sm-8">458 m&sup2;</div>
+                                                </div>
+            </div>
+        </div>
+        <span class="show-more__button" data-show-more-btn data-show-more-text="Zobraziť viac"
+              data-show-less-text="Zobraziť menej">Zobraziť viac</span>
+    </div>
+</div>
+
+
+<hr class="mb-4 mt-4"/>
+
+
+<div class="align-items-center row mb-4">
+    <div class="col-2">
+        <img
+                src="/build/images/svg/clock.svg" width="62px"
+                height="62px" alt="kalendar">
+    </div>
+    <div class="col-10">
+        <p class="report-text mb-0"><strong
+                    class="d-block">Zaujala Vás táto nehnuteľnosť?</strong>Nečakajte a dohodnite si termín obhliadky ešte dnes.
+        </p>
+    </div>
+</div>
+<div class="align-items-center">
+    <a href="/dohodnut-obhliadku/JufRf8UIobu" rel="nofollow"
+       class="btn btn-outline-primary btn-fat-wide w-100 tour-arrangement" data-track="tour-arrangement-click"
+       data-toggle="modal" data-load>
+        <span>Požiadať o termín obhliadky</span>
+    </a>
+</div>
+<hr class="mb-4 mt-4"/>
+
+        <div class="detail-map">
+        <h3 class="d-flex justify-content-between"
+            aria-expanded="false">
+            <span class="detail-subtitle align-self-center">Vybavenosť v okolí</span>
+        </h3>
+
+        <div class="amenities">
+            <span class="amenities-no-result d-none">Žiadne výsledky</span>
+            <a href="#" class="amenity-show-more d-none">Zobraziť viac</a>
+            <a href="#" class="amenity-show-less d-none">Zobraziť menej</a>
+        </div>
+
+        <div class="d-flex d-none justify-content-center text-primary" id="amenities-loader">
+            <div class="spinner-border-large" role="status"></div>
+        </div>
+        <hr class="mb-4 mt-4">
+        <h2 class="detail-subtitle font-weight-bold">Nehnuteľnosť na mape</h2>
+        <div class="map" id="js-map-detail" style="height: 460px;"
+             data-latitude="48.19061575"
+             data-longitude="17.123426225357"
+                                                                 data-zoom-level="12">
+        </div>
+    </div>
+    <hr class="mb-4 mt-4"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+          integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+          crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
+
+
+                    <div class="d-sm-flex justify-content-between mb-2 row">
+                        <div id="detail-contact-card_bottom" class="col-sm-6 contact-box">
+                            <h2 class="mb-4">Kontakt na predajcu</h2>
+                            <figure class="d-flex contact-body mb-4">
+                                <div class="position-relative">
+                                    <div class="rounded-circle avatar">
+                                                                                                <svg class="icon icon fill-primary">
+        <use xlink:href="/build/spritemap.svg#sprite-avatar"></use>
+    </svg>
+
+
+                                                                            </div>
+                                                                            <div class="profi-client_detail p-1 rounded-circle position-absolute">
+                                                        <svg class="icon icon-logo-profi">
+        <use xlink:href="/build/spritemap.svg#sprite-profi-client"></use>
+    </svg>
+
+
+                                        </div>
+                                                                    </div>
+                                                                                                <figcaption class="d-flex flex-column col">
+                                                                            <h4 class="name mt-3">Bc. Lukáš Novotný, LL.M</h4>
+                                                                                                                <span>ProHome Real Estate, s.r.o.</span>
+                                                                            
+<div class="js-phone-loader"
+     data-user-id="f1248786-ea67-4e2e-a92e-69ea1007fcd1"
+     data-offer-id="JufRf8UIobu">
+                                        <p class="cell-number content-hidden" data-content-group="broker-f1248786-ea67-4e2e-a92e-69ea1007fcd1">
+                    <span class="phone-preview ts-body font-weight-bold content-more">
+                        +421 902...
+                    </span><span class="phone-full content-less ts-body font-weight-bold p-0" style="display: none;"><a href="#" class="phone-link" data-track="phone-bottom-call"></a></span>                    <a href="#" class="js-load-phone content-more font-weight-bold js-content-more txt-undrl"
+                       data-track="phone-bottom" data-offer-id="JufRf8UIobu"
+                       data-fb-conversion-api="https://www.reality.sk/app-api/facebook-conversion-api/AddToCart/">
+                        zobraziť číslo
+                    </a>
+                </p>
+                        </div>
+                                </figcaption>
+                            </figure>
+                            <div class="underline mb-4 pt-4 d-md-none"></div>
+                                                            <div class="contact-body">
+    <figure class="d-flex">
+                    <div class="agency-logo avatar">
+                <span class="detail-contact-img hv-center p-2">
+                        <img class="js-lazy " data-lazy-src="https://img.unitedclassifieds.sk/foto/Zml0LWluLzE3MHgxNzAvZmlsdGVyczpxdWFsaXR5KDUwKS9wdXM=/fuyIV2DK8_fss?st=WE0ZIOExux4uE7t7bw_Mb_1zE6GbfH9GPm-9ZSa9AaQ&amp;ts=1654004437&amp;e=0"
+         srcset="https://img.unitedclassifieds.sk/foto/Zml0LWluLzE3MHgxNzAvZmlsdGVyczpxdWFsaXR5KDUwKS9wdXM=/fuyIV2DK8_fss?st=WE0ZIOExux4uE7t7bw_Mb_1zE6GbfH9GPm-9ZSa9AaQ&amp;ts=1654004437&amp;e=0 700w, https://img.unitedclassifieds.sk/foto/Zml0LWluLzE3MHgxNzAvZmlsdGVyczpxdWFsaXR5KDUwKS9wdXM=/fuyIV2DK8_fss?st=WE0ZIOExux4uE7t7bw_Mb_1zE6GbfH9GPm-9ZSa9AaQ&amp;ts=1654004437&amp;e=0 1000w, https://img.unitedclassifieds.sk/foto/Zml0LWluLzE3MHgxNzAvZmlsdGVyczpxdWFsaXR5KDUwKS9wdXM=/fuyIV2DK8_fss?st=WE0ZIOExux4uE7t7bw_Mb_1zE6GbfH9GPm-9ZSa9AaQ&amp;ts=1654004437&amp;e=0 1800w" alt=""
+         title=" | Reality.sk">
+    <noscript data-lazy-src="https://img.unitedclassifieds.sk/foto/Zml0LWluLzE3MHgxNzAvZmlsdGVyczpxdWFsaXR5KDUwKS9wdXM=/fuyIV2DK8_fss?st=WE0ZIOExux4uE7t7bw_Mb_1zE6GbfH9GPm-9ZSa9AaQ&amp;ts=1654004437&amp;e=0">
+        <img  src="https://img.unitedclassifieds.sk/foto/Zml0LWluLzE3MHgxNzAvZmlsdGVyczpxdWFsaXR5KDUwKS9wdXM=/fuyIV2DK8_fss?st=WE0ZIOExux4uE7t7bw_Mb_1zE6GbfH9GPm-9ZSa9AaQ&amp;ts=1654004437&amp;e=0" alt=""
+             title=" | Reality.sk">
+    </noscript>
+
+                </span>
+            </div>
+                            <figcaption class="d-flex flex-column col">
+                <h4 class="name mt-2">
+                    ProHome Real Estate, s.r.o.
+                </h4>
+                                    <address class="ts-body mb-1">
+                        Plynárenská
+                         7/C                        &bull;
+                        821 09, Bratislava
+                                            </address>
+                                                    <a href="/realitna-kancelaria/prohome-real-estate-s-r-o/20bf5fb3-e8bf-4140-af85-9c5b3c9cb038/"
+                       target="_blank"
+                       class="font-weight-bold txt-undrl"
+                       data-track="agency-bottom">
+                        Celá ponuka spoločnosti
+                    </a>
+                            </figcaption>
+            </figure>
+</div>
+
+
+
+                                                    </div>
+                        <div class="justify-content-md-center col-sm-6">
+                            <div id="DetailContactForm" data-react-container="DetailContactForm"
+                                 data-react-props='{"grid":"6", "formPrefix": "footerContact"}'></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div id="detail-contact-card_left" class="contact-card contact-box mb-4 d-none d-lg-block">
+    <div class="contact-header underline">
+        <h3 class="contact-title big
+            ">339 €/m2                    <small>339&nbsp;€/m2</small></h3>
+    </div>
+
+    <div class="contact-body">
+        <h3 class="mb-3">Kontakt na predajcu</h3>
+        <figure class="d-flex underline pb-4 mb-4">
+            <div class="position-relative h-100">
+                <div class="rounded-circle avatar">
+                                                        <svg class="icon icon fill-primary">
+        <use xlink:href="/build/spritemap.svg#sprite-avatar"></use>
+    </svg>
+
+
+                                    </div>
+                                    <div class="profi-client_detail p-1 rounded-circle position-absolute">
+                                    <svg class="icon icon-logo-profi">
+        <use xlink:href="/build/spritemap.svg#sprite-profi-client"></use>
+    </svg>
+
+
+                    </div>
+                            </div>
+            <figcaption class="d-flex flex-column col">
+                                    <h4 id="datalayer-displayName" class="name mt-3">
+                        Bc. Lukáš Novotný, LL.M
+                    </h4>
+                                                <span id="datalayer-agency-name">
+                                            ProHome Real Estate, s.r.o.
+                                    </span>
+
+                    
+<div class="js-phone-loader"
+     data-user-id="f1248786-ea67-4e2e-a92e-69ea1007fcd1"
+     data-offer-id="JufRf8UIobu">
+                                        <p class="cell-number content-hidden" data-content-group="broker-f1248786-ea67-4e2e-a92e-69ea1007fcd1">
+                    <span class="phone-preview ts-body font-weight-bold content-more">
+                        +421 902...
+                    </span><span class="phone-full content-less ts-body font-weight-bold p-0" style="display: none;"><a href="#" class="phone-link" data-track="phone-top-call"></a></span>                    <a href="#" class="js-load-phone content-more font-weight-bold js-content-more txt-undrl"
+                       data-track="phone-top" data-offer-id="JufRf8UIobu"
+                       data-fb-conversion-api="https://www.reality.sk/app-api/facebook-conversion-api/AddToCart/">
+                        zobraziť číslo
+                    </a>
+                </p>
+                        </div>
+            </figcaption>
+        </figure>
+        <div data-react-container="DetailContactForm"
+             data-react-props='{"grid":"12", "formPrefix": "asideContact"}'></div>
+    </div>
+</div>
+
+
+                    <div class="zone-wrapper text-center" data-dfp-zone="reality-desktop-square">
+    <div id='div-gpt-ad-reality-desktop-square' style='text-align: center; width: 100%; margin-bottom: 20px;'>
+    <script>
+        googletag.cmd.push(function() { googletag.display('div-gpt-ad-reality-desktop-square'); });
+    </script>
+</div>
+
+</div>
+
+                                            
+<div class="row xs-gutter pb-5 mb-3">
+    <div class="col-12 mb-3">
+        <h4 class="mb-0">Ďalšie ponuky inzerenta</h4>
+        <a class="text-danger text-sm"
+           href="/realitna-kancelaria/prohome-real-estate-s-r-o/20bf5fb3-e8bf-4140-af85-9c5b3c9cb038/">Celá ponuka inzerenta</a>
+    </div>
+            <div class="col-6 col-lg-6 col-sm-4">
+            <a href="/pozemky/pozemok-1700-3000m2-pre-komorny-projekt-rekreacnych-vil-na-hranici-lesa/Juz_CRZcHm0/">
+                <figure class="similary">
+                    <div class="offer-img-wrapper-similar">
+                                                        <img class="js-lazy img-fluid" data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/w3Pcy52k2_fss?st=UROBQVBxSSGyW9tKRhPFG1oqXoyx3bMjXhaiX5j5Nu8&amp;ts=1772736088&amp;e=0"
+         srcset="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/w3Pcy52k2_fss?st=UROBQVBxSSGyW9tKRhPFG1oqXoyx3bMjXhaiX5j5Nu8&amp;ts=1772736088&amp;e=0 700w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/w3Pcy52k2_fss?st=UROBQVBxSSGyW9tKRhPFG1oqXoyx3bMjXhaiX5j5Nu8&amp;ts=1772736088&amp;e=0 1000w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/w3Pcy52k2_fss?st=UROBQVBxSSGyW9tKRhPFG1oqXoyx3bMjXhaiX5j5Nu8&amp;ts=1772736088&amp;e=0 1800w" alt="Pozemok pre rodinné domy 458 m&sup2; "
+         title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    <noscript data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/w3Pcy52k2_fss?st=UROBQVBxSSGyW9tKRhPFG1oqXoyx3bMjXhaiX5j5Nu8&amp;ts=1772736088&amp;e=0">
+        <img class="img-fluid" src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/w3Pcy52k2_fss?st=UROBQVBxSSGyW9tKRhPFG1oqXoyx3bMjXhaiX5j5Nu8&amp;ts=1772736088&amp;e=0" alt="Pozemok pre rodinné domy 458 m&sup2; "
+             title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    </noscript>
+
+                                            </div>
+                    <figcaption class="similary-caption">
+                                                    <span class="price">
+                                319 €/m2
+                            </span>
+                                            </figcaption>
+                </figure>
+            </a>
+        </div>
+            <div class="col-6 col-lg-6 col-sm-4">
+            <a href="/byty/na-prenajom-3-izbovy-byt-s-balkonom-pet-friendly/JuaMaUR5Kxe/">
+                <figure class="similary">
+                    <div class="offer-img-wrapper-similar">
+                                                        <img class="js-lazy img-fluid" data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/1uz_CrmvF_fss?st=TiuoVp7238zTEzAeYmXDsbeA1apJeIbcZFjWubVLya0&amp;ts=1788440779&amp;e=0"
+         srcset="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/1uz_CrmvF_fss?st=TiuoVp7238zTEzAeYmXDsbeA1apJeIbcZFjWubVLya0&amp;ts=1788440779&amp;e=0 700w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/1uz_CrmvF_fss?st=TiuoVp7238zTEzAeYmXDsbeA1apJeIbcZFjWubVLya0&amp;ts=1788440779&amp;e=0 1000w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/1uz_CrmvF_fss?st=TiuoVp7238zTEzAeYmXDsbeA1apJeIbcZFjWubVLya0&amp;ts=1788440779&amp;e=0 1800w" alt="Pozemok pre rodinné domy 458 m&sup2; "
+         title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    <noscript data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/1uz_CrmvF_fss?st=TiuoVp7238zTEzAeYmXDsbeA1apJeIbcZFjWubVLya0&amp;ts=1788440779&amp;e=0">
+        <img class="img-fluid" src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/1uz_CrmvF_fss?st=TiuoVp7238zTEzAeYmXDsbeA1apJeIbcZFjWubVLya0&amp;ts=1788440779&amp;e=0" alt="Pozemok pre rodinné domy 458 m&sup2; "
+             title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    </noscript>
+
+                                            </div>
+                    <figcaption class="similary-caption">
+                                                    <span class="price">
+                                1,050 €/mesiac
+                            </span>
+                                            </figcaption>
+                </figure>
+            </a>
+        </div>
+            <div class="col-6 col-lg-6 col-sm-4">
+            <a href="/domy/dom-s-pribehom-5-izbovy-rodinny-dom-s-velkou-zahradou/JuOQaVxC4NM/">
+                <figure class="similary">
+                    <div class="offer-img-wrapper-similar">
+                                                        <img class="js-lazy img-fluid" data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/yBQX0h2rv_fss?st=k2J6QfnDqkZbGxwu6yaHsVLlTxCZQ4R71xIYVbVN1NU&amp;ts=1772388933&amp;e=0"
+         srcset="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/yBQX0h2rv_fss?st=k2J6QfnDqkZbGxwu6yaHsVLlTxCZQ4R71xIYVbVN1NU&amp;ts=1772388933&amp;e=0 700w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/yBQX0h2rv_fss?st=k2J6QfnDqkZbGxwu6yaHsVLlTxCZQ4R71xIYVbVN1NU&amp;ts=1772388933&amp;e=0 1000w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/yBQX0h2rv_fss?st=k2J6QfnDqkZbGxwu6yaHsVLlTxCZQ4R71xIYVbVN1NU&amp;ts=1772388933&amp;e=0 1800w" alt="Pozemok pre rodinné domy 458 m&sup2; "
+         title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    <noscript data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/yBQX0h2rv_fss?st=k2J6QfnDqkZbGxwu6yaHsVLlTxCZQ4R71xIYVbVN1NU&amp;ts=1772388933&amp;e=0">
+        <img class="img-fluid" src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/yBQX0h2rv_fss?st=k2J6QfnDqkZbGxwu6yaHsVLlTxCZQ4R71xIYVbVN1NU&amp;ts=1772388933&amp;e=0" alt="Pozemok pre rodinné domy 458 m&sup2; "
+             title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    </noscript>
+
+                                            </div>
+                    <figcaption class="similary-caption">
+                                                    <span class="price">
+                                269,900 €
+                            </span>
+                                            </figcaption>
+                </figure>
+            </a>
+        </div>
+            <div class="col-6 col-lg-6 col-sm-4">
+            <a href="/byty/3-izbovy-byt-panorama-towers-parking/Ju8lEGMqqDK/">
+                <figure class="similary">
+                    <div class="offer-img-wrapper-similar">
+                                                        <img class="js-lazy img-fluid" data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/Ydtl_OKi5_fss?st=tR8QUT1vQUPiGKzwITXYXqdtzcRB2xzrxmioaf5iAKI&amp;ts=1786101659&amp;e=0"
+         srcset="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/Ydtl_OKi5_fss?st=tR8QUT1vQUPiGKzwITXYXqdtzcRB2xzrxmioaf5iAKI&amp;ts=1786101659&amp;e=0 700w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/Ydtl_OKi5_fss?st=tR8QUT1vQUPiGKzwITXYXqdtzcRB2xzrxmioaf5iAKI&amp;ts=1786101659&amp;e=0 1000w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/Ydtl_OKi5_fss?st=tR8QUT1vQUPiGKzwITXYXqdtzcRB2xzrxmioaf5iAKI&amp;ts=1786101659&amp;e=0 1800w" alt="Pozemok pre rodinné domy 458 m&sup2; "
+         title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    <noscript data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/Ydtl_OKi5_fss?st=tR8QUT1vQUPiGKzwITXYXqdtzcRB2xzrxmioaf5iAKI&amp;ts=1786101659&amp;e=0">
+        <img class="img-fluid" src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/Ydtl_OKi5_fss?st=tR8QUT1vQUPiGKzwITXYXqdtzcRB2xzrxmioaf5iAKI&amp;ts=1786101659&amp;e=0" alt="Pozemok pre rodinné domy 458 m&sup2; "
+             title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    </noscript>
+
+                                            </div>
+                    <figcaption class="similary-caption">
+                                                    <span class="price">
+                                1,480 €/mesiac
+                            </span>
+                                            </figcaption>
+                </figure>
+            </a>
+        </div>
+            <div class="col-6 col-lg-6 col-sm-4">
+            <a href="/domy/zariadeny-dom-pri-jazere-byvanie-kazdy-den-ako-na-dovolenke/JuLXRlIW4Ya/">
+                <figure class="similary">
+                    <div class="offer-img-wrapper-similar">
+                                                        <img class="js-lazy img-fluid" data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/gy9raU6J7_fss?st=A3-EmwNC6K5eZoUmuyczTRuw1FnIuMqZppJ3iMn34Vw&amp;ts=1775233846&amp;e=0"
+         srcset="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/gy9raU6J7_fss?st=A3-EmwNC6K5eZoUmuyczTRuw1FnIuMqZppJ3iMn34Vw&amp;ts=1775233846&amp;e=0 700w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/gy9raU6J7_fss?st=A3-EmwNC6K5eZoUmuyczTRuw1FnIuMqZppJ3iMn34Vw&amp;ts=1775233846&amp;e=0 1000w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/gy9raU6J7_fss?st=A3-EmwNC6K5eZoUmuyczTRuw1FnIuMqZppJ3iMn34Vw&amp;ts=1775233846&amp;e=0 1800w" alt="Pozemok pre rodinné domy 458 m&sup2; "
+         title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    <noscript data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/gy9raU6J7_fss?st=A3-EmwNC6K5eZoUmuyczTRuw1FnIuMqZppJ3iMn34Vw&amp;ts=1775233846&amp;e=0">
+        <img class="img-fluid" src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/gy9raU6J7_fss?st=A3-EmwNC6K5eZoUmuyczTRuw1FnIuMqZppJ3iMn34Vw&amp;ts=1775233846&amp;e=0" alt="Pozemok pre rodinné domy 458 m&sup2; "
+             title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    </noscript>
+
+                                            </div>
+                    <figcaption class="similary-caption">
+                                                    <span class="price">
+                                295,000 €
+                            </span>
+                                            </figcaption>
+                </figure>
+            </a>
+        </div>
+            <div class="col-6 col-lg-6 col-sm-4">
+            <a href="/byty/priestranny-3i-byt-s-terasou-loggiou-a-parkovanim-agatova/JuChOmw5U_9/">
+                <figure class="similary">
+                    <div class="offer-img-wrapper-similar">
+                                                        <img class="js-lazy img-fluid" data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/YS5OD2KdM_fss?st=2C2ymPl20RARuEADzuKuOVQIJl8v7zbpjdlOb5lTWKo&amp;ts=1779379737&amp;e=0"
+         srcset="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/YS5OD2KdM_fss?st=2C2ymPl20RARuEADzuKuOVQIJl8v7zbpjdlOb5lTWKo&amp;ts=1779379737&amp;e=0 700w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/YS5OD2KdM_fss?st=2C2ymPl20RARuEADzuKuOVQIJl8v7zbpjdlOb5lTWKo&amp;ts=1779379737&amp;e=0 1000w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/YS5OD2KdM_fss?st=2C2ymPl20RARuEADzuKuOVQIJl8v7zbpjdlOb5lTWKo&amp;ts=1779379737&amp;e=0 1800w" alt="Pozemok pre rodinné domy 458 m&sup2; "
+         title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    <noscript data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/YS5OD2KdM_fss?st=2C2ymPl20RARuEADzuKuOVQIJl8v7zbpjdlOb5lTWKo&amp;ts=1779379737&amp;e=0">
+        <img class="img-fluid" src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/YS5OD2KdM_fss?st=2C2ymPl20RARuEADzuKuOVQIJl8v7zbpjdlOb5lTWKo&amp;ts=1779379737&amp;e=0" alt="Pozemok pre rodinné domy 458 m&sup2; "
+             title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    </noscript>
+
+                                            </div>
+                    <figcaption class="similary-caption">
+                                                    <span class="price">
+                                271,000 €
+                            </span>
+                                            </figcaption>
+                </figure>
+            </a>
+        </div>
+    </div>
+
+
+                        
+<div class="row xs-gutter pb-5 mb-3">
+    <div class="col-12 mb-3">
+        <h4 class="mb-0">Podobné v ponuke</h4>
+                <a class="text-danger text-sm" href="/pozemok-pre-rodinne-domy/bratislava-nove-mesto/predaj/">
+            Bratislava-Nové Mesto, Pozemok pre rodinné domy
+            - predaj
+        </a>
+    </div>
+            <div class="col-6 col-lg-6 col-sm-4">
+            <a href="/pozemky/pozemok-1700-3000m2-pre-komorny-projekt-rekreacnych-vil-na-hranici-lesa/Juz_CRZcHm0/">
+                <figure class="similary">
+                    <div class="offer-img-wrapper-similar">
+                                                        <img class="js-lazy img-fluid" data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/w3Pcy52k2_fss?st=UROBQVBxSSGyW9tKRhPFG1oqXoyx3bMjXhaiX5j5Nu8&amp;ts=1772736088&amp;e=0"
+         srcset="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/w3Pcy52k2_fss?st=UROBQVBxSSGyW9tKRhPFG1oqXoyx3bMjXhaiX5j5Nu8&amp;ts=1772736088&amp;e=0 700w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/w3Pcy52k2_fss?st=UROBQVBxSSGyW9tKRhPFG1oqXoyx3bMjXhaiX5j5Nu8&amp;ts=1772736088&amp;e=0 1000w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/w3Pcy52k2_fss?st=UROBQVBxSSGyW9tKRhPFG1oqXoyx3bMjXhaiX5j5Nu8&amp;ts=1772736088&amp;e=0 1800w" alt="Pozemok pre rodinné domy 458 m&sup2; "
+         title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    <noscript data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/w3Pcy52k2_fss?st=UROBQVBxSSGyW9tKRhPFG1oqXoyx3bMjXhaiX5j5Nu8&amp;ts=1772736088&amp;e=0">
+        <img class="img-fluid" src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/w3Pcy52k2_fss?st=UROBQVBxSSGyW9tKRhPFG1oqXoyx3bMjXhaiX5j5Nu8&amp;ts=1772736088&amp;e=0" alt="Pozemok pre rodinné domy 458 m&sup2; "
+             title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    </noscript>
+
+                                            </div>
+                    <figcaption class="similary-caption">
+                                                    <span class="price">
+                                319 €/m2
+                            </span>
+                                            </figcaption>
+                </figure>
+            </a>
+        </div>
+            <div class="col-6 col-lg-6 col-sm-4">
+            <a href="/byty/na-prenajom-3-izbovy-byt-s-balkonom-pet-friendly/JuaMaUR5Kxe/">
+                <figure class="similary">
+                    <div class="offer-img-wrapper-similar">
+                                                        <img class="js-lazy img-fluid" data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/1uz_CrmvF_fss?st=TiuoVp7238zTEzAeYmXDsbeA1apJeIbcZFjWubVLya0&amp;ts=1788440779&amp;e=0"
+         srcset="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/1uz_CrmvF_fss?st=TiuoVp7238zTEzAeYmXDsbeA1apJeIbcZFjWubVLya0&amp;ts=1788440779&amp;e=0 700w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/1uz_CrmvF_fss?st=TiuoVp7238zTEzAeYmXDsbeA1apJeIbcZFjWubVLya0&amp;ts=1788440779&amp;e=0 1000w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/1uz_CrmvF_fss?st=TiuoVp7238zTEzAeYmXDsbeA1apJeIbcZFjWubVLya0&amp;ts=1788440779&amp;e=0 1800w" alt="Pozemok pre rodinné domy 458 m&sup2; "
+         title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    <noscript data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/1uz_CrmvF_fss?st=TiuoVp7238zTEzAeYmXDsbeA1apJeIbcZFjWubVLya0&amp;ts=1788440779&amp;e=0">
+        <img class="img-fluid" src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/1uz_CrmvF_fss?st=TiuoVp7238zTEzAeYmXDsbeA1apJeIbcZFjWubVLya0&amp;ts=1788440779&amp;e=0" alt="Pozemok pre rodinné domy 458 m&sup2; "
+             title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    </noscript>
+
+                                            </div>
+                    <figcaption class="similary-caption">
+                                                    <span class="price">
+                                1,050 €/mesiac
+                            </span>
+                                            </figcaption>
+                </figure>
+            </a>
+        </div>
+            <div class="col-6 col-lg-6 col-sm-4">
+            <a href="/domy/dom-s-pribehom-5-izbovy-rodinny-dom-s-velkou-zahradou/JuOQaVxC4NM/">
+                <figure class="similary">
+                    <div class="offer-img-wrapper-similar">
+                                                        <img class="js-lazy img-fluid" data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/yBQX0h2rv_fss?st=k2J6QfnDqkZbGxwu6yaHsVLlTxCZQ4R71xIYVbVN1NU&amp;ts=1772388933&amp;e=0"
+         srcset="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/yBQX0h2rv_fss?st=k2J6QfnDqkZbGxwu6yaHsVLlTxCZQ4R71xIYVbVN1NU&amp;ts=1772388933&amp;e=0 700w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/yBQX0h2rv_fss?st=k2J6QfnDqkZbGxwu6yaHsVLlTxCZQ4R71xIYVbVN1NU&amp;ts=1772388933&amp;e=0 1000w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/yBQX0h2rv_fss?st=k2J6QfnDqkZbGxwu6yaHsVLlTxCZQ4R71xIYVbVN1NU&amp;ts=1772388933&amp;e=0 1800w" alt="Pozemok pre rodinné domy 458 m&sup2; "
+         title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    <noscript data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/yBQX0h2rv_fss?st=k2J6QfnDqkZbGxwu6yaHsVLlTxCZQ4R71xIYVbVN1NU&amp;ts=1772388933&amp;e=0">
+        <img class="img-fluid" src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/yBQX0h2rv_fss?st=k2J6QfnDqkZbGxwu6yaHsVLlTxCZQ4R71xIYVbVN1NU&amp;ts=1772388933&amp;e=0" alt="Pozemok pre rodinné domy 458 m&sup2; "
+             title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    </noscript>
+
+                                            </div>
+                    <figcaption class="similary-caption">
+                                                    <span class="price">
+                                269,900 €
+                            </span>
+                                            </figcaption>
+                </figure>
+            </a>
+        </div>
+            <div class="col-6 col-lg-6 col-sm-4">
+            <a href="/byty/3-izbovy-byt-panorama-towers-parking/Ju8lEGMqqDK/">
+                <figure class="similary">
+                    <div class="offer-img-wrapper-similar">
+                                                        <img class="js-lazy img-fluid" data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/Ydtl_OKi5_fss?st=tR8QUT1vQUPiGKzwITXYXqdtzcRB2xzrxmioaf5iAKI&amp;ts=1786101659&amp;e=0"
+         srcset="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/Ydtl_OKi5_fss?st=tR8QUT1vQUPiGKzwITXYXqdtzcRB2xzrxmioaf5iAKI&amp;ts=1786101659&amp;e=0 700w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/Ydtl_OKi5_fss?st=tR8QUT1vQUPiGKzwITXYXqdtzcRB2xzrxmioaf5iAKI&amp;ts=1786101659&amp;e=0 1000w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/Ydtl_OKi5_fss?st=tR8QUT1vQUPiGKzwITXYXqdtzcRB2xzrxmioaf5iAKI&amp;ts=1786101659&amp;e=0 1800w" alt="Pozemok pre rodinné domy 458 m&sup2; "
+         title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    <noscript data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/Ydtl_OKi5_fss?st=tR8QUT1vQUPiGKzwITXYXqdtzcRB2xzrxmioaf5iAKI&amp;ts=1786101659&amp;e=0">
+        <img class="img-fluid" src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/Ydtl_OKi5_fss?st=tR8QUT1vQUPiGKzwITXYXqdtzcRB2xzrxmioaf5iAKI&amp;ts=1786101659&amp;e=0" alt="Pozemok pre rodinné domy 458 m&sup2; "
+             title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    </noscript>
+
+                                            </div>
+                    <figcaption class="similary-caption">
+                                                    <span class="price">
+                                1,480 €/mesiac
+                            </span>
+                                            </figcaption>
+                </figure>
+            </a>
+        </div>
+            <div class="col-6 col-lg-6 col-sm-4">
+            <a href="/domy/zariadeny-dom-pri-jazere-byvanie-kazdy-den-ako-na-dovolenke/JuLXRlIW4Ya/">
+                <figure class="similary">
+                    <div class="offer-img-wrapper-similar">
+                                                        <img class="js-lazy img-fluid" data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/gy9raU6J7_fss?st=A3-EmwNC6K5eZoUmuyczTRuw1FnIuMqZppJ3iMn34Vw&amp;ts=1775233846&amp;e=0"
+         srcset="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/gy9raU6J7_fss?st=A3-EmwNC6K5eZoUmuyczTRuw1FnIuMqZppJ3iMn34Vw&amp;ts=1775233846&amp;e=0 700w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/gy9raU6J7_fss?st=A3-EmwNC6K5eZoUmuyczTRuw1FnIuMqZppJ3iMn34Vw&amp;ts=1775233846&amp;e=0 1000w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/gy9raU6J7_fss?st=A3-EmwNC6K5eZoUmuyczTRuw1FnIuMqZppJ3iMn34Vw&amp;ts=1775233846&amp;e=0 1800w" alt="Pozemok pre rodinné domy 458 m&sup2; "
+         title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    <noscript data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/gy9raU6J7_fss?st=A3-EmwNC6K5eZoUmuyczTRuw1FnIuMqZppJ3iMn34Vw&amp;ts=1775233846&amp;e=0">
+        <img class="img-fluid" src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/gy9raU6J7_fss?st=A3-EmwNC6K5eZoUmuyczTRuw1FnIuMqZppJ3iMn34Vw&amp;ts=1775233846&amp;e=0" alt="Pozemok pre rodinné domy 458 m&sup2; "
+             title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    </noscript>
+
+                                            </div>
+                    <figcaption class="similary-caption">
+                                                    <span class="price">
+                                295,000 €
+                            </span>
+                                            </figcaption>
+                </figure>
+            </a>
+        </div>
+            <div class="col-6 col-lg-6 col-sm-4">
+            <a href="/byty/priestranny-3i-byt-s-terasou-loggiou-a-parkovanim-agatova/JuChOmw5U_9/">
+                <figure class="similary">
+                    <div class="offer-img-wrapper-similar">
+                                                        <img class="js-lazy img-fluid" data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/YS5OD2KdM_fss?st=2C2ymPl20RARuEADzuKuOVQIJl8v7zbpjdlOb5lTWKo&amp;ts=1779379737&amp;e=0"
+         srcset="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/YS5OD2KdM_fss?st=2C2ymPl20RARuEADzuKuOVQIJl8v7zbpjdlOb5lTWKo&amp;ts=1779379737&amp;e=0 700w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/YS5OD2KdM_fss?st=2C2ymPl20RARuEADzuKuOVQIJl8v7zbpjdlOb5lTWKo&amp;ts=1779379737&amp;e=0 1000w, https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/YS5OD2KdM_fss?st=2C2ymPl20RARuEADzuKuOVQIJl8v7zbpjdlOb5lTWKo&amp;ts=1779379737&amp;e=0 1800w" alt="Pozemok pre rodinné domy 458 m&sup2; "
+         title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    <noscript data-lazy-src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/YS5OD2KdM_fss?st=2C2ymPl20RARuEADzuKuOVQIJl8v7zbpjdlOb5lTWKo&amp;ts=1779379737&amp;e=0">
+        <img class="img-fluid" src="https://img.unitedclassifieds.sk/foto/MTc4eDE3OC9maWx0ZXJzOndhdGVybWFyayhwdXMvOE5GQTltQl8xX2ZzcywtNSwtNSwwLDMwLDMwKS9qdWw=/YS5OD2KdM_fss?st=2C2ymPl20RARuEADzuKuOVQIJl8v7zbpjdlOb5lTWKo&amp;ts=1779379737&amp;e=0" alt="Pozemok pre rodinné domy 458 m&sup2; "
+             title="Pozemok pre rodinné domy 458 m&sup2;  | Reality.sk">
+    </noscript>
+
+                                            </div>
+                    <figcaption class="similary-caption">
+                                                    <span class="price">
+                                271,000 €
+                            </span>
+                                            </figcaption>
+                </figure>
+            </a>
+        </div>
+    </div>
+
+
+                    
+                    <div class="zone-wrapper " data-dfp-zone="reality-mobile-mobile-bottom">
+    <div id='div-gpt-ad-reality-mobile-mobile-bottom' style="text-align: center; width: 100%; padding: 10px 0; box-sizing: border-box;">
+    <script>
+        googletag.cmd.push(function() { googletag.display('div-gpt-ad-reality-mobile-mobile-bottom'); });
+    </script>
+</div>
+
+</div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<footer class="main-footer mt-auto">
+                
+<section class="footer-section">
+    <div class="container">
+        <div class="row">
+
+            <div class="col-6 col-md-4 col-lg-3  order-2 order-md-2 footer-three-columns">
+                <p class="d-none d-md-block footer-nav-title">Inzercia na Reality.sk</p>
+                <a class="d-block d-md-none footer-nav-title"
+                   data-toggle="collapse"
+                   href=".js-footer-info">
+                    Inzercia na Reality.sk
+                                <svg class="icon fill-info icon-small">
+        <use xlink:href="/build/spritemap.svg#sprite-arrow"></use>
+    </svg>
+
+
+                </a>
+
+                <ul class="footer-nav d-md-block collapse list-columns-1 list-columns-lg-1 footer-link-list js-footer-info">
+                    <li><a href="/pravidla/">Podmienky používania</a></li>
+                    <li><a href="/cookies/">Cookies</a></li>
+                    <li><a href="/zasady-ochrany-reality/">GDPR</a></li>
+                    <li><a href="https://www.nehnutelnosti.sk/ako-inzerovat?utm_medium=stranky&utm_campaign=presmerovanie&utm_source=reality#reality">Cenník</a></li>
+                    <li><a href="#" data-toggle="modal-confirm" data-load
+                           data-target="#realsoft-modal">Registrácia realitnej kancelárie</a></li>
+                    <li><a href="https://www.nehnutelnosti.sk/prihlasenie?utm_medium=stranky&utm_campaign=presmerovanie&utm_source=reality#reality">Registrácia súkromní inzerenti</a></li>
+                    <li class="d-none d-md-list-item">
+                        <a href="javascript:void(0)" onclick="window._sp_.gdpr.loadPrivacyManagerModal()">
+                            Nastavenie súkromia
+                        </a>
+                    </li>
+                    <li><a href="https://www.nehnutelnosti.sk/kontakty?select=report&url=https%3A%2F%2Fwww.reality.sk%2Fpozemky%2Fstavebne-pozemky-na-hranici-lesa%2FJufRf8UIobu%2F#contact-us-section">Nahlásenie nelegálneho obsahu</a></li>
+                    <li><a href="/sprava-o-transparentnosti-dsa-2024/">Správa o transparentnosti DSA 2024</a></li>
+                    <li><a href="/sprava-o-transparentnosti-dsa-2025/">Správa o transparentnosti DSA 2025</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-md-4 col-lg-2  order-3 order-md-3  list-border-left-lg footer-three-columns">
+                <p class="d-none d-md-block footer-nav-title">Kontaktné údaje</p>
+                <a class="d-block d-md-none footer-nav-title"
+                   data-toggle="collapse" href=".js-footer-contact">Kontaktné údaje
+                                <svg class="icon fill-info icon-small">
+        <use xlink:href="/build/spritemap.svg#sprite-arrow"></use>
+    </svg>
+
+
+                </a>
+
+                <ul class="footer-nav d-md-block collapse list-columns-1 list-columns-lg-1 footer-link-list js-footer-contact">
+                    <li><a href="/kontakt/">Kontakt</a></li>
+                </ul>
+            </div>
+
+            <div class="col-12 col-md-4 col-lg-2  order-3 order-md-3  list-border-left-lg footer-three-columns">
+                <p class="d-none d-md-block footer-nav-title">Poradne</p>
+                <a class="d-block d-md-none footer-nav-title"
+                   data-toggle="collapse" href=".js-footer-advice-forum">Poradne
+                                <svg class="icon fill-info icon-small">
+        <use xlink:href="/build/spritemap.svg#sprite-arrow"></use>
+    </svg>
+
+
+                </a>
+
+                <ul class="footer-nav d-md-block collapse footer-advice-forum list-columns-1 list-columns-lg-1 footer-link-list js-footer-advice-forum">
+                    <li><a href="https://www.nehnutelnosti.sk/magazin-o-byvani?utm_medium=stranky&utm_campaign=presmerovanie&utm_source=reality#reality">Právna poradňa</a></li>
+                    <li><a href="https://www.nehnutelnosti.sk/magazin-o-byvani?utm_medium=stranky&utm_campaign=presmerovanie&utm_source=reality#reality">Daňová poradňa</a></li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+                    
+<section class="copyright-section">
+    <div class="container">
+        <div class="row align-items-center justify-content-between">
+            <div class="col-auto col-sm-8">
+                <div class="d-flex align-items-baseline">
+                                <svg class="icon icon-logo-uc fill-info">
+        <use xlink:href="/build/spritemap.svg#sprite-logo-uc"></use>
+    </svg>
+
+
+                    <p class="d-none d-sm-block fs-small m-0 ml-3">2010 - 2026 NARKS-INFOSERVIS a.s.</p>
+                </div>
+            </div>
+            <div class="col-auto col-sm-4 text-right">
+                <a href="https://www.facebook.com/www.reality.sk" class="social-icon">
+                                <svg class="icon fill-info icon-huge">
+        <use xlink:href="/build/spritemap.svg#sprite-facebook"></use>
+    </svg>
+
+
+                </a>
+                <a href="https://www.youtube.com/channel/UCAjPov3mLJY2pYRwu5LaIfA" class="social-icon ml-4">
+                                <svg class="icon fill-info icon-huge">
+        <use xlink:href="/build/spritemap.svg#sprite-youtube"></use>
+    </svg>
+
+
+                </a>
+                                                                            </div>
+        </div>
+
+        <div class="row d-flex d-sm-none mt-4">
+            <div class="col-12">
+                <p class="fs-small text-center m-0">2010 - 2026 NARKS-INFOSERVIS a.s.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+    </footer>
+
+    <div class="detail-sticky-contact position-fixed fixed-bottom bg-white">
+    <div class="collapse" id="collapseContactBanner">
+        <div class="card">
+            <ul class="list-group list-group-flush">
+                                                                                                                                    <li class="list-group-item text-center font-weight-bold">
+                                <a href="tel:++421 902 890 701" class="color-black" data-track="phone-bottom-sticky">
+                                                <svg class="icon icon fill-primary">
+        <use xlink:href="/build/spritemap.svg#sprite-phone"></use>
+    </svg>
+
+Volať predajcovi
+                                </a>
+                            </li>
+                                                                            <li class="list-group-item text-center font-weight-bold">
+                                <svg class="icon icon fill-primary">
+        <use xlink:href="/build/spritemap.svg#sprite-mail"></use>
+    </svg>
+
+
+                    <a href="" id="scrollToContactForm" class="color-black" data-track="email-bottom-sticky"
+                       onclick="$('#collapseContactBanner').collapse('toggle');">Poslať e-mail</a>
+                </li>
+                <li class="list-group-item text-center font-weight-bold">
+                    <a data-toggle="collapse"
+                       href="#collapseContactBanner"
+                       role="button"
+                       aria-expanded="false"
+                       aria-controls="collapseContactBanner">
+                        Zavrieť
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="position-static">
+        <div class="sticky-bar">
+            <p class="bar-price">
+                                    339 €/m2
+                                                    <small>Bratislava-Staré Mesto
+                        (Slovensko)</small>
+                            </p>
+            <button class="btn btn-primary"
+                    data-track="detail-sticky-contact-open"
+                    type="button"
+                    data-toggle="collapse"
+                    data-target="#collapseContactBanner"
+                    aria-expanded="false"
+                    aria-controls="collapseContactBanner">
+                Kontaktovať
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('scrollToContactForm').addEventListener('click', function(event) {
+        event.preventDefault();
+        document.getElementById('DetailContactForm').scrollIntoView({ behavior: 'smooth' });
+    });
+</script>
+
+
+<button class="js-back-top back-top">
+                <svg class="icon fill-primary">
+        <use xlink:href="/build/spritemap.svg#sprite-top"></use>
+    </svg>
+
+
+</button>
+
+
+<script src="/build/runtime.d94b3b43.js"></script><script src="/build/js/app/ads.fbadf7a3.js"></script>
+<script src="/build/js/app/react.660a4e76.js"></script>
+    
+    <script src="/build/js/app/detail.7cec5986.js"></script>
+        <script type="text/javascript">
+        const tourArrangementFormState = '';
+        if (tourArrangementFormState){
+            function getOfferCategory(categoryNumber) {
+                const catNumbers = ['1', '2', '3', '4', '5'];
+
+                if (typeof categoryNumber === 'undefined' || !catNumbers.includes(categoryNumber)) {
+                    return null;
+                }
+
+                const offerCatElement = $(`[data-offer-cat-${categoryNumber}]`);
+
+                if (offerCatElement.length !== 0) {
+                    return offerCatElement.data(`offer-cat-${categoryNumber}`);
+                }
+
+                return null;
+            }
+
+            const today = new Date();
+            const currentTime = today.getTime();
+
+            window.eventTracker('dataLayer', {
+                event: 'generate_lead',
+                method: 'sql schedule viewing',
+                form_state: tourArrangementFormState,
+                form_step: 1,
+                page_type: 'detail',
+                affiliation: 'ProHome Real Estate, s.r.o.',
+            });
+
+            window.eventTracker('dataLayer', {
+                'event': 'purchase',
+                'ecommerce': {
+                    'transaction_id': 'JufRf8UIobu'+ '_' + currentTime.toString(),
+                    'items': [
+                        {
+                            'item_id': 'JufRf8UIobu',
+                            'item_brand': 'classified listing',
+                            'quantity': 1,
+                            'affiliation': 'ProHome Real Estate, s.r.o.',
+                            'currency': 'EUR',
+                            'price': 1,
+                            'item_category': getOfferCategory('1') !== null ? getOfferCategory('1') : undefined,
+                            'item_category2': getOfferCategory('2') !== null ? getOfferCategory('2') : undefined,
+                            'item_category3': getOfferCategory('3') !== null ? getOfferCategory('3') : undefined,
+                            'item_category4': getOfferCategory('4') !== null ? getOfferCategory('4') : undefined,
+                            'item_category5': getOfferCategory('5') !== null ? getOfferCategory('5') : undefined,
+                        }
+                    ],
+                    'currency': 'EUR',
+                    'value': 1,
+                }
+            });
+        }
+
+        let loadReCaptcha = () => {
+            if ($('.modal-content-wrapper').length) {
+                $.getScript('https://www.google.com/recaptcha/api.js', () => {
+                });
+            } else {
+                setTimeout(() => {
+                    loadReCaptcha()
+                }, 100);
+            }
+        };
+
+        $('.contact-agent').on('click', function () {
+            loadReCaptcha();
+        });
+        $('.tour-arrangement').on('click', function () {
+            loadReCaptcha();
+            window.eventTracker('fbq-ajax', ["https://www.reality.sk/app-api/facebook-conversion-api/Lead/"]);
+        });
+        window.eventTracker('fbq-ajax', ["https://www.reality.sk/app-api/facebook-conversion-api/ViewContent/"])
+
+        //live count popover
+        $(function () {
+            // Enables popover
+            $("[data-toggle=popover]").popover();
+
+            $(document).on("click", "#popover-contact-button", function () {
+                $(this).parents(".popover").popover('hide');
+                let contactForm;
+                if ($(document).width() > 991) {
+                    contactForm = $("#detail-contact-card_left");
+                } else {
+                    contactForm = $("#detail-contact-card_bottom");
+                }
+
+                $('html, body').animate({
+                    scrollTop: $(contactForm).offset().top,
+                }, 500);
+                const elem = $(contactForm).find(".content-more");
+                const duration = 400;
+                const opacityTo = 0.2;
+                elem.delay(300)
+                    .fadeTo(duration, opacityTo)
+                    .fadeTo(duration, 1)
+                    .fadeTo(duration, opacityTo)
+                    .fadeTo(duration, 1)
+                    .fadeTo(duration, opacityTo)
+                    .fadeTo(duration, 1);
+            });
+        });
+    </script>
+
+
+
+<!-- giosg tag -->
+<script>
+    (function (w, t, f) {
+        var s = 'script', o = '_giosg', h = 'https://service.giosg.com', e, n;
+        e = t.createElement(s);
+        e.async = 1;
+        e.src = h + '/live/';
+        w[o] = w[o] || function () {
+            (w[o]._e = w[o]._e || []).push(arguments)
+        };
+        w[o]._c = f;
+        w[o]._h = h;
+        n = t.getElementsByTagName(s)[0];
+        n.parentNode.insertBefore(e, n);
+    })(window, document, 5898);
+</script>
+<!-- giosg tag -->
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+
+<div class="ie-warning-modal">
+    <div class="ie-warning-modal-content text-center alert text-dark p-4" role="alert">
+        <span class="ie-warning-modal-cancel text-dark">
+                        <svg class="icon fill-info icon-medium">
+        <use xlink:href="/build/spritemap.svg#sprite-close"></use>
+    </svg>
+
+
+        </span>
+        <p class="alert-heading p-0 m-0">
+            Prepáčte, portál reality.sk nepodporuje verziu prehliadača, ktorý používate. Použite prehliadače Chrome, Firefox, Edge alebo Opera.
+        </p>
+    </div>
+</div>
+
+
+<div id="realsoft-modal" class="d-none">
+    
+    <div class="modal-actions">        <button type="button" class="modal-close" data-modal-close aria-label="Close">
+                    <svg class="icon fill-info icon-medium">
+        <use xlink:href="/build/spritemap.svg#sprite-close"></use>
+    </svg>
+
+
+    </button>
+</div>
+    <div class="modal-header">    <div class="modal-title text-center"><h2 class="m-0">Registrácia realitnej kancelárie</h2></div>
+</div>
+    <div class="modal-body">    <p class="m-0">Vkladanie a editácia inzercie sú možné len prostredníctvom administračného systému <strong>Nehnuteľnosti Admin</strong>.<br><br> <strong>Nehnuteľnosti Admin</strong> Vám umožní správu inzercie, sledovanie výkonnosti Vašej inzercie aj spravovanie doplnkových služieb <strong>z jedného miesta</strong>.<br><br> Bližšie informácie Vám s radosťou poskytne naše obchodné oddelenie.</p>
+</div>
+    <div class="modal-footer">    <div class="button-group px-5">
+        <div class="d-flex flex-fill">
+            <div class="flex-fill pr-1 pr-md-3">
+                <a href="https://www.reality.sk/kontakt/" target="_self"
+                   class="btn btn-secondary w-100">Kontaktovať <br>obchodné oddelenie</a>
+            </div>
+            <div class="flex-fill pl-1 pl-md-3">
+                <a href="https://admin.nehnutelnosti.sk/login" target="_self"
+                   class="btn btn-primary w-100">Prejsť do <br>Nehnuteľnosti Admin</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+</body>
+</html>

@@ -22,6 +22,7 @@
 | C2: Strankovanie vsetkych zdrojov (scrape_all_pages + _page_url) | HOTOVO - auto-stop + strop 50 |
 | C3.1: obchodny_vestnik listing crawler (listing->detail->PDF) | HOTOVO - +11 testov |
 | C3.2: notarske_drazby scraper (listing HTML -> detail HTML) | HOTOVO - +26 testov |
+| C3.3: reality_sk scraper (div.offer CSS, cena s ciarkami) | HOTOVO - +25 testov |
 | Fixtures aktualizovane (listing+detail, naming konvencia) | HOTOVO |
 
 ---
