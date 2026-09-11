@@ -23,6 +23,8 @@
 | C3.1: obchodny_vestnik listing crawler (listing->detail->PDF) | HOTOVO - +11 testov |
 | C3.2: notarske_drazby scraper (listing HTML -> detail HTML) | HOTOVO - +26 testov |
 | C3.3: reality_sk scraper (div.offer CSS, cena s ciarkami) | HOTOVO - +25 testov |
+| C4: ske_drazobne_vyhlasky scraper (exekutorske drazby, verejne) | HOTOVO - +26 testov |
+| C4: config opraven - drazby_net (CZ) + sexe.sk vyradene, ske.sk pridane | HOTOVO |
 | Fixtures aktualizovane (listing+detail, naming konvencia) | HOTOVO |
 
 ---

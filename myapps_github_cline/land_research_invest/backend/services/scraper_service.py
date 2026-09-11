@@ -23,6 +23,7 @@ from services.scrapers.obchodny_vestnik_scraper import ObchodnyVestnikScraper
 from services.scrapers.spf_scraper import SpfScraper
 from services.scrapers.notarske_drazby_scraper import NotarskeDrazbyaScraper
 from services.scrapers.reality_sk_scraper import RealitySkScraper
+from services.scrapers.ske_scraper import SkeScraper
 
 SERVICE_NAME = "scraper_service"
 
@@ -38,8 +39,7 @@ SCRAPER_REGISTRY = {
     "spf":               SpfScraper,
     "notarske_drazby":   NotarskeDrazbyaScraper,
     "reality_sk":        RealitySkScraper,
-    # "exekutorske_drazby": ExekutorskeDrazbyScr,   # TODO faza C4
-    # "drazby_net":        DrazbyNetScraper,         # TODO faza C4
+    "ske_drazobne_vyhlasky": SkeScraper,
     # "eks_statny_majetok": EksScraper,              # TODO faza C5
     # "bsk_kraj":          BskKrajScraper,           # TODO faza C6
     # "obce_uradne_tabule": ObceUradneTabuleScraper, # TODO faza C6

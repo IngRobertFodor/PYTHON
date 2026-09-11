@@ -258,20 +258,28 @@ sources:
     note: "ZLATO: oficialny register konkurzov, drazob, likvidacii"
 
   exekutorske_drazby:
-    enabled: true
+    enabled: false
     zone: GREEN
     automation: AUTO
     rate_limit_per_min: 10
     url_hint: "https://www.sexe.sk"
-    note: "Zabavene pozemky pod trhovym cenou"
+    note: "NAHRADENE: sexe.sk nedostupne - pouzivame ske_drazobne_vyhlasky"
 
-  drazby_net:
+  ske_drazobne_vyhlasky:
     enabled: true
     zone: GREEN
     automation: AUTO
     rate_limit_per_min: 10
+    url_hint: "https://ske.sk/drazobne-vyhlasky/"
+    note: "Exekutorske drazby nehnutelnosti (SKE) - verejna HTML tabulka bez registracie, data z OV"
+
+  drazby_net:
+    enabled: false
+    zone: GREEN
+    automation: AUTO
+    rate_limit_per_min: 10
     url_hint: "https://www.drazby.net"
-    note: "Agregator drazob"
+    note: "VYRADENE: ceska drazobn kancelaria (Olomouc), nie slovensky zdroj"
 
   eks_statny_majetok:
     enabled: true
