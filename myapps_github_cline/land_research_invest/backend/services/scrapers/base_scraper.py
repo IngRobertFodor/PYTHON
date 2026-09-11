@@ -85,6 +85,42 @@ class BaseScraper:
                 print(f"[{self.SOURCE_NAME}] chyba pri {url}: {exc}")
         return results
 
+    def scrape_all_pages(self, base_url, page_param="page", max_safety=50):
+        """
+        Stránkovanie: ide stranu po strane kym su NOVE vysledky.
+        Auto-stop: strana vrati 0 novych pozemkov (koniec / duplicity).
+        Strop: max_safety stran (poistka proti nekonecnu, default 50).
+        Pouziva ten isty rate-limit ako fetch_html().
+        """
+        seen    = set()
+        results = []
+        for page in range(1, max_safety + 1):
+            url = self._page_url(base_url, page, page_param)
+            try:
+                html    = self.fetch_html(url)
+                parcels = self.parse_listings(html)
+            except Exception as exc:
+                print(f"[{self.SOURCE_NAME}] strana {page} chyba: {exc}")
+                break
+            new = [p for p in parcels if p.url and p.url not in seen]
+            if not new:
+                break                    # koniec zoznamu alebo duplicity
+            seen.update(p.url for p in new)
+            results.extend(new)
+        return results
+
+    @staticmethod
+    def _page_url(base_url, page, param="page"):
+        """
+        Prida strankovaci parameter do URL.
+        Strana 1 vracia povodne base_url bez parametra.
+        Strana N prida ?param=N alebo &param=N podla existencie query stringu.
+        """
+        if page == 1:
+            return base_url
+        sep = "&" if "?" in base_url else "?"
+        return f"{base_url}{sep}{param}={page}"
+
     # ----------------------------------------------------------------
     # Interne pomocne metody
     # ----------------------------------------------------------------

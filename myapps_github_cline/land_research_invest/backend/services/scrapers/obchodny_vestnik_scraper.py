@@ -75,10 +75,110 @@ _DRAZOBNIK_RE = re.compile(
 
 
 class ObchodnyVestnikScraper(BaseScraper):
-    """Scraper drazobnych oznameni z Obchodneho vestnika (PDF-based)."""
+    """Scraper drazobnych oznameni z Obchodneho vestnika (PDF-based).
 
-    SOURCE_NAME = "obchodny_vestnik"
-    BASE_URL    = BASE_URL
+    Workflow:
+      1. scrape() -> _scrape_listing_pages() -> FormularDetail URL zo zoznamu
+      2. Pre kazdu URL: fetch_html() -> _extract_pdf_url_from_detail() -> PDF URL
+      3. fetch_pdf_bytes(pdf_url) -> scrape_pdf() -> Parcel
+    """
+
+    SOURCE_NAME   = "obchodny_vestnik"
+    BASE_URL      = BASE_URL
+    BASE_DOMAIN   = "https://obchodnyvestnik.justice.gov.sk"
+    _LISTING_URL  = (
+        "https://obchodnyvestnik.justice.gov.sk"
+        "/ObchodnyVestnik/Formular/FormulareVyhladavanie.aspx"
+    )
+    _DRAZBA_KEYS  = ["dra\u017eb", "drazb", "dobrovoln", "opakovan",
+                     "dra\u017eobn", "drazobn"]
+
+    def scrape(self, criteria=None):
+        """Kompletny workflow: listing -> detail -> PDF -> Parcel."""
+        parcels, seen = [], set()
+        for page_parcels in self._scrape_listing_pages():
+            for p in page_parcels:
+                if p.url and p.url not in seen:
+                    seen.add(p.url)
+                    parcels.append(p)
+        return parcels
+
+    def _scrape_listing_pages(self):
+        """Generator: pre kazdu stranu listingu yieldi zoznam Parcel."""
+        seen_ids = set()
+        for page in range(1, 51):
+            url = self._page_url(self._listing_url_page(page), 1)
+            try:
+                html = self.fetch_html(url)
+            except Exception as exc:
+                print(f"[{self.SOURCE_NAME}] listing strana {page} chyba: {exc}")
+                break
+            form_urls = self._parse_listing_html(html)
+            new_urls  = [u for u in form_urls if u not in seen_ids]
+            if not new_urls:
+                break
+            seen_ids.update(new_urls)
+            page_parcels = []
+            for fu in new_urls:
+                try:
+                    page_parcels.extend(self._process_formular(fu))
+                except Exception as exc:
+                    print(f"[{self.SOURCE_NAME}] formular {fu} chyba: {exc}")
+            yield page_parcels
+
+    def _listing_url_page(self, page):
+        """URL pre konkretnu stranu listingu OV."""
+        base = self._LISTING_URL
+        sep  = "&" if "?" in base else "?"
+        return base if page == 1 else f"{base}{sep}strana={page}"
+
+    def _parse_listing_html(self, html):
+        """Zo HTML listingu extrahuje zoznam FormularDetail URL pre drazby."""
+        from bs4 import BeautifulSoup
+        soup  = BeautifulSoup(html, "html.parser")
+        urls  = []
+        table = soup.find("table")
+        if not table:
+            return urls
+        for row in table.find_all("tr")[1:]:
+            cells = row.find_all("td")
+            if len(cells) < 2:
+                continue
+            typ = cells[1].get_text(strip=True).lower()
+            if not any(k in typ for k in self._DRAZBA_KEYS):
+                continue
+            a = row.find("a", href=re.compile(r"FormularDetail", re.I))
+            if a:
+                href = a["href"]
+                if not href.startswith("http"):
+                    href = self.BASE_DOMAIN + href
+                urls.append(href)
+        return urls
+
+    def _process_formular(self, formular_url):
+        """Z FormularDetail stranky najde PDF link a parsuje ho."""
+        html    = self.fetch_html(formular_url)
+        pdf_url = self._extract_pdf_url_from_detail(html)
+        if not pdf_url:
+            return []
+        pdf_bytes = self.fetch_pdf_bytes(pdf_url)
+        return self.scrape_pdf(pdf_bytes)
+
+    def _extract_pdf_url_from_detail(self, html):
+        """Zo stranky FormularDetail extrahuje URL na PDF."""
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(html, "html.parser")
+        for a in soup.find_all("a", href=True):
+            href = a["href"]
+            if re.search(r"\.pdf|GetFormularPdf|formular.*pdf", href, re.I):
+                if not href.startswith("http"):
+                    href = self.BASE_DOMAIN + href
+                return href
+        return None
+
+    def parse_listings(self, html):
+        """BaseScraper kontrakt - vrati FormularDetail URL zo stranky listingu."""
+        return self._parse_listing_html(html)
 
     def fetch_pdf_bytes(self, url):
         """Stiahne PDF ako bytes (nepise na disk)."""
@@ -92,22 +192,10 @@ class ObchodnyVestnikScraper(BaseScraper):
         resp.raise_for_status()
         return resp.content
 
-    def parse_listings(self, html):
-        """
-        Pre OV je html parameter ignorovany.
-        Scrapovanie PDF prebieha cez scrape_pdf().
-        Tato metoda je zachovana kvoli BaseScraper kontrakt.
-        """
-        return []
-
     def scrape_pdf(self, pdf_source):
-        """
-        Parsuje PDF drazobneho oznamenia.
-        pdf_source: cesta (str/Path) alebo bytes.
-        Vracia zoznam Parcel (zvycajne 1 pre 1 PDF).
-        """
+        """Parsuje PDF drazobneho oznamenia. pdf_source: cesta alebo bytes."""
         try:
-            text = extract_pdf_text(pdf_source)
+            text   = extract_pdf_text(pdf_source)
             parcel = pdf_to_parcel(text, str(pdf_source))
             return [] if parcel is None else [parcel]
         except Exception as exc:

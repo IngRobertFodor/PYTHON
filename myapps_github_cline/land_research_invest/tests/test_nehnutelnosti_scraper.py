@@ -199,5 +199,9 @@ class TestNehnutelnostiScraper:
     def test_scrape_uses_multiple_urls(self, fixture_html):
         with patch.object(NehnutelnostiScraper, "fetch_html", return_value=fixture_html):
             parcels = NehnutelnostiScraper().scrape()
-        assert len(parcels) >= 25
+        # scrape_all_pages: strana 1 vrati pozemky, strana 2 su duplicity -> auto-stop
+        # pre kazdu SEARCH_URL dostaneme novu sadu (rovnake URL = globalny dedup)
+        # vysledok: >= 20 unikatnych pozemkov z prvej (alebo viacerych) stran
+        assert len(parcels) >= 20
+        assert all(isinstance(p, Parcel) for p in parcels)
 

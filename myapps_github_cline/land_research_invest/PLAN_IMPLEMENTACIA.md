@@ -17,6 +17,11 @@
 | Limity v criteria.yaml (cena 0-10000, vymera 350-1000) | HOTOVO |
 | C0: nehnutelnosti.sk - oprava markera (T23c11 -> dynamic RSC) | HOTOVO - 46 pozemkov nazivo |
 | C0: nehnutelnosti.sk - lokalita (ZNAME_OBCE 70km od BA) | HOTOVO - 46/46 s lokalitou |
+| C1: topreality_sk - oprava 404 URL (8 SEARCH_URLS) | HOTOVO - 128 pozemkov nazivo |
+| C1: topreality_sk - vymera regex (m 2 format) | HOTOVO - 33% -> 100% vymery |
+| C2: Strankovanie vsetkych zdrojov (scrape_all_pages + _page_url) | HOTOVO - auto-stop + strop 50 |
+| C3.1: obchodny_vestnik listing crawler (listing->detail->PDF) | HOTOVO - +11 testov |
+| C3.2: notarske_drazby scraper (listing HTML -> detail HTML) | HOTOVO - +26 testov |
 | Fixtures aktualizovane (listing+detail, naming konvencia) | HOTOVO |
 
 ---

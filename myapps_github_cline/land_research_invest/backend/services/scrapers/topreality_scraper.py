@@ -1,29 +1,154 @@
-"""Topreality.sk scraper - parsuje HTML detail stranky."""
+"""Topreality.sk scraper
+========================
+Parsuje zoznamy pozemkov priamo z listing stránok (div.estate)
+aj detail stránky (JSON-LD RealEstateListing) pre spätnu kompatibilitu.
+
+Listing parsing (primarne):
+  - Nacita stranky zo SEARCH_URLS (opravene URL, overene 10/9/2026)
+  - Z kazdej stranky extrahuje inzeraty cez div.estate
+  - Data (cena, vymera, lokalita) su priamo v HTML listingu bez detailov
+"""
 import re, json
+from bs4 import BeautifulSoup
 from services.scrapers.base_scraper import BaseScraper
+
 SOURCE_NAME = "topreality_sk"
 BASE_DOMAIN  = "https://www.topreality.sk"
+
+# Aktualne funkcionalne URL (overene 10/9/2026, stare /pozemky/kraj/ davali 404)
 SEARCH_URLS = [
-    "https://www.topreality.sk/pozemky/bratislavsky-kraj/predaj/",
-    "https://www.topreality.sk/pozemky/trnavsky-kraj/predaj/",
+    "https://www.topreality.sk/bratislava-i/pozemky/pozemok-pre-rodinne-domy/",
+    "https://www.topreality.sk/bratislava-ii/pozemky/pozemok-pre-rodinne-domy/",
+    "https://www.topreality.sk/bratislava-iii/pozemky/pozemok-pre-rodinne-domy/",
+    "https://www.topreality.sk/bratislava-iv/pozemky/pozemok-pre-rodinne-domy/",
+    "https://www.topreality.sk/bratislava-v/pozemky/pozemok-pre-rodinne-domy/",
+    "https://www.topreality.sk/senec/pozemky/pozemok-pre-rodinne-domy/",
+    "https://www.topreality.sk/pezinok/pozemky/pozemok-pre-rodinne-domy/",
+    "https://www.topreality.sk/malacky/pozemky/pozemok-pre-rodinne-domy/",
 ]
-_AREA_M2_RE     = re.compile('(\\d[\\d ]{0,5}?)\\s*m(?:²|2)(?=[^/\\d]|$)', re.IGNORECASE)
-_AREA_ARE_RE    = re.compile('(\\d+)\\s*-?\\s*(?:arov|arovy|arovych|are)(?=[^a-z]|$)', re.IGNORECASE)
-_DATA_PRICE_RE  = re.compile(r"""data-price=["'"](\d+)["'"]""")
-_PRICE_CLASS_RE = re.compile(r"""class=["'"]price["'"][^>]*>\s*([\d\s\xa0]+)\s*\u20ac""")
-_JSONLD_PAT     = re.compile(r"""<script[^>]+type=["'"]application/ld\+json["'"][^>]*>(.*?)</script>""", re.DOTALL | re.IGNORECASE)
+
+_PRICE_DOHODOU  = 5_000_000   # cena dohodou = 99999999
+_AREA_M2_RE     = re.compile(r'(\d[\d ]{0,5}?)\s*m\s*(?:²|2|\xa0?2)(?=[^/\d]|$)', re.IGNORECASE)
+_AREA_ARE_RE    = re.compile(r'(\d+)\s*-?\s*(?:arov|arovy|arovych|are)(?=[^a-z]|$)', re.IGNORECASE)
+_DATA_PRICE_RE  = re.compile(r"""data-price=["'](\d+(?:\.\d+)?)["']""")
+_PRICE_CLASS_RE = re.compile(r"""class=["']price["'][^>]*>\s*([\d\s\xa0]+)\s*\u20ac""")
+_JSONLD_PAT     = re.compile(r"""<script[^>]+type=["']application/ld\+json["'][^>]*>(.*?)</script>""", re.DOTALL | re.IGNORECASE)
+_DETAIL_URL_RE  = re.compile(r'-r\d+\.html$')
+
 
 class TopRealityScraper(BaseScraper):
     SOURCE_NAME = "topreality_sk"
     BASE_URL    = SEARCH_URLS[0]
-    def get_listing_urls(self, criteria=None): return SEARCH_URLS
+
+    def get_listing_urls(self, criteria=None):
+        return SEARCH_URLS
+
+    def scrape(self, criteria=None):
+        """
+        Stránkovanie: pre kazdu z 8 lokalitnych SEARCH_URL prechádza
+        vsetky strany kym su nove pozemky (auto-stop + strop 50 stran).
+        Globalny dedup zabraňuje duplikatom medzi lokalitami.
+        """
+        seen    = set()
+        results = []
+        for base_url in SEARCH_URLS:
+            for p in self.scrape_all_pages(base_url, page_param="page", max_safety=50):
+                if p.url and p.url not in seen:
+                    seen.add(p.url)
+                    results.append(p)
+        return results
+
     def parse_listings(self, html):
-        """Parsuje HTML detailovej stranky topreality.sk."""
-        try: blocks = extract_jsonld_blocks(html)
-        except Exception as exc: print(f"[{self.SOURCE_NAME}] extract err: {exc}"); return []
-        try: parcel = listing_to_parcel(blocks, html)
-        except Exception as exc: print(f"[{self.SOURCE_NAME}] parse err: {exc}"); return []
-        return [] if parcel is None else [parcel]
+        """Parsuje listing stranku - primarny parser (div.estate), fallback na JSON-LD."""
+        parcels = parse_listing_page(html)
+        if parcels:
+            return parcels
+        try:
+            blocks = extract_jsonld_blocks(html)
+            parcel = listing_to_parcel(blocks, html)
+            return [] if parcel is None else [parcel]
+        except Exception as exc:
+            print(f"[{self.SOURCE_NAME}] parse err: {exc}")
+            return []
+
+
+# ----------------------------------------------------------------
+# Listing parser (primarne) - div.estate bloky
+# ----------------------------------------------------------------
+
+def parse_listing_page(html):
+    """
+    Parsuje zoznam inzeratov z listing stranky topreality.sk.
+    Kazdy inzerat je div.estate s nazvom, url, cenou, vymerou, lokalitou.
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    parcels = []
+    seen_urls = set()
+    for div in soup.find_all("div", class_="estate"):
+        try:
+            p = _estate_div_to_parcel(div, seen_urls)
+            if p is not None:
+                parcels.append(p)
+        except Exception:
+            continue
+    return parcels
+
+
+def _estate_div_to_parcel(div, seen_urls):
+    """Z jedneho div.estate extrahuje Parcel. None ak chyba URL alebo duplikat."""
+    a = div.find("a", href=_DETAIL_URL_RE)
+    if not a:
+        return None
+    url = a["href"]
+    if not url.startswith("http"):
+        url = BASE_DOMAIN + url
+    if url in seen_urls:
+        return None
+    seen_urls.add(url)
+
+    txt = div.get_text(separator=" ", strip=True)
+    title = a.get_text(strip=True) or txt[:80]
+    if title.startswith("TOP "):
+        title = title[4:]
+
+    price = _extract_price_from_estate(div, txt)
+    area  = extract_area_from_text(txt)
+    loc   = _extract_location_from_estate(txt)
+
+    return BaseScraper._make_parcel(
+        title=title[:200], url=url, price_eur=price,
+        area_sqm=area, location_text=loc, source_portal=SOURCE_NAME,
+    )
+
+
+def _extract_price_from_estate(div, txt):
+    """Cena z data-price (ignoruj dohodou a EUR/m2) alebo z textu."""
+    dp = div.find(attrs={"data-price": True})
+    if dp:
+        try:
+            v = float(dp["data-price"])
+            if 1000 < v < _PRICE_DOHODOU:
+                return v
+        except (ValueError, TypeError):
+            pass
+    m = re.search(r'([\d\s\xa0]{3,})\s*€(?!\s*/)', txt)
+    if m:
+        raw = m.group(1).replace(" ", "").replace("\xa0", "")
+        try:
+            v = float(raw)
+            if 1000 < v < _PRICE_DOHODOU:
+                return v
+        except ValueError:
+            pass
+    return 0.0
+
+
+def _extract_location_from_estate(txt):
+    """Lokalita zo zatvorky '(Bratislava III)' v texte inzeratu."""
+    m = re.search(r'\(([^)]{3,50})\)', txt)
+    return m.group(1).strip() if m else ""
+
+
 
 def _fix_json_nl(s):
     """Escapuje literal newlines uvnutri JSON string hodnot."""

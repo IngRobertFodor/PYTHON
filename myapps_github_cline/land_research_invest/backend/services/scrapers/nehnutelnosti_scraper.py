@@ -50,6 +50,21 @@ class NehnutelnostiScraper(BaseScraper):
     def get_listing_urls(self, criteria=None):
         return SEARCH_URLS
 
+    def scrape(self, criteria=None):
+        """
+        Stránkovanie: pre kazdu SEARCH_URL prechádza vsetky strany
+        kým su nove pozemky (auto-stop na konci alebo duplikatoch).
+        Strop 50 stran = poistka proti nekonecnu.
+        """
+        seen    = set()
+        results = []
+        for base_url in SEARCH_URLS:
+            for p in self.scrape_all_pages(base_url, page_param="page", max_safety=50):
+                if p.url and p.url not in seen:
+                    seen.add(p.url)
+                    results.append(p)
+        return results
+
     def parse_listings(self, html):
         """
         Parsuje HTML stranky nehnutelnosti.sk.

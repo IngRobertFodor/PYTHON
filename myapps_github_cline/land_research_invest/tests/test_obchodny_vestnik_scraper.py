@@ -257,5 +257,85 @@ class TestObchodnyVestnikScraperRegistry:
         scraper.rate_limit = 0
         scraper.neutral_ua = False
         scraper._last_call = 0.0
+        # prazdne HTML -> ziadne URL
         assert scraper.parse_listings("<html></html>") == []
+
+
+# ----------------------------------------------------------------
+# TestObchodnyVestnikListingCrawler
+# ----------------------------------------------------------------
+
+FIXTURE_LISTING = pathlib.Path(__file__).parent / "fixtures" / "obchodny_vestnik_drazby_listing.html"
+
+
+class TestObchodnyVestnikListingCrawler:
+    """Testy pre listing crawler - _parse_listing_html, _extract_pdf_url."""
+
+    @pytest.fixture(scope="class")
+    def listing_html(self):
+        return FIXTURE_LISTING.read_text(encoding="utf-8", errors="ignore")
+
+    @pytest.fixture(scope="class")
+    def scraper(self):
+        s = ObchodnyVestnikScraper.__new__(ObchodnyVestnikScraper)
+        s.rate_limit = 0
+        s.neutral_ua = False
+        s._last_call  = 0.0
+        return s
+
+    def test_fixture_exists(self):
+        assert FIXTURE_LISTING.exists(), "obchodny_vestnik_drazby_listing.html chyba"
+
+    def test_parse_listing_returns_list(self, scraper, listing_html):
+        urls = scraper._parse_listing_html(listing_html)
+        assert isinstance(urls, list)
+
+    def test_parse_listing_finds_drazby(self, scraper, listing_html):
+        urls = scraper._parse_listing_html(listing_html)
+        # listing ma minimalne 1 drazbu (Oznamenie o dobrovolnej/opakovaneji drazbe)
+        assert len(urls) >= 1
+
+    def test_parse_listing_urls_are_absolute(self, scraper, listing_html):
+        urls = scraper._parse_listing_html(listing_html)
+        for url in urls:
+            assert url.startswith("http"), f"Relativna URL: {url}"
+
+    def test_parse_listing_urls_contain_formular_detail(self, scraper, listing_html):
+        urls = scraper._parse_listing_html(listing_html)
+        for url in urls:
+            assert "FormularDetail" in url or "formulardetail" in url.lower()
+
+    def test_parse_listing_skips_non_drazba_rows(self, scraper, listing_html):
+        """Riadky 'Upovedomenia exekvtorov' nesmú byť v zozname."""
+        urls = scraper._parse_listing_html(listing_html)
+        # V fixture je 87 upovedomeni a len 9 drazob - urls musi byt << 87
+        assert len(urls) <= 15
+
+    def test_listing_url_page1_is_base(self, scraper):
+        url = scraper._listing_url_page(1)
+        assert "strana" not in url
+        assert "FormulareVyhladavanie" in url
+
+    def test_listing_url_page2_has_strana(self, scraper):
+        url = scraper._listing_url_page(2)
+        assert "strana=2" in url
+
+    def test_extract_pdf_url_from_detail_no_pdf(self, scraper):
+        """HTML bez PDF linku -> None."""
+        result = scraper._extract_pdf_url_from_detail("<html><a href='/detail'>text</a></html>")
+        assert result is None
+
+    def test_extract_pdf_url_finds_pdf_link(self, scraper):
+        """HTML s PDF linkom -> absolutna URL."""
+        html = '<html><a href="/GetFormularPdf?id=123">Stiahnut PDF</a></html>'
+        result = scraper._extract_pdf_url_from_detail(html)
+        assert result is not None
+        assert "GetFormularPdf" in result
+
+    def test_extract_pdf_url_absolute_preserved(self, scraper):
+        """Absolutna PDF URL zostane nezmenena."""
+        html = '<html><a href="https://example.com/file.pdf">PDF</a></html>'
+        result = scraper._extract_pdf_url_from_detail(html)
+        assert result == "https://example.com/file.pdf"
+
 

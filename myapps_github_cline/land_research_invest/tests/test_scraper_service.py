@@ -60,6 +60,87 @@ class TestBaseScraper:
 
 
 # ----------------------------------------------------------------
+# TestPagination
+# ----------------------------------------------------------------
+
+class TestPagination:
+    """Testy pre scrape_all_pages a _page_url v BaseScraper."""
+
+    def _make_scraper(self):
+        s = BaseScraper.__new__(BaseScraper)
+        s.SOURCE_NAME = "test_src"
+        s.rate_limit  = 0
+        s.neutral_ua  = False
+        s._last_call  = 0.0
+        return s
+
+    # --- _page_url ---
+
+    def test_page_url_page1_returns_base(self):
+        assert BaseScraper._page_url("https://x.sk/pozemky/", 1) == "https://x.sk/pozemky/"
+
+    def test_page_url_page2_adds_query(self):
+        assert BaseScraper._page_url("https://x.sk/pozemky/", 2) == "https://x.sk/pozemky/?page=2"
+
+    def test_page_url_page3_appends_to_existing_query(self):
+        url = "https://x.sk/hladat?typ=pozemok"
+        assert BaseScraper._page_url(url, 3) == "https://x.sk/hladat?typ=pozemok&page=3"
+
+    def test_page_url_custom_param(self):
+        assert BaseScraper._page_url("https://x.sk/", 2, "strana") == "https://x.sk/?strana=2"
+
+    # --- scrape_all_pages ---
+
+    def test_auto_stop_on_empty_page(self, fixture_html):
+        """Strana 2 je prazdna -> auto-stop po strane 1."""
+        call_count = {"n": 0}
+        def mock_fetch(url):
+            call_count["n"] += 1
+            if call_count["n"] == 1:
+                return fixture_html   # strana 1: pozemky
+            return "<html></html>"    # strana 2: prazdno -> stop
+
+        s = NehnutelnostiScraper.__new__(NehnutelnostiScraper)
+        s.rate_limit = 0; s.neutral_ua = False; s._last_call = 0.0
+        with patch.object(NehnutelnostiScraper, "fetch_html", side_effect=mock_fetch):
+            parcels = s.scrape_all_pages("https://www.nehnutelnosti.sk/vysledky/pozemky/test/")
+        assert len(parcels) >= 20
+        assert call_count["n"] == 2   # strana 1 + strana 2 (prazdna)
+
+    def test_auto_stop_on_duplicates(self, fixture_html):
+        """Strana 2 ma rovnake URL ako strana 1 -> auto-stop (0 novych)."""
+        s = NehnutelnostiScraper.__new__(NehnutelnostiScraper)
+        s.rate_limit = 0; s.neutral_ua = False; s._last_call = 0.0
+        with patch.object(NehnutelnostiScraper, "fetch_html", return_value=fixture_html):
+            parcels = s.scrape_all_pages("https://www.nehnutelnosti.sk/vysledky/pozemky/test/")
+        # strana 1 = pozemky, strana 2 = tie iste URL -> auto-stop
+        assert len(parcels) >= 20
+
+    def test_safety_cap_stops_at_max(self, fixture_html):
+        """Strop max_safety=3: nemoze ist dalej ako 3 strany aj keby prichadzali nove."""
+        counter = {"n": 0}
+        def mock_fetch_unique(url):
+            counter["n"] += 1
+            return fixture_html
+
+        s = NehnutelnostiScraper.__new__(NehnutelnostiScraper)
+        s.rate_limit = 0; s.neutral_ua = False; s._last_call = 0.0
+        # kazda strana vracia rovnake URL -> auto-stop po 2 volaniach
+        # (strana 1 = nowe, strana 2 = duplicity)
+        with patch.object(NehnutelnostiScraper, "fetch_html", return_value=fixture_html):
+            parcels = s.scrape_all_pages("https://test.sk/", max_safety=3)
+        assert counter["n"] <= 4   # max 2 (auto-stop) alebo 3 (safety cap) + 1 buffer
+
+    def test_exception_in_fetch_stops_gracefully(self):
+        """Vynimka pri fetch -> break, vrati co mame."""
+        s = NehnutelnostiScraper.__new__(NehnutelnostiScraper)
+        s.rate_limit = 0; s.neutral_ua = False; s._last_call = 0.0
+        with patch.object(NehnutelnostiScraper, "fetch_html", side_effect=Exception("conn err")):
+            parcels = s.scrape_all_pages("https://test.sk/")
+        assert parcels == []
+
+
+# ----------------------------------------------------------------
 # TestScraperService
 # ----------------------------------------------------------------
 
