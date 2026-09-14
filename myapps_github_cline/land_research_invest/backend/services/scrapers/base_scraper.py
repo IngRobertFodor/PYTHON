@@ -11,8 +11,11 @@ Konvencia nazvania:
 
 import time
 import requests
+from requests.exceptions import ConnectionError as RequestsConnectionError
 from models.parcel import Parcel
 from config_loader import get_sources
+
+RETRY_DELAY = 3.0   # sekundy pred retry pri sietovom vypadku
 
 DEFAULT_USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -45,16 +48,29 @@ class BaseScraper:
     def fetch_html(self, url):
         """
         HTTP GET s rate-limitom a spravnym user-agentom.
+        Retry: 1 opakovanie pri sietovom vypadku (ConnectionReset/ConnectionError).
         Implementuj v podtriede ak potrebujes specialny handling.
         """
         self._wait_rate_limit()
-        resp = requests.get(
-            url,
-            headers={"User-Agent": self.user_agent},
-            timeout=TIMEOUT,
-        )
-        resp.raise_for_status()
-        return resp.text
+        try:
+            resp = requests.get(
+                url,
+                headers={"User-Agent": self.user_agent},
+                timeout=TIMEOUT,
+            )
+            resp.raise_for_status()
+            return resp.text
+        except (RequestsConnectionError, TimeoutError) as exc:
+            print(f"[{self.SOURCE_NAME}] sietovy vypadok pri {url}: {exc} — retry za {RETRY_DELAY}s")
+            time.sleep(RETRY_DELAY)
+            self._wait_rate_limit()
+            resp = requests.get(
+                url,
+                headers={"User-Agent": self.user_agent},
+                timeout=TIMEOUT,
+            )
+            resp.raise_for_status()
+            return resp.text
 
     def parse_listings(self, html):
         """

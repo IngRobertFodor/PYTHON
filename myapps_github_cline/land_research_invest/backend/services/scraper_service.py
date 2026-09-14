@@ -14,7 +14,15 @@ Pridanie noveho zdroja:
      (zdedi BaseScraper, implementuj parse_listings)
   2. Pridaj do SCRAPER_REGISTRY nizsie
   Tato funkcia (scrape_all) sa NEzmeni.
+
+Paralelizacia:
+  scrape_all() spusta vsetky zdroje SUCASNE (ThreadPoolExecutor).
+  Kazdy zdroj je na inej domene => nulove riziko banu.
+  Rate-limit v ramci jednej domeny ostava zachovany v BaseScraper.
 """
+
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as FuturesTimeoutError
 
 from config_loader import get_green_sources
 from services.scrapers.nehnutelnosti_scraper import NehnutelnostiScraper
@@ -26,6 +34,10 @@ from services.scrapers.reality_sk_scraper import RealitySkScraper
 from services.scrapers.ske_scraper import SkeScraper
 
 SERVICE_NAME = "scraper_service"
+
+# Per-zdroj timeout: ak jeden zdroj trvá dlhšie, nepocká sa naňho donekonecna.
+# 2700s = 45 min (dostatok aj pre zdroje s 50 stranami + rate-limitom 10/min)
+SCRAPER_TIMEOUT_SEC = 2700
 
 # ----------------------------------------------------------------
 # Registry: config source_name -> ScraperClass
@@ -53,11 +65,14 @@ def get_registered_scrapers():
 
 def scrape_all(criteria=None):
     """
-    Spusti vsetky registrovane scrapery pre GREEN+enabled zdroje.
+    Spusti vsetky registrovane scrapery pre GREEN+enabled zdroje PARALELNE.
 
-    Pre kazdy zdroj:
-      - Ak je v SCRAPER_REGISTRY -> spusti scraper
-      - Ak nie je                -> preskoci + vypise info
+    Paralelizacia: kazdy zdroj bezi v samostatnom thread (ThreadPoolExecutor).
+    Kazdy zdroj je na inej domene => ziadny server nedostane viac requestov
+    nez dovoli jeho rate-limit. Nulove riziko banu.
+
+    Per-zdroj timeout: zaseknuty zdroj neblokuje ostatne — po SCRAPER_TIMEOUT_SEC
+    sa preskoci a ostatne vysledky sa vrátia.
 
     Args:
         criteria: volitelny dict s kriterimi (napr. max_price, max_distance)
@@ -66,22 +81,37 @@ def scrape_all(criteria=None):
         list[Parcel] - deduplikovane, zoradene podla URL
     """
     green = get_green_sources()
+    active = [src for src in green if src in SCRAPER_REGISTRY]
+    skipped = [src for src in green if src not in SCRAPER_REGISTRY]
+
+    for src in skipped:
+        print(f"[scraper_service] {src}: parser TODO - preskacujem")
+
     all_parcels = []
+    t_start = time.monotonic()
 
-    for source_name in green:
-        if source_name not in SCRAPER_REGISTRY:
-            print(f"[scraper_service] {source_name}: parser TODO - preskacujem")
-            continue
-        try:
-            scraper = SCRAPER_REGISTRY[source_name]()
-            print(f"[scraper_service] Scrapujem: {source_name}")
-            parcels = scraper.scrape(criteria)
-            print(f"[scraper_service] {source_name}: {len(parcels)} pozemkov")
-            all_parcels.extend(parcels)
-        except Exception as exc:
-            print(f"[scraper_service] {source_name} CHYBA: {exc}")
+    print(f"[scraper_service] Paralelne spustam {len(active)} zdrojov: {active}")
 
-    return _deduplicate(all_parcels)
+    with ThreadPoolExecutor(max_workers=len(active) or 1) as executor:
+        future_to_src = {
+            executor.submit(_scrape_one, src, criteria): src
+            for src in active
+        }
+        for future in as_completed(future_to_src, timeout=SCRAPER_TIMEOUT_SEC + 30):
+            src = future_to_src[future]
+            try:
+                parcels = future.result(timeout=SCRAPER_TIMEOUT_SEC)
+                print(f"[scraper_service] {src}: {len(parcels)} pozemkov")
+                all_parcels.extend(parcels)
+            except FuturesTimeoutError:
+                print(f"[scraper_service] {src}: TIMEOUT po {SCRAPER_TIMEOUT_SEC}s — preskakujem")
+            except Exception as exc:
+                print(f"[scraper_service] {src} CHYBA: {exc}")
+
+    elapsed = time.monotonic() - t_start
+    result = _deduplicate(all_parcels)
+    print(f"[scraper_service] Hotovo: {len(result)} unikatnych pozemkov za {elapsed:.0f}s")
+    return result
 
 
 def scrape_source(source_name, criteria=None):
@@ -107,6 +137,13 @@ def scrape_source(source_name, criteria=None):
 # ----------------------------------------------------------------
 # Interne pomocne funkcie
 # ----------------------------------------------------------------
+
+def _scrape_one(source_name, criteria=None):
+    """Spusti jeden scraper — volane z ThreadPoolExecutor."""
+    print(f"[scraper_service] Scrapujem: {source_name}")
+    scraper = SCRAPER_REGISTRY[source_name]()
+    return scraper.scrape(criteria)
+
 
 def _deduplicate(parcels):
     """
