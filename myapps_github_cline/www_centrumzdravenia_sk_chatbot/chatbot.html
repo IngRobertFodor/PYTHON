@@ -317,50 +317,50 @@ a.cz-link:hover { color: var(--c-green-h); }
 
 <script>
 const FAQ = [
-  { id:1, keywords:["hodiny","otvorene","otvaracie","kedy","pracovna doba","ordinacne","ordinacna"],
+  { id:1, keywords:["hodiny","otvorene","otvaracie","kedy","pracovna doba","ordinacne","ordinacna","dokedy","od kolkej","cez tyzden"],
     answer:"Sme tu pre Vás od pondelka do štvrtka, 8:00 až 20:00." },
-  { id:2, keywords:["adresa","kde","nachadza","sidlo","lokalita","poloha","vysehradska","petrzalka"],
-    answer:"Nájdete nás na Vyšehradská 4, 851†06 Bratislava (Petržalka). Sílime v polyfunkčnej budove, vstup je pri presklenom schodisku, ambulancia je na 1. poschodí." },
-  { id:3, keywords:["objednat","termin","rezervacia","prihlasit","objednanie"],
-    answer:"Objednať sa môžete telefonicky, e-mailom alebo cez kontaktný formulár na stránke. Ak sa nám hneď nedovoláte, práve prebieha sedenie – ozveme sa Vám späť čo najskôr.",
+  { id:2, keywords:["adresa","kde","nachadza","sidlo","lokalita","poloha","vysehradska","petrzalka","ako sa dostat","mapa"],
+    answer:"Nájdete nás na Vyšehradskej 4, 851 06 Bratislava (Petržalka). Sídlime v polyfunkčnej budove, vstup je pri presklenom schodisku a ambulancia sa nachádza na 1. poschodí." },
+  { id:3, keywords:["objednat","termin","rezervacia","prihlasit","objednanie","objednat sa","chcem sa objednat","volny termin","sedenie"],
+    answer:"Objednať sa môžete telefonicky, e-mailom alebo cez kontaktný formulár na stránke. Ak sa nám hneď nedovoláte, práve prebieha sedenie, preto sa Vám ozveme späť čo najskôr.",
     links:[{label:"0908 743 734",href:"tel:0908743734"},{label:"kontakt@centrumuzdravenia.sk",href:"mailto:kontakt@centrumuzdravenia.sk"}] },
   { id:4, keywords:["telefon","cislo","kontakt","mail","email","zavolat","napisat"],
     answer:"Kontaktujte nás:",
     links:[{label:"0908 743 734",href:"tel:0908743734"},{label:"kontakt@centrumuzdravenia.sk",href:"mailto:kontakt@centrumuzdravenia.sk"}] },
-  { id:5, keywords:["parkovanie","parkovat","auto","parkovisko"],
+  { id:5, keywords:["parkovanie","parkovat","auto","parkovisko","zaparkovat","kde zaparkujem"],
     answer:"Zaparkovať môžete priamo na parkovisku polyfunkčného objektu na Vyšehradskej 4." },
   { id:6, keywords:["mhd","autobus","elektricka","doprava","zastavka","luky","budatinska","lucanka","bez auta"],
-    lines:["Peši to od zastávok trvá naozaj krátko:","Lúky (linka 93) — necelú minútu chôdze","Budátínska (linky 93, 98, 99) — asi 4 minúty chôdze","Lúčanka (električka 3, autobusy 92, 98, 99) — asi 10 minút chôdze"] },
+    lines:["Pešo to od zastávok trvá naozaj krátko:","Lúky (linka 93) je necelú minútu chôdze","Budatínska (linky 93, 98, 99) je asi 4 minúty chôdze","Lúčanka (električka 3, autobusy 92, 98, 99) je asi 10 minút chôdze"] },
   { id:7, keywords:["sluzby","co ponukate","co robite","pomoc","s cim pomoze","ponuka"],
     lines:["S čím Vám u nás pomôžeme:","individuálna psychoterapia","párová psychoterapia","psychodiagnostika (vrátane zbrojného preukazu a SBS)","výcvik a supervízia pre kolegov"] },
   { id:8, keywords:["individualna","terapia","psychoterapia","jednotlivec"],
-    answer:"Individuálna psychoterapia umožňuje riešiť Vaše osobné t ažkosti v bezpečnom prostredí terapeutického vzťahu, prispôsobené Vašim potrebyám." },
-  { id:9, keywords:["parova","par","partner","vztah","manzelka","manzel"],
-    answer:"Párová psychoterapia sa zameriava predovšetkým na riešenie partnerskych a rodinných problémov." },
+    answer:"Individuálna psychoterapia umožňuje riešiť Vaše osobné ťažkosti v bezpečnom prostredí terapeutického vzťahu a prispôsobuje sa Vašim potrebám." },
+  { id:9, keywords:["parova","par","partner","vztah","manzelka","manzel","rodinna","partnerska","dvojica","kriza"],
+    answer:"Párová psychoterapia sa zameriava predovšetkým na riešenie partnerských a rodinných problémov." },
   { id:10, keywords:["psychodiagnostika","vysetrenie","posudenie","diagnostika"],
     answer:"Ponúkame psychodiagnostické vyšetrenie a posúdenie psychickej spôsobilosti, napríklad pre zbrojný preukaz alebo prácu v bezpečnostnej službe (SBS)." },
-  { id:11, keywords:["zbrojny preukaz","zbran","psychotest","sposobilost","sbs"],
-    answer:"Vykonávame posúdenie psychickej spôsobilosti potrebné k žiadosti o zbrojný preukaz. Pre viac info nás kontaktujte telefonicky alebo e-mailom.",
+  { id:11, keywords:["zbrojny preukaz","zbran","psychotest","sposobilost","sbs","zbrojak","bezpecnostna sluzba"],
+    answer:"Vykonávame posúdenie psychickej spôsobilosti potrebné k žiadosti o zbrojný preukaz. Pre viac informácií nás kontaktujte telefonicky alebo e-mailom.",
     links:[{label:"0908 743 734",href:"tel:0908743734"},{label:"kontakt@centrumuzdravenia.sk",href:"mailto:kontakt@centrumuzdravenia.sk"}] },
   { id:12, keywords:["vycvik","supervizia","kolega","vzdelavanie","kurz"],
     answer:"Ponúkame možnosť absolvovať cvičnú terapiu alebo supervíziu pre kolegov v psychoterapeutickom výcviku." },
-  { id:13, keywords:["tim","terapeut","kto","psycholog","odbornik","matia","kovalcik","fodorova","janoskova"],
+  { id:13, keywords:["tim","terapeut","kto","psycholog","odbornik","matia","kovalcik","fodorova","janoskova","kto ste","kto pracuje","personal"],
     answer:"V našom tíme nájdete Mgr. et Mgr. Adriánu Matiu, Mgr. Michala Kovalčíka, Mgr. Jaromíru Fodorovú a PhDr. Jaromíru Jánoškovú. Viac o každom z nich nájdete v sekcii Náš tím na stránke." },
-  { id:14, keywords:["cena","cennik","kolko","stoji","platba","poplatok","euro"],
+  { id:14, keywords:["cena","cennik","kolko","stoji","platba","poplatok","euro","cena sedenia","sedenie","kolko zaplatim"],
     answer:"Cena jedného sedenia je od 55 €. Presnú sumu podľa typu služby Vám radi upresníme telefonicky alebo e-mailom." },
   { id:15, keywords:["poistenie","poistovna","hradene","preplati","zdravotna"],
     answer:"Naša ambulancia nemá uzatvorené zmluvy so zdravotnými poisťovňami, sedenia si klienti hradia sami." },
-  { id:16, keywords:["trvanie","dlzka","ako casto","kolkokrat","pravidelne","frekvencia","dlho trva"],
-    answer:"Jedno sedenie trvá 45 až 50 minút. Pravidelnež Vám terapia pomôže viac – pravidelnostť vytvara bezpečný priestor na skutočnú zmenu. Frekvenciu návštev si spolu s terapeutom prispôsobíte Vašim potrebyám." },
-  { id:17, keywords:["prva navsteva","prve stretnutie","co ocakavat","ako to prebieha","priprava","prvy krat","prvy raz"],
-    answer:"Rozumieme, že urobiť prvý krok môže byť náročné, a sme radi, že ste sa rozhodli ozvať. Na prvom stretnutí od Vás nič neočakávame – len priestor v pokoji sa spoznať Vašim tempom. Stačí prísť tak, ako ste." }
+  { id:16, keywords:["trvanie","dlzka","ako casto","kolkokrat","pravidelne","frekvencia","dlho trva","ako dlho","kolko minut","sedenie","ako casto chodit"],
+    answer:"Jedno sedenie trvá 45 až 50 minút. Pravidelná terapia pomáha viac, pretože pravidelnosť vytvára bezpečný priestor na skutočnú zmenu. Frekvenciu návštev si spolu s terapeutom prispôsobíte Vašim potrebám." },
+  { id:17, keywords:["prva navsteva","prve stretnutie","co ocakavat","ako to prebieha","priprava","prvy krat","prvy raz","bojim sa","prvykrat","co ma caka"],
+    answer:"Rozumieme, že urobiť prvý krok môže byť náročné, a sme radi, že ste sa rozhodli ozvať. Na prvom stretnutí od Vás nič neočakávame. Vytvoríme len priestor, aby ste sa v pokoji spoznali Vaším tempom. Stačí prísť tak, ako ste." }
 ];
 
 const FALLBACK = "Ospravedlňujeme sa, na túto otázku Vám vie najlepšie odpovedať priamo náš tím.";
 const FALLBACK_LINKS = [{label:"0908 743 734",href:"tel:0908743734"},{label:"kontakt@centrumuzdravenia.sk",href:"mailto:kontakt@centrumuzdravenia.sk"}];
 
 const WELCOME_LINES = [
-  "Vitajte v Centre uzdravenia. Rád Vám poradím so základnými informáciami: hodiny, adresa, objednanie, ceník alebo naše služby.",
+  "Vitajte v Centre uzdravenia. Rád Vám poradím so základnými informáciami: hodiny, adresa, objednanie, cenník alebo naše služby.",
   "Osobné a zdravotné témy prosím riešte priamo s naším tímom telefonicky alebo e-mailom.",
   "Ako Vám môžem pomôcť?"
 ];
