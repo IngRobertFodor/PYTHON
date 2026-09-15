@@ -237,9 +237,10 @@ sources:
     enabled: true
     zone: GREEN
     automation: AUTO
-    rate_limit_per_min: 10
+    rate_limit_per_min: 4
+    max_pages: 3
     url_hint: "https://www.notar.sk/drazby"
-    note: "Verejny register zo zakona"
+    note: "Verejny register zo zakona. rate_limit 4/min (15s) - notar.sk blokuje rychlejsie. max_pages=3 (~40 drazieb, ~15min). parcel.url = PDF Oznamenie o drazbe (cena/vymera/adresa v skene)."
 
   spf:
     enabled: true

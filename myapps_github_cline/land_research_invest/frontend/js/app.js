@@ -117,8 +117,16 @@ function buildCard(parcel, report) {
   const isRealUrl = parcel.url && parcel.url.length > 0
     && !parcel.url.includes("/demo/")
     && parcel.url.startsWith("http");
+
+  // Popisok odkazu podla zdroja:
+  // - drazobne zdroje -> "Oznamenie o drazbe (PDF)" (klik = stiahne sken s cenou/vymerou)
+  // - realitne portaly -> "Inzerat"
+  const DRAZOBNE = ["notarske_drazby", "ske_drazobne_vyhlasky", "obchodny_vestnik"];
+  const linkLabel = DRAZOBNE.includes(parcel.source_portal)
+    ? "Ozn\u00e1menie o dra\u017ebe (PDF) \u2192"
+    : "Inzer\u00e1t \u2192";
   const linkHtml = isRealUrl
-    ? `<a class="card-link" href="${parcel.url}" target="_blank">Inzerat &rarr;</a>`
+    ? `<a class="card-link" href="${parcel.url}" target="_blank">${linkLabel}</a>`
     : "";
 
   card.innerHTML = `
