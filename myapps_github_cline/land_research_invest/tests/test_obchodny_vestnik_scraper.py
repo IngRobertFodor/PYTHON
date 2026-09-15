@@ -312,13 +312,13 @@ class TestObchodnyVestnikListingCrawler:
         assert len(urls) <= 15
 
     def test_listing_url_page1_is_base(self, scraper):
-        url = scraper._listing_url_page(1)
-        assert "strana" not in url
-        assert "FormulareVyhladavanie" in url
+        """_LISTING_URL obsahuje FormulareVyhladavanie."""
+        assert "FormulareVyhladavanie" in scraper._LISTING_URL
 
     def test_listing_url_page2_has_strana(self, scraper):
-        url = scraper._listing_url_page(2)
-        assert "strana=2" in url
+        """_DRAZBA_TYPES obsahuje spravne typy drazob."""
+        assert "OV_DRAZBA_OZNAMENIE_DOBROVOLNA" in scraper._DRAZBA_TYPES
+        assert "UPVS_00166073.MSSR_OV_Drazobna_vyhlaska" in scraper._DRAZBA_TYPES
 
     def test_extract_pdf_url_from_detail_no_pdf(self, scraper):
         """HTML bez PDF linku -> None."""

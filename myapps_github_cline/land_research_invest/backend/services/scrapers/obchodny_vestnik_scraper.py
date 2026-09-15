@@ -90,6 +90,13 @@ class ObchodnyVestnikScraper(BaseScraper):
         "https://obchodnyvestnik.justice.gov.sk"
         "/ObchodnyVestnik/Formular/FormulareVyhladavanie.aspx"
     )
+    # Typy drazobnych podani ktore chceme scrapovat
+    _DRAZBA_TYPES = [
+        "OV_DRAZBA_OZNAMENIE_DOBROVOLNA",          # Oznamenie o dobrovolnej drazbe
+        "OV_DRAZBA_OZNAMENIE_DOBROVOLNA_OPAKOVANA",# Opakovana dobrovolna drazba
+        "UPVS_00166073.MSSR_OV_Drazobna_vyhlaska", # Drazobna vyhlaska (exekutori)
+        "OV_DRAZBA_SUDNY_EXEKUTOR",                # Sudni exekutori
+    ]
     _DRAZBA_KEYS  = ["dra\u017eb", "drazb", "dobrovoln", "opakovan",
                      "dra\u017eobn", "drazobn"]
 
@@ -104,33 +111,87 @@ class ObchodnyVestnikScraper(BaseScraper):
         return parcels
 
     def _scrape_listing_pages(self):
-        """Generator: pre kazdu stranu listingu yieldi zoznam Parcel."""
+        """Generator: nacita listing cez POST (pre kazdy typ drazby)."""
         seen_ids = set()
-        for page in range(1, 51):
-            url = self._page_url(self._listing_url_page(page), 1)
-            try:
-                html = self.fetch_html(url)
-            except Exception as exc:
-                print(f"[{self.SOURCE_NAME}] listing strana {page} chyba: {exc}")
-                break
-            form_urls = self._parse_listing_html(html)
-            new_urls  = [u for u in form_urls if u not in seen_ids]
-            if not new_urls:
-                break
-            seen_ids.update(new_urls)
-            page_parcels = []
-            for fu in new_urls:
-                try:
-                    page_parcels.extend(self._process_formular(fu))
-                except Exception as exc:
-                    print(f"[{self.SOURCE_NAME}] formular {fu} chyba: {exc}")
-            yield page_parcels
+        # Nacitaj VIEWSTATE raz
+        try:
+            vs_data = self._fetch_viewstate()
+        except Exception as exc:
+            print(f"[{self.SOURCE_NAME}] VIEWSTATE chyba: {exc}")
+            return
 
-    def _listing_url_page(self, page):
-        """URL pre konkretnu stranu listingu OV."""
-        base = self._LISTING_URL
-        sep  = "&" if "?" in base else "?"
-        return base if page == 1 else f"{base}{sep}strana={page}"
+        for drazba_typ in self._DRAZBA_TYPES:
+            for page in range(1, 51):
+                try:
+                    html = self._fetch_listing_post(vs_data, drazba_typ, page)
+                except Exception as exc:
+                    print(f"[{self.SOURCE_NAME}] listing {drazba_typ} str.{page} chyba: {exc}")
+                    break
+                form_urls = self._parse_listing_html(html)
+                new_urls  = [u for u in form_urls if u not in seen_ids]
+                if not new_urls:
+                    break
+                seen_ids.update(new_urls)
+                page_parcels = []
+                for fu in new_urls:
+                    try:
+                        page_parcels.extend(self._process_formular(fu))
+                    except Exception as exc:
+                        print(f"[{self.SOURCE_NAME}] formular chyba: {exc}")
+                yield page_parcels
+
+    def _fetch_viewstate(self):
+        """GET na listing stranku — vrati dict s VIEWSTATE hodnotami."""
+        import requests
+        from bs4 import BeautifulSoup
+        self._wait_rate_limit()
+        resp = requests.get(self._LISTING_URL,
+                            headers={"User-Agent": self.user_agent},
+                            timeout=20)
+        resp.raise_for_status()
+        soup = BeautifulSoup(resp.text, "html.parser")
+        def val(name):
+            tag = soup.find("input", {"name": name})
+            return tag["value"] if tag and tag.get("value") else ""
+        return {
+            "__VIEWSTATE":          val("__VIEWSTATE"),
+            "__VIEWSTATEGENERATOR": val("__VIEWSTATEGENERATOR"),
+            "__EVENTVALIDATION":    val("__EVENTVALIDATION"),
+        }
+
+    def _fetch_listing_post(self, vs_data, typ_podania, page):
+        """POST na listing stranku s filtrom pre konkretny typ drazby."""
+        import requests
+        self._wait_rate_limit()
+        data = {
+            "__EVENTTARGET":    "ctl00$ctl00$CphMain$CphMain$btnVyhladat",
+            "__EVENTARGUMENT":  "",
+            "__VIEWSTATE":      vs_data["__VIEWSTATE"],
+            "__VIEWSTATEGENERATOR": vs_data["__VIEWSTATEGENERATOR"],
+            "__EVENTVALIDATION": vs_data["__EVENTVALIDATION"],
+            "ctl00$ctl00$CphMain$CphMain$cmbObchodnyVestnikRocnik": "",
+            "ctl00$ctl00$CphMain$CphMain$cmbKapitola":    "",
+            "ctl00$ctl00$CphMain$CphMain$cmbTypPodania":  typ_podania,
+            "ctl00$ctl00$CphMain$CphMain$txtCisloOV":     "",
+            "ctl00$ctl00$CphMain$CphMain$txtIco":         "",
+            "ctl00$ctl00$CphMain$CphMain$txtObchodneMeno":"",
+        }
+        if page > 1:
+            data["__EVENTTARGET"] = (
+                "ctl00$ctl00$CphMain$CphMain$gvVyhladavanieOV$ctl13$ctl00$lbPage"
+            )
+            data["__EVENTARGUMENT"] = str(page)
+        resp = requests.post(
+            self._LISTING_URL,
+            data=data,
+            headers={
+                "User-Agent":   self.user_agent,
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            timeout=25,
+        )
+        resp.raise_for_status()
+        return resp.text
 
     def _parse_listing_html(self, html):
         """Zo HTML listingu extrahuje zoznam FormularDetail URL pre drazby."""
@@ -156,13 +217,28 @@ class ObchodnyVestnikScraper(BaseScraper):
         return urls
 
     def _process_formular(self, formular_url):
-        """Z FormularDetail stranky najde PDF link a parsuje ho."""
-        html    = self.fetch_html(formular_url)
-        pdf_url = self._extract_pdf_url_from_detail(html)
-        if not pdf_url:
+        """Z FormularDetail URL ziska PDF a parsuje ho.
+
+        FormularDetail.aspx vracia priamo PDF binarny obsah (nie HTML stranku).
+        Ak by vracal HTML, hladame v nom PDF link ako fallback.
+        """
+        try:
+            pdf_bytes = self.fetch_pdf_bytes(formular_url)
+            if pdf_bytes and pdf_bytes[:4] == b"%PDF":
+                return self.scrape_pdf(pdf_bytes)
+        except Exception:
+            pass
+        # Fallback: HTML stranka s PDF linkom
+        try:
+            html    = self.fetch_html(formular_url)
+            pdf_url = self._extract_pdf_url_from_detail(html)
+            if not pdf_url:
+                return []
+            pdf_bytes = self.fetch_pdf_bytes(pdf_url)
+            return self.scrape_pdf(pdf_bytes)
+        except Exception as exc:
+            print(f"[{self.SOURCE_NAME}] formular fallback chyba: {exc}")
             return []
-        pdf_bytes = self.fetch_pdf_bytes(pdf_url)
-        return self.scrape_pdf(pdf_bytes)
 
     def _extract_pdf_url_from_detail(self, html):
         """Zo stranky FormularDetail extrahuje URL na PDF."""
