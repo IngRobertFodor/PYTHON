@@ -135,6 +135,103 @@ class TestParsePdfPozemky:
         assert any(any(d in p.description for d in druh_vals) for p in fixture_parcels[:10])
 
 
+
+# ----------------------------------------------------------------
+# TestParseIndexMetoda2 — nova HTML struktura (uzemneplany plugin href)
+# ----------------------------------------------------------------
+
+_PLUGIN_HTML = """<html><body>
+<div class="entry-content">
+  <p>Okres: Malacky Mesto / Obec: Pernek
+  <a href="https://pozfond.sk/wp-content/uploads/uzemneplany/Malacky_Pernek_Pernek.pdf">Stiahnut PDF</a></p>
+  <p>Okres: Rimavska-Sobota Mesto / Obec: Martinova
+  <a href="https://pozfond.sk/wp-content/uploads/uzemneplany/Rimavska-Sobota_Martinova_Martinova.pdf">Stiahnut PDF</a></p>
+  <p>Okres: Banska-Stiavnica Mesto / Obec: Dekys
+  <a href="https://pozfond.sk/wp-content/uploads/uzemneplany/Banska-Stiavnica_Dekys_Dekys.pdf">Stiahnut PDF</a></p>
+</div>
+</body></html>"""
+
+_LISTING_NO_PDF_HTML = """<html><body>
+<p>Aktualne fond nezverejnuje nove zoznamy.</p>
+<a href="https://pozfond.sk/zoznam-pozemkov-na-prenajom-archiv-2-4-2026/">Archiv pre zoznam neprenajatych pozemkov</a>
+</body></html>"""
+
+
+class TestParseIndexMetoda2:
+    def test_plugin_html_returns_list(self):
+        result = parse_index(_PLUGIN_HTML)
+        assert isinstance(result, list)
+
+    def test_plugin_html_3_entries(self):
+        result = parse_index(_PLUGIN_HTML)
+        assert len(result) == 3
+
+    def test_plugin_html_has_keys(self):
+        result = parse_index(_PLUGIN_HTML)
+        for e in result:
+            assert "okres" in e and "obec" in e and "pdf_url" in e
+
+    def test_plugin_html_first_okres(self):
+        result = parse_index(_PLUGIN_HTML)
+        assert "Malacky" in result[0]["okres"]
+
+    def test_plugin_html_first_obec(self):
+        result = parse_index(_PLUGIN_HTML)
+        assert "Pernek" in result[0]["obec"]
+
+    def test_plugin_html_pdf_url_correct(self):
+        result = parse_index(_PLUGIN_HTML)
+        assert result[0]["pdf_url"].endswith("Malacky_Pernek_Pernek.pdf")
+
+    def test_plugin_html_no_duplicates(self):
+        result = parse_index(_PLUGIN_HTML)
+        urls = [e["pdf_url"] for e in result]
+        assert len(urls) == len(set(urls))
+
+    def test_plugin_html_url_contains_uzemneplany(self):
+        result = parse_index(_PLUGIN_HTML)
+        assert all("uzemneplany" in e["pdf_url"] for e in result)
+
+    def test_no_pdf_returns_empty(self):
+        """HTML bez PDF uzemneplany odkazov vraci prazdny zoznam."""
+        assert parse_index(_LISTING_NO_PDF_HTML) == []
+
+
+# ----------------------------------------------------------------
+# TestSpfScraperListingUrl — nova get_listing_urls + BASE_URL
+# ----------------------------------------------------------------
+
+class TestSpfScraperListingUrl:
+    def test_base_url_is_pozfond(self):
+        from services.scrapers.spf_scraper import BASE_URL, LISTING_URL
+        assert "pozfond.sk" in BASE_URL
+        assert "www.pozemkovyfond.sk" not in BASE_URL
+
+    def test_listing_url_is_zoznam(self):
+        from services.scrapers.spf_scraper import LISTING_URL
+        assert "zoznam-pozemkov-na-prenajom" in LISTING_URL
+
+    def test_get_listing_urls_returns_listing_url(self):
+        from services.scrapers.spf_scraper import LISTING_URL
+        scraper = SpfScraper.__new__(SpfScraper)
+        scraper.rate_limit = 0
+        scraper.neutral_ua = False
+        scraper.timeout    = 20
+        scraper._last_call = 0.0
+        urls = scraper.get_listing_urls()
+        assert urls == [LISTING_URL]
+
+    def test_timeout_loaded_from_config(self):
+        """timeout atribut existuje (nastaveny z DEFAULT_TIMEOUT ak nie je v config)."""
+        scraper = SpfScraper.__new__(SpfScraper)
+        scraper.rate_limit = 0
+        scraper.neutral_ua = False
+        scraper.timeout    = 20
+        scraper._last_call = 0.0
+        assert hasattr(scraper, "timeout")
+        assert scraper.timeout >= 10
+
+
 # ----------------------------------------------------------------
 # TestExtractOkresObecFromPdfUrl
 # ----------------------------------------------------------------

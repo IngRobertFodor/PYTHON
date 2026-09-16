@@ -11,11 +11,18 @@ Konvencia nazvania:
 
 import time
 import requests
-from requests.exceptions import ConnectionError as RequestsConnectionError
+from requests.exceptions import (
+    ConnectionError as RequestsConnectionError,
+    Timeout as RequestsTimeout,
+    ReadTimeout,
+    ConnectTimeout,
+)
 from models.parcel import Parcel
 from config_loader import get_sources
 
-RETRY_DELAY = 3.0   # sekundy pred retry pri sietovom vypadku
+RETRY_DELAY = 3.0   # sekundy pred retry pri sietovom vypadku (1. retry)
+RETRY_DELAY2 = 6.0  # sekundy pred 2. retry (exponencialny backoff)
+MAX_RETRIES = 2     # pocet opakovaní pri sietovom vypadku
 
 DEFAULT_USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -24,7 +31,7 @@ DEFAULT_USER_AGENT = (
 )
 AI_BOT_USER_AGENT = "LandResearchInvest/1.0 (land-parcel-research)"
 
-TIMEOUT = 20
+DEFAULT_TIMEOUT = 20   # default ak nie je nastavene v criteria.yaml
 
 
 class BaseScraper:
@@ -38,6 +45,8 @@ class BaseScraper:
         cfg = get_sources().get(self.SOURCE_NAME, {})
         self.rate_limit  = cfg.get("rate_limit_per_min", 10)
         self.neutral_ua  = cfg.get("use_neutral_useragent", False)
+        # Per-source timeout: nastavitelne v criteria.yaml ako timeout_sec
+        self.timeout     = cfg.get("timeout_sec", DEFAULT_TIMEOUT)
         self._last_call  = 0.0
 
     @property
@@ -48,29 +57,31 @@ class BaseScraper:
     def fetch_html(self, url):
         """
         HTTP GET s rate-limitom a spravnym user-agentom.
-        Retry: 1 opakovanie pri sietovom vypadku (ConnectionReset/ConnectionError).
+        Retry: az MAX_RETRIES opakovaní pri sietovom vypadku alebo timeout.
+        Zachytava: ConnectionError, ReadTimeout, ConnectTimeout (requests aj built-in).
         Implementuj v podtriede ak potrebujes specialny handling.
         """
-        self._wait_rate_limit()
-        try:
-            resp = requests.get(
-                url,
-                headers={"User-Agent": self.user_agent},
-                timeout=TIMEOUT,
-            )
-            resp.raise_for_status()
-            return resp.text
-        except (RequestsConnectionError, TimeoutError) as exc:
-            print(f"[{self.SOURCE_NAME}] sietovy vypadok pri {url}: {exc} — retry za {RETRY_DELAY}s")
-            time.sleep(RETRY_DELAY)
+        _RETRYABLE = (RequestsConnectionError, RequestsTimeout,
+                      ReadTimeout, ConnectTimeout, TimeoutError, OSError)
+        delays = [RETRY_DELAY, RETRY_DELAY2]
+
+        for attempt in range(MAX_RETRIES + 1):
             self._wait_rate_limit()
-            resp = requests.get(
-                url,
-                headers={"User-Agent": self.user_agent},
-                timeout=TIMEOUT,
-            )
-            resp.raise_for_status()
-            return resp.text
+            try:
+                resp = requests.get(
+                    url,
+                    headers={"User-Agent": self.user_agent},
+                    timeout=self.timeout,
+                )
+                resp.raise_for_status()
+                return resp.text
+            except _RETRYABLE as exc:
+                if attempt < MAX_RETRIES:
+                    delay = delays[attempt]
+                    print(f"[{self.SOURCE_NAME}] sietovy vypadok pri {url}: {exc} — retry za {delay}s")
+                    time.sleep(delay)
+                else:
+                    raise
 
     def parse_listings(self, html):
         """

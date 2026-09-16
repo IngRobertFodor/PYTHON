@@ -97,16 +97,21 @@ def scrape_all(criteria=None):
             executor.submit(_scrape_one, src, criteria): src
             for src in active
         }
-        for future in as_completed(future_to_src, timeout=SCRAPER_TIMEOUT_SEC + 30):
-            src = future_to_src[future]
-            try:
-                parcels = future.result(timeout=SCRAPER_TIMEOUT_SEC)
-                print(f"[scraper_service] {src}: {len(parcels)} pozemkov")
-                all_parcels.extend(parcels)
-            except FuturesTimeoutError:
-                print(f"[scraper_service] {src}: TIMEOUT po {SCRAPER_TIMEOUT_SEC}s — preskakujem")
-            except Exception as exc:
-                print(f"[scraper_service] {src} CHYBA: {exc}")
+        try:
+            for future in as_completed(future_to_src, timeout=SCRAPER_TIMEOUT_SEC + 30):
+                src = future_to_src[future]
+                try:
+                    parcels = future.result(timeout=SCRAPER_TIMEOUT_SEC)
+                    print(f"[scraper_service] {src}: {len(parcels)} pozemkov")
+                    all_parcels.extend(parcels)
+                except FuturesTimeoutError:
+                    print(f"[scraper_service] {src}: TIMEOUT po {SCRAPER_TIMEOUT_SEC}s — preskakujem")
+                except Exception as exc:
+                    print(f"[scraper_service] {src} CHYBA: {exc}")
+        except TimeoutError:
+            pending = [s for f,s in future_to_src.items() if not f.done()]
+            for src in pending:
+                print(f"[scraper_service] {src}: GLOBALNY TIMEOUT — preskakujem")
 
     elapsed = time.monotonic() - t_start
     result = _deduplicate(all_parcels)

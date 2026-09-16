@@ -2,8 +2,12 @@
 ====================================================================================
 Urovne:
   1. HTML index (parse_index):
-       wpDataTable s riadkami: Okres | Obec | PDF odkaz
+       Parsuje HTML stranku SPF s PDF odkazmi (uzemneplany plugin).
        URL vzor: https://pozfond.sk/wp-content/uploads/uzemneplany/<Okres>_<Obec>_<KU>.pdf
+       Poznamka: stara domena www.pozemkovyfond.sk ma SSL chybu a vracia 503.
+       Nova domena: https://pozfond.sk (platny SSL cert *.pozfond.sk).
+       Ked nie su aktivne pozemky (mimo vyhlasovacieho obdobia), pouzije sa
+       posledna archivna stranka (ARCHIVE_URL).
   2. PDF pozemkov (parse_pdf_pozemky):
        pypdf cita tabu v pamati (nie na disk)
        Kazda strana: header + riadky parciel
@@ -31,7 +35,12 @@ from bs4 import BeautifulSoup
 from services.scrapers.base_scraper import BaseScraper
 
 SOURCE_NAME = "spf"
-BASE_URL    = "https://www.pozemkovyfond.sk"
+BASE_URL    = "https://pozfond.sk"
+# Aktivna listing stranka (ked su pozemky vyhlasene)
+LISTING_URL = "https://pozfond.sk/zoznam-pozemkov-na-prenajom/"
+# Archivna stranka - pouziva sa ked nie su aktivne pozemky
+# (SPF vyhlasuje pozemky periodicky; URL archivnej stranky sa meni s datumom,
+#  scraper precita LISTING_URL a automaticky nasleduje prvy archivny link)
 PDF_BASE    = "https://pozfond.sk/wp-content/uploads/uzemneplany/"
 
 # Kody druhu pozemku podla katastra nehnutelnosti
@@ -66,24 +75,63 @@ _PDF_HEADER_TOKENS = {
 
 
 class SpfScraper(BaseScraper):
-    """Scraper Slovenskeho pozemkoveho fondu (HTML index + PDF parcely)."""
+    """Scraper Slovenskeho pozemkoveho fondu (HTML index + PDF parcely).
+
+    Logika listing URL:
+      1. Nacita LISTING_URL (https://pozfond.sk/zoznam-pozemkov-na-prenajom/)
+      2. Ak obsahuje PDF uzemneplany linky -> pouzije ich (aktivne vyhlasovanie)
+      3. Ak nie -> hlada prvy archivny link (href obsahujuci 'archiv') a nacita ho
+      Tym pokryva obe stavy: aktivne aj neaktivne vyhlasovanie.
+    """
 
     SOURCE_NAME = "spf"
     BASE_URL    = BASE_URL
 
+    def get_listing_urls(self, criteria=None):
+        """Vracia [LISTING_URL] - scrape() vola parse_listings() ktory resi fallback."""
+        return [LISTING_URL]
+
     def parse_listings(self, html):
         """
-        Parsuje HTML index stranky SPF.
-        Vracia zoznam Parcel zo vsetkych PDF v indexe (pre scrape_all).
-        Pozn.: v produkcii by stiahol kazde PDF; pre testy mockujeme fetch_html.
+        Parsuje HTML stranku SPF.
+        Ak neobsahuje PDF linky, automaticky nasleduje prvy archivny link.
+        Vracia zoznam Parcel zo vsetkych PDF na stranke.
         """
+        # Skus priamu stranku
         index = parse_index(html)
+
+        # Fallback: hladaj archivny link (SPF mimo vyhlasovacie obdobie)
+        if not index:
+            soup = BeautifulSoup(html, "html.parser")
+            archiv_link = None
+            for a in soup.find_all("a", href=True):
+                href = a["href"]
+                if "archiv" in href.lower() and "pozfond.sk" in href:
+                    archiv_link = href
+                    break
+                elif "archiv" in href.lower() and href.startswith("/"):
+                    archiv_link = BASE_URL + href
+                    break
+            if archiv_link:
+                print(f"[{self.SOURCE_NAME}] Aktivne pozemky nenajdene, pouzivam archiv: {archiv_link}")
+                try:
+                    archiv_html = self.fetch_html(archiv_link)
+                    index = parse_index(archiv_html)
+                except Exception as exc:
+                    print(f"[{self.SOURCE_NAME}] Archiv chyba: {exc}")
+
+        if not index:
+            print(f"[{self.SOURCE_NAME}] Ziadne PDF linky nenajdene na SPF stranke")
+            return []
+
         parcels = []
         for entry in index:
             try:
                 pdf_bytes = self.fetch_html(entry["pdf_url"])
-                new = parse_pdf_pozemky(pdf_bytes.encode() if isinstance(pdf_bytes, str) else pdf_bytes,
-                                        entry["okres"], entry["obec"])
+                new = parse_pdf_pozemky(
+                    pdf_bytes.encode() if isinstance(pdf_bytes, str) else pdf_bytes,
+                    entry["okres"], entry["obec"]
+                )
                 parcels.extend(new)
             except Exception as exc:
                 print(f"[{self.SOURCE_NAME}] PDF chyba {entry.get('pdf_url','')}: {exc}")
@@ -108,28 +156,76 @@ class SpfScraper(BaseScraper):
 
 def parse_index(html):
     """
-    Parsuje HTML index SPF (wpDataTable).
+    Parsuje HTML stranku SPF a vracia zoznam PDF zaznamov.
+
+    Podporuje dve HTML struktury:
+      1. Stara (wpDataTable): <tr> s 12+ <td>, td[7]=Okres, td[8]=Obec, td[11]=PDF link
+      2. Nova (uzemneplany plugin): href linky obsahujuce 'uzemneplany/*.pdf'
+         s prilozenym textom 'Okres: X Mesto / Obec: Y'
+
     Vracia zoznam dict: [{okres, obec, pdf_url}, ...].
     """
     soup = BeautifulSoup(html, "html.parser")
     results = []
+    seen_urls = set()
+
+    # --- METODA 1: wpDataTable (<tr> s 12+ <td>) ---
     for row in soup.find_all("tr"):
         tds = row.find_all("td")
         if len(tds) < 12:
             continue
-        # td[7]=Okres, td[8]=Obec, td[11]=PDF link
         okres = tds[7].get_text(strip=True)
         obec  = tds[8].get_text(strip=True)
         link  = tds[11].find("a")
         if not link or not okres:
             continue
         pdf_url = link.get("href", "").strip()
-        if pdf_url and "uzemneplany" in pdf_url:
-            results.append({
-                "okres":   okres,
-                "obec":    obec,
-                "pdf_url": pdf_url,
-            })
+        if pdf_url and "uzemneplany" in pdf_url and pdf_url not in seen_urls:
+            results.append({"okres": okres, "obec": obec, "pdf_url": pdf_url})
+            seen_urls.add(pdf_url)
+
+    if results:
+        return results
+
+    # --- METODA 2: uzemneplany plugin (href linky v HTML) ---
+    # Vzor: href="https://pozfond.sk/wp-content/uploads/uzemneplany/Okres_Obec_KU.pdf"
+    # Pridruzeny text moze byt: "Okres: Rimavska-Sobota Mesto / Obec: Martinova"
+    _OKRES_RE = re.compile(r"Okres[:\s]+([A-Za-z\u00c0-\u024f\-]+(?:\s+[A-Za-z\u00c0-\u024f\-]+)?)", re.IGNORECASE)
+    _OBEC_RE  = re.compile(r"(?:Mesto\s*/\s*Obec|Obec)[:\s]+([A-Za-z\u00c0-\u024f\-]+(?:\s+[A-Za-z\u00c0-\u024f\-]+)?)", re.IGNORECASE)
+
+    for a in soup.find_all("a", href=True):
+        pdf_url = a.get("href", "").strip()
+        if "uzemneplany" not in pdf_url or not pdf_url.endswith(".pdf"):
+            continue
+        if pdf_url in seen_urls:
+            continue
+
+        # Hladaj Okres/Obec v okolnom texte (rodic element + siblings)
+        context = ""
+        parent = a.parent
+        if parent:
+            context = parent.get_text(" ", strip=True)
+
+        okres = ""
+        obec  = ""
+        m_ok = _OKRES_RE.search(context)
+        m_ob = _OBEC_RE.search(context)
+        if m_ok:
+            okres = m_ok.group(1).strip()
+        if m_ob:
+            obec = m_ob.group(1).strip()
+
+        # Fallback: extrahuj z URL nazvu suboru
+        if not okres or not obec:
+            url_okres, url_obec = extract_okres_obec_from_pdf_url(pdf_url)
+            if not okres:
+                okres = url_okres
+            if not obec:
+                obec = url_obec
+
+        results.append({"okres": okres, "obec": obec, "pdf_url": pdf_url})
+        seen_urls.add(pdf_url)
+
     return results
 
 

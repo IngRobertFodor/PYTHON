@@ -13,7 +13,7 @@
 | Frontend (mapa, karty, modal, demo) | HOTOVO |
 | Scraper kostra (BaseScraper, registry, scrape_all) | HOTOVO |
 | nehnutelnosti_sk parser | HOTOVO |
-| Testy | **767, 0 zlyh** |
+| Testy | **948, 0 zlyh** |
 | Limity v criteria.yaml (cena 0-10000, vymera 350-1000) | HOTOVO |
 | C0: nehnutelnosti.sk - oprava markera (T23c11 -> dynamic RSC) | HOTOVO - 46 pozemkov nazivo |
 | C0: nehnutelnosti.sk - lokalita (ZNAME_OBCE 70km od BA) | HOTOVO - 46/46 s lokalitou |
@@ -26,6 +26,20 @@
 | C4: ske_drazobne_vyhlasky scraper (exekutorske drazby, verejne) | HOTOVO - +26 testov |
 | C4: config opraven - drazby_net (CZ) + sexe.sk vyradene, ske.sk pridane | HOTOVO |
 | Fixtures aktualizovane (listing+detail, naming konvencia) | HOTOVO |
+| C5: reality_sk scraper (div.offer CSS, cena s ciarkami) - 811 pozemkov nazivo | HOTOVO |
+| E1: Paralelizacia scrape_all (ThreadPoolExecutor) + retry + per-zdroj timeout | HOTOVO - cas ~13min |
+| E2: notarske_drazby - nova URL /drazby/, POST, PDF odkaz na url, max_pages=3 | HOTOVO |
+| E3: ske_drazobne_vyhlasky - 11 poli (cena, vymera-sucet, obec, LV, datum...) | HOTOVO - +18 testov |
+| E4: obchodny_vestnik - POST filter drazob, VIEWSTATE, FormularDetail=PDF | HOTOVO |
+| E5: frontend - odkaz Oznamenie o drazbe (PDF) pre drazobne zdroje | HOTOVO |
+| F1: reality_sk zone YELLOW->GREEN (neutralny UA uz implementovany) | HOTOVO |
+| F2: scraper_service GlobalnyTimeoutError zachytenie (as_completed fix) | HOTOVO |
+| F3: spf - nova domena pozfond.sk (stara www.pozemkovyfond.sk: SSL+503) | HOTOVO |
+| F3: spf parse_index Metoda2 (uzemneplany plugin href, nie wpDataTable) | HOTOVO - +10 testov |
+| F3: spf fallback na archivnu stranku (mimo vyhlasovacie obdobie) | HOTOVO |
+| F4: base_scraper ReadTimeout fix - retry pre requests.Timeout aj built-in | HOTOVO - +22 testov |
+| F4: base_scraper MAX_RETRIES=2 + exponencialny backoff (3s, 6s) | HOTOVO |
+| F4: per-source timeout_sec v criteria.yaml (ske=30s, OV=30s, default=20s) | HOTOVO |
 
 ---
 
@@ -139,6 +153,49 @@
 
 ---
 
+## FAZA E - Optimalizacia a udrzba (HOTOVO)
+
+**Ciel:** Stabilny, rychly a odolny scraping vsetkych zdrojov.
+
+### E1 - Paralelizacia scrapingu
+- [x] scrape_all() -> ThreadPoolExecutor (kazdy zdroj iná domena, nulove riziko banu)
+- [x] Retry vo fetch_html pri ConnectionReset (1 opakovanie, 3s pauza)
+- [x] Per-zdroj timeout (SCRAPER_TIMEOUT_SEC=2700s)
+- [x] Vysledok: ~40 min -> ~13 min (live test: 1560 pozemkov za 789s)
+
+### E2 - notarske_drazby oprava
+- [x] Stara URL /notarsky-centralny-register-drazob/ -> 404
+- [x] Nova URL https://www.notar.sk/drazby/ + GET formular (auction-search=Hladat)
+- [x] Strankovanie: &start=N (nie page=N)
+- [x] parcel.url = priamy PDF odkaz (Oznamenie o drazbe) - klik = stiahne sken
+- [x] max_pages=3 (rate-limit 4/min, notar.sk blokuje rychlejsie)
+- [x] 52 testov
+
+### E3 - ske_drazobne_vyhlasky rozsirenie
+- [x] Z 1 pola (location) na 11 poli: cena, vymera-sucet, obec, kataster, LV,
+      datum+cas+miesto drazby, datum obhliadky, vlastnik, cislo OV, zoznam parciel
+- [x] Live: cena napr. 20500 EUR, 64900 EUR, 18400 EUR - priamo v HTML detaile
+- [x] +18 testov
+
+### E4 - obchodny_vestnik oprava
+- [x] Listing GET vracat zmiesane podania (dane, zmluvy) -> 0 drazob
+- [x] Riesenie: POST s VIEWSTATE + cmbTypPodania filter pre 4 typy drazob
+- [x] FormularDetail.aspx vracia priamo PDF (nie HTML stranku)
+- [x] Live: Parcel z 1. formulara: title=Drazba - SR, loc=Spiska
+
+### E5 - Frontend aktualizacia
+- [x] Odkaz "Oznamenie o drazbe (PDF) ->" pre notarske/ske/obchodny_vestnik
+- [x] Realitne portaly ostali "Inzerat ->"
+- [x] Oba renderery (app.js + map.js) aktualizovane
+
+### Zistenia o zdrojoch
+- spf (pozemkovyfond.sk): SSL certifikat neplatny na ich strane - zatial nefunkcny
+- notar.sk: rate-limit 4/min na celu domenu (nie len /drazby/)
+- notar.sk PDF: skenovaný dokument (JPEG v PDF) - OCR nie je implementovane
+- ske.sk: cena a odhad su priamo v HTML detaile (nie v PDF)
+- OV justice.gov.sk: FormularDetail.aspx vracia PDF priamo (nie HTML stranku)
+
+---
 ## FAZA C - LLM agent (volitelne)
 
 **Ciel:** LangChain + Google Gemini orchestruje existujuce nastroje (@tool)
@@ -188,8 +245,9 @@ Potom AI: precita fixture, extrahuje strukturu, napise presny parser.
 | B2 | obchodny_vestnik (ZLATO) | ✅ HOTOVO | +44 |
 | B3 | spf | ✅ HOTOVO | +33 |
 | B4 | exekutorske + drazby_net | ❌ caka na HTML | ~+20 |
-| B5 | notarske + eks | ❌ caka na HTML | ~+20 |
+| B5 | notarske_drazby (notar.sk, POST, PDF odkaz) | ✅ HOTOVO | +52 |
 | B6 | bsk_kraj + obce (najkomplexnejsie) | ❌ caka na HTML | ~+20 |
 | C | llm_agent_service (volitelne) | ❌ | ~+15 |
 | D | frontend rozsirenia (volitelne) | ❌ | manual |
-| **TOTAL** | | | **~870** |
+| E  | Optimalizacia + udrzba (paralelizacia, E1-E5) | ✅ HOTOVO | +18 |
+| **TOTAL** | | | **883** |

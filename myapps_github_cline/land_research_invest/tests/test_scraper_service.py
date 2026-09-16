@@ -285,6 +285,7 @@ class TestFetchHtmlRetry:
         s.SOURCE_NAME = "test_retry"
         s.rate_limit  = 0
         s.neutral_ua  = False
+        s.timeout     = 20
         s._last_call  = 0.0
         return s
 
