@@ -10,6 +10,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("modal-overlay").addEventListener("click", e => {
     if (e.target.id === "modal-overlay") closeModal();
   });
+
+  // Auto-resume: ak scraping prave bezi (napr. po refreshi F5), obnov progress bar
+  try {
+    const p = await apiScrapeProgress();
+    if (p.running) {
+      const btn = document.getElementById("btn-research");
+      btn.disabled = true;
+      btn.textContent = "⏳ Prebieha prieskum...";
+      showProgressSection(true);
+      updateProgressUI(p);
+      startProgressPolling();
+    }
+  } catch (e) { /* backend nedostupny - ignoruj */ }
 });
 
 // --- Config ---

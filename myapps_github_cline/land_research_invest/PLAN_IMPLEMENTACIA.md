@@ -46,7 +46,8 @@
 | G4: spf fetch_pdf_bytes() - binarne stiahnutie PDF (fix: resp.text vs resp.content) | HOTOVO |
 | H1: frontend "Spustit prieskum" button + progress bar (polling 2s) | HOTOVO |
 | H1: GET /api/scrape/results endpoint + _last_results ulozenie | HOTOVO - +6 testov |
-| H1: api.js apiScrapeStart/Progress/Results + app.js onResearchClick | HOTOVO |
+| H2: auto-resume polling po refreshi F5 (varianta b - len running stav) | HOTOVO |
+| H2: cleanup temp suborov (20x ov_* notar_* full_live_*) | HOTOVO |
 
 ---
 
