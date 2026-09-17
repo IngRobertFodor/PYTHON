@@ -247,8 +247,10 @@ sources:
     zone: GREEN
     automation: AUTO
     rate_limit_per_min: 10
+    filter_okresy_70km: true
+    max_pdf: 30
     url_hint: "https://pozfond.sk/zoznam-pozemkov-na-prenajom/"
-    note: "Verejne obchodne sutaze SPF. Nova domena: pozfond.sk (stara www.pozemkovyfond.sk ma SSL chybu + 503). Scraper automaticky pouziva archivnu stranku ak nie su aktivne pozemky."
+    note: "Verejne obchodne sutaze SPF. Nova domena: pozfond.sk. filter_okresy_70km=true: len okresy do 70km od BA. max_pdf=30: max 30 PDF na beh (~3min, archiv ma 557 relevantnych PDF)."
 
   obchodny_vestnik:
     enabled: true

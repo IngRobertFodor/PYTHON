@@ -211,6 +211,312 @@ class TestSpfScraperListingUrl:
         from services.scrapers.spf_scraper import LISTING_URL
         assert "zoznam-pozemkov-na-prenajom" in LISTING_URL
 
+
+# ----------------------------------------------------------------
+# TestSpfFallbackFilter — fallback preferuje pozemkovy archiv
+# ----------------------------------------------------------------
+
+# HTML simulujuci SPF listing stranku BEZ aktivnych pozemkov
+# Obsahuje faktury-archiv a objednavky-archiv PRED pozemkovym archivom
+_LISTING_WITH_WRONG_ARCHIV = """<html><body>
+<p>Aktualne fond nezverejnuje nove zoznamy.</p>
+<a href="https://pozfond.sk/verejny-pristup-k-informaciam/faktury-archiv/">Faktury archiv</a>
+<a href="https://pozfond.sk/verejny-pristup-k-informaciam/objednavky-archiv/">Objednavky archiv</a>
+<a href="https://pozfond.sk/zoznam-pozemkov-na-prenajom-archiv-2-4-2026/">Archiv neprenajatych pozemkov</a>
+</body></html>"""
+
+# HTML kde je pozemkovy archiv ako relativna URL
+_LISTING_RELATIVE_ARCHIV = """<html><body>
+<a href="/verejny-pristup-k-informaciam/faktury-archiv/">Faktury archiv</a>
+<a href="/zoznam-pozemkov-na-prenajom-archiv-1-1-2026/">Pozemkovy archiv</a>
+</body></html>"""
+
+
+class TestSpfFallbackFilter:
+    """Overuje, ze SPF fallback trafuje pozemkovy archiv, nie faktury/objednavky."""
+
+    def _scraper(self):
+        s = SpfScraper.__new__(SpfScraper)
+        s.rate_limit = 0
+        s.neutral_ua = False
+        s.timeout    = 20
+        s._last_call = 0.0
+        return s
+
+    def test_skips_faktury_archiv(self):
+        """faktury-archiv NESMIE byt pouzity ako fallback."""
+        from unittest.mock import patch, MagicMock
+        s = self._scraper()
+        captured = []
+
+        def mock_fetch(url):
+            captured.append(url)
+            return "<html><body></body></html>"
+
+        with patch.object(s, "fetch_html", side_effect=mock_fetch):
+            s.parse_listings(_LISTING_WITH_WRONG_ARCHIV)
+
+        for url in captured:
+            assert "faktury-archiv" not in url, f"Trafil faktury-archiv: {url}"
+
+    def test_skips_objednavky_archiv(self):
+        """objednavky-archiv NESMIE byt pouzity ako fallback."""
+        from unittest.mock import patch
+        s = self._scraper()
+        captured = []
+
+        def mock_fetch(url):
+            captured.append(url)
+            return "<html><body></body></html>"
+
+        with patch.object(s, "fetch_html", side_effect=mock_fetch):
+            s.parse_listings(_LISTING_WITH_WRONG_ARCHIV)
+
+        for url in captured:
+            assert "objednavky-archiv" not in url, f"Trafil objednavky-archiv: {url}"
+
+    def test_uses_pozemkovy_archiv(self):
+        """Pozemkovy archiv MUSI byt pouzity (obsahuje 'prenajom' + 'archiv')."""
+        from unittest.mock import patch
+        s = self._scraper()
+        captured = []
+
+        def mock_fetch(url):
+            captured.append(url)
+            return "<html><body></body></html>"
+
+        with patch.object(s, "fetch_html", side_effect=mock_fetch):
+            s.parse_listings(_LISTING_WITH_WRONG_ARCHIV)
+
+        assert any("pozemkov" in url or "prenajom" in url for url in captured), \
+            f"Pozemkovy archiv nebol pouzity. Volania: {captured}"
+
+
+
+# ----------------------------------------------------------------
+# TestNormalizeOkres
+# ----------------------------------------------------------------
+
+from services.scrapers.spf_scraper import _normalize_okres, OKRESY_BA_70KM
+
+
+class TestNormalizeOkres:
+    def test_malacky(self):
+        assert _normalize_okres("Malacky") == "malacky"
+
+    def test_dunajska_streda_medzery(self):
+        assert _normalize_okres("Dunajska Streda") == "dunajska-streda"
+
+    def test_bratislava_i(self):
+        assert _normalize_okres("Bratislava I") == "bratislava-i"
+
+    def test_rimavska_sobota_pomlcka(self):
+        assert _normalize_okres("Rimavska-Sobota") == "rimavska-sobota"
+
+    def test_strips_whitespace(self):
+        assert _normalize_okres("  Trnava  ") == "trnava"
+
+    def test_empty_string(self):
+        assert _normalize_okres("") == ""
+
+
+class TestOkresyBa70km:
+    def test_blizke_v_sete(self):
+        """Blízke okresy (BA, Malacky, Pezinok, Senec) musia byť v sete."""
+        for ok in ["malacky", "pezinok", "senec", "trnava", "galanta"]:
+            assert ok in OKRESY_BA_70KM, f"{ok} chyba v OKRESY_BA_70KM"
+
+    def test_stredne_v_sete(self):
+        """Stredné okresy (~70km) musia byť v sete."""
+        for ok in ["hlohovec", "senica", "skalica", "sala", "nove-zamky", "piestany"]:
+            assert ok in OKRESY_BA_70KM, f"{ok} chyba v OKRESY_BA_70KM"
+
+    def test_vzdialene_nie_v_sete(self):
+        """Vzdialené okresy (Košice, Prešov, Rimavská Sobota) nesmú byť v sete."""
+        for ok in ["kosice", "presov", "rimavska-sobota", "banska-bystrica", "zilina"]:
+            assert ok not in OKRESY_BA_70KM, f"{ok} nesmie byť v OKRESY_BA_70KM"
+
+    def test_aspon_14_okresov(self):
+        """Sada musí mať aspoň 14 relevantných okresov."""
+        assert len(OKRESY_BA_70KM) >= 14
+
+
+class TestSpfFilterOkresy:
+    """Testuje filter 70km v parse_listings() cez mock."""
+
+    _HTML_WITH_MIXED_OKRESY = """<html><body>
+<div>
+  Okres: Malacky Mesto / Obec: Rohoznica
+  <a href="https://pozfond.sk/wp-content/uploads/uzemneplany/Malacky_Rohoznica_Rohoznica.pdf">PDF</a>
+</div>
+<div>
+  Okres: Rimavska-Sobota Mesto / Obec: Martinova
+  <a href="https://pozfond.sk/wp-content/uploads/uzemneplany/Rimavska-Sobota_Martinova_Martinova.pdf">PDF</a>
+</div>
+<div>
+  Okres: Pezinok Mesto / Obec: Pernek
+  <a href="https://pozfond.sk/wp-content/uploads/uzemneplany/Pezinok_Pernek_Pernek.pdf">PDF</a>
+</div>
+<div>
+  Okres: Kosice Mesto / Obec: Lukovistia
+  <a href="https://pozfond.sk/wp-content/uploads/uzemneplany/Kosice_Lukovistia_Lukovistia.pdf">PDF</a>
+</div>
+</body></html>"""
+
+    def _scraper(self, filter_on=True):
+        from unittest.mock import patch, MagicMock
+        s = SpfScraper.__new__(SpfScraper)
+        s.rate_limit = 0
+        s.neutral_ua = False
+        s.timeout    = 20
+        s._last_call = 0.0
+        return s
+
+    def test_filter_zachova_blizke(self):
+        """Malacky a Pezinok (blízke) musia prejsť filtrom."""
+        from unittest.mock import patch
+        s = self._scraper()
+        captured = []
+        def mock_fetch(url):
+            captured.append(url)
+            return "<html></html>"
+        with patch.object(s, "fetch_html", side_effect=mock_fetch):
+            with patch("services.scrapers.spf_scraper.get_sources",
+                       return_value={"spf": {"filter_okresy_70km": True}}):
+                s.parse_listings(self._HTML_WITH_MIXED_OKRESY)
+        fetched_pdfs = [u for u in captured if "uzemneplany" in u]
+        fetched_names = " ".join(fetched_pdfs)
+        assert "Malacky" in fetched_names or "Pezinok" in fetched_names
+
+    def test_filter_odstrani_vzdialene(self):
+        """Rimavska-Sobota a Kosice (vzdialené) nesmú byť stiahnuté."""
+        from unittest.mock import patch
+        s = self._scraper()
+        captured = []
+        def mock_fetch(url):
+            captured.append(url)
+            return "<html></html>"
+        with patch.object(s, "fetch_html", side_effect=mock_fetch):
+            with patch("services.scrapers.spf_scraper.get_sources",
+                       return_value={"spf": {"filter_okresy_70km": True}}):
+                s.parse_listings(self._HTML_WITH_MIXED_OKRESY)
+        fetched_pdfs = " ".join(u for u in captured if "uzemneplany" in u)
+        assert "Rimavska-Sobota" not in fetched_pdfs
+        assert "Kosice" not in fetched_pdfs
+
+    def test_filter_vypnuty_zachova_vsetky(self):
+        """filter_okresy_70km=False → stiahnu sa všetky PDF vrátane vzdialených."""
+        from unittest.mock import patch
+        s = self._scraper()
+        captured = []
+        def mock_fetch(url):
+            captured.append(url)
+            return "<html></html>"
+        with patch.object(s, "fetch_html", side_effect=mock_fetch):
+            with patch("services.scrapers.spf_scraper.get_sources",
+                       return_value={"spf": {"filter_okresy_70km": False}}):
+                s.parse_listings(self._HTML_WITH_MIXED_OKRESY)
+        fetched_pdfs = [u for u in captured if "uzemneplany" in u]
+        assert len(fetched_pdfs) == 4
+
+
+# ----------------------------------------------------------------
+# TestSpfMaxPdf — limit max_pdf
+# ----------------------------------------------------------------
+
+class TestSpfMaxPdf:
+    """Testuje max_pdf limit v parse_listings()."""
+
+    # HTML s 5 PDF zo SENEC (relevantny okres)
+    _HTML_5_PDF = "\n".join([
+        '<html><body>' + "".join([
+            f'<div>Okres: Senec Mesto / Obec: Obec{i}'
+            f' <a href="https://pozfond.sk/wp-content/uploads/uzemneplany/Senec_Obec{i}_Obec{i}.pdf">PDF</a></div>'
+            for i in range(1, 6)
+        ]) + '</body></html>'
+    ])
+
+    def _scraper(self):
+        s = SpfScraper.__new__(SpfScraper)
+        s.rate_limit = 0
+        s.neutral_ua = False
+        s.timeout    = 20
+        s._last_call = 0.0
+        return s
+
+    def test_max_pdf_limits_count(self):
+        """max_pdf=2 zo 5 PDF → len 2 PDF stiahnuté."""
+        from unittest.mock import patch
+        s = self._scraper()
+        captured = []
+        def mock_fetch(url):
+            captured.append(url)
+            return "<html></html>"
+        with patch.object(s, "fetch_html", side_effect=mock_fetch):
+            with patch("services.scrapers.spf_scraper.get_sources",
+                       return_value={"spf": {"filter_okresy_70km": True, "max_pdf": 2}}):
+                s.parse_listings(self._HTML_5_PDF)
+        fetched = [u for u in captured if "uzemneplany" in u]
+        assert len(fetched) == 2
+
+    def test_max_pdf_false_no_limit(self):
+        """max_pdf=False → všetkých 5 PDF stiahnutých."""
+        from unittest.mock import patch
+        s = self._scraper()
+        captured = []
+        def mock_fetch(url):
+            captured.append(url)
+            return "<html></html>"
+        with patch.object(s, "fetch_html", side_effect=mock_fetch):
+            with patch("services.scrapers.spf_scraper.get_sources",
+                       return_value={"spf": {"filter_okresy_70km": True, "max_pdf": False}}):
+                s.parse_listings(self._HTML_5_PDF)
+        fetched = [u for u in captured if "uzemneplany" in u]
+        assert len(fetched) == 5
+
+    def test_max_pdf_default_is_30(self):
+        """max_pdf default = 30: 5 PDF < 30 → všetkých 5 stiahnutých (limit sa neaplikuje)."""
+        from unittest.mock import patch
+        s = self._scraper()
+        captured = []
+        def mock_fetch(url):
+            captured.append(url)
+            return "<html></html>"
+        with patch.object(s, "fetch_html", side_effect=mock_fetch):
+            with patch("services.scrapers.spf_scraper.get_sources",
+                       return_value={"spf": {"filter_okresy_70km": True}}):
+                # 5 PDF zo Senec (Senec je v OKRESY_BA_70KM)
+                s.parse_listings(self._HTML_5_PDF)
+        fetched = [u for u in captured if "uzemneplany" in u]
+        # 5 PDF, default limit 30 → všetky 5 prejdú (5 < 30)
+        assert len(fetched) == 5
+
+    def test_relative_archiv_url_prefixed(self):
+        """Relativna URL pozemkoveho archivu sa preda s BASE_URL."""
+        from unittest.mock import patch
+        from services.scrapers.spf_scraper import BASE_URL
+        s = self._scraper()
+        captured = []
+
+        def mock_fetch(url):
+            captured.append(url)
+            return "<html><body></body></html>"
+
+        with patch.object(s, "fetch_html", side_effect=mock_fetch):
+            s.parse_listings(_LISTING_RELATIVE_ARCHIV)
+
+        pozemkove = [u for u in captured if "pozemkov" in u or "prenajom" in u]
+        assert pozemkove, f"Pozemkovy archiv nebol pouzity. Volania: {captured}"
+        assert all(u.startswith("http") for u in pozemkove), \
+            f"URL nezacina http: {pozemkove}"
+
+    def test_no_archiv_link_at_all(self):
+        """Ak nie je ziadny archivny link, vrati prazdny zoznam."""
+        s = self._scraper()
+        result = s.parse_listings("<html><body><p>Nic tu nie je.</p></body></html>")
+        assert result == []
+
+
     def test_get_listing_urls_returns_listing_url(self):
         from services.scrapers.spf_scraper import LISTING_URL
         scraper = SpfScraper.__new__(SpfScraper)

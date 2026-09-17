@@ -33,11 +33,13 @@ def create_app(test_config=None):
     from routes.config_routes import config_bp
     from routes.parcel_routes import parcel_bp
     from routes.monitor_routes import monitor_bp
+    from routes.scrape_routes import scrape_bp
 
     app.register_blueprint(health_bp, url_prefix="/api")
     app.register_blueprint(config_bp, url_prefix="/api/config")
     app.register_blueprint(parcel_bp,  url_prefix="/api")
     app.register_blueprint(monitor_bp, url_prefix="/api/monitor")
+    app.register_blueprint(scrape_bp,  url_prefix="/api/scrape")
 
     # Monitor start (ak use_monitoring=true)
     from config_loader import is_feature_enabled as _ife

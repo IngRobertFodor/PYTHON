@@ -29,19 +29,43 @@ Pouzitie:
 
 import re
 import io
+import unicodedata
 import pypdf
 from bs4 import BeautifulSoup
 
 from services.scrapers.base_scraper import BaseScraper
+from config_loader import get_sources
 
 SOURCE_NAME = "spf"
 BASE_URL    = "https://pozfond.sk"
 # Aktivna listing stranka (ked su pozemky vyhlasene)
 LISTING_URL = "https://pozfond.sk/zoznam-pozemkov-na-prenajom/"
 # Archivna stranka - pouziva sa ked nie su aktivne pozemky
-# (SPF vyhlasuje pozemky periodicky; URL archivnej stranky sa meni s datumom,
-#  scraper precita LISTING_URL a automaticky nasleduje prvy archivny link)
 PDF_BASE    = "https://pozfond.sk/wp-content/uploads/uzemneplany/"
+
+# ----------------------------------------------------------------
+# Filter okresov - relevantné pre investíciu (do ~70km od BA)
+# Normalizovany format: male pismena, medzery -> pomlcky
+# ----------------------------------------------------------------
+OKRESY_BA_70KM = {
+    # Blízke (~50km od BA)
+    "bratislava",
+    "bratislava-i", "bratislava-ii", "bratislava-iii",
+    "bratislava-iv", "bratislava-v",
+    "malacky",
+    "pezinok",
+    "senec",
+    "trnava",
+    "dunajska-streda",
+    "galanta",
+    # Stredné (~70km od BA, súlad s criteria.yaml max_distance_km: 70)
+    "hlohovec",
+    "senica",
+    "skalica",
+    "sala",
+    "nove-zamky",
+    "piestany",
+}
 
 # Kody druhu pozemku podla katastra nehnutelnosti
 DRUH_KODY = {
@@ -101,15 +125,24 @@ class SpfScraper(BaseScraper):
         index = parse_index(html)
 
         # Fallback: hladaj archivny link (SPF mimo vyhlasovacie obdobie)
+        # Filter: 'archiv' + pozemkovy kontext (pozemk/prenaj/neprenaj)
+        #         NESMIE byt faktury-archiv ani objednavky-archiv
         if not index:
             soup = BeautifulSoup(html, "html.parser")
             archiv_link = None
             for a in soup.find_all("a", href=True):
                 href = a["href"]
-                if "archiv" in href.lower() and "pozfond.sk" in href:
+                low  = href.lower()
+                is_pozemkovy = (
+                    "archiv" in low
+                    and ("pozemk" in low or "prenaj" in low or "neprenaj" in low)
+                    and "faktur" not in low
+                    and "objednavk" not in low
+                )
+                if is_pozemkovy and "pozfond.sk" in href:
                     archiv_link = href
                     break
-                elif "archiv" in href.lower() and href.startswith("/"):
+                elif is_pozemkovy and href.startswith("/"):
                     archiv_link = BASE_URL + href
                     break
             if archiv_link:
@@ -123,6 +156,25 @@ class SpfScraper(BaseScraper):
         if not index:
             print(f"[{self.SOURCE_NAME}] Ziadne PDF linky nenajdene na SPF stranke")
             return []
+
+        # Filter okresov: len relevantne pre investiciu (do ~70km od BA)
+        # Konfigurovatelne cez criteria.yaml: spf.filter_okresy_70km: true/false
+        cfg = get_sources().get(self.SOURCE_NAME, {})
+        if cfg.get("filter_okresy_70km", True):
+            before = len(index)
+            index = [e for e in index if _normalize_okres(e.get("okres", "")) in OKRESY_BA_70KM]
+            print(f"[{self.SOURCE_NAME}] Filter 70km od BA: {len(index)}/{before} PDF (okresy: {sorted({_normalize_okres(e['okres']) for e in index})})")
+
+        if not index:
+            print(f"[{self.SOURCE_NAME}] Ziadne PDF v relevantnych okresoch (filter_okresy_70km)")
+            return []
+
+        # Limit max_pdf: ochrana pred tisíckami PDF (napr. 557 po filtri = 55min)
+        # Konfigurovatelne cez criteria.yaml: spf.max_pdf: 30 (false = bez limitu)
+        max_pdf = cfg.get("max_pdf", 30)
+        if max_pdf and len(index) > max_pdf:
+            print(f"[{self.SOURCE_NAME}] max_pdf limit: {max_pdf}/{len(index)} PDF (zmen v criteria.yaml pre viac)")
+            index = index[:max_pdf]
 
         parcels = []
         for entry in index:
@@ -153,6 +205,29 @@ class SpfScraper(BaseScraper):
 # ----------------------------------------------------------------
 # Samostatne funkcie (testovatelne bez instancie)
 # ----------------------------------------------------------------
+
+
+def _normalize_okres(okres):
+    """
+    Normalizuje nazov okresu pre porovnanie s OKRESY_BA_70KM.
+    Prevod: 'Dunajska Streda' -> 'dunajska-streda'
+            'Bratislava I'    -> 'bratislava-i'
+            'Rimavska-Sobota' -> 'rimavska-sobota'
+            'Malacky Mesto'   -> 'malacky'  (odstrani trailing 'Mesto'/'Obec')
+    """
+    import unicodedata
+    # Odstran diakritiku
+    nfkd = unicodedata.normalize("NFKD", okres.strip())
+    ascii_str = "".join(c for c in nfkd if not unicodedata.combining(c))
+    # Male pismena, medzery -> pomlcky
+    result = ascii_str.lower().replace(" ", "-").strip("-")
+    # Odstran trailing "-mesto" alebo "-obec" (artifact z HTML parsingu)
+    for suffix in ("-mesto", "-obec", "-/-obec"):
+        if result.endswith(suffix):
+            result = result[: -len(suffix)]
+    return result
+
+
 
 def parse_index(html):
     """

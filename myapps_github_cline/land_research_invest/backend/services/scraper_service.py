@@ -19,9 +19,14 @@ Paralelizacia:
   scrape_all() spusta vsetky zdroje SUCASNE (ThreadPoolExecutor).
   Kazdy zdroj je na inej domene => nulove riziko banu.
   Rate-limit v ramci jednej domeny ostava zachovany v BaseScraper.
+
+Progress:
+  scrape_all() aktualizuje globalny thread-safe stav _progress.
+  get_scrape_progress() vracia aktualny stav pre API / frontend.
 """
 
 import time
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as FuturesTimeoutError
 
 from config_loader import get_green_sources
@@ -38,6 +43,71 @@ SERVICE_NAME = "scraper_service"
 # Per-zdroj timeout: ak jeden zdroj trvá dlhšie, nepocká sa naňho donekonecna.
 # 2700s = 45 min (dostatok aj pre zdroje s 50 stranami + rate-limitom 10/min)
 SCRAPER_TIMEOUT_SEC = 2700
+
+# ----------------------------------------------------------------
+# Progress stav (thread-safe singleton)
+# ----------------------------------------------------------------
+
+_progress_lock = threading.Lock()
+_progress = {
+    "running":   False,   # True pocas scrape_all()
+    "total":     0,       # celkovy pocet zdrojov
+    "done":      0,       # pocet dokoncených zdrojov
+    "percent":   0,       # done/total * 100 (0-100)
+    "sources":   [],      # zoznam vsetkych zdrojov
+    "per_source": {},     # {zdroj: pocet_pozemkov alebo None ak este bezi}
+    "elapsed_s": 0.0,
+    "finished":  False,
+    "total_parcels": 0,
+}
+
+
+def get_scrape_progress():
+    """
+    Vrati aktualny progress stav scrapingu (thread-safe kopia).
+    Pouziva sa pre API endpoint GET /api/scrape/progress.
+
+    Returns:
+        dict: running, total, done, percent, sources, per_source,
+              elapsed_s, finished, total_parcels
+    """
+    with _progress_lock:
+        return dict(_progress)
+
+
+def _reset_progress(sources):
+    """Resetuje progress pred novym behom scrape_all()."""
+    with _progress_lock:
+        _progress["running"]      = True
+        _progress["total"]        = len(sources)
+        _progress["done"]         = 0
+        _progress["percent"]      = 0
+        _progress["sources"]      = list(sources)
+        _progress["per_source"]   = {s: None for s in sources}  # None = este bezi
+        _progress["elapsed_s"]    = 0.0
+        _progress["finished"]     = False
+        _progress["total_parcels"] = 0
+
+
+def _update_progress(src, count, elapsed_s):
+    """Aktualizuje progress po dokonceni jedneho zdroja."""
+    with _progress_lock:
+        _progress["per_source"][src] = count
+        _progress["done"]     += 1
+        total = _progress["total"]
+        _progress["percent"]   = round(100 * _progress["done"] / total) if total else 0
+        _progress["elapsed_s"] = elapsed_s
+        _progress["total_parcels"] += count
+
+
+def _finish_progress(elapsed_s):
+    """Oznaci progress ako dokonceny."""
+    with _progress_lock:
+        _progress["running"]   = False
+        _progress["finished"]  = True
+        _progress["elapsed_s"] = elapsed_s
+        if _progress["total"]:
+            _progress["percent"] = 100
 
 # ----------------------------------------------------------------
 # Registry: config source_name -> ScraperClass
@@ -90,6 +160,7 @@ def scrape_all(criteria=None):
     all_parcels = []
     t_start = time.monotonic()
 
+    _reset_progress(active)
     print(f"[scraper_service] Paralelne spustam {len(active)} zdrojov: {active}")
 
     with ThreadPoolExecutor(max_workers=len(active) or 1) as executor:
@@ -100,21 +171,27 @@ def scrape_all(criteria=None):
         try:
             for future in as_completed(future_to_src, timeout=SCRAPER_TIMEOUT_SEC + 30):
                 src = future_to_src[future]
+                elapsed_now = time.monotonic() - t_start
                 try:
                     parcels = future.result(timeout=SCRAPER_TIMEOUT_SEC)
                     print(f"[scraper_service] {src}: {len(parcels)} pozemkov")
                     all_parcels.extend(parcels)
+                    _update_progress(src, len(parcels), elapsed_now)
                 except FuturesTimeoutError:
                     print(f"[scraper_service] {src}: TIMEOUT po {SCRAPER_TIMEOUT_SEC}s — preskakujem")
+                    _update_progress(src, 0, elapsed_now)
                 except Exception as exc:
                     print(f"[scraper_service] {src} CHYBA: {exc}")
+                    _update_progress(src, 0, elapsed_now)
         except TimeoutError:
             pending = [s for f,s in future_to_src.items() if not f.done()]
             for src in pending:
                 print(f"[scraper_service] {src}: GLOBALNY TIMEOUT — preskakujem")
+                _update_progress(src, 0, time.monotonic() - t_start)
 
     elapsed = time.monotonic() - t_start
     result = _deduplicate(all_parcels)
+    _finish_progress(elapsed)
     print(f"[scraper_service] Hotovo: {len(result)} unikatnych pozemkov za {elapsed:.0f}s")
     return result
 
