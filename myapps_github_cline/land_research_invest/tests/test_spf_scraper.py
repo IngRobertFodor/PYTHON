@@ -377,15 +377,15 @@ class TestSpfFilterOkresy:
         from unittest.mock import patch
         s = self._scraper()
         captured = []
-        def mock_fetch(url):
+        def mock_pdf(url):
             captured.append(url)
-            return "<html></html>"
-        with patch.object(s, "fetch_html", side_effect=mock_fetch):
-            with patch("services.scrapers.spf_scraper.get_sources",
-                       return_value={"spf": {"filter_okresy_70km": True}}):
-                s.parse_listings(self._HTML_WITH_MIXED_OKRESY)
-        fetched_pdfs = [u for u in captured if "uzemneplany" in u]
-        fetched_names = " ".join(fetched_pdfs)
+            return b"%PDF fake"
+        with patch.object(s, "fetch_html", return_value="<html></html>"):
+            with patch.object(s, "fetch_pdf_bytes", side_effect=mock_pdf):
+                with patch("services.scrapers.spf_scraper.get_sources",
+                           return_value={"spf": {"filter_okresy_70km": True}}):
+                    s.parse_listings(self._HTML_WITH_MIXED_OKRESY)
+        fetched_names = " ".join(u for u in captured if "uzemneplany" in u)
         assert "Malacky" in fetched_names or "Pezinok" in fetched_names
 
     def test_filter_odstrani_vzdialene(self):
@@ -393,13 +393,14 @@ class TestSpfFilterOkresy:
         from unittest.mock import patch
         s = self._scraper()
         captured = []
-        def mock_fetch(url):
+        def mock_pdf(url):
             captured.append(url)
-            return "<html></html>"
-        with patch.object(s, "fetch_html", side_effect=mock_fetch):
-            with patch("services.scrapers.spf_scraper.get_sources",
-                       return_value={"spf": {"filter_okresy_70km": True}}):
-                s.parse_listings(self._HTML_WITH_MIXED_OKRESY)
+            return b"%PDF fake"
+        with patch.object(s, "fetch_html", return_value="<html></html>"):
+            with patch.object(s, "fetch_pdf_bytes", side_effect=mock_pdf):
+                with patch("services.scrapers.spf_scraper.get_sources",
+                           return_value={"spf": {"filter_okresy_70km": True}}):
+                    s.parse_listings(self._HTML_WITH_MIXED_OKRESY)
         fetched_pdfs = " ".join(u for u in captured if "uzemneplany" in u)
         assert "Rimavska-Sobota" not in fetched_pdfs
         assert "Kosice" not in fetched_pdfs
@@ -409,13 +410,14 @@ class TestSpfFilterOkresy:
         from unittest.mock import patch
         s = self._scraper()
         captured = []
-        def mock_fetch(url):
+        def mock_pdf(url):
             captured.append(url)
-            return "<html></html>"
-        with patch.object(s, "fetch_html", side_effect=mock_fetch):
-            with patch("services.scrapers.spf_scraper.get_sources",
-                       return_value={"spf": {"filter_okresy_70km": False}}):
-                s.parse_listings(self._HTML_WITH_MIXED_OKRESY)
+            return b"%PDF fake"
+        with patch.object(s, "fetch_html", return_value="<html></html>"):
+            with patch.object(s, "fetch_pdf_bytes", side_effect=mock_pdf):
+                with patch("services.scrapers.spf_scraper.get_sources",
+                           return_value={"spf": {"filter_okresy_70km": False}}):
+                    s.parse_listings(self._HTML_WITH_MIXED_OKRESY)
         fetched_pdfs = [u for u in captured if "uzemneplany" in u]
         assert len(fetched_pdfs) == 4
 
@@ -451,11 +453,12 @@ class TestSpfMaxPdf:
         captured = []
         def mock_fetch(url):
             captured.append(url)
-            return "<html></html>"
-        with patch.object(s, "fetch_html", side_effect=mock_fetch):
-            with patch("services.scrapers.spf_scraper.get_sources",
-                       return_value={"spf": {"filter_okresy_70km": True, "max_pdf": 2}}):
-                s.parse_listings(self._HTML_5_PDF)
+            return b"%PDF fake"
+        with patch.object(s, "fetch_html", return_value="<html></html>"):
+            with patch.object(s, "fetch_pdf_bytes", side_effect=mock_fetch):
+                with patch("services.scrapers.spf_scraper.get_sources",
+                           return_value={"spf": {"filter_okresy_70km": True, "max_pdf": 2}}):
+                    s.parse_listings(self._HTML_5_PDF)
         fetched = [u for u in captured if "uzemneplany" in u]
         assert len(fetched) == 2
 
@@ -466,11 +469,12 @@ class TestSpfMaxPdf:
         captured = []
         def mock_fetch(url):
             captured.append(url)
-            return "<html></html>"
-        with patch.object(s, "fetch_html", side_effect=mock_fetch):
-            with patch("services.scrapers.spf_scraper.get_sources",
-                       return_value={"spf": {"filter_okresy_70km": True, "max_pdf": False}}):
-                s.parse_listings(self._HTML_5_PDF)
+            return b"%PDF fake"
+        with patch.object(s, "fetch_html", return_value="<html></html>"):
+            with patch.object(s, "fetch_pdf_bytes", side_effect=mock_fetch):
+                with patch("services.scrapers.spf_scraper.get_sources",
+                           return_value={"spf": {"filter_okresy_70km": True, "max_pdf": False}}):
+                    s.parse_listings(self._HTML_5_PDF)
         fetched = [u for u in captured if "uzemneplany" in u]
         assert len(fetched) == 5
 
@@ -481,12 +485,12 @@ class TestSpfMaxPdf:
         captured = []
         def mock_fetch(url):
             captured.append(url)
-            return "<html></html>"
-        with patch.object(s, "fetch_html", side_effect=mock_fetch):
-            with patch("services.scrapers.spf_scraper.get_sources",
-                       return_value={"spf": {"filter_okresy_70km": True}}):
-                # 5 PDF zo Senec (Senec je v OKRESY_BA_70KM)
-                s.parse_listings(self._HTML_5_PDF)
+            return b"%PDF fake"
+        with patch.object(s, "fetch_html", return_value="<html></html>"):
+            with patch.object(s, "fetch_pdf_bytes", side_effect=mock_fetch):
+                with patch("services.scrapers.spf_scraper.get_sources",
+                           return_value={"spf": {"filter_okresy_70km": True}}):
+                    s.parse_listings(self._HTML_5_PDF)
         fetched = [u for u in captured if "uzemneplany" in u]
         # 5 PDF, default limit 30 → všetky 5 prejdú (5 < 30)
         assert len(fetched) == 5

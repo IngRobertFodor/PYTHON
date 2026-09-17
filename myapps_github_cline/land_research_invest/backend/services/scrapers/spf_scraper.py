@@ -115,6 +115,41 @@ class SpfScraper(BaseScraper):
         """Vracia [LISTING_URL] - scrape() vola parse_listings() ktory resi fallback."""
         return [LISTING_URL]
 
+    def fetch_pdf_bytes(self, url):
+        """
+        Stiahne PDF ako binarne bytes (nie text).
+        BaseScraper.fetch_html() vracia resp.text (string) - pre PDF treba resp.content (bytes).
+        """
+        import requests as _req
+        self._wait_rate_limit()
+        _RETRYABLE = (
+            _req.exceptions.ConnectionError,
+            _req.exceptions.Timeout,
+            _req.exceptions.ReadTimeout,
+            _req.exceptions.ConnectTimeout,
+            TimeoutError, OSError,
+        )
+        from services.scrapers.base_scraper import RETRY_DELAY, RETRY_DELAY2, MAX_RETRIES
+        delays = [RETRY_DELAY, RETRY_DELAY2]
+        for attempt in range(MAX_RETRIES + 1):
+            self._wait_rate_limit()
+            try:
+                resp = _req.get(
+                    url,
+                    headers={"User-Agent": self.user_agent},
+                    timeout=self.timeout,
+                )
+                resp.raise_for_status()
+                return resp.content  # bytes, nie text!
+            except _RETRYABLE as exc:
+                if attempt < MAX_RETRIES:
+                    delay = delays[attempt]
+                    print(f"[{self.SOURCE_NAME}] sietovy vypadok pri {url}: {exc} — retry za {delay}s")
+                    import time as _time
+                    _time.sleep(delay)
+                else:
+                    raise
+
     def parse_listings(self, html):
         """
         Parsuje HTML stranku SPF.
@@ -179,11 +214,8 @@ class SpfScraper(BaseScraper):
         parcels = []
         for entry in index:
             try:
-                pdf_bytes = self.fetch_html(entry["pdf_url"])
-                new = parse_pdf_pozemky(
-                    pdf_bytes.encode() if isinstance(pdf_bytes, str) else pdf_bytes,
-                    entry["okres"], entry["obec"]
-                )
+                pdf_bytes = self.fetch_pdf_bytes(entry["pdf_url"])
+                new = parse_pdf_pozemky(pdf_bytes, entry["okres"], entry["obec"])
                 parcels.extend(new)
             except Exception as exc:
                 print(f"[{self.SOURCE_NAME}] PDF chyba {entry.get('pdf_url','')}: {exc}")

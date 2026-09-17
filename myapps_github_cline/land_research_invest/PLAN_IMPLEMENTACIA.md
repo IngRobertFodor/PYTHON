@@ -13,7 +13,7 @@
 | Frontend (mapa, karty, modal, demo) | HOTOVO |
 | Scraper kostra (BaseScraper, registry, scrape_all) | HOTOVO |
 | nehnutelnosti_sk parser | HOTOVO |
-| Testy | **1002, 0 zlyh** |
+| Testy | **1005, 0 zlyh** |
 | Limity v criteria.yaml (cena 0-10000, vymera 350-1000) | HOTOVO |
 | C0: nehnutelnosti.sk - oprava markera (T23c11 -> dynamic RSC) | HOTOVO - 46 pozemkov nazivo |
 | C0: nehnutelnosti.sk - lokalita (ZNAME_OBCE 70km od BA) | HOTOVO - 46/46 s lokalitou |
@@ -42,7 +42,9 @@
 | F5: spf fallback filter - preskoci faktury/objednavky-archiv, trafí pozemkovy | HOTOVO - +5 testov |
 | G1: scraper_service progress (thread-safe _reset/_update/_finish/get) | HOTOVO - +24 testov |
 | G3: spf OKRESY_BA_70KM filter (18 okresov, konfig filter_okresy_70km) | HOTOVO - +13 testov |
-| G3: spf _normalize_okres (diakritika, medzery, trailing Mesto/Obec) | HOTOVO |
+| G3: spf max_pdf: 30 limit (archiv ma 557 relevantnvch PDF = 55min bez limitu) | HOTOVO - +3 testy |
+| G4: spf fetch_pdf_bytes() - binarne stiahnutie PDF (fix: resp.text vs resp.content) | HOTOVO |
+| G4: spf live test: 2404 parciel / 30 PDF / 6.6min (filter 70km + max_pdf=30) | OVERENE |
 
 ---
 
