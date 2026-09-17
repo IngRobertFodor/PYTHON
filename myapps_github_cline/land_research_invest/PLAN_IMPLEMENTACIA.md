@@ -13,7 +13,7 @@
 | Frontend (mapa, karty, modal, demo) | HOTOVO |
 | Scraper kostra (BaseScraper, registry, scrape_all) | HOTOVO |
 | nehnutelnosti_sk parser | HOTOVO |
-| Testy | **1010, 0 zlyh** |
+| Testy | **1013, 0 zlyh** |
 | Limity v criteria.yaml (cena 0-10000, vymera 350-1000) | HOTOVO |
 | C0: nehnutelnosti.sk - oprava markera (T23c11 -> dynamic RSC) | HOTOVO - 46 pozemkov nazivo |
 | C0: nehnutelnosti.sk - lokalita (ZNAME_OBCE 70km od BA) | HOTOVO - 46/46 s lokalitou |
@@ -48,6 +48,13 @@
 | H1: GET /api/scrape/results endpoint + _last_results ulozenie | HOTOVO - +6 testov |
 | H2: auto-resume polling po refreshi F5 (varianta b - len running stav) | HOTOVO |
 | H2: cleanup temp suborov (20x ov_* notar_* full_live_*) | HOTOVO |
+| H3: live test vsetkych 7 zdrojov (background+poll, shell-timeout-proof) | HOTOVO |
+| H3: live test 2026-09-17: **2442 unikat. / 931s** (nehu=1322, real=811, spf=2404 pred dedup, top=128, ske=112, notar=48, ov=20) | OVERENE |
+| H3: zosulad. checkboxov B1[x]/B3[x]/B5.2[x], poznamky k B4/B5/B6 | HOTOVO |
+| ⚠️ SPF dedup issue: 2404 parciel pred dedup -> 1 po dedup (skoro identicke URL) | FIXNUTE |
+| H4: spf_scraper url=pdf_url (nie PDF_BASE), parcel_number=t_parcela | HOTOVO - +3 testy |
+| H4: _deduplicate klic url+parcel_number (SPF parcely z toho isteho PDF sa nededupuju) | HOTOVO |
+| Testy | **1013, 0 zlyh** |
 
 ---
 
@@ -84,12 +91,13 @@
 **Typ:** realitny portal (podobna struktura ako nehnutelnosti.sk)
 **URL:** https://www.topreality.sk
 **Rate:** 10/min | **Zone:** GREEN
+**Live test (2026-09-17): 128 pozemkov / 90s** ✅
 
-- [ ] B1.1: HTML vzorka od pouzivatela -> `tests/fixtures/topreality_listing.html`
-- [ ] B1.2: `backend/services/scrapers/topreality_scraper.py`
-- [ ] B1.3: Pridat do `SCRAPER_REGISTRY`
-- [ ] B1.4: `tests/test_topreality_scraper.py` (~15 testov)
-- [ ] B1.5: Aktualizacia dokumentacie
+- [x] B1.1: HTML vzorka od pouzivatela -> `tests/fixtures/topreality_sk_listing.html` + `topreality_sk_detail.html`
+- [x] B1.2: `backend/services/scrapers/topreality_scraper.py`
+- [x] B1.3: Pridat do `SCRAPER_REGISTRY`
+- [x] B1.4: `tests/test_topreality_scraper.py` (45 testov)
+- [x] B1.5: Aktualizacia dokumentacie
 
 ### B2 - obchodny_vestnik (**ZLATO** - konkurzy/drazby)
 
@@ -107,21 +115,24 @@
 ### B3 - spf (Slovensky pozemkovy fond)
 
 **Typ:** verejne obchodne sutaze - statne pozemky
-**URL:** https://www.pozemkovyfond.sk
+**URL:** https://pozfond.sk (nova domena od F3)
 **Rate:** 10/min | **Zone:** GREEN
+**Live test (2026-09-17): 2404 pozemkov (pred dedup) / ~7min, max_pdf=30** ✅
 
-- [ ] B3.1: HTML vzorka -> `tests/fixtures/spf_listing.html`
-- [ ] B3.2: `backend/services/scrapers/spf_scraper.py`
-- [ ] B3.3: Pridat do `SCRAPER_REGISTRY`
-- [ ] B3.4: `tests/test_spf_scraper.py` (~15 testov)
-- [ ] B3.5: Aktualizacia dokumentacie
+- [x] B3.1: HTML vzorka -> `tests/fixtures/spf_listing.html` + `spf_detail.pdf`
+- [x] B3.2: `backend/services/scrapers/spf_scraper.py` (fetch_pdf_bytes, filter 70km, max_pdf=30)
+- [x] B3.3: Pridat do `SCRAPER_REGISTRY`
+- [x] B3.4: `tests/test_spf_scraper.py` (66 testov)
+- [x] B3.5: Aktualizacia dokumentacie
 
 ### B4 - exekutorske_drazby + drazby_net
 
 **Typ:** drazby zabavenych pozemkov (pod trhovym cenam)
 **URL:** sexe.sk / drazby.net
 **Rate:** 10/min | **Zone:** GREEN
-**Poznamka:** Drazby_net je agregator - moze pokryvat aj exekutorske
+> ⚠️ **Zrusene v C4 (2026-09):** drazby.net je CZ agregator (nie SK), sexe.sk vyradene.
+> Nahradene scraperom `ske_drazobne_vyhlasky` (SK exekutorske drazby).
+> Live test 2026-09-17: ske = **112 pozemkov**. Tieto B4 polozky su trvalo SKIP.
 
 - [ ] B4.1: HTML vzorky -> `tests/fixtures/exekutorske_listing.html`, `drazby_net_listing.html`
 - [ ] B4.2: `backend/services/scrapers/exekutorske_drazby_scraper.py`
@@ -137,11 +148,11 @@
 **Rate:** 10/min | **Zone:** GREEN
 **Poznamka:** EKS = aukcie statnych organizacii a samosprav
 
-- [ ] B5.1: HTML vzorky -> `tests/fixtures/notarske_listing.html`, `eks_listing.html`
-- [ ] B5.2: `backend/services/scrapers/notarske_drazby_scraper.py`
-- [ ] B5.3: `backend/services/scrapers/eks_scraper.py`
-- [ ] B5.4: Pridat do `SCRAPER_REGISTRY` (2 zaznamy)
-- [ ] B5.5: Testy (~20 testov)
+- [x] B5.1: HTML vzorky -> `tests/fixtures/notarske_drazby_listing.html` + `notarske_drazby_detail.pdf`
+- [x] B5.2: `backend/services/scrapers/notarske_drazby_scraper.py` — **Live test 2026-09-17: 48 pozemkov** ✅
+- [ ] B5.3: `backend/services/scrapers/eks_scraper.py` — zatial neimplementovane
+- [ ] B5.4: Pridat do `SCRAPER_REGISTRY` (2 zaznamy) — notarske uz je, eks chyba
+- [ ] B5.5: Testy (~20 testov) — notarske: 52 testov ✅, eks: TODO
 - [ ] B5.6: Aktualizacia dokumentacie
 
 ### B6 - bsk_kraj + obce_uradne_tabule (najkomplexnejsie)
@@ -150,6 +161,8 @@
 **URL:** regionbratislava.sk / (per-obec - viac URL)
 **Rate:** 5/min | **Zone:** GREEN
 **Poznamka:** obce_uradne_tabule = parser per-obec, potrebuje zoznam URL obci
+> ℹ️ **Status:** zatial neimplementovane — naplanovane ako futurna faza.
+> Pokryte alternativne cez `ske_drazobne_vyhlasky` (verejne vyhlasky). B6 ostava ako TODO.
 
 - [ ] B6.1: HTML vzorky -> `tests/fixtures/bsk_listing.html`, `obec_tabula_listing.html`
 - [ ] B6.2: `backend/services/scrapers/bsk_kraj_scraper.py`

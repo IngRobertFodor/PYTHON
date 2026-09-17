@@ -134,6 +134,32 @@ class TestParsePdfPozemky:
         druh_vals = list(DRUH_KODY.values())
         assert any(any(d in p.description for d in druh_vals) for p in fixture_parcels[:10])
 
+    def test_url_fallback_to_pdf_base_when_no_pdf_url(self, fixture_parcels):
+        """Bez pdf_url parametra pouzije PDF_BASE ako fallback (spatna kompatibilita)."""
+        from services.scrapers.spf_scraper import PDF_BASE
+        assert all(p.url == PDF_BASE for p in fixture_parcels)
+
+    def test_url_is_specific_pdf_when_pdf_url_given(self):
+        """S pdf_url parametrom dostane kazda parcela konkretnu URL PDF suboru."""
+        from services.scrapers.spf_scraper import PDF_BASE
+        specific_url = "https://pozfond.sk/wp-content/uploads/uzemneplany/Banska-Stiavnica_Dekys_Dekys.pdf"
+        parcels = parse_pdf_pozemky(FIX_PDF, "Banska Stiavnica", "Dekys", specific_url)
+        assert len(parcels) > 0
+        assert all(p.url == specific_url for p in parcels)
+        assert all(p.url != PDF_BASE for p in parcels)
+
+    def test_url_uniqueness_when_pdf_url_given(self):
+        """Parcely z roznych PDF maju rozne URL -> dedup ich nezmaze."""
+        url_a = "https://pozfond.sk/wp-content/uploads/uzemneplany/Malacky_Pernek_Pernek.pdf"
+        url_b = "https://pozfond.sk/wp-content/uploads/uzemneplany/Banska-Stiavnica_Dekys_Dekys.pdf"
+        parcels_a = parse_pdf_pozemky(FIX_PDF, "Banska Stiavnica", "Dekys", url_a)
+        parcels_b = parse_pdf_pozemky(FIX_PDF, "Banska Stiavnica", "Dekys", url_b)
+        all_urls_a = {p.url for p in parcels_a}
+        all_urls_b = {p.url for p in parcels_b}
+        assert all_urls_a == {url_a}
+        assert all_urls_b == {url_b}
+        assert all_urls_a.isdisjoint(all_urls_b)
+
 
 
 # ----------------------------------------------------------------

@@ -229,13 +229,17 @@ def _scrape_one(source_name, criteria=None):
 
 def _deduplicate(parcels):
     """
-    Odstrani duplicitne pozemky podla URL.
+    Odstrani duplicitne pozemky.
+    Klic: url (lower) + parcel_number — zachova vsetky parcely z toho isteho PDF
+    (rozne parcel_number = rozne parcely aj ked zdielaju URL PDF suboru).
     Zachova prvy vyskyt.
     """
     seen = set()
     result = []
     for p in parcels:
-        key = p.url.strip().lower() if p.url else id(p)
+        base = p.url.strip().lower() if p.url else str(id(p))
+        suffix = p.parcel_number.strip() if p.parcel_number else ""
+        key = f"{base}#{suffix}" if suffix else base
         if key not in seen:
             seen.add(key)
             result.append(p)

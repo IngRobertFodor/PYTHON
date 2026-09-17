@@ -215,7 +215,7 @@ class SpfScraper(BaseScraper):
         for entry in index:
             try:
                 pdf_bytes = self.fetch_pdf_bytes(entry["pdf_url"])
-                new = parse_pdf_pozemky(pdf_bytes, entry["okres"], entry["obec"])
+                new = parse_pdf_pozemky(pdf_bytes, entry["okres"], entry["obec"], entry["pdf_url"])
                 parcels.extend(new)
             except Exception as exc:
                 print(f"[{self.SOURCE_NAME}] PDF chyba {entry.get('pdf_url','')}: {exc}")
@@ -358,7 +358,7 @@ def _tokenize_page(page_text):
     return [t for t in tokens if t not in _PDF_HEADER_TOKENS]
 
 
-def parse_pdf_pozemky(pdf_source, okres="", obec=""):
+def parse_pdf_pozemky(pdf_source, okres="", obec="", pdf_url=""):
     """
     Parsuje PDF so zoznamom parciel SPF.
     Token schema na parcelu (9 tokenov):
@@ -429,11 +429,12 @@ def parse_pdf_pozemky(pdf_source, okres="", obec=""):
 
             parcels.append(BaseScraper._make_parcel(
                 title         = title,
-                url           = PDF_BASE,
+                url           = pdf_url or PDF_BASE,
                 price_eur     = 0.0,
                 area_sqm      = vymera_m2,
                 location_text = loc_obec if loc_obec else r_ku,
                 source_portal = SOURCE_NAME,
+                parcel_number = t_parcela,
                 description   = " | ".join(desc_parts)[:500],
             ))
             i += 9   # posun o 9 tokenov (1 parcela bez numerickych hodnot)
