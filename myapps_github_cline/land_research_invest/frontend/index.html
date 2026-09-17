@@ -60,6 +60,25 @@
       <div id="status" class="status"></div>
     </div>
 
+    <!-- SPUSTIT PRIESKUM -->
+    <div class="form-section research-section">
+      <h2>&#128269; Spusti&#357; prieskum</h2>
+      <p class="research-hint">Stiahne pozemky zo v&#353;etk&#253;ch zdrojov a ohodnotí ich automaticky.</p>
+      <button id="btn-research" class="btn btn-research">&#9654;&#9654; Spusti&#357; prieskum</button>
+
+      <!-- PROGRESS BAR (skryt&#253; kym nebezi) -->
+      <div id="research-progress" class="research-progress hidden">
+        <div class="progress-label">
+          <span id="progress-text">Pripravujem...</span>
+          <span id="progress-pct">0 %</span>
+        </div>
+        <div class="progress-track">
+          <div id="progress-bar" class="progress-fill" style="width:0%"></div>
+        </div>
+        <div id="progress-sources" class="progress-sources"></div>
+      </div>
+    </div>
+
     <!-- LIMITY (z configu) -->
     <div class="form-section">
       <h2>&#9881; Limity (z criteria.yaml)</h2>

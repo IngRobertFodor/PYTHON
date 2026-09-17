@@ -161,6 +161,62 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   flex: 1; overflow-y: auto;
   padding: 16px 20px;
 }
+
+/* ----------------------------------------------------------------
+   SPUSTIT PRIESKUM — research section + progress bar
+   ---------------------------------------------------------------- */
+
+.research-section { background: #f0f7ff; border-bottom: 2px solid #1a3a5c; }
+
+.research-hint {
+  font-size: .78rem; color: #555; margin-bottom: 10px; line-height: 1.4;
+}
+
+.btn-research {
+  width: 100%;
+  background: #1a3a5c; color: #fff;
+  padding: 10px 0; border-radius: 6px;
+  font-size: .95rem; font-weight: 700;
+  border: none; cursor: pointer;
+  transition: background .2s;
+}
+.btn-research:hover:not(:disabled) { background: #24548a; }
+.btn-research:disabled { background: #7a9ab8; cursor: not-allowed; }
+
+/* Progress bar */
+.research-progress { margin-top: 12px; }
+.research-progress.hidden { display: none; }
+
+.progress-label {
+  display: flex; justify-content: space-between;
+  font-size: .78rem; color: #333; margin-bottom: 4px;
+}
+#progress-pct { font-weight: 700; color: #1a3a5c; }
+
+.progress-track {
+  height: 10px; background: #dde4ec;
+  border-radius: 5px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; background: #1a3a5c;
+  border-radius: 5px;
+  transition: width .5s ease;
+}
+
+/* Per-source chipy */
+.progress-sources {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  margin-top: 8px;
+}
+.src-chip {
+  font-size: .70rem; padding: 2px 7px;
+  border-radius: 10px; white-space: nowrap;
+  border: 1px solid transparent;
+}
+.src-running { background: #fff3cd; border-color: #f0ad00; color: #7a5800; }
+.src-done    { background: #d4edda; border-color: #28a745; color: #155724; }
+.src-zero    { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+
 #modal-body {
   white-space: pre-wrap;
   font-family: "Courier New", monospace;

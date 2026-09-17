@@ -26,3 +26,24 @@ async function apiAnalyzeBatch(parcels) {
   if (!r.ok) throw new Error(data.error || "Batch failed");
   return data;
 }
+
+// --- Scrape API ---
+async function apiScrapeStart() {
+  const r = await fetch(API_BASE + "/api/scrape/start", { method: "POST" });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || "Start failed (" + r.status + ")");
+  return data;
+}
+
+async function apiScrapeProgress() {
+  const r = await fetch(API_BASE + "/api/scrape/progress");
+  if (!r.ok) throw new Error("Progress fetch failed: " + r.status);
+  return r.json();
+}
+
+async function apiScrapeResults() {
+  const r = await fetch(API_BASE + "/api/scrape/results");
+  if (!r.ok) throw new Error("Results fetch failed: " + r.status);
+  return r.json();
+}
+

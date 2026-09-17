@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadConfigDefaults();
   document.getElementById("btn-analyze").addEventListener("click", onAnalyzeClick);
   document.getElementById("btn-demo").addEventListener("click",    onDemoClick);
+  document.getElementById("btn-research").addEventListener("click", onResearchClick);
   document.getElementById("modal-close").addEventListener("click",  closeModal);
   document.getElementById("modal-overlay").addEventListener("click", e => {
     if (e.target.id === "modal-overlay") closeModal();
@@ -175,3 +176,105 @@ function showStatus(msg, type) {
   el.textContent  = msg;
   el.className    = "status " + (type || "");
 }
+
+// ----------------------------------------------------------------
+// Spustit prieskum — scrape_all + analyze + progress bar
+// ----------------------------------------------------------------
+
+let _pollTimer = null;
+
+async function onResearchClick() {
+  const btn = document.getElementById("btn-research");
+  if (btn.disabled) return;
+
+  try {
+    await apiScrapeStart();
+  } catch (e) {
+    // 409 = uz bezi -> pokracuj v pollingu
+    if (!e.message.includes("bezi")) {
+      showStatus("Chyba spustenia: " + e.message, "error");
+      return;
+    }
+  }
+
+  btn.disabled = true;
+  btn.textContent = "⏳ Prebieha prieskum...";
+  showProgressSection(true);
+  updateProgressUI({ done: 0, total: 0, percent: 0, running: true, per_source: {} });
+  startProgressPolling();
+}
+
+function startProgressPolling() {
+  if (_pollTimer) clearInterval(_pollTimer);
+  _pollTimer = setInterval(async () => {
+    try {
+      const p = await apiScrapeProgress();
+      updateProgressUI(p);
+      if (p.finished) {
+        stopProgressPolling();
+        await onResearchFinished();
+      }
+    } catch (e) {
+      // sietova chyba - pokracuj v pollingu
+    }
+  }, 2000);
+}
+
+function stopProgressPolling() {
+  if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+}
+
+function showProgressSection(visible) {
+  const el = document.getElementById("research-progress");
+  if (el) el.classList.toggle("hidden", !visible);
+}
+
+function updateProgressUI(p) {
+  const pct   = p.percent || 0;
+  const done  = p.done    || 0;
+  const total = p.total   || 0;
+
+  const bar   = document.getElementById("progress-bar");
+  const text  = document.getElementById("progress-text");
+  const pctEl = document.getElementById("progress-pct");
+  const srcs  = document.getElementById("progress-sources");
+
+  if (bar)   bar.style.width = pct + "%";
+  if (pctEl) pctEl.textContent = pct + " %";
+
+  if (p.finished) {
+    if (text) text.textContent = "Hotovo — " + (p.total_parcels || 0) + " pozemkov";
+  } else if (p.running) {
+    if (text) text.textContent = done + " / " + total + " zdrojov";
+  } else {
+    if (text) text.textContent = "Pripravujem...";
+  }
+
+  // Per-source tabuľka
+  if (srcs && p.per_source) {
+    srcs.innerHTML = Object.entries(p.per_source).map(([src, cnt]) => {
+      const val = cnt === null ? "⏳" : cnt;
+      const cls = cnt === null ? "src-running" : (cnt > 0 ? "src-done" : "src-zero");
+      return `<span class="src-chip ${cls}">${src.replace(/_/g," ")}: ${val}</span>`;
+    }).join("");
+  }
+}
+
+async function onResearchFinished() {
+  const btn = document.getElementById("btn-research");
+  try {
+    const data = await apiScrapeResults();
+    const items = (data.results || []).map(p => ({
+      parcel: p,
+      report: p.results?.report_service?.data || {},
+    }));
+    renderResults(items);
+    showStatus("Prieskum dokonceny: " + data.count + " pozemkov.", "ok");
+    if (btn) { btn.disabled = false; btn.textContent = "▶▶ Spustiť prieskum"; }
+    showProgressSection(false);
+  } catch (e) {
+    showStatus("Chyba nacitania vysledkov: " + e.message, "error");
+    if (btn) { btn.disabled = false; btn.textContent = "▶▶ Spustiť prieskum"; }
+  }
+}
+

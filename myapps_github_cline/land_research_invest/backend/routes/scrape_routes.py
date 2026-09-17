@@ -1,74 +1,79 @@
 """Scrape routes
 ================
 GET  /api/scrape/progress  -> aktualny stav scrapingu (X/N zdrojov, %, per-source)
-POST /api/scrape/start     -> spusti scrape_all() v pozadi (thread), vrati 202
+POST /api/scrape/start     -> spusti scrape_all() + analyze v pozadi, vrati 202
+GET  /api/scrape/results   -> vysledky posledneho scrapingu (analyzovane, zoradene)
 
 Pouzitie vo frontende:
   1. POST /api/scrape/start          -> spusti scraping
   2. GET  /api/scrape/progress       -> polling kazde 2s -> zobraz progress bar
-  3. Ked progress.finished == true   -> zobraz vysledky
+  3. Ked progress.finished == true   -> GET /api/scrape/results -> zobraz vysledky
 """
 
 import threading
 from flask import Blueprint, jsonify
 
 from services.scraper_service import scrape_all, get_scrape_progress
+from services.pipeline_service import analyze_parcel
 
 scrape_bp = Blueprint("scrape", __name__)
 
-# Globalny lock: zabrani sucasnemu spusteniu dvoch scrapingov
-_scrape_lock = threading.Lock()
+_scrape_lock  = threading.Lock()
+_results_lock = threading.Lock()
+_last_results = []
+
+
+def _get_last_results():
+    with _results_lock:
+        return list(_last_results)
+
+
+def _set_last_results(items):
+    with _results_lock:
+        _last_results.clear()
+        _last_results.extend(items)
 
 
 @scrape_bp.route("/progress", methods=["GET"])
 def scrape_progress():
-    """
-    Vrati aktualny stav scrapingu.
-
-    Returns:
-        200 {
-            running:    bool,   -- True pocas scrapingu
-            total:      int,    -- celkovy pocet zdrojov (napr. 7)
-            done:       int,    -- pocet dokoncených zdrojov
-            percent:    int,    -- 0-100
-            sources:    list,   -- ['nehnutelnosti_sk', ...]
-            per_source: dict,   -- {'spf': 0, 'topreality_sk': 128, ...} alebo None=este bezi
-            elapsed_s:  float,  -- cas behu v sekundach
-            finished:   bool,   -- True po dokonceni scrape_all()
-            total_parcels: int  -- celkovy pocet pozemkov (priebezne rastie)
-        }
-    """
+    """Vrati aktualny stav scrapingu (running, done, percent, per_source, ...)"""
     return jsonify(get_scrape_progress()), 200
 
 
 @scrape_bp.route("/start", methods=["POST"])
 def scrape_start():
     """
-    Spusti scrape_all() v pozadi (daemon thread).
+    Spusti scrape_all() + analyze_parcel() v pozadi (daemon thread).
     Ak uz bezi, vrati 409 Conflict.
-
-    Returns:
-        202 { message, sources }    -- scraping spusteny
-        409 { error }               -- uz bezi
+    Returns 202 { message, sources } alebo 409.
     """
-    prog = get_scrape_progress()
-    if prog.get("running"):
+    if get_scrape_progress().get("running"):
         return jsonify({"error": "Scraping uz bezi"}), 409
-
     if not _scrape_lock.acquire(blocking=False):
         return jsonify({"error": "Scraping uz bezi (lock)"}), 409
 
     def _run():
         try:
-            scrape_all()
+            parcels = scrape_all()
+            analyzed = []
+            for p in parcels:
+                try:
+                    analyze_parcel(p)
+                except Exception:
+                    pass
+                analyzed.append(p.to_dict())
+            analyzed.sort(key=lambda d: d.get("final_score", 0), reverse=True)
+            _set_last_results(analyzed)
         finally:
             _scrape_lock.release()
 
-    t = threading.Thread(target=_run, daemon=True, name="scrape_all_bg")
-    t.start()
+    threading.Thread(target=_run, daemon=True, name="scrape_all_bg").start()
+    prog = get_scrape_progress()
+    return jsonify({"message": "Scraping spusteny", "sources": prog.get("sources", [])}), 202
 
-    prog_after = get_scrape_progress()
-    return jsonify({
-        "message": "Scraping spusteny",
-        "sources": prog_after.get("sources", []),
-    }), 202
+
+@scrape_bp.route("/results", methods=["GET"])
+def scrape_results():
+    """Vrati vysledky posledneho scrapingu, zoradene podla final_score DESC."""
+    items = _get_last_results()
+    return jsonify({"results": items, "count": len(items)}), 200
