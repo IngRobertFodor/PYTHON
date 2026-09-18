@@ -186,6 +186,71 @@ class TestScoreSelectedEndpoint:
                 _score_lock.release()
 
 
+# ----------------------------------------------------------------
+# TestScrapeResultsCsv — GET /api/scrape/results.csv
+# ----------------------------------------------------------------
+
+class TestScrapeResultsCsv:
+    def setup_method(self):
+        _set_last_results([])
+
+    def test_csv_200_empty(self, client):
+        resp = client.get("/api/scrape/results.csv")
+        assert resp.status_code == 200
+
+    def test_csv_content_type(self, client):
+        resp = client.get("/api/scrape/results.csv")
+        assert "text/csv" in resp.content_type
+
+    def test_csv_attachment_header(self, client):
+        resp = client.get("/api/scrape/results.csv")
+        cd = resp.headers.get("Content-Disposition", "")
+        assert "attachment" in cd
+        assert "pozemky.csv" in cd
+
+    def test_csv_header_row(self, client):
+        text = client.get("/api/scrape/results.csv").data.decode("utf-8-sig")
+        assert "Zdroj" in text
+        assert "Lokalita" in text
+        assert "Prelim_skore" in text
+        assert "URL" in text
+
+    def test_csv_empty_has_only_header(self, client):
+        text = client.get("/api/scrape/results.csv").data.decode("utf-8-sig")
+        lines = [l for l in text.strip().splitlines() if l]
+        assert len(lines) == 1  # iba hlavicka
+
+    def test_csv_row_count(self, client):
+        _set_last_results([
+            {"source_portal": "nehnutelnosti_sk", "location_text": "Senec",
+             "price_eur": 8000, "area_sqm": 600, "price_per_sqm": 13.33,
+             "preliminary_score": 95.0, "prelim_recommendation": "STRONG BUY",
+             "final_score": 65.5, "recommendation": "CONSIDER",
+             "url": "http://test.sk/1"},
+            {"source_portal": "spf", "location_text": "Malacky",
+             "price_eur": 0, "area_sqm": 500, "price_per_sqm": 0,
+             "preliminary_score": 80.0, "prelim_recommendation": "INVESTIGATE",
+             "final_score": 0, "recommendation": "",
+             "url": "http://test.sk/2"},
+        ])
+        text = client.get("/api/scrape/results.csv").data.decode("utf-8-sig")
+        lines = [l for l in text.strip().splitlines() if l]
+        assert len(lines) == 3  # hlavicka + 2 riadky
+
+    def test_csv_contains_data(self, client):
+        _set_last_results([
+            {"source_portal": "topreality_sk", "location_text": "Pezinok",
+             "price_eur": 9000, "area_sqm": 700, "price_per_sqm": 12.86,
+             "preliminary_score": 98.0, "prelim_recommendation": "STRONG BUY",
+             "final_score": 66.6, "recommendation": "CONSIDER",
+             "url": "http://test.sk/3"},
+        ])
+        text = client.get("/api/scrape/results.csv").data.decode("utf-8-sig")
+        assert "Pezinok" in text
+        assert "topreality_sk" in text
+        assert "98.0" in text
+
+
 class TestScoreProgressEndpoint:
     def test_score_progress_200(self, client):
         assert client.get("/api/scrape/score-progress").status_code == 200
@@ -200,34 +265,7 @@ class TestScoreProgressEndpoint:
         assert data["running"] is False
 
 
-    def test_results_empty_list(self, client):
-        data = client.get("/api/scrape/results").get_json()
-        assert data["count"] == 0 and data["results"] == []
+# Testy pre /results su v TestScrapeResultsEndpoint (viď vyssie)
 
-    def test_results_returns_stored(self, client):
-        _set_last_results([{"title": "Test", "final_score": 80}])
-        data = client.get("/api/scrape/results").get_json()
-        assert data["count"] == 1 and data["results"][0]["title"] == "Test"
 
-    def test_results_sorted_desc(self, client):
-        """_set_last_results ulozi v danom poradi; _run() zoradi podla preliminary_score."""
-        # Simulujeme co by _run() ulozil (uz zoradene podla preliminary_score)
-        _set_last_results([
-            {"title": "B", "final_score": 90, "preliminary_score": 90},
-            {"title": "C", "final_score": 75, "preliminary_score": 75},
-            {"title": "A", "final_score": 60, "preliminary_score": 60},
-        ])
-        data = client.get("/api/scrape/results").get_json()
-        scores = [r["preliminary_score"] for r in data["results"]]
-        assert scores == sorted(scores, reverse=True)
-
-    def test_results_has_count(self, client):
-        _set_last_results([{"x": 1}, {"x": 2}])
-        data = client.get("/api/scrape/results").get_json()
-        assert data["count"] == 2
-
-    def test_set_get_last_results_roundtrip(self, client):
-        items = [{"title": "X", "final_score": 55}]
-        _set_last_results(items)
-        assert _get_last_results() == items
 

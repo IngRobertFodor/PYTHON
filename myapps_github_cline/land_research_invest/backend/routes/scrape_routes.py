@@ -166,3 +166,54 @@ def score_progress():
     """Vrati stav plneho GIS scoringu."""
     return jsonify(_get_score_progress()), 200
 
+
+@scrape_bp.route("/results.csv", methods=["GET"])
+def scrape_results_csv():
+    """
+    Exportuje vsetky vysledky posledneho scrapingu ako CSV.
+    Delimiter: ; (SK Excel standard), encoding: utf-8-sig (BOM -> diakritika OK).
+    Vracia vsetky _last_results bez ohladom na klientsky filter.
+    """
+    import csv
+    import io
+    from flask import Response
+
+    items = _get_last_results()
+    output = io.StringIO()
+    writer = csv.writer(output, delimiter=";", quoting=csv.QUOTE_MINIMAL)
+
+    writer.writerow([
+        "Zdroj", "Lokalita", "Cena_EUR", "Vymera_m2", "EUR_m2",
+        "Prelim_skore", "Prelim_odporucanie",
+        "Final_skore", "Odporucanie", "URL",
+    ])
+
+    for p in items:
+        area = p.get("area_sqm") or 0
+        price = p.get("price_eur") or 0
+        ppsm = p.get("price_per_sqm") or (
+            round(price / area, 2) if area > 0 else 0
+        )
+        writer.writerow([
+            p.get("source_portal", ""),
+            p.get("location_text", ""),
+            price,
+            area,
+            ppsm,
+            p.get("preliminary_score", 0),
+            p.get("prelim_recommendation", ""),
+            p.get("final_score", 0),
+            p.get("recommendation", ""),
+            p.get("url", ""),
+        ])
+
+    csv_bytes = output.getvalue().encode("utf-8-sig")   # BOM pre SK Excel
+    return Response(
+        csv_bytes,
+        mimetype="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": "attachment; filename=pozemky.csv",
+            "Content-Length": str(len(csv_bytes)),
+        },
+    )
+

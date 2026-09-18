@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("btn-filter-apply").addEventListener("click", applyFilter);
   document.getElementById("btn-filter-reset").addEventListener("click", resetFilter);
   document.getElementById("chk-all").addEventListener("change", onChkAllChange);
+  document.getElementById("btn-export-csv").addEventListener("click",  onExportCsv);
+  document.getElementById("btn-export-json").addEventListener("click", onExportJson);
   document.getElementById("modal-close").addEventListener("click",  closeModal);
   document.getElementById("modal-overlay").addEventListener("click", e => {
     if (e.target.id === "modal-overlay") closeModal();
@@ -325,10 +327,12 @@ function applyFilter() {
   const zdroj = document.getElementById("filter-zdroj").value;
   const cena  = parseFloat(document.getElementById("filter-cena").value) || Infinity;
   const vym   = parseFloat(document.getElementById("filter-vymera").value) || 0;
+  const skore = parseFloat(document.getElementById("filter-skore").value) || 0;
   renderResultsTable(_allResults.filter(p =>
     (!zdroj || p.source_portal === zdroj) &&
     (p.price_eur === 0 || p.price_eur <= cena) &&
-    (p.area_sqm  === 0 || p.area_sqm  >= vym)
+    (p.area_sqm  === 0 || p.area_sqm  >= vym) &&
+    ((p.preliminary_score || 0) >= skore)
   ));
 }
 
@@ -336,6 +340,7 @@ function resetFilter() {
   document.getElementById("filter-zdroj").value  = "";
   document.getElementById("filter-cena").value   = "";
   document.getElementById("filter-vymera").value = "";
+  document.getElementById("filter-skore").value  = "";
   renderResultsTable(_allResults);
 }
 
@@ -414,6 +419,44 @@ async function onScoringFinished(scoredUrls) {
       scored.forEach(p => addParcelMarker(p, p.results?.report_service?.data||{}, openModal));
       fitMapToMarkers();
     }
+
+// ----------------------------------------------------------------
+// Export výsledkov (D5)
+// ----------------------------------------------------------------
+
+function onExportCsv() {
+  // CSV = vsetky vysledky zo servera (nie len filtrovane) -> priamy download
+  if (!_allResults || _allResults.length === 0) {
+    showStatus("Žiadne výsledky na export — najskôr spustite prieskum.", "error");
+    return;
+  }
+  window.location = API_BASE + "/api/scrape/results.csv";
+}
+
+function onExportJson() {
+  // JSON = aktualne filtrovane vysledky (Blob download, bez servera)
+  const data = _filteredResults && _filteredResults.length > 0
+    ? _filteredResults
+    : _allResults;
+  if (!data || data.length === 0) {
+    showStatus("Žiadne výsledky na export — najskôr spustite prieskum.", "error");
+    return;
+  }
+  const blob = new Blob(
+    [JSON.stringify(data, null, 2)],
+    { type: "application/json;charset=utf-8" }
+  );
+  const url = URL.createObjectURL(blob);
+  const a   = document.createElement("a");
+  a.href     = url;
+  a.download = "pozemky.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showStatus("Exportovaných " + data.length + " záznamov (JSON).", "ok");
+}
+
     showStatus("Scoring dokonceny: " + scoredUrls.length + " pozemkov.", "ok");
     if (btn) btn.disabled = false;
     showScoreProgress(false);

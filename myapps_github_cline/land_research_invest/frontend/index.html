@@ -100,9 +100,15 @@
         <label class="filter-label">Výmera min (m²):
           <input id="filter-vymera" type="number" class="filter-input" placeholder="350">
         </label>
+        <label class="filter-label">Min. skóre:
+          <input id="filter-skore" type="number" class="filter-input" placeholder="0" min="0" max="100" style="width:52px">
+        </label>
         <button id="btn-filter-apply" class="btn btn-sm">Filtrovať</button>
         <button id="btn-filter-reset" class="btn btn-sm btn-outline">Reset</button>
         <span id="filter-count" class="filter-count"></span>
+        <span class="filter-spacer"></span>
+        <button id="btn-export-csv"  class="btn btn-sm btn-outline" title="Exportovať všetky výsledky ako CSV (SK Excel)">&#11015; CSV</button>
+        <button id="btn-export-json" class="btn btn-sm btn-outline" title="Exportovať zobrazené výsledky ako JSON">&#11015; JSON</button>
       </div>
 
       <!-- Tabuľka -->

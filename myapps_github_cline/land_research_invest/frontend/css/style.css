@@ -232,6 +232,7 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   border: 1px solid #bbb; border-radius: 4px;
 }
 .filter-count { font-size: .73rem; color: #666; margin-left: 4px; }
+.filter-spacer { flex: 1; }
 
 .btn-sm {
   font-size: .74rem; padding: 4px 10px;

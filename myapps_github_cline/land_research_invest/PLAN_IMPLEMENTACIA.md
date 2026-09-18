@@ -13,7 +13,7 @@
 | Frontend (mapa, karty, modal, demo) | HOTOVO |
 | Scraper kostra (BaseScraper, registry, scrape_all) | HOTOVO |
 | nehnutelnosti_sk parser | HOTOVO |
-| Testy | **1049, 0 zlyh** |
+| Testy | **1051, 0 zlyh** |
 | Limity v criteria.yaml (cena 0-10000, vymera 350-1000) | HOTOVO |
 | C0: nehnutelnosti.sk - oprava markera (T23c11 -> dynamic RSC) | HOTOVO - 46 pozemkov nazivo |
 | C0: nehnutelnosti.sk - lokalita (ZNAME_OBCE 70km od BA) | HOTOVO - 46/46 s lokalitou |
@@ -67,6 +67,10 @@
 | I8: Faza1 prelim OK (Senec=95 SB, Pezinok=98 SB, Malacky=95 SB) | OVERENE |
 | I8: Faza2 geocode_ok=3/3, 10 GIS sluzieb, final_score>0, elapsed=64s | OVERENE |
 | I9: ARCHITEKTURA_DEVELOPER.txt zosúladena — 10 blokov (tok, scoring, endpointy, testy, zdroje) | HOTOVO |
+| D4: filter tabulky +min.skore (preliminary_score >= threshold) | HOTOVO |
+| D5: CSV export GET /api/scrape/results.csv (delimiter ; utf-8-sig BOM) | HOTOVO - +7 testov |
+| D5: JSON export klientsky (Blob z _filteredResults) | HOTOVO |
+| Testy | **1051, 0 zlyh** |
 | Testy | **1049, 0 zlyh** |
 
 ---
