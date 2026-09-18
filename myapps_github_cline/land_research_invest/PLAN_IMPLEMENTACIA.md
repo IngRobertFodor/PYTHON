@@ -53,7 +53,8 @@
 | H3: zosulad. checkboxov B1[x]/B3[x]/B5.2[x], poznamky k B4/B5/B6 | HOTOVO |
 | ⚠️ SPF dedup issue: 2404 parciel pred dedup -> 1 po dedup (skoro identicke URL) | FIXNUTE |
 | H4: spf_scraper url=pdf_url (nie PDF_BASE), parcel_number=t_parcela | HOTOVO - +3 testy |
-| H4: _deduplicate klic url+parcel_number (SPF parcely z toho isteho PDF sa nededupuju) | HOTOVO |
+| H4: live rerun po SPF dedup fixe (2026-09-17): **4646 unikat. / 931s** | OVERENE |
+| H4: SPF po fixe: 2404 (pred dedup) → 2212 (po dedup, ~192 skutocnych duplikatov zo 30 PDF) | OVERENE |
 | Testy | **1013, 0 zlyh** |
 
 ---
