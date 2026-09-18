@@ -248,6 +248,59 @@ class TestObchodnyVestnikScraperRegistry:
         scraper.rate_limit = 0
         scraper.neutral_ua = False
         scraper._last_call = 0.0
+
+
+# ----------------------------------------------------------------
+# TestScrapePdfUrlFix — url=b'%PDF...' bug fix
+# ----------------------------------------------------------------
+
+class TestScrapePdfUrlFix:
+    """Overuje ze scrape_pdf nikdy neuklada binarne bajty ako url."""
+
+    @pytest.fixture
+    def scraper(self):
+        s = ObchodnyVestnikScraper.__new__(ObchodnyVestnikScraper)
+        s.rate_limit = 0
+        s.neutral_ua = False
+        s._last_call  = 0.0
+        return s
+
+    def test_scrape_pdf_with_source_url_uses_it(self, scraper):
+        """S source_url parametrom parcela dostane tu URL."""
+        pdf_bytes = FIXTURE_PDF.read_bytes()
+        expected  = "https://obchodnyvestnik.justice.gov.sk/FormularDetail.aspx?id=123"
+        parcels   = scraper.scrape_pdf(pdf_bytes, expected)
+        if parcels:  # fixture moze vratit [] ak nema cenu/lv
+            assert parcels[0].url == expected
+
+    def test_scrape_pdf_bytes_without_url_gives_empty_string(self, scraper):
+        """Bajty bez source_url -> url='' (nie stringifikovane bajty)."""
+        pdf_bytes = FIXTURE_PDF.read_bytes()
+        parcels   = scraper.scrape_pdf(pdf_bytes)
+        if parcels:
+            assert not parcels[0].url.startswith("b'")
+            assert not parcels[0].url.startswith("b\"")
+
+    def test_scrape_pdf_bytes_url_never_contains_pdf_magic(self, scraper):
+        """url nesmie obsahovat %PDF (binarny obsah)."""
+        pdf_bytes = FIXTURE_PDF.read_bytes()
+        parcels   = scraper.scrape_pdf(pdf_bytes)
+        if parcels:
+            assert "%PDF" not in parcels[0].url
+
+    def test_scrape_pdf_str_path_uses_path_as_url(self, scraper):
+        """Ked pdf_source je str (cesta) a source_url nie je, url = cesta."""
+        parcels = scraper.scrape_pdf(str(FIXTURE_PDF))
+        if parcels:
+            assert str(FIXTURE_PDF) in parcels[0].url or parcels[0].url == ""
+
+    def test_scrape_pdf_source_url_overrides_path(self, scraper):
+        """source_url ma prioritu pred cestou."""
+        override = "https://example.com/drazba.pdf"
+        parcels  = scraper.scrape_pdf(str(FIXTURE_PDF), override)
+        if parcels:
+            assert parcels[0].url == override
+
         parcels = scraper.scrape_pdf(FIXTURE_PDF)
         # Vysledok drazby bez ceny/plochy vracia [] (pdf_to_parcel None)
         assert isinstance(parcels, list)

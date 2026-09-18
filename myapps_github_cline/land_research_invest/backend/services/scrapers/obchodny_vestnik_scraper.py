@@ -225,7 +225,7 @@ class ObchodnyVestnikScraper(BaseScraper):
         try:
             pdf_bytes = self.fetch_pdf_bytes(formular_url)
             if pdf_bytes and pdf_bytes[:4] == b"%PDF":
-                return self.scrape_pdf(pdf_bytes)
+                return self.scrape_pdf(pdf_bytes, formular_url)
         except Exception:
             pass
         # Fallback: HTML stranka s PDF linkom
@@ -235,7 +235,7 @@ class ObchodnyVestnikScraper(BaseScraper):
             if not pdf_url:
                 return []
             pdf_bytes = self.fetch_pdf_bytes(pdf_url)
-            return self.scrape_pdf(pdf_bytes)
+            return self.scrape_pdf(pdf_bytes, pdf_url)
         except Exception as exc:
             print(f"[{self.SOURCE_NAME}] formular fallback chyba: {exc}")
             return []
@@ -268,11 +268,14 @@ class ObchodnyVestnikScraper(BaseScraper):
         resp.raise_for_status()
         return resp.content
 
-    def scrape_pdf(self, pdf_source):
+    def scrape_pdf(self, pdf_source, source_url=""):
         """Parsuje PDF drazobneho oznamenia. pdf_source: cesta alebo bytes."""
         try:
             text   = extract_pdf_text(pdf_source)
-            parcel = pdf_to_parcel(text, str(pdf_source))
+            # Ak source_url nie je zadana a pdf_source je cesta (str), pouzi ju ako URL.
+            # Nikdy nestringifikujeme bytes -> zabrani url=b'%PDF-1.4...' bugu.
+            url = source_url or (str(pdf_source) if isinstance(pdf_source, str) else "")
+            parcel = pdf_to_parcel(text, url)
             return [] if parcel is None else [parcel]
         except Exception as exc:
             print(f"[{self.SOURCE_NAME}] scrape_pdf error: {exc}")

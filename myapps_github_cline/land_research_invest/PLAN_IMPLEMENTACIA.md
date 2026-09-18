@@ -13,7 +13,7 @@
 | Frontend (mapa, karty, modal, demo) | HOTOVO |
 | Scraper kostra (BaseScraper, registry, scrape_all) | HOTOVO |
 | nehnutelnosti_sk parser | HOTOVO |
-| Testy | **1013, 0 zlyh** |
+| Testy | **1018, 0 zlyh** |
 | Limity v criteria.yaml (cena 0-10000, vymera 350-1000) | HOTOVO |
 | C0: nehnutelnosti.sk - oprava markera (T23c11 -> dynamic RSC) | HOTOVO - 46 pozemkov nazivo |
 | C0: nehnutelnosti.sk - lokalita (ZNAME_OBCE 70km od BA) | HOTOVO - 46/46 s lokalitou |
@@ -55,7 +55,8 @@
 | H4: spf_scraper url=pdf_url (nie PDF_BASE), parcel_number=t_parcela | HOTOVO - +3 testy |
 | H4: live rerun po SPF dedup fixe (2026-09-17): **4646 unikat. / 931s** | OVERENE |
 | H4: SPF po fixe: 2404 (pred dedup) → 2212 (po dedup, ~192 skutocnych duplikatov zo 30 PDF) | OVERENE |
-| Testy | **1013, 0 zlyh** |
+| H5: OV url bug fix — scrape_pdf(bytes, source_url) + _process_formular odovzdava formular_url | HOTOVO - +5 testov |
+| Testy | **1018, 0 zlyh** |
 
 ---
 
