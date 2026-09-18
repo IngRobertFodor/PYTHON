@@ -66,6 +66,7 @@
 | I8: E2E test (in-process, 3 realne parcely) — OVERENE NAZIVO | OVERENE |
 | I8: Faza1 prelim OK (Senec=95 SB, Pezinok=98 SB, Malacky=95 SB) | OVERENE |
 | I8: Faza2 geocode_ok=3/3, 10 GIS sluzieb, final_score>0, elapsed=64s | OVERENE |
+| I9: ARCHITEKTURA_DEVELOPER.txt zosúladena — 10 blokov (tok, scoring, endpointy, testy, zdroje) | HOTOVO |
 | Testy | **1049, 0 zlyh** |
 
 ---

@@ -35,7 +35,7 @@ Pre vyvojarov a AI agentov.
 ==============================================================
 
   +----------------------------------------------------------+
-  |     AI ORCHESTRATOR  (llm_agent_service.py)              |
+  |     AI ORCHESTRATOR  (llm_agent_service.py) [PLANOVANE] |
   |     Google Gemini (primarny) / Claude (zaloha)           |
   |     LangChain agent + tools                              |
   +-----------------+----------------------------------------+
@@ -43,33 +43,58 @@ Pre vyvojarov a AI agentov.
      +--------------+-----------+---------------+
      v              v           v               v
   [Scrapery]  [GIS validatory]  [Pipeline]  [Scoring / Report]
-  realestate  zbgis/flood/      pipeline_   scoring_service
-  auction     terrain/bpej/     service     report_service
-  scraper     overpass/protect  (orchestr.) cadastral_service
+  7 zdrojov:  zbgis/flood/      pipeline_   scoring_service
+  nehnut.sk   terrain/bpej/     service     preliminary_score
+  topreality  overpass/protect  (orchestr.) report_service
+  reality_sk  geocoding                     cadastral_service
+  spf/ske
+  notar./OV
 
 
 ==============================================================
-3. TOK DAT (WORKFLOW)
+3. TOK DAT (WORKFLOW) — DVOJFAZOVY SCORING
 ==============================================================
+
+  --- FAZA 1: SCRAPING + LACNY PRE-SCORING (0 HTTP, okamzite) ---
 
   1. Pouzivatel nastavi kriteria (config/criteria.yaml alebo UI)
-  2. Agent vola: search_real_estate_portals + search_auctions
-  3. Pre KAZDY pozemok -- pipeline_service.analyze_parcel():
+  2. scraper_service.scrape_all()
+       -> 7 zdrojov paralelne (ThreadPoolExecutor):
+            nehnutelnosti_sk, topreality_sk, reality_sk
+            spf, ske_drazobne_vyhlasky, notarske_drazby
+            obchodny_vestnik
+       -> dedup podla (url + parcel_number)
+       -> vysledok: list[Parcel] (typicky 2000-5000 kusov)
+  3. scoring_service.preliminary_score() pre KAZDY pozemok (0 HTTP):
+       price_score    (35%) -> cena v konfigurovanom rozsahu
+       area_score     (30%) -> vymera v konfigurovanom rozsahu
+       ppsm_score     (20%) -> EUR/m2 pod limitom
+       source_bonus   (10%) -> drazbove zdroje = bonus (podhodnotene)
+       data_quality   ( 5%) -> penalizacia za chybajuce polia
+     -> parcel.preliminary_score (0-100) + prelim_recommendation
+  4. Zoradeny zoznam (tabulka) + filter (zdroj / cena max / vymera min)
+     Pouzivatel zafajkne kandidatov (max 30)
+
+  --- FAZA 2: PLNY GIS SCORING VYBRANYCH (HTTP, ~20s/parcelu) ---
+
+  5. POST /api/scrape/score-selected {urls: [...]}
+     Pre KAZDU vybranú parcelu -- pipeline_service.analyze_parcel():
        ensure_coordinates()     -> GPS suradnice (geocoding_service)
-       run_gis_services()       -> 7 GIS sluzieb (feature flagy)
-         distance_service       -> vzdialenost od BA
-         flood_service          -> Q100 zaplavova zona
-         terrain_service        -> sklon, zosuvy, radon
+       run_gis_services()       -> 8 GIS sluzieb paralelne (feature flagy):
+         distance_service       -> vzdialenost od BA (Haversine)
+         flood_service          -> Q100 zaplavova zona (SHMU WMS)
+         terrain_service        -> sklon, zosuvy, radon (DMR/SGUDSH)
          bpej_service           -> bonita pody, ochrana, odvody
-         overpass_service       -> cesta, elektrina, voda, okolie
+         overpass_service       -> cesta, elektrina, voda, okolie (OSM)
          protected_service      -> VVN/VTL, Natura 2000, CHKO
          zbgis_service          -> geometria (sirka, tvar, vymera)
        run_price_service()      -> price_analysis_service EUR/m2
-  4. scoring_service            -> vazene skore 0-100
-  5. Ak skore >= 70:
+  6. scoring_service.score_parcel() -> vazene skore 0-100 + recommendation
+  7. Ak skore >= 70:
        cadastral_service        -> manualny LV checklist (B/C/D)
-  6. report_service             -> investicny report + text
-  7. notifier_service           -> email / Telegram (prah skore, feature flag)
+  8. report_service             -> investicny report + text
+  9. notifier_service           -> email / Telegram (prah skore, feature flag)
+  10. Mapa zobrazena len pre skórovane parcely (maju GPS)
 
   Odolnost pipeline:
     Vypnuta sluzba  -> ServiceResult.skip_result (neutralne 50)
@@ -79,6 +104,21 @@ Pre vyvojarov a AI agentov.
 ==============================================================
 4. SCORING ALGORITMUS
 ==============================================================
+
+  --- FAZA 1: LACNY PRE-SCORING (scoring_service.preliminary_score) ---
+
+  Kriterium             | Vaha  | Zdroj dat
+  ----------------------|-------|---------------------------
+  Cena v rozsahu        | 35 %  | parcel.price_eur
+  Vymera v rozsahu      | 30 %  | parcel.area_sqm
+  EUR/m2 pod limitom    | 20 %  | parcel.price_per_sqm
+  Bonus drazbovy zdroj  | 10 %  | parcel.source_portal
+  Datova kvalita        |  5 %  | price_eur>0 AND area_sqm>0
+
+  -> parcel.preliminary_score (0-100) + prelim_recommendation
+  Rozsahy z criteria.yaml: price.min/max_eur, parcel.min/max_area_sqm
+
+  --- FAZA 2: PLNY GIS SCORING (scoring_service.score_parcel) ---
 
   Kriterium             | Vaha (predvolena, menitelna v YAML)
   ----------------------|--------
@@ -228,12 +268,12 @@ VYSVETLIVKY_POUZIVATEL.txt  -- legenda stavov, farieb, GIS chyb
 
 
 ==============================================================
-9. IMPLEMENTOVANE SLUZBY (17 / 17)
+9. IMPLEMENTOVANE SLUZBY (aktualny stav)
 ==============================================================
 
-  Hotove (offline-testovatelne, 763 testov):
+  Hotove (offline-testovatelne, 1049 testov):
     pipeline_service    -- orchestrator, analyze_parcel()
-    scoring_service     -- vazene skore, get_recommendation()
+    scoring_service     -- score_parcel() + preliminary_score() (0 HTTP)
     report_service      -- generate_report(), format_text_report()
     cadastral_service   -- LV checklist + evaluate_lv_data()
     distance_service    -- Haversine + WGS84/JTSK konverzia
@@ -246,21 +286,25 @@ VYSVETLIVKY_POUZIVATEL.txt  -- legenda stavov, farieb, GIS chyb
     geocoding_service   -- Nominatim adresa -> GPS
     price_analysis_service -- EUR/m2 vs. regional avg
     notifier_service    -- Telegram / email notifikacie
-    app.py + routes/    -- Flask REST API (5 endpointov)
-    frontend/           -- HTML+CSS+JS UI (Leaflet mapa, karty, modal)
-    scraper_service     -- multi-zdrojovy scraper + nehnutelnosti_sk parser
+    app.py + routes/    -- Flask REST API (10 endpointov)
+    scrape_routes       -- /api/scrape/* (5 endpointov, dvojfazovy scoring)
+    frontend/           -- HTML+CSS+JS UI (tabulka+filter+mapa, Leaflet)
+    scraper_service     -- 7 zdrojov paralelne, dedup, progress, pre-scoring
     scrapers/base       -- BaseScraper kontrakt (plugin architektura)
     monitor_service     -- APScheduler scan + Flask /api/monitor endpoints
-    topreality_scraper  -- JSON-LD detail parser (RealEstateListing + BreadcrumbList)
-    scrapers/nehnut.    -- nehnutelnosti.sk JSON-LD parser (realne fixture) (Leaflet mapa, karty, modal)
+    topreality_scraper  -- JSON-LD detail parser (128 pozemkov nazivo)
+    reality_sk_scraper  -- div.offer CSS parser (809 pozemkov nazivo)
+    nehnutelnosti_scraper -- JSON-LD parser (1317 pozemkov nazivo)
+    spf_scraper         -- PDF parser + filter 70km + dedup (2212 nazivo)
+    ske_scraper         -- SKE exekutorske drazby (112 nazivo)
+    notarske_drazby_scraper -- notar.sk PDF drazby (48 nazivo)
+    obchodny_vestnik_scraper -- justice.gov.sk PDF drazby (20 nazivo)
 
-  Zostava implementovat:
-    llm_agent_service           -- LangChain + Gemini
-    realestate_scraper_service  -- Playwright portály
-    notifier_service            -- Telegram / email
-    monitor_service            -- HOTOVO
-    llm_agent_service          (LangChain + Gemini) -- volitelne             -- APScheduler
-    app.py + routes/            -- Flask REST API
+  Zostava implementovat (TODO):
+    llm_agent_service   -- LangChain + Gemini [PLANOVANE - C faza]
+    eks_scraper         -- elektronicke aukcie statu (eks.sk) [B5.3]
+    bsk_kraj_scraper    -- BSK kraj urade tabule [B6]
+    obce_uradne_tabule  -- per-obec uradne tabule [B6]
 
 
 
@@ -268,11 +312,19 @@ VYSVETLIVKY_POUZIVATEL.txt  -- legenda stavov, farieb, GIS chyb
 10. REST API ENDPOINTY  (Flask, port 5001)
 ==============================================================
 
+  --- Analyza pozemkov ---
   GET  /api/health                 -> status, pocet sluzieb, verzia
   GET  /api/config/                -> kriteria, vahy, prahy, features
   GET  /api/config/validate        -> overenie criteria.yaml
   POST /api/analyze                -> analyza 1 pozemku (JSON -> report)
   POST /api/parcels/analyze-batch  -> analyza N pozemkov, zoradene
+
+  --- Scraping + dvojfazovy scoring ---
+  GET  /api/scrape/progress        -> stav scrapingu (running, %, per-source)
+  POST /api/scrape/start           -> spusti scrape_all + pre-scoring (background)
+  GET  /api/scrape/results         -> vysledky (preliminary_score DESC)
+  POST /api/scrape/score-selected  -> plny GIS scoring vybranych {urls:[...]}
+  GET  /api/scrape/score-progress  -> stav plneho scoringu (done/total/%)
 
   POST /api/analyze - vstup:
     { title, price_eur, area_sqm, location_text,  <- povinne
@@ -281,28 +333,42 @@ VYSVETLIVKY_POUZIVATEL.txt  -- legenda stavov, farieb, GIS chyb
   POST /api/analyze - vystup:
     { parcel: {...}, report: {text_report, recommendation, ...} }
 
+  POST /api/scrape/score-selected - vstup:
+    { "urls": ["https://...", ...] }  max 30 URL
+
 
 
 ==============================================================
 11. SCRAPER ARCHITEKTURA (plugin system)
 ==============================================================
 
-  Pridanie noveho zdroja (napr. topreality_sk):
-  1. Vytvor: backend/services/scrapers/topreality_scraper.py
+  Pridanie noveho zdroja (napr. eks_scraper):
+  1. Vytvor: backend/services/scrapers/eks_scraper.py
      - Zdedi BaseScraper
      - Implementuj parse_listings(html) -> list[Parcel]
   2. Pridaj do SCRAPER_REGISTRY v scraper_service.py:
-     "topreality_sk": TopRealityScraper
-  3. Testy: tests/fixtures/topreality_listing.html + test tridy
+     "eks_statny_majetok": EksScraper
+  3. Testy: tests/fixtures/eks_listing.html + test tridy
   scrape_all() sa NEMENI - automaticky vyzbie novy zdroj.
 
-  Planovane fazy:
-    Faza 2: topreality_sk      (rovnaky typ - HTML inzeraty)
-    Faza 3: obchodny_vestnik   (ZLATO - konkurzy)
-    Faza 4: spf                (statne verejne sutaze)
-    Faza 5: exekutorske_drazby + drazby_net
-    Faza 6: notarske_drazby + eks_statny_majetok
-    Faza 7: bsk_kraj + obce_uradne_tabule (najkomplexnejsie)
+  Aktivne zdroje (SCRAPER_REGISTRY, live overene 2026-09-18):
+    nehnutelnosti_sk       1317 pozemkov  (realitny portal)
+    topreality_sk           128 pozemkov  (realitny portal)
+    reality_sk              809 pozemkov  (realitny portal)
+    spf                    2212 pozemkov  (statne verejne sutaze, PDF)
+    ske_drazobne_vyhlasky   112 pozemkov  (SK exekutorske drazby)
+    notarske_drazby          48 pozemkov  (notarske drazby, PDF)
+    obchodny_vestnik         20 pozemkov  (justice.gov.sk, PDF)
+    CELKOM:                4646 unikatnych / 931s (paralel. beh)
+
+  Planovane doplnenia:
+    eks_statny_majetok  -- EKS elektronicke aukcie statu [B5.3 TODO]
+    bsk_kraj            -- BSK kraj urade tabule [B6 TODO]
+    obce_uradne_tabule  -- per-obec uradne tabule [B6 TODO]
+
+  Zrusene (C4, nahradene):
+    drazby_net          -- CZ agregator (nie SK) -> nahradeny ske
+    sexe.sk             -> nahradeny ske_drazobne_vyhlasky
 
 
 ==============================================================
