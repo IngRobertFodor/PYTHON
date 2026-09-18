@@ -36,7 +36,8 @@ header .subtitle { font-size: 0.85rem; opacity: .75; }
   border-right: 1px solid #ddd;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .form-section {

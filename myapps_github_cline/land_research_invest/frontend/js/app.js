@@ -42,12 +42,21 @@ async function loadConfigDefaults() {
     const price  = cfg.criteria?.price    || {};
     const parcel = cfg.criteria?.parcel   || {};
     const loc    = cfg.criteria?.location || {};
-    setVal("f-price-max",   price.max_eur            || 50000);
-    setVal("f-area-min",    parcel.min_area_sqm       || 600);
-    setVal("f-area-max",    parcel.max_area_sqm       || 1500);
-    setVal("f-dist-max",    loc.max_distance_km       || 70);
+    // Polia "Limity" v sidebari
+    setVal("f-price-max", price.max_eur          ?? 10000);
+    setVal("f-area-min",  parcel.min_area_sqm     ?? 350);
+    setVal("f-area-max",  parcel.max_area_sqm     ?? 1000);
+    setVal("f-dist-max",  loc.max_distance_km     ?? 70);
+    // Subtitle v hlavicke - reflektuje max_distance_km z criteria.yaml
+    const km  = loc.max_distance_km ?? 70;
+    const sub = document.getElementById("app-subtitle");
+    if (sub) sub.textContent =
+      "AI agent pre vyhladavanie stavebnych pozemkov do " + km + " km od Bratislavy";
   } catch (e) {
-    console.warn("Config load failed:", e);
+    // Diagnostika: zobraz chybu priamo v subtitle (viditelne bez konzoly)
+    const sub = document.getElementById("app-subtitle");
+    if (sub) sub.textContent = "Config error: " + e.message;
+    console.warn("loadConfigDefaults failed:", e);
   }
 }
 
