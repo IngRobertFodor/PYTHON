@@ -70,6 +70,9 @@
 | D4: filter tabulky +min.skore (preliminary_score >= threshold) | HOTOVO |
 | D5: CSV export GET /api/scrape/results.csv (delimiter ; utf-8-sig BOM) | HOTOVO - +7 testov |
 | D5: JSON export klientsky (Blob z _filteredResults) | HOTOVO |
+| spustit.bat: auto-otvorenie prehliadaca + odstraneny playwright install | HOTOVO |
+| Dokumentacia: AKO_SPUSTIT, README, ARCHITEKTURA zosúladene s realitou | HOTOVO |
+| PLAN: vsetky otvorene [ ] -> [~] SKIP (B5.3-B5.6, B6, C, D1-D3) | HOTOVO |
 | Testy | **1051, 0 zlyh** |
 | Testy | **1049, 0 zlyh** |
 
@@ -167,10 +170,10 @@
 
 - [x] B5.1: HTML vzorky -> `tests/fixtures/notarske_drazby_listing.html` + `notarske_drazby_detail.pdf`
 - [x] B5.2: `backend/services/scrapers/notarske_drazby_scraper.py` — **Live test 2026-09-17: 48 pozemkov** ✅
-- [ ] B5.3: `backend/services/scrapers/eks_scraper.py` — zatial neimplementovane
-- [ ] B5.4: Pridat do `SCRAPER_REGISTRY` (2 zaznamy) — notarske uz je, eks chyba
-- [ ] B5.5: Testy (~20 testov) — notarske: 52 testov ✅, eks: TODO
-- [ ] B5.6: Aktualizacia dokumentacie
+- [~] B5.3: `backend/services/scrapers/eks_scraper.py` (SKIP - notarske+ske uz pokryvaju drazby)
+- [~] B5.4: Pridat do `SCRAPER_REGISTRY` (SKIP)
+- [~] B5.5: Testy (SKIP)
+- [~] B5.6: Aktualizacia dokumentacie (SKIP)
 
 ### B6 - bsk_kraj + obce_uradne_tabule (najkomplexnejsie)
 
@@ -181,13 +184,12 @@
 > ℹ️ **Status:** zatial neimplementovane — naplanovane ako futurna faza.
 > Pokryte alternativne cez `ske_drazobne_vyhlasky` (verejne vyhlasky). B6 ostava ako TODO.
 
-- [ ] B6.1: HTML vzorky -> `tests/fixtures/bsk_listing.html`, `obec_tabula_listing.html`
-- [ ] B6.2: `backend/services/scrapers/bsk_kraj_scraper.py`
-- [ ] B6.3: `backend/services/scrapers/obce_uradne_tabule_scraper.py`
-  - Subkonfig: zoznam URL obci (v criteria.yaml alebo osobitny subor)
-- [ ] B6.4: Pridat do `SCRAPER_REGISTRY` (2 zaznamy)
-- [ ] B6.5: Testy (~20 testov)
-- [ ] B6.6: Aktualizacia dokumentacie
+- [~] B6.1: HTML vzorky (SKIP - nizka hodnota, pokryte cez ske_drazobne_vyhlasky)
+- [~] B6.2: `backend/services/scrapers/bsk_kraj_scraper.py` (SKIP)
+- [~] B6.3: `backend/services/scrapers/obce_uradne_tabule_scraper.py` (SKIP)
+- [~] B6.4: Pridat do `SCRAPER_REGISTRY` (SKIP)
+- [~] B6.5: Testy (SKIP)
+- [~] B6.6: Aktualizacia dokumentacie (SKIP)
 
 ---
 
@@ -240,20 +242,17 @@
 **Pozaduje:** GOOGLE_API_KEY v .env
 **Poznamka:** Pipeline funguje aj bez LLM. LLM prida inteligentne rozhodovanie.
 
-- [ ] C1: `backend/services/llm_agent_service.py`
-  - Gemini ako primarny LLM, Claude ako zaloha
-  - @tool obaly: analyze_parcel_tool, scrape_source_tool, get_status_tool
-  - LangChain AgentExecutor s max 50 iteraciami
-- [ ] C2: `tests/test_llm_agent_service.py` (~15 testov - mock LLM)
-- [ ] C3: Aktualizacia dokumentacie
+- [~] C1: `backend/services/llm_agent_service.py` (SKIP - pipeline funguje bez LLM)
+- [~] C2: `tests/test_llm_agent_service.py` (SKIP)
+- [~] C3: Aktualizacia dokumentacie (SKIP)
 
 ---
 
 ## FAZA D - Frontend rozsirenia (volitelne)
 
-- [ ] D1: Tlacidlo "Spustit realny sken" -> `POST /api/monitor/scan`
-- [ ] D2: Status monitora na stranke (posledny scan, dalsi scan)
-- [ ] D3: Real-time aktualizacia vysledkov (polling /api/monitor/status)
+- [~] D1: Tlacidlo "Spustit realny sken" (SKIP - pouzivatel spusta prieskum rucne cez /scrape)
+- [~] D2: Status monitora na stranke (SKIP - monitoring off, use_monitoring=false)
+- [~] D3: Real-time aktualizacia vysledkov (SKIP)
 - [x] D4: Filter kariet podla skore / lokality — HOTOVO (tabulka: zdroj+cena+vymera+min.skore)
 - [x] D5: Export vysledkov do CSV / JSON — HOTOVO (GET /api/scrape/results.csv + JSON Blob)
 

@@ -3,219 +3,96 @@ AKO SPUSTIT APLIKACIU
 
 === PRVE SPUSTENIE (iba raz) ===
 
-KROK 1: Uistite sa, ze mate nainstalovaný Python
+KROK 1: Uistite sa, ze mate nainstalovany Python
   - Stiahnite z https://www.python.org/downloads/
   - Pri instalacii zaskrtnite "Add Python to PATH"
   - Po instalacii restartujte pocitac
 
-KROK 2: Ziskajte API kluc pre Google Gemini (bezplatne)
-  - Chodte na: https://aistudio.google.com/app/apikey
-  - Kliknite "Create API key" (zadarmo, bez kreditnej karty)
-  - Skopirujte subor ".env.example" na ".env"
-  - Otvorte ".env" a vlozite kluc:
+KROK 2: API kluc Google Gemini (volitelne - LLM funkcie)
+  - Aplikacia funguje PLNE BEZ tohto kluca.
+  - Pre volitelne AI funkcie: https://aistudio.google.com/app/apikey
+  - Skopirujte ".env.example" na ".env" a vlozite kluc:
         GOOGLE_API_KEY=vas_kluc_tu
-  - Volitelne: zalozny kluc Anthropic Claude:
-        ANTHROPIC_API_KEY=vas_kluc_tu  (ak nemate, nechajte prazdne)
 
-KROK 3: Nainstalujte potrebne kniiznice
+KROK 3: Nainstalujte zavislosti
   - Dvakrat kliknite na "spustit.bat"
-  - Automaticky sa nainstaluju vsetky zavislosti
-    (Flask, LangChain, Gemini, GIS kniiznice, Playwright...)
-  - Prebehne aj: playwright install chromium
-    (stiahne Chromium prehliadac pre scraping -- ~130 MB, len raz)
+  - Automaticky sa nainstaluju: Flask, GIS kniiznice, BeautifulSoup, pypdf...
   - Prve spustenie moze trvat niekolko minut
 
 
 === SPUSTENIE APLIKACIE (kazdy raz) ===
 
   - Dvakrat kliknite na "spustit.bat"
-  - Pockajte niekolko sekund
   - Webovy prehliadac sa otvori automaticky na: http://localhost:5001
-  - Hotovo!
 
 
 === POUZIVANIE APLIKACIE ===
 
-  1. Nastavte kriteria vyhladavania:
-       - Maximalna cena (EUR)
-       - Maximalna vzdialenost od Bratislavy (km, max 70)
-       - Min. / max. vymera pozemku (m2)
-       - Minimalna sirka parcely (m, min 15)
+  1. Nastavte kriteria vyhladavania (cena, vzdialenost, vymera)
 
-  2. Kliknite "Spustit sken"
-       - Agent zacne prehladavat realtne portaly
-       - Priebeh je zobrazeny v paneli zaznamu
+  2. Kliknite "Spustit prieskum"
+       - 7 zdrojov paralelne (~15 min)
+       - Tabulka pozemkov s rychlym skorom (0-100)
 
-  3. Agent automaticky overi kazdy pozemok.
-     Manualna analyza (tlacidlo Analyzovat):
-       - Zadaj lokalitu, cenu, vymeru -> klikni Analyzovat
-       - Zobrazi sa karta + marker na mape
-     Demo ukazka (tlacidlo Demo):
-       - Nacita 5 vzorovych pozemkov (Senec, Pezinok, Malacky...)
-       - Zobrazi farebné karty + markery na mape
-     Klik na kartu -> plny investicny report (text)
+  3. Filtrujte: Zdroj, Cena max, Vymera min, Min. skore
 
-  3b. Agent automaticky overi kazdy pozemok
-     (cez scraper_service + pipeline_service -- automaticky):
-       - geometria (sirka, tvar, vymera)      -- ZBGIS
-       - zaplavova zona Q100                  -- SHMU
-       - bonita pody BPEJ                     -- geodata.gov.sk
-       - cesta, elektrina, voda              -- OpenStreetMap
-       - vzdialenost a cas jazdy od Bratislavy
-       - chranene uzemia (VVN, Natura, CHKO)
-       - cenova analyza (EUR/m2 vs. priemer)
+  4. Zasfajknite par pozemkov (max 30) -> "Skorovat vybrane"
+       - Dukladne overenie: GPS, zaplavy, poda, siete (~20s/pozemok)
+       - Vysledky na mape
 
-  4. Vysledky sa zobrazia na mape + ako ohodnotene karty (0-100):
-       - ZELENA  karta = skore >= 85  (STRONG BUY)
-       - ZLTA    karta = skore >= 70  (INVESTIGATE)
-       - ORANZOVA karta = skore >= 50 (CONSIDER)
-       - CERVENA karta = skore <  50  (SKIP)
+  5. Export: "CSV" -> Excel,  "JSON" -> JSON
 
-  5. Kliknite na kartu pre uplny investicny report:
-       - rozpad skore (8 vazenych sluzieb)
-       - red flags (blokanty a varovania)
-       - porovnanie ceny s limitmi
-
-  6. Pre top kandidatov (skore >= 70):
-       - Stiahnite KATASTER CHECKLIST
-       - Overte List vlastnictva rucne na:
-         https://kataster.skgeodesy.sk
+  6. Pre skore >= 70: overte LV na https://kataster.skgeodesy.sk
 
 
-=== PRISPOSOBENIE VYHLADAVANIA (volitelne) ===
+=== ZDROJE (7 zdrojov automaticky) ===
 
-  Chcete zmenit cenovy limit, okruh hladania, velkost pozemku
-  alebo ktore zdroje agent prehladava?
-
-  Vsetko sa nastavuje v jednom subore: config/criteria.yaml
-
-  Jednoduchy sprievodca co a kde zmenit:
-    -> NASTAVENIA_POUZIVATEL.txt
-
-  Po zmene staci restartovat aplikaciu. Ziadna kompilacia.
+  Nehnutelnosti.sk, TopReality.sk, Reality.sk
+  SPF (statne pozemky), SKE drazby, Notarske drazby
+  Obchodny vestnik (justice.gov.sk)
 
 
-=== DOLEZITE -- KROKY VYZADUJUCE VAS ===
+=== ZASTAVENIE ===
 
-  Niektore overenia sa NEDAJU automatizovat:
-
-  X List vlastnictva (sekcie B/C/D)
-       Blokovany CAPTCHA na katasterportal.sk
-       -> Agent vygeneruje vyplneny checklist pre vas
-          Overte na: https://kataster.skgeodesy.sk
-
-  X UPI / uzemne zaradenie (potvrdenie IBV zony)
-       Musi vydat obec
-       -> Agent pripravi ziadost
-
-  ! Kapacita trafostanice
-       Bliskost sa overi automaticky
-       -> Skutocnu kapacitu potvrdte u distributora (ZSDIS)
-
-  ! Archeologicka zona
-       -> Overte na KPU (Krajsky pamiatkový urad)
-
-
+  Sposob 1: Zavrite cierne CMD okno
+  Sposob 2: Dvakrat kliknite na "STOP.bat"
+  Sposob 3: Ctrl+C v CMD okne
 
 
 === REST API (pre pokrocilych) ===
 
-  Po spusteni su dostupne endpointy:
     GET  http://localhost:5001/api/health
     GET  http://localhost:5001/api/config/
-    GET  http://localhost:5001/api/config/validate
     POST http://localhost:5001/api/analyze
     POST http://localhost:5001/api/parcels/analyze-batch
-
-  Priklad - analyza pozemku cez curl:
-    curl -X POST http://localhost:5001/api/analyze \
-         -H "Content-Type: application/json" \
-         -d '{"title":"Pozemok Senec","price_eur":35000,
-              "area_sqm":800,"location_text":"Senec, Slovakia"}'
+    POST http://localhost:5001/api/scrape/start
+    GET  http://localhost:5001/api/scrape/progress
+    GET  http://localhost:5001/api/scrape/results
+    POST http://localhost:5001/api/scrape/score-selected
+    GET  http://localhost:5001/api/scrape/results.csv
 
 
 === NASTAVENIE NOTIFIKACII (volitelne) ===
 
-  Ak chcete dostavat upozornenia ked agent najde dobry pozemok:
-
-  1. Telegram bot (odporucane):
-       - Vytvorte bota cez @BotFather na Telegrame
-       - Ziskajte Bot Token a Chat ID
-       - Pridajte do suboru .env:
-           TELEGRAM_BOT_TOKEN=vas_token
-           TELEGRAM_CHAT_ID=vas_chat_id
-       - Zapnite v criteria.yaml:
-           features -> use_notifications: true
-           notifications -> channels -> telegram: true
-
-  2. Email (Gmail):
-       - Vytvorte App Password v Google Account
-       - Pridajte do .env:
-           EMAIL_FROM=vas@gmail.com
-           EMAIL_TO=prijemca@gmail.com
-           EMAIL_PASSWORD=app_password
-       - Zapnite v criteria.yaml:
-           features -> use_notifications: true
-           notifications -> channels -> email: true
-
-  Prah pre notifikaciu:
-    notifications -> min_score_to_notify: 75  (len pozemky nad 75/100)
-
-
-=== ZASTAVENIE APLIKACIE ===
-
-  Sposob 1 (najjednoduchsi):
-    - Zavrite cierne CMD okno krizikom vpravo hore
-    - Server sa automaticky zastavi
-
-  Sposob 2 - dvojklik:
-    - Dvakrat kliknite na "STOP.bat" (v priecinku projektu)
-    - Server sa zastavi aj keby cierne okno uz bolo zavrete
-    - Funguje aj ked neviete kde je cierne okno
-
-  Sposob 3 - Ctrl+C:
-    - V ciernom CMD okne stlacte Ctrl+C
-    - Server sa zastavi
-
-  Poznamka: Ak zabudnete zastavit server a restartujete pocitac,
-  server sa sam neobnoví (nie je to systemova sluzba).
-  Po restarte staci znova dvojkliknut na spustit.bat.
+  Telegram: TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID do .env
+  Email:    EMAIL_FROM + EMAIL_TO + EMAIL_PASSWORD do .env
+  Zapnut:   features -> use_notifications: true v criteria.yaml
+  Prah:     notifications -> min_score_to_notify: 75
 
 
 === RIESENIE PROBLEMOV ===
 
-  Problem: "spustit.bat" hlasi "Python nie je nainstalovaný"
-  Riesenie: Nainstalujte Python z python.org (zaskrtnite "Add to PATH")
-
-  Problem: Agent hlasi "GOOGLE_API_KEY nie je nastaveny"
-  Riesenie: Uistite sa, ze existuje subor .env s platnym GOOGLE_API_KEY=...
-
-  Problem: Scraping nenasel vysledky alebo je blokovany
-  Riesenie: Portaly maju anti-bot ochranu.
-            Skuste znova o 10-15 minut alebo aktualizujte selektory
-            v backend/services/realestate_scraper_service.py
-
-  Problem: Chyba GIS sluzby (ZBGIS / SHMU / BPEJ timeout)
-  Riesenie: Slovenske statne WMS/WFS endpointy mozu byt docasne nedostupne.
-            Skuste neskor. Zaloha (skip_result, neutralne skore 50)
-            sa pouzije automaticky -- analyza prebehne aj bez nej.
-
-  Problem: Port 5001 je obsadeny
-  Riesenie: Zmente PORT v .env (predvoleny: 5001)
-
-  Problem: "playwright install" zlyha
-  Riesenie: Spustite ako spravca:
-            cd backend
-            python -m playwright install chromium
+  Python nie je nainstalovany  -> python.org (zaskrtnite Add to PATH)
+  Scraping nenasel vysledky    -> portaly docasne nedostupne, skuste o 15min
+  GIS sluzba timeout           -> skuste neskor, analyza prebehne aj bez nej
+  Port 5001 obsadeny           -> zmente PORT v .env
+  Chcete AI (Gemini)           -> vytvorte .env s GOOGLE_API_KEY=...
 
 
 === SPUSTENIE TESTOV ===
 
-  Otvorte CMD v tomto priecinku a spustite:
-  python -m pytest tests/ --rootdir=. -v
-
-  Rychle offline testy (763 testov, ~1 sekunda):
-  python -m pytest tests/ -q
+  python -m pytest tests/ -q       (1051 testov, ~35 sekund)
+  python -m pytest tests/ -v       (detailny vystup)
 
 
 Autor: Robert Fodor | 2026

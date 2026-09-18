@@ -62,22 +62,18 @@ KDE HLADA
   Realitne portaly    Nehnutelnosti.sk, TopReality.sk, Reality.sk
   Statne pozemky      SPF -- Slovensky pozemkovy fond
   Notarske drazby     Casto pod trhovou cenou
-  Exekucne predaje    Mozu byt vyrazne podhodnotene
+  Exekucne predaje    SKE drazobne vyhlasky -- mozu byt podhodnotene
   Obchodny vestnik    Konkurzy a sudne drazby -- zlata bana
-  Obecne predaje      Samospravy predavajuce prebytocne pozemky
 
 
 ==============================================================
 STAV PROJEKTU
 ==============================================================
 
-  Backend sluzby:  17 z 17 naimplementovanych
-  Testy:           763 testov, 0 zlyhani
-  Pokrytie toku:   pipeline_service orchestruje cely tok
-
-  Zostatok:
-    llm_agent_service, realestate_scraper_service,
-    monitor_service
+  Backend sluzby:  27+ naimplementovanych (7 scraperov, 8 GIS, pipeline, scoring...)
+  Testy:           1051 testov, 0 zlyhani
+  Live overene:    4646 pozemkov / 931s (7 zdrojov paralelne)
+  Dvojfazovy scoring: rychle pre-scoring (0 HTTP) + GIS scoring vybranych
 
 
 ==============================================================

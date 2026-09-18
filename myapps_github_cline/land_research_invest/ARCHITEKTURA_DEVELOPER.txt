@@ -15,7 +15,7 @@ Pre vyvojarov a AI agentov.
   AI zaloha             | Anthropic Claude
   Frontend              | HTML5 + CSS3 + Vanilla JS
   Mapa                  | Leaflet.js + OpenStreetMap
-  Realtne data          | Playwright scraping
+  Realtne data          | requests + BeautifulSoup + pypdf (scraping)
   Kataster / geometria  | ZBGIS WFS (UGKK)
   Zaplavy Q100          | SHMU WMS
   Teren / vyskopis      | DMR 5.0 (UGKK) + SRTM (Copernicus)

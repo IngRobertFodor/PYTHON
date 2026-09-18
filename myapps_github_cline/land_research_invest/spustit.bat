@@ -32,8 +32,6 @@ if errorlevel 1 (
         pause
         exit /b 1
     )
-    echo [INFO] Stiahnutie Playwright Chromium...
-    python -m playwright install chromium
 )
 
 :: Kontrola API kluca
@@ -44,6 +42,9 @@ if "%GOOGLE_API_KEY%"=="" (
     echo Aplikacia stale bezi ale LLM funkcie budu nedostupne.
     echo.
 )
+
+:: Otvor prehliadac (server startujem ihned po tom)
+start "" http://localhost:5001
 
 :: Spustenie Flask servera
 echo [OK] Spustam server na http://localhost:5001 ...
