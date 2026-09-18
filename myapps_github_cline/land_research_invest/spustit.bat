@@ -23,10 +23,10 @@ if exist .env (
 )
 
 :: Instalacia zavislosti (iba ak chybaju)
-pip show flask >nul 2>&1
+python -m pip show flask >nul 2>&1
 if errorlevel 1 (
     echo [INFO] Instalujem zavislosti...
-    pip install -r backend/requirements.txt
+    python -m pip install -r backend/requirements.txt
     if errorlevel 1 (
         echo [CHYBA] Instalacia zlyhala.
         pause
