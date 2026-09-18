@@ -175,17 +175,28 @@ function buildCard(parcel, report) {
   return card;
 }
 
-// --- Modal ---
+function closeModal() {
+  const ov = document.getElementById("modal-overlay");
+  if (ov) {
+    ov.style.setProperty("display", "none", "important");
+  }
+}
+// Globalne dostupna (pre inline onclick aj konzolu)
+window.closeModal = closeModal;
+
 function openModal(parcel, report) {
   const text = report?.text_report || "(bez reportu)";
   document.getElementById("modal-title").textContent = parcel.title || "Detail";
   document.getElementById("modal-body").textContent  = text;
-  document.getElementById("modal-overlay").style.display = "flex";
+  const ov = document.getElementById("modal-overlay");
+  ov.style.removeProperty("display");        // zrus pripadny !important
+  ov.style.setProperty("display", "flex", "important");
 }
 
-function closeModal() {
-  document.getElementById("modal-overlay").style.display = "none";
-}
+// ESC zatvorí modal
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeModal();
+});
 
 // --- Helpers ---
 function getVal(id) { return (document.getElementById(id)?.value || "").trim(); }

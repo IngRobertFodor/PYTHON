@@ -205,11 +205,11 @@
 </div>
 
 <!-- MODAL - detail pozemku -->
-<div id="modal-overlay">
+<div id="modal-overlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-header">
       <h2 id="modal-title">Detail pozemku</h2>
-      <button id="modal-close" title="Zatvorit">&times;</button>
+      <button id="modal-close" onclick="closeModal()" title="Zatvorit">&times;</button>
     </div>
     <div class="modal-body">
       <pre id="modal-body"></pre>
