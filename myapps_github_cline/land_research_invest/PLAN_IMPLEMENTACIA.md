@@ -151,12 +151,12 @@
 > Nahradene scraperom `ske_drazobne_vyhlasky` (SK exekutorske drazby).
 > Live test 2026-09-17: ske = **112 pozemkov**. Tieto B4 polozky su trvalo SKIP.
 
-- [ ] B4.1: HTML vzorky -> `tests/fixtures/exekutorske_listing.html`, `drazby_net_listing.html`
-- [ ] B4.2: `backend/services/scrapers/exekutorske_drazby_scraper.py`
-- [ ] B4.3: `backend/services/scrapers/drazby_net_scraper.py`
-- [ ] B4.4: Pridat do `SCRAPER_REGISTRY` (2 zaznamy)
-- [ ] B4.5: Testy (~20 testov)
-- [ ] B4.6: Aktualizacia dokumentacie
+- [~] B4.1: HTML vzorky (SKIP - zrusene v C4, nahradene ske_drazobne_vyhlasky)
+- [~] B4.2: `backend/services/scrapers/exekutorske_drazby_scraper.py` (SKIP)
+- [~] B4.3: `backend/services/scrapers/drazby_net_scraper.py` (SKIP - CZ portal)
+- [~] B4.4: Pridat do `SCRAPER_REGISTRY` (SKIP)
+- [~] B4.5: Testy (SKIP)
+- [~] B4.6: Aktualizacia dokumentacie (SKIP)
 
 ### B5 - notarske_drazby + eks_statny_majetok
 
@@ -254,8 +254,8 @@
 - [ ] D1: Tlacidlo "Spustit realny sken" -> `POST /api/monitor/scan`
 - [ ] D2: Status monitora na stranke (posledny scan, dalsi scan)
 - [ ] D3: Real-time aktualizacia vysledkov (polling /api/monitor/status)
-- [ ] D4: Filter kariet podla skore / lokality
-- [ ] D5: Export vysledkov do CSV / JSON
+- [x] D4: Filter kariet podla skore / lokality — HOTOVO (tabulka: zdroj+cena+vymera+min.skore)
+- [x] D5: Export vysledkov do CSV / JSON — HOTOVO (GET /api/scrape/results.csv + JSON Blob)
 
 ---
 
