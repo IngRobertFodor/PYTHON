@@ -34,14 +34,6 @@ if errorlevel 1 (
     )
 )
 
-:: Kontrola API kluca
-if "%GOOGLE_API_KEY%"=="" (
-    echo.
-    echo [UPOZORNENIE] GOOGLE_API_KEY nie je nastaveny.
-    echo Skopirujte .env.example na .env a doplnte kluc.
-    echo Aplikacia stale bezi ale LLM funkcie budu nedostupne.
-    echo.
-)
 
 :: Otvor prehliadac (server startujem ihned po tom)
 start "" http://localhost:5001

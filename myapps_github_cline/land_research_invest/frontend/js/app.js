@@ -1,8 +1,9 @@
 // app.js - hlavna logika
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Listenery registrujeme IHNED - pred akymkolvek await
+  // (ak await hodi exception, listenery by sa nezaregistrovali)
   initMap();
-  await loadConfigDefaults();
   document.getElementById("btn-analyze").addEventListener("click", onAnalyzeClick);
   document.getElementById("btn-demo").addEventListener("click",    onDemoClick);
   document.getElementById("btn-research").addEventListener("click", onResearchClick);
@@ -16,6 +17,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("modal-overlay").addEventListener("click", e => {
     if (e.target.id === "modal-overlay") closeModal();
   });
+
+  // Az po registracii listenerov - moze trvat dlhsie / hodit exception
+  await loadConfigDefaults();
 
   // Auto-resume: ak scraping prave bezi (napr. po refreshi F5), obnov progress bar
   try {
