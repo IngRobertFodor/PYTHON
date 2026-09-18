@@ -208,6 +208,96 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   display: flex; flex-wrap: wrap; gap: 4px;
   margin-top: 8px;
 }
+
+/* ----------------------------------------------------------------
+   VÝSLEDKOVÁ TABUĽKA + FILTER
+   ---------------------------------------------------------------- */
+
+#results-table-section { margin-top: 12px; }
+#results-table-section.hidden { display: none; }
+
+/* Filter toolbar */
+.filter-bar {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: 6px; padding: 8px 0 10px; border-bottom: 1px solid #dde4ec;
+  margin-bottom: 8px;
+}
+.filter-label { font-size: .76rem; color: #333; }
+.filter-select {
+  font-size: .76rem; padding: 3px 6px;
+  border: 1px solid #bbb; border-radius: 4px;
+}
+.filter-input {
+  width: 80px; font-size: .76rem; padding: 3px 6px;
+  border: 1px solid #bbb; border-radius: 4px;
+}
+.filter-count { font-size: .73rem; color: #666; margin-left: 4px; }
+
+.btn-sm {
+  font-size: .74rem; padding: 4px 10px;
+  background: #1a3a5c; color: #fff;
+  border: none; border-radius: 4px; cursor: pointer;
+}
+.btn-sm:hover { background: #24548a; }
+.btn-outline {
+  background: #fff; color: #1a3a5c;
+  border: 1px solid #1a3a5c;
+}
+.btn-outline:hover { background: #edf2f8; }
+
+/* Tabuľka */
+.table-wrapper {
+  overflow-x: auto; max-height: 420px; overflow-y: auto;
+  border: 1px solid #dde4ec; border-radius: 6px;
+}
+.results-table {
+  width: 100%; border-collapse: collapse;
+  font-size: .76rem;
+}
+.results-table thead th {
+  position: sticky; top: 0; z-index: 1;
+  background: #1a3a5c; color: #fff;
+  padding: 7px 8px; text-align: left;
+  font-weight: 600; white-space: nowrap;
+}
+.results-table tbody tr {
+  border-bottom: 1px solid #eef1f5; cursor: pointer;
+  transition: background .12s;
+}
+.results-table tbody tr:hover { background: #f0f6ff; }
+.results-table td { padding: 5px 8px; vertical-align: middle; }
+.tbl-num  { color: #999; font-size: .70rem; }
+.tbl-src  { color: #555; font-size: .70rem; white-space: nowrap; }
+.tbl-loc  { max-width: 120px; overflow: hidden;
+            text-overflow: ellipsis; white-space: nowrap; }
+.tbl-price { font-weight: 600; white-space: nowrap; }
+.tbl-link { color: #1a3a5c; font-size: .72rem; white-space: nowrap; }
+.tbl-link:hover { text-decoration: underline; }
+
+/* Prelim badge */
+.prelim-badge {
+  display: inline-block; padding: 2px 7px;
+  border-radius: 10px; color: #fff;
+  font-weight: 700; font-size: .74rem;
+  white-space: nowrap;
+}
+
+/* Score bar */
+.score-bar {
+  margin-top: 10px; display: flex;
+  flex-direction: column; gap: 8px;
+}
+.btn-score {
+  background: #2e7d32; color: #fff;
+  border: none; border-radius: 6px;
+  padding: 8px 14px; font-size: .88rem;
+  font-weight: 700; cursor: pointer;
+  transition: background .2s;
+}
+.btn-score:hover:not(:disabled) { background: #388e3c; }
+.btn-score:disabled { background: #9dbfa0; cursor: not-allowed; }
+#score-progress-wrap.hidden { display: none; }
+
 .src-chip {
   font-size: .70rem; padding: 2px 7px;
   border-radius: 10px; white-space: nowrap;

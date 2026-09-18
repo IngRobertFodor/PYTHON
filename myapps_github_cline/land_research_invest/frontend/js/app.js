@@ -6,6 +6,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("btn-analyze").addEventListener("click", onAnalyzeClick);
   document.getElementById("btn-demo").addEventListener("click",    onDemoClick);
   document.getElementById("btn-research").addEventListener("click", onResearchClick);
+  document.getElementById("btn-score-selected").addEventListener("click", onScoreSelectedClick);
+  document.getElementById("btn-filter-apply").addEventListener("click", applyFilter);
+  document.getElementById("btn-filter-reset").addEventListener("click", resetFilter);
+  document.getElementById("chk-all").addEventListener("change", onChkAllChange);
   document.getElementById("modal-close").addEventListener("click",  closeModal);
   document.getElementById("modal-overlay").addEventListener("click", e => {
     if (e.target.id === "modal-overlay") closeModal();
@@ -255,6 +259,183 @@ function updateProgressUI(p) {
   if (bar)   bar.style.width = pct + "%";
   if (pctEl) pctEl.textContent = pct + " %";
 
+// ----------------------------------------------------------------
+// Výsledková tabuľka + filter
+// ----------------------------------------------------------------
+
+let _allResults = [];
+let _filteredResults = [];
+const _DRAZOBNE_UI = ["notarske_drazby", "ske_drazobne_vyhlasky", "obchodny_vestnik"];
+
+function showTableSection(visible) {
+  const el = document.getElementById("results-table-section");
+  if (el) el.classList.toggle("hidden", !visible);
+}
+
+function prelim_color(score) {
+  if (score >= 85) return "#2e7d32";
+  if (score >= 70) return "#1565c0";
+  if (score >= 50) return "#e65100";
+  return "#757575";
+}
+
+function renderResultsTable(items) {
+  showTableSection(items && items.length > 0);
+  const tbody = document.getElementById("results-tbody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  _filteredResults = items;
+  updateScoreButton();
+  const fc = document.getElementById("filter-count");
+  if (fc) fc.textContent = (items.length) + " pozemkov";
+
+  items.forEach((p, idx) => {
+    const score = (p.preliminary_score || 0).toFixed(1);
+    const col   = prelim_color(p.preliminary_score || 0);
+    const ppsm  = p.price_per_sqm > 0
+      ? p.price_per_sqm.toFixed(0)
+      : (p.area_sqm > 0 ? (p.price_eur / p.area_sqm).toFixed(0) : "—");
+    const isRealUrl = p.url && p.url.startsWith("http") && !p.url.includes("/demo/");
+    const label = _DRAZOBNE_UI.includes(p.source_portal) ? "Dražba PDF →" : "Inzerát →";
+    const link  = isRealUrl
+      ? `<a href="${p.url}" target="_blank" class="tbl-link">${label}</a>`
+      : "—";
+    const tr = document.createElement("tr");
+    tr.dataset.url = p.url || "";
+    tr.innerHTML = `
+      <td><input type="checkbox" class="row-chk" data-url="${p.url || ""}"></td>
+      <td class="tbl-num">${idx + 1}</td>
+      <td><span class="prelim-badge" style="background:${col}">${score}</span></td>
+      <td class="tbl-src">${(p.source_portal||"").replace(/_/g," ")}</td>
+      <td class="tbl-loc">${p.location_text||"—"}</td>
+      <td class="tbl-price">${p.price_eur>0?p.price_eur.toLocaleString("sk-SK"):"—"}</td>
+      <td>${p.area_sqm>0?p.area_sqm.toLocaleString("sk-SK"):"—"}</td>
+      <td>${ppsm}</td>
+      <td>${link}</td>`;
+    tr.addEventListener("click", e => {
+      if (e.target.tagName==="INPUT"||e.target.tagName==="A") return;
+      openModal(p, p.results?.report_service?.data||{});
+    });
+    tr.querySelector(".row-chk").addEventListener("change", () => updateScoreButton());
+    tbody.appendChild(tr);
+  });
+}
+
+function applyFilter() {
+  const zdroj = document.getElementById("filter-zdroj").value;
+  const cena  = parseFloat(document.getElementById("filter-cena").value) || Infinity;
+  const vym   = parseFloat(document.getElementById("filter-vymera").value) || 0;
+  renderResultsTable(_allResults.filter(p =>
+    (!zdroj || p.source_portal === zdroj) &&
+    (p.price_eur === 0 || p.price_eur <= cena) &&
+    (p.area_sqm  === 0 || p.area_sqm  >= vym)
+  ));
+}
+
+function resetFilter() {
+  document.getElementById("filter-zdroj").value  = "";
+  document.getElementById("filter-cena").value   = "";
+  document.getElementById("filter-vymera").value = "";
+  renderResultsTable(_allResults);
+}
+
+function onChkAllChange(e) {
+  document.querySelectorAll(".row-chk").forEach(c => { c.checked = e.target.checked; });
+  updateScoreButton();
+}
+
+function getSelectedUrls() {
+
+// ----------------------------------------------------------------
+// Plný scoring vybraných parciel
+// ----------------------------------------------------------------
+
+let _scoreTimer = null;
+
+async function onScoreSelectedClick() {
+  const btn  = document.getElementById("btn-score-selected");
+  const urls = getSelectedUrls();
+  if (!urls.length) return;
+  try {
+    await apiScoreSelected(urls);
+  } catch (e) {
+    showStatus("Chyba scoringu: " + e.message, "error");
+    return;
+  }
+  btn.disabled = true;
+  showScoreProgress(true);
+  updateScoreProgressUI({ done: 0, total: urls.length, percent: 0, running: true });
+  startScorePolling(urls);
+}
+
+function startScorePolling(urls) {
+  if (_scoreTimer) clearInterval(_scoreTimer);
+  _scoreTimer = setInterval(async () => {
+    try {
+      const p = await apiScoreProgress();
+      updateScoreProgressUI(p);
+      if (p.finished) { stopScorePolling(); await onScoringFinished(urls); }
+    } catch (e) {}
+  }, 2000);
+}
+
+function stopScorePolling() {
+  if (_scoreTimer) { clearInterval(_scoreTimer); _scoreTimer = null; }
+}
+
+function showScoreProgress(visible) {
+  const el = document.getElementById("score-progress-wrap");
+  if (el) el.classList.toggle("hidden", !visible);
+}
+
+function updateScoreProgressUI(p) {
+  const pct  = p.percent || 0;
+  const bar  = document.getElementById("score-progress-bar");
+  const text = document.getElementById("score-progress-text");
+  const pctE = document.getElementById("score-progress-pct");
+  if (bar)  bar.style.width  = pct + "%";
+  if (pctE) pctE.textContent = pct + " %";
+  if (text) text.textContent = p.finished
+    ? "Hotovo"
+    : (p.done||0) + " / " + (p.total||0) + " skórovaných";
+}
+
+async function onScoringFinished(scoredUrls) {
+  const btn = document.getElementById("btn-score-selected");
+  try {
+    const data  = await apiScrapeResults();
+    _allResults = data.results || [];
+    renderResultsTable(_allResults);
+    // Mapa len pre skórované parcely s GPS
+    const scored = _allResults.filter(p =>
+      scoredUrls.includes(p.url) && p.final_score > 0 && p.lat && p.lon);
+    if (scored.length > 0) {
+      clearMarkers();
+      scored.forEach(p => addParcelMarker(p, p.results?.report_service?.data||{}, openModal));
+      fitMapToMarkers();
+    }
+    showStatus("Scoring dokonceny: " + scoredUrls.length + " pozemkov.", "ok");
+    if (btn) btn.disabled = false;
+    showScoreProgress(false);
+  } catch (e) {
+    showStatus("Chyba po scoringu: " + e.message, "error");
+    if (btn) btn.disabled = false;
+  }
+}
+
+  return Array.from(document.querySelectorAll(".row-chk:checked"))
+    .map(c => c.dataset.url).filter(Boolean);
+}
+
+function updateScoreButton() {
+  const btn = document.getElementById("btn-score-selected");
+  const n   = getSelectedUrls().length;
+  if (!btn) return;
+  btn.disabled    = n === 0;
+  btn.textContent = `★ Skórovať vybrané (${n})`;
+}
+
+
   if (p.finished) {
     if (text) text.textContent = "Hotovo — " + (p.total_parcels || 0) + " pozemkov";
   } else if (p.running) {
@@ -277,11 +458,8 @@ async function onResearchFinished() {
   const btn = document.getElementById("btn-research");
   try {
     const data = await apiScrapeResults();
-    const items = (data.results || []).map(p => ({
-      parcel: p,
-      report: p.results?.report_service?.data || {},
-    }));
-    renderResults(items);
+    _allResults = data.results || [];
+    renderResultsTable(_allResults);
     showStatus("Prieskum dokonceny: " + data.count + " pozemkov.", "ok");
     if (btn) { btn.disabled = false; btn.textContent = "▶▶ Spustiť prieskum"; }
     showProgressSection(false);

@@ -11,7 +11,7 @@ from models.parcel import Parcel
 from services.scoring_service import (
     score_parcel, calculate_weighted_score,
     get_recommendation, needs_cadastral_checklist,
-    WEIGHT_TO_SOURCE,
+    WEIGHT_TO_SOURCE, preliminary_score,
 )
 
 
@@ -170,6 +170,125 @@ class TestNeedsCadastralChecklist:
 
     def test_69_does_not_need_checklist(self):
         assert needs_cadastral_checklist(69.9) is False
+
+
+# ----------------------------------------------------------------
+# TestPreliminaryScore
+# ----------------------------------------------------------------
+
+class TestPreliminaryScore:
+    """Testy lacneho pre-scoringu (0 HTTP). Pouziva criteria.yaml hodnoty."""
+
+    def _p(self, price=5000.0, area=600.0, source="nehnutelnosti_sk", ppsm=0.0):
+        p = Parcel(url="http://t.sk/1", price_eur=price, area_sqm=area,
+                   source_portal=source, price_per_sqm=ppsm)
+        return p
+
+    # --- Zakladne ---
+    def test_returns_parcel(self):
+        assert isinstance(preliminary_score(self._p()), Parcel)
+
+    def test_modifies_inplace(self):
+        p = self._p()
+        assert preliminary_score(p) is p
+
+    def test_score_in_range(self):
+        s = preliminary_score(self._p()).preliminary_score
+        assert 0.0 <= s <= 100.0
+
+    def test_recommendation_set(self):
+        rec = preliminary_score(self._p()).prelim_recommendation
+        assert rec in ("STRONG BUY", "INVESTIGATE", "CONSIDER", "SKIP")
+
+    def test_idempotent(self):
+        p = self._p()
+        s1 = preliminary_score(p).preliminary_score
+        s2 = preliminary_score(p).preliminary_score
+        assert s1 == s2
+
+    # --- price_score ---
+    def test_price_in_range_gives_high_score(self):
+        # cena 5000 EUR je v defaultnom rozsahu (0-10000) -> price_score=100
+        p = self._p(price=5000.0, area=600.0)
+        s = preliminary_score(p).preliminary_score
+        assert s > 70.0
+
+    def test_price_zero_neutral(self):
+        # neznama cena -> price_score=50 (neutral), ostatne zlozky prispivaju
+        p1 = self._p(price=0.0)
+        p2 = self._p(price=5000.0)
+        s1 = preliminary_score(p1).preliminary_score
+        s2 = preliminary_score(p2).preliminary_score
+        # p1 musi mat nizsi skore nez p1 s peknou cenou
+        assert s1 < s2
+
+    def test_price_way_over_max_gives_low_score(self):
+        # 100x nad max = velmi nizky price_score
+        p = self._p(price=1_000_000.0, area=600.0)
+        s = preliminary_score(p).preliminary_score
+        assert s < 70.0
+
+    # --- area_score ---
+    def test_area_in_range_gives_high_score(self):
+        p = self._p(price=5000.0, area=700.0)
+        s = preliminary_score(p).preliminary_score
+        assert s > 70.0
+
+    def test_area_zero_neutral(self):
+        p0 = self._p(price=5000.0, area=0.0)
+        pk = self._p(price=5000.0, area=700.0)
+        assert preliminary_score(p0).preliminary_score < preliminary_score(pk).preliminary_score
+
+    # --- source_bonus ---
+    def test_drazobny_zdroj_ma_bonus(self):
+        p_drazba  = self._p(source="ske_drazobne_vyhlasky")
+        p_portal  = self._p(source="nehnutelnosti_sk")
+        sd = preliminary_score(p_drazba).preliminary_score
+        sp = preliminary_score(p_portal).preliminary_score
+        assert sd > sp
+
+    def test_notarske_drazby_ma_bonus(self):
+        p = self._p(source="notarske_drazby")
+        s = preliminary_score(p).preliminary_score
+        assert s > 50.0
+
+    def test_obchodny_vestnik_ma_bonus(self):
+        p = self._p(source="obchodny_vestnik")
+        s = preliminary_score(p).preliminary_score
+        assert s > 50.0
+
+    # --- data_quality ---
+    def test_both_zero_penalizes(self):
+        p_empty  = self._p(price=0.0, area=0.0)
+        p_filled = self._p(price=5000.0, area=700.0)
+        se = preliminary_score(p_empty).preliminary_score
+        sf = preliminary_score(p_filled).preliminary_score
+        assert se < sf
+
+    # --- price_per_sqm autopocet ---
+    def test_ppsm_computed_when_missing(self):
+        p = self._p(price=60000.0, area=600.0, ppsm=0.0)
+        preliminary_score(p)
+        assert p.price_per_sqm == pytest.approx(100.0)
+
+    def test_ppsm_not_overwritten_when_set(self):
+        p = self._p(price=60000.0, area=600.0, ppsm=50.0)
+        preliminary_score(p)
+        assert p.price_per_sqm == 50.0  # neprepise existujucu hodnotu
+
+    # --- prelim_recommendation prahy ---
+    def test_perfect_parcel_high_recommendation(self):
+        # cena a vymera v rozsahu + drazobny zdroj -> vysoke skore
+        p = self._p(price=5000.0, area=700.0, source="ske_drazobne_vyhlasky")
+        preliminary_score(p)
+        assert p.prelim_recommendation in ("STRONG BUY", "INVESTIGATE")
+
+    def test_bad_parcel_skip(self):
+        # milionova cena + nulova vymera -> malo bodov
+        p = self._p(price=5_000_000.0, area=0.0)
+        preliminary_score(p)
+        assert p.prelim_recommendation in ("SKIP", "CONSIDER")
+
 
     def test_0_does_not_need_checklist(self):
         assert needs_cadastral_checklist(0.0) is False

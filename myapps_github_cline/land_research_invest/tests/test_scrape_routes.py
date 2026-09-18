@@ -107,20 +107,118 @@ class TestScrapeResultsEndpoint:
         assert data["count"] == 0 and data["results"] == []
 
     def test_results_returns_stored(self, client):
+        _set_last_results([{"title": "Test", "preliminary_score": 80}])
+        data = client.get("/api/scrape/results").get_json()
+        assert data["count"] == 1 and data["results"][0]["title"] == "Test"
+
+    def test_results_sorted_desc(self, client):
+        """_set_last_results ulozi v danom poradi; _run() zoradi podla preliminary_score."""
+        _set_last_results([
+            {"title": "B", "final_score": 90, "preliminary_score": 90},
+            {"title": "C", "final_score": 75, "preliminary_score": 75},
+            {"title": "A", "final_score": 60, "preliminary_score": 60},
+        ])
+        data = client.get("/api/scrape/results").get_json()
+        scores = [r["preliminary_score"] for r in data["results"]]
+        assert scores == sorted(scores, reverse=True)
+
+    def test_results_has_count(self, client):
+        _set_last_results([{"x": 1}, {"x": 2}])
+        assert client.get("/api/scrape/results").get_json()["count"] == 2
+
+    def test_set_get_last_results_roundtrip(self, client):
+        items = [{"title": "X", "preliminary_score": 55}]
+        _set_last_results(items)
+        assert _get_last_results() == items
+
+
+# ----------------------------------------------------------------
+# TestScoreSelectedEndpoint
+# ----------------------------------------------------------------
+
+from routes.scrape_routes import _get_score_progress
+
+class TestScoreSelectedEndpoint:
+    def setup_method(self):
+        _set_last_results([])
+
+    def test_score_selected_empty_urls_400(self, client):
+        resp = client.post("/api/scrape/score-selected",
+                           json={}, content_type="application/json")
+        assert resp.status_code == 400
+
+    def test_score_selected_urls_not_found_404(self, client):
+        _set_last_results([{"url": "http://a.sk/1", "preliminary_score": 80}])
+        resp = client.post("/api/scrape/score-selected",
+                           json={"urls": ["http://nemas.sk/99"]},
+                           content_type="application/json")
+        assert resp.status_code == 404
+
+    def test_score_selected_202_when_found(self, client):
+        _set_last_results([{"url": "http://a.sk/1", "preliminary_score": 80,
+                            "price_eur": 5000, "area_sqm": 600,
+                            "source_portal": "nehnutelnosti_sk"}])
+        with patch("routes.scrape_routes.analyze_parcel"):
+            resp = client.post("/api/scrape/score-selected",
+                               json={"urls": ["http://a.sk/1"]},
+                               content_type="application/json")
+        assert resp.status_code == 202
+
+    def test_score_selected_returns_count(self, client):
+        _set_last_results([{"url": "http://a.sk/1", "preliminary_score": 80,
+                            "price_eur": 5000, "area_sqm": 600}])
+        with patch("routes.scrape_routes.analyze_parcel"):
+            data = client.post("/api/scrape/score-selected",
+                               json={"urls": ["http://a.sk/1"]},
+                               content_type="application/json").get_json()
+        assert "count" in data or "error" in data
+
+    def test_score_selected_409_if_running(self, client):
+        from routes.scrape_routes import _score_lock
+        acquired = _score_lock.acquire(blocking=False)
+        try:
+            resp = client.post("/api/scrape/score-selected",
+                               json={"urls": ["http://x.sk/1"]},
+                               content_type="application/json")
+            assert resp.status_code == 409
+        finally:
+            if acquired:
+                _score_lock.release()
+
+
+class TestScoreProgressEndpoint:
+    def test_score_progress_200(self, client):
+        assert client.get("/api/scrape/score-progress").status_code == 200
+
+    def test_score_progress_has_keys(self, client):
+        data = client.get("/api/scrape/score-progress").get_json()
+        for key in ["running", "done", "total", "percent", "finished"]:
+            assert key in data
+
+    def test_score_progress_not_running_initially(self, client):
+        data = client.get("/api/scrape/score-progress").get_json()
+        assert data["running"] is False
+
+
+    def test_results_empty_list(self, client):
+        data = client.get("/api/scrape/results").get_json()
+        assert data["count"] == 0 and data["results"] == []
+
+    def test_results_returns_stored(self, client):
         _set_last_results([{"title": "Test", "final_score": 80}])
         data = client.get("/api/scrape/results").get_json()
         assert data["count"] == 1 and data["results"][0]["title"] == "Test"
 
     def test_results_sorted_desc(self, client):
-        """_set_last_results ulozi v danom poradi; _run() zoradi pred ulozenim."""
-        # Simulujeme co by _run() ulozil (uz zoradene)
+        """_set_last_results ulozi v danom poradi; _run() zoradi podla preliminary_score."""
+        # Simulujeme co by _run() ulozil (uz zoradene podla preliminary_score)
         _set_last_results([
-            {"title": "B", "final_score": 90},
-            {"title": "C", "final_score": 75},
-            {"title": "A", "final_score": 60},
+            {"title": "B", "final_score": 90, "preliminary_score": 90},
+            {"title": "C", "final_score": 75, "preliminary_score": 75},
+            {"title": "A", "final_score": 60, "preliminary_score": 60},
         ])
         data = client.get("/api/scrape/results").get_json()
-        scores = [r["final_score"] for r in data["results"]]
+        scores = [r["preliminary_score"] for r in data["results"]]
         assert scores == sorted(scores, reverse=True)
 
     def test_results_has_count(self, client):

@@ -79,6 +79,69 @@
       </div>
     </div>
 
+    <!-- TABULKA VYSLEDKOV PRIESKUMU -->
+    <div id="results-table-section" class="hidden">
+      <!-- Filter toolbar -->
+      <div class="filter-bar">
+        <span class="filter-label">Filter:</span>
+        <select id="filter-zdroj" class="filter-select">
+          <option value="">Všetky zdroje</option>
+          <option value="nehnutelnosti_sk">Nehnuteľnosti.sk</option>
+          <option value="topreality_sk">TopReality</option>
+          <option value="reality_sk">Reality.sk</option>
+          <option value="spf">SPF</option>
+          <option value="ske_drazobne_vyhlasky">SKE dražby</option>
+          <option value="notarske_drazby">Notárske dražby</option>
+          <option value="obchodny_vestnik">Obchodný vestník</option>
+        </select>
+        <label class="filter-label">Cena max (EUR):
+          <input id="filter-cena" type="number" class="filter-input" placeholder="10000">
+        </label>
+        <label class="filter-label">Výmera min (m²):
+          <input id="filter-vymera" type="number" class="filter-input" placeholder="350">
+        </label>
+        <button id="btn-filter-apply" class="btn btn-sm">Filtrovať</button>
+        <button id="btn-filter-reset" class="btn btn-sm btn-outline">Reset</button>
+        <span id="filter-count" class="filter-count"></span>
+      </div>
+
+      <!-- Tabuľka -->
+      <div class="table-wrapper">
+        <table id="results-table" class="results-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="chk-all" title="Vybrať všetky"></th>
+              <th>#</th>
+              <th>Skóre</th>
+              <th>Zdroj</th>
+              <th>Lokalita</th>
+              <th>Cena EUR</th>
+              <th>m²</th>
+              <th>EUR/m²</th>
+              <th>Odkaz</th>
+            </tr>
+          </thead>
+          <tbody id="results-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Skóruj vybrané -->
+      <div class="score-bar">
+        <button id="btn-score-selected" class="btn btn-score" disabled>
+          &#9733; Skórovať vybrané (0)
+        </button>
+        <div id="score-progress-wrap" class="hidden">
+          <div class="progress-label">
+            <span id="score-progress-text">Skórujem...</span>
+            <span id="score-progress-pct">0 %</span>
+          </div>
+          <div class="progress-track">
+            <div id="score-progress-bar" class="progress-fill" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- LIMITY (z configu) -->
     <div class="form-section">
       <h2>&#9881; Limity (z criteria.yaml)</h2>

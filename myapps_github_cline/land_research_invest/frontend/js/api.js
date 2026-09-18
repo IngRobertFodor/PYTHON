@@ -47,3 +47,20 @@ async function apiScrapeResults() {
   return r.json();
 }
 
+async function apiScoreSelected(urls) {
+  const r = await fetch(API_BASE + "/api/scrape/score-selected", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ urls }),
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || "Score-selected failed (" + r.status + ")");
+  return data;
+}
+
+async function apiScoreProgress() {
+  const r = await fetch(API_BASE + "/api/scrape/score-progress");
+  if (!r.ok) throw new Error("Score-progress fetch failed: " + r.status);
+  return r.json();
+}
+

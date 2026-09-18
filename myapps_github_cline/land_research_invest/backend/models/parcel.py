@@ -46,6 +46,10 @@ class Parcel:
     final_score: float = 0.0
     recommendation: str = ""        # STRONG BUY / INVESTIGATE / CONSIDER / SKIP
 
+    # --- Lacny pre-scoring (bez HTTP, instantny po scrape_all) ---
+    preliminary_score: float = 0.0
+    prelim_recommendation: str = "" # STRONG BUY / INVESTIGATE / CONSIDER / SKIP
+
     def add_result(self, result: ServiceResult) -> None:
         """Prida vysledok sluzby do results dict."""
         self.results[result.source] = result
@@ -79,5 +83,7 @@ class Parcel:
             "price_per_sqm": self.price_per_sqm,
             "final_score": self.final_score,
             "recommendation": self.recommendation,
+            "preliminary_score": self.preliminary_score,
+            "prelim_recommendation": self.prelim_recommendation,
             "results": {k: v.to_dict() for k, v in self.results.items()},
         }
