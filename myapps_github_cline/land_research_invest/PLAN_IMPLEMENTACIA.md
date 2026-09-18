@@ -63,6 +63,9 @@
 | I5: frontend tabulka (filter zdroj+cena+vymera, checkboxy, prelim badge) | HOTOVO |
 | I6: btn-score-selected + score polling + mapa len pre scorovane | HOTOVO |
 | I7: api.js +apiScoreSelected +apiScoreProgress | HOTOVO |
+| I8: E2E test (in-process, 3 realne parcely) — OVERENE NAZIVO | OVERENE |
+| I8: Faza1 prelim OK (Senec=95 SB, Pezinok=98 SB, Malacky=95 SB) | OVERENE |
+| I8: Faza2 geocode_ok=3/3, 10 GIS sluzieb, final_score>0, elapsed=64s | OVERENE |
 | Testy | **1049, 0 zlyh** |
 
 ---
