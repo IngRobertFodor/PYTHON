@@ -51,7 +51,7 @@ async function loadConfigDefaults() {
     const km  = loc.max_distance_km ?? 70;
     const sub = document.getElementById("app-subtitle");
     if (sub) sub.textContent =
-      "AI agent pre vyhladavanie stavebnych pozemkov do " + km + " km od Bratislavy";
+      "AI agent pre vyhľadávanie stavebných pozemkov do " + km + " km od Bratislavy";
     // DIAG: over ze polia su nastavene (viditelne v subtitle kym nezavrieme)
     const elP = document.getElementById("f-price-max");
     const elD = document.getElementById("f-dist-max");
@@ -232,7 +232,7 @@ function showStatus(msg, type) {
 }
 
 // ----------------------------------------------------------------
-// Spustit prieskum — scrape_all + analyze + progress bar
+// Spustiť prieskum — scrape_all + analyze + progress bar
 // ----------------------------------------------------------------
 
 let _pollTimer = null;
@@ -387,21 +387,32 @@ function onChkAllChange(e) {
 }
 
 function getSelectedUrls() {
+  return Array.from(document.querySelectorAll('.row-chk:checked'))
+    .map(c => c.dataset.url).filter(Boolean);
+}
+
+function updateScoreButton() {
+  const btn = document.getElementById('btn-score-selected');
+  const n   = getSelectedUrls().length;
+  if (!btn) return;
+  btn.disabled    = n === 0;
+  btn.textContent = '★ Skórovať vybrané (' + n + ')';
+}
 
 // ----------------------------------------------------------------
-// Plný scoring vybraných parciel
+// Plýn scoring vybraných parciel
 // ----------------------------------------------------------------
 
 let _scoreTimer = null;
 
 async function onScoreSelectedClick() {
-  const btn  = document.getElementById("btn-score-selected");
+  const btn  = document.getElementById('btn-score-selected');
   const urls = getSelectedUrls();
   if (!urls.length) return;
   try {
     await apiScoreSelected(urls);
   } catch (e) {
-    showStatus("Chyba scoringu: " + e.message, "error");
+    showStatus('Chyba skórovania: ' + e.message, 'error');
     return;
   }
   btn.disabled = true;
@@ -414,9 +425,9 @@ function startScorePolling(urls) {
   if (_scoreTimer) clearInterval(_scoreTimer);
   _scoreTimer = setInterval(async () => {
     try {
-      const p = await apiScoreProgress();
-      updateScoreProgressUI(p);
-      if (p.finished) { stopScorePolling(); await onScoringFinished(urls); }
+      const prog = await apiScoreProgress();
+      updateScoreProgressUI(prog);
+      if (prog.finished) { stopScorePolling(); await onScoringFinished(urls); }
     } catch (e) {}
   }, 2000);
 }
@@ -426,24 +437,24 @@ function stopScorePolling() {
 }
 
 function showScoreProgress(visible) {
-  const el = document.getElementById("score-progress-wrap");
-  if (el) el.classList.toggle("hidden", !visible);
+  const el = document.getElementById('score-progress-wrap');
+  if (el) el.classList.toggle('hidden', !visible);
 }
 
 function updateScoreProgressUI(p) {
   const pct  = p.percent || 0;
-  const bar  = document.getElementById("score-progress-bar");
-  const text = document.getElementById("score-progress-text");
-  const pctE = document.getElementById("score-progress-pct");
-  if (bar)  bar.style.width  = pct + "%";
-  if (pctE) pctE.textContent = pct + " %";
-  if (text) text.textContent = p.finished
-    ? "Hotovo"
-    : (p.done||0) + " / " + (p.total||0) + " skórovaných";
+  const bar  = document.getElementById('score-progress-bar');
+  const txt  = document.getElementById('score-progress-text');
+  const pctE = document.getElementById('score-progress-pct');
+  if (bar)  bar.style.width  = pct + '%';
+  if (pctE) pctE.textContent = pct + ' %';
+  if (txt)  txt.textContent  = p.finished
+    ? 'Hotovo'
+    : (p.done||0) + ' / ' + (p.total||0) + ' skórovaných';
 }
 
 async function onScoringFinished(scoredUrls) {
-  const btn = document.getElementById("btn-score-selected");
+  const btn = document.getElementById('btn-score-selected');
   try {
     const data  = await apiScrapeResults();
     _allResults = data.results || [];
@@ -453,85 +464,48 @@ async function onScoringFinished(scoredUrls) {
       scoredUrls.includes(p.url) && p.final_score > 0 && p.lat && p.lon);
     if (scored.length > 0) {
       clearMarkers();
-      scored.forEach(p => addParcelMarker(p, p.results?.report_service?.data||{}, openModal));
+      scored.forEach(q => addParcelMarker(q, q.results?.report_service?.data||{}, openModal));
       fitMapToMarkers();
     }
+    showStatus('Skórovanie dokončené: ' + scoredUrls.length + ' pozemkov.', 'ok');
+    if (btn) { btn.disabled = false; }
+    showScoreProgress(false);
+  } catch (e) {
+    showStatus('Chyba po skórovaní: ' + e.message, 'error');
+    if (btn) btn.disabled = false;
+  }
+}
 
 // ----------------------------------------------------------------
 // Export výsledkov (D5)
 // ----------------------------------------------------------------
 
 function onExportCsv() {
-  // CSV = vsetky vysledky zo servera (nie len filtrovane) -> priamy download
   if (!_allResults || _allResults.length === 0) {
-    showStatus("Žiadne výsledky na export — najskôr spustite prieskum.", "error");
+    showStatus('Žiadne výsledky na export — najskôr spustite prieskum.', 'error');
     return;
   }
-  window.location = API_BASE + "/api/scrape/results.csv";
+  window.location = API_BASE + '/api/scrape/results.csv';
 }
 
 function onExportJson() {
-  // JSON = aktualne filtrovane vysledky (Blob download, bez servera)
   const data = _filteredResults && _filteredResults.length > 0
     ? _filteredResults
     : _allResults;
   if (!data || data.length === 0) {
-    showStatus("Žiadne výsledky na export — najskôr spustite prieskum.", "error");
+    showStatus('Žiadne výsledky na export — najskôr spustite prieskum.', 'error');
     return;
   }
-  const blob = new Blob(
-    [JSON.stringify(data, null, 2)],
-    { type: "application/json;charset=utf-8" }
-  );
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' });
   const url = URL.createObjectURL(blob);
-  const a   = document.createElement("a");
+  const a   = document.createElement('a');
   a.href     = url;
-  a.download = "pozemky.json";
+  a.download = 'pozemky.json';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showStatus("Exportovaných " + data.length + " záznamov (JSON).", "ok");
-}
-
-    showStatus("Scoring dokonceny: " + scoredUrls.length + " pozemkov.", "ok");
-    if (btn) btn.disabled = false;
-    showScoreProgress(false);
-  } catch (e) {
-    showStatus("Chyba po scoringu: " + e.message, "error");
-    if (btn) btn.disabled = false;
-  }
-}
-
-  return Array.from(document.querySelectorAll(".row-chk:checked"))
-    .map(c => c.dataset.url).filter(Boolean);
-}
-
-function updateScoreButton() {
-  const btn = document.getElementById("btn-score-selected");
-  const n   = getSelectedUrls().length;
-  if (!btn) return;
-  btn.disabled    = n === 0;
-  btn.textContent = `★ Skórovať vybrané (${n})`;
-}
-
-
-  if (p.finished) {
-    if (text) text.textContent = "Hotovo — " + (p.total_parcels || 0) + " pozemkov";
-  } else if (p.running) {
-    if (text) text.textContent = done + " / " + total + " zdrojov";
-  } else {
-    if (text) text.textContent = "Pripravujem...";
-  }
-
-  // Per-source tabuľka
-  if (srcs && p.per_source) {
-    srcs.innerHTML = Object.entries(p.per_source).map(([src, cnt]) => {
-      const val = cnt === null ? "⏳" : cnt;
-      const cls = cnt === null ? "src-running" : (cnt > 0 ? "src-done" : "src-zero");
-      return `<span class="src-chip ${cls}">${src.replace(/_/g," ")}: ${val}</span>`;
-    }).join("");
-  }
+  showStatus('Exportovaných ' + data.length + ' záznamov (JSON).', 'ok');
 }
 
 async function onResearchFinished() {
@@ -540,11 +514,11 @@ async function onResearchFinished() {
     const data = await apiScrapeResults();
     _allResults = data.results || [];
     renderResultsTable(_allResults);
-    showStatus("Prieskum dokonceny: " + data.count + " pozemkov.", "ok");
+    showStatus("Prieskum dokončený: " + data.count + " pozemkov.", "ok");
     if (btn) { btn.disabled = false; btn.textContent = "▶▶ Spustiť prieskum"; }
     showProgressSection(false);
   } catch (e) {
-    showStatus("Chyba nacitania vysledkov: " + e.message, "error");
+    showStatus("Chyba načítania výsledkov: " + e.message, "error");
     if (btn) { btn.disabled = false; btn.textContent = "▶▶ Spustiť prieskum"; }
   }
 }
