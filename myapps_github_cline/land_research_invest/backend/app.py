@@ -9,7 +9,7 @@ Spustenie:
 """
 
 import os
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, request
 from flask_cors import CORS
 
 
@@ -59,6 +59,16 @@ def create_app(test_config=None):
     if "/" not in [r.rule for r in app.url_map.iter_rules()]:
         app.add_url_rule("/", endpoint="frontend_index",
                           view_func=_serve_frontend)
+
+    # No-cache pre staticke subory (JS/CSS/HTML) - zakazuje starovanie v prehliadaci
+    # Dolezite pri vyvoji: prehliadac vzdy nacita najnovsiu verziu
+    @app.after_request
+    def _no_cache(resp):
+        if request.path.startswith("/static/") or request.path == "/":
+            resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            resp.headers["Pragma"]        = "no-cache"
+            resp.headers["Expires"]       = "0"
+        return resp
 
     return app
 

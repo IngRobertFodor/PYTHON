@@ -52,6 +52,14 @@ async function loadConfigDefaults() {
     const sub = document.getElementById("app-subtitle");
     if (sub) sub.textContent =
       "AI agent pre vyhladavanie stavebnych pozemkov do " + km + " km od Bratislavy";
+    // DIAG: over ze polia su nastavene (viditelne v subtitle kym nezavrieme)
+    const elP = document.getElementById("f-price-max");
+    const elD = document.getElementById("f-dist-max");
+    console.log("DIAG loadConfigDefaults:",
+      "f-price-max =", elP ? elP.value : "NEEXISTUJE",
+      "f-dist-max =",  elD ? elD.value : "NEEXISTUJE",
+      "api.max_eur =", price.max_eur,
+      "api.km =", loc.max_distance_km);
   } catch (e) {
     // Diagnostika: zobraz chybu priamo v subtitle (viditelne bez konzoly)
     const sub = document.getElementById("app-subtitle");
@@ -211,11 +219,14 @@ document.addEventListener("keydown", e => {
 function getVal(id) { return (document.getElementById(id)?.value || "").trim(); }
 function setVal(id, v) { const el=document.getElementById(id); if(el) el.value=v; }
 function setLoading(on) {
-  document.getElementById("btn-analyze").disabled = on;
-  document.getElementById("btn-demo").disabled    = on;
+  const ba = document.getElementById("btn-analyze");
+  const bd = document.getElementById("btn-demo");
+  if (ba) ba.disabled = on;
+  if (bd) bd.disabled = on;
 }
 function showStatus(msg, type) {
   const el = document.getElementById("status");
+  if (!el) return;
   el.textContent  = msg;
   el.className    = "status " + (type || "");
 }
@@ -346,6 +357,8 @@ function renderResultsTable(items) {
     tbody.appendChild(tr);
   });
 }
+// Globalne dostupna
+window.renderResultsTable = renderResultsTable;
 
 function applyFilter() {
   const zdroj = document.getElementById("filter-zdroj").value;
