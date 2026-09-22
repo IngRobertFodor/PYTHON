@@ -52,14 +52,6 @@ async function loadConfigDefaults() {
     const sub = document.getElementById("app-subtitle");
     if (sub) sub.textContent =
       "AI agent pre vyhľadávanie stavebných pozemkov do " + km + " km od Bratislavy";
-    // DIAG: over ze polia su nastavene (viditelne v subtitle kym nezavrieme)
-    const elP = document.getElementById("f-price-max");
-    const elD = document.getElementById("f-dist-max");
-    console.log("DIAG loadConfigDefaults:",
-      "f-price-max =", elP ? elP.value : "NEEXISTUJE",
-      "f-dist-max =",  elD ? elD.value : "NEEXISTUJE",
-      "api.max_eur =", price.max_eur,
-      "api.km =", loc.max_distance_km);
   } catch (e) {
     // Diagnostika: zobraz chybu priamo v subtitle (viditelne bez konzoly)
     const sub = document.getElementById("app-subtitle");
