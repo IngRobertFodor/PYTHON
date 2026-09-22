@@ -9,7 +9,8 @@ Spustenie:
 """
 
 import os
-from flask import Flask, send_from_directory, request
+import pathlib
+from flask import Flask, send_from_directory, request, Response
 from flask_cors import CORS
 
 
@@ -53,7 +54,16 @@ def create_app(test_config=None):
     fe_dir = _fe_dir  # local var pre closure
 
     def _serve_frontend():
-        return send_from_directory(fe_dir, "index.html")
+        # Server-side render: vlozi max_distance_km priamo do HTML
+        # -> subtitle je spravny bez ohladu na JS/cache v prehliadaci
+        try:
+            from config_loader import get_config as _gc
+            km = _gc().get("criteria", {}).get("location", {}).get("max_distance_km", 70)
+        except Exception:
+            km = 70
+        html = pathlib.Path(fe_dir, "index.html").read_text(encoding="utf-8")
+        html = html.replace("{{MAX_KM}}", str(km))
+        return Response(html, mimetype="text/html")
 
     # Registruj len ak este neexistuje (bezpecne pre viaceré create_app() volania)
     if "/" not in [r.rule for r in app.url_map.iter_rules()]:

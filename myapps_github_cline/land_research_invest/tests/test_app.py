@@ -307,6 +307,13 @@ class TestFrontendServing:
         r = client.get("/")
         assert b"Land Research Invest" in r.data
 
+    def test_root_subtitle_has_km_number(self, client):
+        r = client.get("/")
+        # Server-side render: {{MAX_KM}} musi byt nahradeny cislom, nie ponechany ako placeholder
+        assert b"{{MAX_KM}}" not in r.data
+        # Subtitle musi obsahovat "km od Bratislavy"
+        assert b"km od Bratislavy" in r.data
+
     def test_root_content_type_html(self, client):
         r = client.get("/")
         assert "text/html" in r.content_type
