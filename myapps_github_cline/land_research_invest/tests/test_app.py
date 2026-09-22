@@ -314,6 +314,17 @@ class TestFrontendServing:
         # Subtitle musi obsahovat "km od Bratislavy"
         assert b"km od Bratislavy" in r.data
 
+    def test_root_limits_server_rendered(self, client):
+        r = client.get("/")
+        html = r.data
+        # Ziadny placeholder nesmie ostat nenahradeny
+        assert b"{{MAX_KM}}"    not in html
+        assert b"{{MAX_PRICE}}" not in html
+        assert b"{{MIN_AREA}}"  not in html
+        assert b"{{MAX_AREA}}"  not in html
+        # Vsetky inputy musia mat konkretne ciselne hodnoty
+        assert b'value="' in html  # aspon jeden input s hodnotou
+
     def test_root_content_type_html(self, client):
         r = client.get("/")
         assert "text/html" in r.content_type

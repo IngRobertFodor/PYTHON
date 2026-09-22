@@ -58,11 +58,19 @@ def create_app(test_config=None):
         # -> subtitle je spravny bez ohladu na JS/cache v prehliadaci
         try:
             from config_loader import get_config as _gc
-            km = _gc().get("criteria", {}).get("location", {}).get("max_distance_km", 70)
+            cfg = _gc()
         except Exception:
-            km = 70
+            cfg = {}
+        crit   = cfg.get("criteria", {})
+        loc    = crit.get("location", {})
+        price  = crit.get("price",    {})
+        parcel = crit.get("parcel",   {})
+        km     = loc.get("max_distance_km", 70)
         html = pathlib.Path(fe_dir, "index.html").read_text(encoding="utf-8")
-        html = html.replace("{{MAX_KM}}", str(km))
+        html = html.replace("{{MAX_KM}}",    str(km))
+        html = html.replace("{{MAX_PRICE}}", str(price.get("max_eur",       10000)))
+        html = html.replace("{{MIN_AREA}}",  str(parcel.get("min_area_sqm",  350)))
+        html = html.replace("{{MAX_AREA}}",  str(parcel.get("max_area_sqm", 1000)))
         return Response(html, mimetype="text/html")
 
     # Registruj len ak este neexistuje (bezpecne pre viaceré create_app() volania)

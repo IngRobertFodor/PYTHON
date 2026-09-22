@@ -153,18 +153,18 @@
       <h2>&#9881; Limity (z criteria.yaml)</h2>
       <div class="form-group">
         <label>Max cena (EUR)</label>
-        <input id="f-price-max" type="number" readonly style="background:#f5f5f5" value="10000">
+        <input id="f-price-max" type="number" readonly style="background:#f5f5f5" value="{{MAX_PRICE}}">
       </div>
       <div class="form-group">
         <label>Min / max vymera (m&sup2;)</label>
         <div style="display:flex;gap:6px">
-          <input id="f-area-min" type="number" readonly style="background:#f5f5f5" value="350">
-          <input id="f-area-max" type="number" readonly style="background:#f5f5f5" value="1000">
+          <input id="f-area-min" type="number" readonly style="background:#f5f5f5" value="{{MIN_AREA}}">
+          <input id="f-area-max" type="number" readonly style="background:#f5f5f5" value="{{MAX_AREA}}">
         </div>
       </div>
       <div class="form-group">
         <label>Max vzdialenost od BA (km)</label>
-        <input id="f-dist-max" type="number" readonly style="background:#f5f5f5" value="70">
+        <input id="f-dist-max" type="number" readonly style="background:#f5f5f5" value="{{MAX_KM}}">
       </div>
     </div>
 

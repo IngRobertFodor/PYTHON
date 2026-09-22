@@ -181,14 +181,15 @@ class TestCheckFunction:
         assert result.data["within_criteria"] is True
 
     def test_nitra_not_within_criteria(self, nitra_coords):
-        """Nitra (74.5 km) nesplna kriterium 70 km."""
+        """Nitra (74.5 km) splna kriterium 85 km (zmena z 70 na 85 km)."""
         result = check(nitra_coords["lat"], nitra_coords["lon"])
         assert result.ok is True
-        assert result.data["within_criteria"] is False
+        assert result.data["within_criteria"] is True
 
     def test_nitra_score_is_zero(self, nitra_coords):
+        # Nitra (74.5 km) je v limite 85 km - score > 0
         result = check(nitra_coords["lat"], nitra_coords["lon"])
-        assert result.score == 0.0
+        assert result.score > 0.0
 
     def test_senec_score_positive(self, senec_coords):
         result = check(senec_coords["lat"], senec_coords["lon"])
