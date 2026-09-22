@@ -20,7 +20,7 @@ criteria:
   location:
     center_lat: 48.1486
     center_lon: 17.1077
-    max_distance_km: 70
+    max_distance_km: 85
     automation: AUTO           # Haversine offline
 
   price:
