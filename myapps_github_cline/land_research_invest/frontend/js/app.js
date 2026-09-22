@@ -288,6 +288,24 @@ function updateProgressUI(p) {
   if (bar)   bar.style.width = pct + "%";
   if (pctEl) pctEl.textContent = pct + " %";
 
+  if (text) {
+    if (p.finished) {
+      text.textContent = "Hotovo — " + (p.total_parcels || p.total || 0) + " pozemkov";
+    } else if (p.running) {
+      text.textContent = done + " / " + total + " zdrojov";
+    } else {
+      text.textContent = "Pripravávam...";
+    }
+  }
+  if (srcs && p.per_source) {
+    srcs.innerHTML = Object.entries(p.per_source).map(([src, cnt]) => {
+      const val = cnt === null ? "⏳" : cnt;
+      const cls = cnt === null ? "src-running" : (cnt > 0 ? "src-done" : "src-zero");
+      return "<span class=\"src-chip " + cls + "\">" + src.replace(/_/g," ") + ": " + val + "</span>";
+    }).join("");
+  }
+}
+
 // ----------------------------------------------------------------
 // Výsledková tabuľka + filter
 // ----------------------------------------------------------------
