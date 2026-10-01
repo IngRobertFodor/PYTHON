@@ -100,11 +100,12 @@ def scrape_start():
                 analyzed.append(p.to_dict())
             analyzed.sort(key=lambda d: d.get("preliminary_score", 0), reverse=True)
             _set_last_results(analyzed)
-            # Uloz do SQLite (perzistencia medzi restartmi)
-            try:
-                save_run(analyzed)
-            except Exception as exc:
-                print(f"[scrape_routes] save_run failed: {exc}")
+            # Uloz do SQLite len ak mame realne vysledky (nie prazdny beh)
+            if analyzed:
+                try:
+                    save_run(analyzed)
+                except Exception as exc:
+                    print(f"[scrape_routes] save_run failed: {exc}")
         finally:
             _scrape_lock.release()
 
@@ -202,27 +203,37 @@ def scrape_runs():
 @scrape_bp.route("/diff", methods=["GET"])
 def scrape_diff():
     """
-    Porovnaj posledne dva behy.
-    GET /api/scrape/diff?prev_run=<id>  -- volitelne; bez parametru = posledne 2 behy.
+    Porovnaj posledne dva NEPRAZDNE behy.
+    GET /api/scrape/diff?prev_run=<id>  -- volitelne; bez parametru = posledne 2 neprazdne.
     Vracia: {summary, new, removed, price_dropped, still_here, run_curr, run_prev}
     """
     try:
-        runs = list_runs(limit=2)
-        if len(runs) < 2:
-            # Ak mame len 1 beh, vsetko je "nove"
+        # Pouzij len neprazdne behy (parcel_count > 0)
+        all_runs = list_runs(limit=50)
+        nonempty = [r for r in all_runs if r.get("parcel_count", 0) > 0]
+
+        if not nonempty:
+            return jsonify({
+                "summary": {"new": 0, "removed": 0, "price_dropped": 0, "still_here": 0},
+                "new": [], "removed": [], "price_dropped": [],
+                "still_here": 0, "run_curr": None, "run_prev": None,
+                "note": "Ziadny beh s vysledkami este nebol ulozeny.",
+            }), 200
+
+        if len(nonempty) < 2:
             curr = _get_last_results()
             return jsonify({
                 "summary": {"new": len(curr), "removed": 0,
                             "price_dropped": 0, "still_here": 0},
                 "new": curr, "removed": [], "price_dropped": [],
                 "still_here": 0,
-                "run_curr": runs[0]["id"] if runs else None,
+                "run_curr": nonempty[0]["id"],
                 "run_prev": None,
-                "note": "Iba jeden beh v historii — vsetky parcely su 'nove'",
+                "note": "Iba jeden beh s vysledkami — vsetky parcely su 'nove'",
             }), 200
 
-        prev_run_id = request.args.get("prev_run", type=int) or runs[1]["id"]
-        curr_run_id = runs[0]["id"]
+        prev_run_id = request.args.get("prev_run", type=int) or nonempty[1]["id"]
+        curr_run_id = nonempty[0]["id"]
 
         prev = load_run(prev_run_id)
         curr = load_run(curr_run_id)

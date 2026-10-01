@@ -230,16 +230,19 @@ def _scrape_one(source_name, criteria=None):
 def _deduplicate(parcels):
     """
     Odstrani duplicitne pozemky.
-    Klic: url (lower) + parcel_number — zachova vsetky parcely z toho isteho PDF
-    (rozne parcel_number = rozne parcely aj ked zdielaju URL PDF suboru).
+    Klic: url (lower) + parcel_number + location_text — zachova vsetky parcely
+    z toho isteho PDF/drazby aj ked zdielaju URL.
     Zachova prvy vyskyt.
     """
     seen = set()
     result = []
     for p in parcels:
-        base = p.url.strip().lower() if p.url else str(id(p))
-        suffix = p.parcel_number.strip() if p.parcel_number else ""
-        key = f"{base}#{suffix}" if suffix else base
+        base     = p.url.strip().lower() if p.url else str(id(p))
+        suffix   = p.parcel_number.strip() if p.parcel_number else ""
+        loc      = p.location_text.strip().lower() if p.location_text else ""
+        # Pouzij kombinaciu url + parcel_number + lokacia pre SKE/OV kde
+        # jeden drazobny spis (url) moze mat viacero parciel v roznych obciach
+        key = f"{base}#{suffix}#{loc}" if (suffix or loc) else base
         if key not in seen:
             seen.add(key)
             result.append(p)

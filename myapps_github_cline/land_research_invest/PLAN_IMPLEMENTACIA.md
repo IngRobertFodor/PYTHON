@@ -41,6 +41,10 @@
 | N3: JSON slim export (bez results{}) - btn-export-json-slim | HOTOVO |
 | N4: mapa legenda rozsirena o prelim skore farebnu skalu | HOTOVO |
 | N5: README_TYMTO_ZACAT aktualizovany (85km, nove schopnosti J1/L3) | HOTOVO |
+| Live prieskum 2026-10-01: **4594 parciel** (spf=2212, nehu=1303, real=815, top=128, ske=75, notar=46, ov=15) | OVERENE |
+| O1: scraper_service dedup klic +location_text (SKE viac parciel z jedneho spisu) | HOTOVO |
+| O2: scrape_routes save_run guard (prazdne behy sa neukladaju) | HOTOVO |
+| O3: scrape_diff endpoint porovnava len neprazdne behy (parcel_count>0) | HOTOVO |
 | Limity v criteria.yaml (cena 0-10000, vymera 350-1000) | HOTOVO |
 | C0: nehnutelnosti.sk - oprava markera (T23c11 -> dynamic RSC) | HOTOVO - 46 pozemkov nazivo |
 | C0: nehnutelnosti.sk - lokalita (ZNAME_OBCE 70km od BA) | HOTOVO - 46/46 s lokalitou |
