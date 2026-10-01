@@ -64,3 +64,9 @@ async function apiScoreProgress() {
   return r.json();
 }
 
+async function apiScrapeDiff() {
+  const r = await fetch(API_BASE + "/api/scrape/diff");
+  if (!r.ok) throw new Error("Diff fetch failed: " + r.status);
+  return r.json();
+}
+

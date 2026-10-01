@@ -300,6 +300,26 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 /* Riadok skvosta - jemne zvyrazneny */
 .gem-row      { background: #fffde7 !important; }
 
+/* Diff banner */
+.diff-banner {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: 6px;
+  background: #f0f6ff; border: 1px solid #c8d8f0;
+  margin-bottom: 8px; font-size: .78rem;
+}
+.diff-banner .diff-title { font-weight: 700; color: #1a3a5c; margin-right: 4px; }
+.diff-chip {
+  display: inline-block; padding: 2px 8px;
+  border-radius: 10px; font-weight: 700; font-size: .72rem;
+  white-space: nowrap; cursor: pointer; border: 1px solid transparent;
+}
+.diff-chip:hover { opacity: .8; }
+.diff-new    { background: #d4edda; color: #155724; border-color: #28a745; }
+.diff-gone   { background: #f8d7da; color: #721c24; border-color: #dc3545; }
+.diff-cheap  { background: #fff3cd; color: #7a4f00; border-color: #f0b429; }
+.diff-same   { background: #f0f0f0; color: #555;    border-color: #bbb; }
+.diff-filter-active { outline: 2px solid #1a3a5c; }
+
 
 /* Score bar */
 .score-bar {

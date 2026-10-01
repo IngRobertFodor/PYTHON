@@ -6,6 +6,7 @@ GET  /api/scrape/results         -> vysledky (preliminary_score zoradene)
 POST /api/scrape/score-selected  -> plny GIS scoring vybranych parciel
 GET  /api/scrape/score-progress  -> stav plneho scoringu
 GET  /api/scrape/runs            -> zoznam poslednych behov (SQLite)
+GET  /api/scrape/diff            -> diff poslednych 2 behov (nove/zrusene/zlacnene)
 """
 
 import threading
@@ -16,8 +17,9 @@ from services.scoring_service  import preliminary_score
 from services.pipeline_service import analyze_parcel
 from services.storage_service  import (
     save_run, patch_parcel as db_patch,
-    load_last_run, list_runs,
+    load_last_run, list_runs, load_run,
 )
+from services.diff_service import compute_diff
 from models.parcel import Parcel
 
 scrape_bp = Blueprint("scrape", __name__)
@@ -195,6 +197,41 @@ def scrape_runs():
         return jsonify({"runs": runs, "count": len(runs)}), 200
     except Exception as exc:
         return jsonify({"runs": [], "count": 0, "error": str(exc)}), 200
+
+
+@scrape_bp.route("/diff", methods=["GET"])
+def scrape_diff():
+    """
+    Porovnaj posledne dva behy.
+    GET /api/scrape/diff?prev_run=<id>  -- volitelne; bez parametru = posledne 2 behy.
+    Vracia: {summary, new, removed, price_dropped, still_here, run_curr, run_prev}
+    """
+    try:
+        runs = list_runs(limit=2)
+        if len(runs) < 2:
+            # Ak mame len 1 beh, vsetko je "nove"
+            curr = _get_last_results()
+            return jsonify({
+                "summary": {"new": len(curr), "removed": 0,
+                            "price_dropped": 0, "still_here": 0},
+                "new": curr, "removed": [], "price_dropped": [],
+                "still_here": 0,
+                "run_curr": runs[0]["id"] if runs else None,
+                "run_prev": None,
+                "note": "Iba jeden beh v historii — vsetky parcely su 'nove'",
+            }), 200
+
+        prev_run_id = request.args.get("prev_run", type=int) or runs[1]["id"]
+        curr_run_id = runs[0]["id"]
+
+        prev = load_run(prev_run_id)
+        curr = load_run(curr_run_id)
+        diff = compute_diff(prev, curr)
+        diff["run_curr"] = curr_run_id
+        diff["run_prev"] = prev_run_id
+        return jsonify(diff), 200
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
 
 
 @scrape_bp.route("/results.csv", methods=["GET"])

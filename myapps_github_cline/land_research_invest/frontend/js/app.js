@@ -674,9 +674,89 @@ async function onResearchFinished() {
     showStatus("Prieskum dokončený: " + data.count + " pozemkov.", "ok");
     if (btn) { btn.disabled = false; btn.textContent = "▶▶ Spustiť prieskum"; }
     showProgressSection(false);
+    // Nacitaj diff po dokonceni prieskumu (async, neblokuje UI)
+    loadDiffBanner().catch(() => {});
   } catch (e) {
     showStatus("Chyba načítania výsledkov: " + e.message, "error");
     if (btn) { btn.disabled = false; btn.textContent = "▶▶ Spustiť prieskum"; }
+  }
+}
+
+// ----------------------------------------------------------------
+// Diff banner — porovnanie s predoslym behom
+// ----------------------------------------------------------------
+
+let _diffData = null;   // posledny nacitany diff
+let _diffFilter = null; // aktualny aktivny filter: null | "new" | "price_dropped"
+
+async function loadDiffBanner() {
+  const banner = document.getElementById("diff-banner");
+  if (!banner) return;
+  try {
+    const d = await apiScrapeDiff();
+    _diffData = d;
+    _renderDiffBanner(d);
+  } catch (e) {
+    // tichy fail — diff nie je kriticka funkcia
+  }
+}
+
+function _renderDiffBanner(d) {
+  const banner = document.getElementById("diff-banner");
+  if (!banner) return;
+  const s = d.summary || {};
+  // Ak prvy beh (note = iba jeden beh) alebo vsetko je "nove" a nic ine -> skry
+  if (!s.new && !s.removed && !s.price_dropped) {
+    banner.classList.add("hidden");
+    return;
+  }
+  banner.classList.remove("hidden");
+
+  const chips = [];
+  if (s.new)           chips.push(`<span class="diff-chip diff-new"   data-filter="new">✨ ${s.new} nových</span>`);
+  if (s.price_dropped) chips.push(`<span class="diff-chip diff-cheap" data-filter="price_dropped">📉 ${s.price_dropped} zlacneli</span>`);
+  if (s.removed)       chips.push(`<span class="diff-chip diff-gone"  data-filter="removed">🗑️ ${s.removed} zmizlo</span>`);
+  if (s.still_here)    chips.push(`<span class="diff-chip diff-same"  data-filter="none">${s.still_here} nezmenených</span>`);
+
+  const note = d.note ? `<span style="font-size:.70rem;color:#888;margin-left:4px">${d.note}</span>` : "";
+  banner.innerHTML = `<span class="diff-title">Zmeny od minulého behu:</span>${chips.join("")}${note}`;
+
+  // Listenery na chipy — filter tabulky
+  banner.querySelectorAll(".diff-chip[data-filter]").forEach(chip => {
+    chip.addEventListener("click", () => {
+      const f = chip.dataset.filter;
+      if (_diffFilter === f) {
+        // Druhy klik = zrus filter
+        _diffFilter = null;
+        banner.querySelectorAll(".diff-chip").forEach(c => c.classList.remove("diff-filter-active"));
+        renderResultsTable(_allResults);
+      } else {
+        _diffFilter = f;
+        banner.querySelectorAll(".diff-chip").forEach(c => c.classList.remove("diff-filter-active"));
+        chip.classList.add("diff-filter-active");
+        _applyDiffFilter(f);
+      }
+    });
+  });
+}
+
+function _applyDiffFilter(filter) {
+  if (!_diffData) return;
+  let subset;
+  if (filter === "new")           subset = _diffData.new           || [];
+  else if (filter === "price_dropped") subset = _diffData.price_dropped || [];
+  else if (filter === "removed")  subset = _diffData.removed       || [];
+  else { renderResultsTable(_allResults); return; }
+
+  // Zobraz len parcely ktore su v submnozine (podla URL)
+  const urls = new Set(subset.map(p => p.url));
+  const filtered = _allResults.filter(p => urls.has(p.url));
+  // Doplnim price_dropped data (price_prev, drop_pct) do zobrazenych zaznamov
+  if (filter === "price_dropped") {
+    const byUrl = Object.fromEntries((subset).map(p => [p.url, p]));
+    renderResultsTable(filtered.map(p => Object.assign({}, byUrl[p.url] || p, p)));
+  } else {
+    renderResultsTable(filtered);
   }
 }
 
