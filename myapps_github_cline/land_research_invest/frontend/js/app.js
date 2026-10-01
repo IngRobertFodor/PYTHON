@@ -31,6 +31,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       showProgressSection(true);
       updateProgressUI(p);
       startProgressPolling();
+    } else {
+      // Auto-load: nacitaj posledny beh z DB (perzistencia medzi restartmi)
+      await _autoLoadLastResults();
     }
   } catch (e) { /* backend nedostupny - ignoruj */ }
 });
@@ -42,22 +45,32 @@ async function loadConfigDefaults() {
     const price  = cfg.criteria?.price    || {};
     const parcel = cfg.criteria?.parcel   || {};
     const loc    = cfg.criteria?.location || {};
-    // Polia "Limity" v sidebari
     setVal("f-price-max", price.max_eur          ?? 10000);
     setVal("f-area-min",  parcel.min_area_sqm     ?? 350);
     setVal("f-area-max",  parcel.max_area_sqm     ?? 1000);
     setVal("f-dist-max",  loc.max_distance_km     ?? 70);
-    // Subtitle v hlavicke - reflektuje max_distance_km z criteria.yaml
     const km  = loc.max_distance_km ?? 70;
     const sub = document.getElementById("app-subtitle");
     if (sub) sub.textContent =
       "AI agent pre vyhľadávanie stavebných pozemkov do " + km + " km od Bratislavy";
   } catch (e) {
-    // Diagnostika: zobraz chybu priamo v subtitle (viditelne bez konzoly)
     const sub = document.getElementById("app-subtitle");
     if (sub) sub.textContent = "Config error: " + e.message;
     console.warn("loadConfigDefaults failed:", e);
   }
+}
+
+// --- Auto-load posledneho behu pri starte (F5 / restart servera) ---
+async function _autoLoadLastResults() {
+  try {
+    const data = await apiScrapeResults();
+    if (!data.results || data.results.length === 0) return;
+    _allResults = data.results;
+    renderResultsTable(_allResults);
+    showStatus("Načítaných " + data.count + " pozemkov z posledného behu.", "info");
+    // Nacitaj diff (ticho)
+    loadDiffBanner().catch(() => {});
+  } catch (e) { /* prazdna DB alebo backend nedostupny */ }
 }
 
 // --- Formular - analyza 1 pozemku ---
@@ -315,6 +328,32 @@ function openModal(parcel, _reportLegacy) {
 
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 
+// ----------------------------------------------------------------
+// Watchlist — localStorage perzistencia hviezdicky
+// ----------------------------------------------------------------
+
+const _WL_KEY = "lri_watchlist";
+
+function wlLoad() {
+  try { return new Set(JSON.parse(localStorage.getItem(_WL_KEY) || "[]")); }
+  catch { return new Set(); }
+}
+
+function wlSave(set) {
+  try { localStorage.setItem(_WL_KEY, JSON.stringify([...set])); } catch {}
+}
+
+function wlToggle(url) {
+  const s = wlLoad();
+  if (s.has(url)) s.delete(url); else s.add(url);
+  wlSave(s);
+  return s.has(url);
+}
+
+function wlHas(url) { return wlLoad().has(url); }
+
+function wlCount() { return wlLoad().size; }
+
 // --- Helpers ---
 function getVal(id) { return (document.getElementById(id)?.value || "").trim(); }
 function setVal(id, v) { const el=document.getElementById(id); if(el) el.value=v; }
@@ -487,9 +526,11 @@ function renderResultsTable(items) {
     const tr = document.createElement("tr");
     tr.dataset.url = p.url || "";
     if (ov && ov.is_gem_candidate) tr.classList.add("gem-row");
+    const starred = wlHas(p.url || "");
     tr.innerHTML = `
       <td><input type="checkbox" class="row-chk" data-url="${p.url || ""}"></td>
       <td class="tbl-num">${idx + 1}</td>
+      <td><button class="star-btn${starred ? " active" : ""}" data-url="${p.url || ""}" title="Sledovať">${starred ? "★" : "☆"}</button></td>
       <td><span class="prelim-badge" style="background:${col}">${score}</span></td>
       <td class="tbl-src">${(p.source_portal||"").replace(/_/g," ")}</td>
       <td class="tbl-loc">${p.location_text||"—"}</td>
@@ -499,10 +540,18 @@ function renderResultsTable(items) {
       <td>${infraHtml}</td>
       <td>${link}</td>`;
     tr.addEventListener("click", e => {
-      if (e.target.tagName==="INPUT"||e.target.tagName==="A") return;
+      if (e.target.tagName==="INPUT"||e.target.tagName==="A"||e.target.classList.contains("star-btn")) return;
       openModal(p, p.results?.report_service?.data||{});
     });
     tr.querySelector(".row-chk").addEventListener("change", () => updateScoreButton());
+    tr.querySelector(".star-btn").addEventListener("click", e => {
+      e.stopPropagation();
+      const btn = e.currentTarget;
+      const url = btn.dataset.url;
+      const isNow = wlToggle(url);
+      btn.textContent = isNow ? "★" : "☆";
+      btn.classList.toggle("active", isNow);
+    });
     tbody.appendChild(tr);
   });
 }
@@ -515,6 +564,8 @@ function applyFilter() {
   const vym   = parseFloat(document.getElementById("filter-vymera").value) || 0;
   const skore = parseFloat(document.getElementById("filter-skore").value) || 0;
   const gemOnly = document.getElementById("filter-gem")?.checked || false;
+  const wlOnly  = document.getElementById("filter-watchlist")?.checked || false;
+  const wl = wlOnly ? wlLoad() : null;
   renderResultsTable(_allResults.filter(p => {
     if (zdroj && p.source_portal !== zdroj) return false;
     if (p.price_eur > 0 && p.price_eur > cena) return false;
@@ -524,6 +575,7 @@ function applyFilter() {
       const ov = p.results && p.results.overpass_service && p.results.overpass_service.data;
       if (!ov || !ov.is_gem_candidate) return false;
     }
+    if (wl && !wl.has(p.url)) return false;
     return true;
   }));
 }
@@ -535,6 +587,8 @@ function resetFilter() {
   document.getElementById("filter-skore").value  = "";
   const gemChk = document.getElementById("filter-gem");
   if (gemChk) gemChk.checked = false;
+  const wlChk = document.getElementById("filter-watchlist");
+  if (wlChk) wlChk.checked = false;
   renderResultsTable(_allResults);
 }
 

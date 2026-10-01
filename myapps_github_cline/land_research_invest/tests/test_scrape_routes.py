@@ -269,3 +269,76 @@ class TestScoreProgressEndpoint:
 
 
 
+
+
+# ----------------------------------------------------------------
+# TestRunsEndpoint + TestDiffEndpoint (K2)
+# ----------------------------------------------------------------
+
+class TestRunsEndpoint:
+    def test_runs_200(self, client):
+        with patch("routes.scrape_routes.list_runs", return_value=[]):
+            r = client.get("/api/scrape/runs")
+        assert r.status_code == 200
+
+    def test_runs_returns_list(self, client):
+        mock_runs = [{"id": 1, "started_at": "2026-01-01T00:00:00+00:00", "parcel_count": 42}]
+        with patch("routes.scrape_routes.list_runs", return_value=mock_runs):
+            data = client.get("/api/scrape/runs").get_json()
+        assert data["count"] == 1
+        assert data["runs"][0]["parcel_count"] == 42
+
+    def test_runs_empty(self, client):
+        with patch("routes.scrape_routes.list_runs", return_value=[]):
+            data = client.get("/api/scrape/runs").get_json()
+        assert data["runs"] == [] and data["count"] == 0
+
+    def test_runs_db_error_returns_200(self, client):
+        with patch("routes.scrape_routes.list_runs", side_effect=RuntimeError("db err")):
+            r = client.get("/api/scrape/runs")
+        assert r.status_code == 200
+        assert "error" in r.get_json()
+
+
+class TestDiffEndpoint:
+    def _mock_two_runs(self):
+        return [{"id": 2, "parcel_count": 3}, {"id": 1, "parcel_count": 2}]
+
+    def _p(self, url, price=5000, score=70):
+        return {"url": url, "price_eur": price, "preliminary_score": score,
+                "source_portal": "nehnutelnosti_sk", "title": url, "location_text": "X"}
+
+    def test_diff_200(self, client):
+        prev = [self._p("http://x/1"), self._p("http://x/2")]
+        curr = [self._p("http://x/1"), self._p("http://x/3")]
+        with patch("routes.scrape_routes.list_runs", return_value=self._mock_two_runs()), \
+             patch("routes.scrape_routes.load_run", side_effect=[curr, prev]):
+            r = client.get("/api/scrape/diff")
+        assert r.status_code == 200
+
+    def test_diff_summary_keys(self, client):
+        prev = [self._p("http://x/1")]
+        curr = [self._p("http://x/1"), self._p("http://x/2")]
+        with patch("routes.scrape_routes.list_runs", return_value=self._mock_two_runs()), \
+             patch("routes.scrape_routes.load_run", side_effect=[curr, prev]):
+            data = client.get("/api/scrape/diff").get_json()
+        assert "summary" in data and "new" in data["summary"]
+
+    def test_diff_new_detected(self, client):
+        prev = [self._p("http://x/1")]
+        curr = [self._p("http://x/1"), self._p("http://x/2")]
+        with patch("routes.scrape_routes.list_runs", return_value=self._mock_two_runs()), \
+             patch("routes.scrape_routes.load_run", side_effect=[prev, curr]):
+            data = client.get("/api/scrape/diff").get_json()
+        assert data["summary"]["new"] == 1
+
+    def test_diff_single_run_note(self, client):
+        _set_last_results([self._p("http://x/1")])
+        with patch("routes.scrape_routes.list_runs", return_value=[{"id": 1, "parcel_count": 1}]):
+            data = client.get("/api/scrape/diff").get_json()
+        assert "note" in data
+
+    def test_diff_db_error_500(self, client):
+        with patch("routes.scrape_routes.list_runs", side_effect=RuntimeError("err")):
+            r = client.get("/api/scrape/diff")
+        assert r.status_code == 500

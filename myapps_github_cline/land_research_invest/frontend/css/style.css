@@ -300,7 +300,14 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 /* Riadok skvosta - jemne zvyrazneny */
 .gem-row      { background: #fffde7 !important; }
 
-/* Diff banner */
+/* Watchlist hviezdicky */
+.star-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: .9rem; padding: 0 2px; line-height: 1;
+  opacity: .4; transition: opacity .15s, transform .1s;
+}
+.star-btn:hover  { opacity: 1; transform: scale(1.2); }
+.star-btn.active { opacity: 1; }
 .diff-banner {
   display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
   padding: 8px 12px; border-radius: 6px;

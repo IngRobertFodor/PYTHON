@@ -252,7 +252,9 @@ def scrape_results_csv():
     writer.writerow([
         "Zdroj", "Lokalita", "Cena_EUR", "Vymera_m2", "EUR_m2",
         "Prelim_skore", "Prelim_odporucanie",
-        "Final_skore", "Odporucanie", "URL",
+        "Final_skore", "Odporucanie",
+        "Priama_dostupnost", "Poloha_v_obci", "Skvost",
+        "URL",
     ])
 
     for p in items:
@@ -261,6 +263,10 @@ def scrape_results_csv():
         ppsm = p.get("price_per_sqm") or (
             round(price / area, 2) if area > 0 else 0
         )
+        ov = (p.get("results") or {}).get("overpass_service", {}).get("data") or {}
+        acc = (ov.get("direct_access")    or {}).get("level",    "")
+        pos = (ov.get("village_position") or {}).get("position", "")
+        gem = "ano" if ov.get("is_gem_candidate") else ""
         writer.writerow([
             p.get("source_portal", ""),
             p.get("location_text", ""),
@@ -271,6 +277,9 @@ def scrape_results_csv():
             p.get("prelim_recommendation", ""),
             p.get("final_score", 0),
             p.get("recommendation", ""),
+            acc,
+            pos,
+            gem,
             p.get("url", ""),
         ])
 
