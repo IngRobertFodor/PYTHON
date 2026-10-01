@@ -314,4 +314,12 @@ Potom AI: precita fixture, extrahuje strukturu, napise presny parser.
 | C | llm_agent_service (volitelne) | ❌ | ~+15 |
 | D | frontend rozsirenia (volitelne) | ❌ | manual |
 | E  | Optimalizacia + udrzba (paralelizacia, E1-E5) | ✅ HOTOVO | +18 |
-| **TOTAL** | | | **883** |
+| **J1** | classify_access/position/is_gem_candidate + badgese + filter | ✅ HOTOVO | +35 |
+| **J2** | Modal rozpad skore (8 GIS komponentov) | ✅ HOTOVO | - |
+| **J3** | SQLite perzistencia behov (storage_service) | ✅ HOTOVO | +14 |
+| **J4** | Diff service (nove/zlacneli/zmizli) + diff banner | ✅ HOTOVO | +17 |
+| **K1-K4** | Auto-load, watchlist, testy routes, CSV+infra stlpce | ✅ HOTOVO | +9 |
+| **L1-L4** | Prelim mapa, watchlist×diff, druh pozemku KN, spustit.bat | ✅ HOTOVO | +12 |
+| **M1-M4** | Modal detaily, naklady na pripojky, mrtvy kod | ✅ HOTOVO | - |
+| **N1-N5** | Vsetky modal komp., slim JSON, legenda, README | ✅ HOTOVO | - |
+| **TOTAL** | | | **1140** |
