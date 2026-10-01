@@ -5,6 +5,7 @@ POST /api/scrape/start           -> spusti scrape_all() + pre-scoring, vrati 202
 GET  /api/scrape/results         -> vysledky (preliminary_score zoradene)
 POST /api/scrape/score-selected  -> plny GIS scoring vybranych parciel
 GET  /api/scrape/score-progress  -> stav plneho scoringu
+GET  /api/scrape/runs            -> zoznam poslednych behov (SQLite)
 """
 
 import threading
@@ -13,6 +14,10 @@ from flask import Blueprint, jsonify, request
 from services.scraper_service  import scrape_all, get_scrape_progress
 from services.scoring_service  import preliminary_score
 from services.pipeline_service import analyze_parcel
+from services.storage_service  import (
+    save_run, patch_parcel as db_patch,
+    load_last_run, list_runs,
+)
 from models.parcel import Parcel
 
 scrape_bp = Blueprint("scrape", __name__)
@@ -20,7 +25,11 @@ scrape_bp = Blueprint("scrape", __name__)
 # --- Scraping ---
 _scrape_lock  = threading.Lock()
 _results_lock = threading.Lock()
-_last_results: list = []
+# Nacitaj posledny beh z DB pri starte (perzistencia medzi restartmi)
+try:
+    _last_results: list = load_last_run()
+except Exception:
+    _last_results: list = []
 
 # --- Plny scoring ---
 _score_lock      = threading.Lock()
@@ -89,6 +98,11 @@ def scrape_start():
                 analyzed.append(p.to_dict())
             analyzed.sort(key=lambda d: d.get("preliminary_score", 0), reverse=True)
             _set_last_results(analyzed)
+            # Uloz do SQLite (perzistencia medzi restartmi)
+            try:
+                save_run(analyzed)
+            except Exception as exc:
+                print(f"[scrape_routes] save_run failed: {exc}")
         finally:
             _scrape_lock.release()
 
@@ -149,7 +163,13 @@ def score_selected():
                         prelim_recommendation= item.get("prelim_recommendation", ""),
                     )
                     analyze_parcel(p)
-                    _patch_last_results(p.to_dict())
+                    scored = p.to_dict()
+                    _patch_last_results(scored)
+                    # Persistuj GIS vysledok do SQLite
+                    try:
+                        db_patch(scored.get("url", ""), scored)
+                    except Exception as exc:
+                        print(f"[score_selected] db_patch failed: {exc}")
                 except Exception as exc:
                     print(f"[score_selected] {item.get('url','')}: {exc}")
                 _update_score_progress(i + 1, len(to_score))
@@ -165,6 +185,16 @@ def score_selected():
 def score_progress():
     """Vrati stav plneho GIS scoringu."""
     return jsonify(_get_score_progress()), 200
+
+
+@scrape_bp.route("/runs", methods=["GET"])
+def scrape_runs():
+    """Vrati zoznam poslennych behov zo SQLite (id, started_at, parcel_count)."""
+    try:
+        runs = list_runs(limit=20)
+        return jsonify({"runs": runs, "count": len(runs)}), 200
+    except Exception as exc:
+        return jsonify({"runs": [], "count": 0, "error": str(exc)}), 200
 
 
 @scrape_bp.route("/results.csv", methods=["GET"])

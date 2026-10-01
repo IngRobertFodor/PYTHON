@@ -13,10 +13,14 @@
 | Frontend (mapa, karty, modal, demo) | HOTOVO |
 | Scraper kostra (BaseScraper, registry, scrape_all) | HOTOVO |
 | nehnutelnosti_sk parser | HOTOVO |
-| Testy | **1088, 0 zlyh** |
+| Testy | **1102, 0 zlyh** |
 | J1: overpass_service - classify_access / classify_position / is_gem_candidate | HOTOVO - +35 testov |
 | J1: criteria.yaml - access_classification sekcia (full_m, partial_m, core/edge prahy) | HOTOVO |
 | J1: frontend - Infra stlpec, skvost/priama/okraj badgese + filter | HOTOVO |
+| J2: frontend modal - rozpad skore (8 GIS komp, J1 infra, report) + _buildModalHtml | HOTOVO |
+| J3: storage_service - SQLite perzistencia (save_run/patch_parcel/load/list_runs) | HOTOVO - +14 testov |
+| J3: scrape_routes - load_last_run pri starte, save_run po scrape, db_patch po GIS | HOTOVO |
+| J3: GET /api/scrape/runs endpoint | HOTOVO |
 | Limity v criteria.yaml (cena 0-10000, vymera 350-1000) | HOTOVO |
 | C0: nehnutelnosti.sk - oprava markera (T23c11 -> dynamic RSC) | HOTOVO - 46 pozemkov nazivo |
 | C0: nehnutelnosti.sk - lokalita (ZNAME_OBCE 70km od BA) | HOTOVO - 46/46 s lokalitou |
@@ -76,8 +80,8 @@
 | spustit.bat: auto-otvorenie prehliadaca + odstraneny playwright install | HOTOVO |
 | Dokumentacia: AKO_SPUSTIT, README, ARCHITEKTURA zosúladene s realitou | HOTOVO |
 | PLAN: vsetky otvorene [ ] -> [~] SKIP (B5.3-B5.6, B6, C, D1-D3) | HOTOVO |
-| Testy | **1088, 0 zlyh** |
-| Testy | **1088, 0 zlyh** |
+| Testy | **1102, 0 zlyh** |
+| Testy | **1102, 0 zlyh** |
 
 ---
 

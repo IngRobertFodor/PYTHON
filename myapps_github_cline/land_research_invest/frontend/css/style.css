@@ -327,10 +327,63 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .src-zero    { background: #f8d7da; border-color: #dc3545; color: #721c24; }
 
 #modal-body {
-  white-space: pre-wrap;
-  font-family: "Courier New", monospace;
-  font-size: .8rem; line-height: 1.55;
-  color: #222;
+  font-size: .85rem; line-height: 1.5; color: #222;
+  overflow-y: auto;
+}
+
+/* --- Rozpad skore v modali --- */
+.modal-score-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-radius: 8px;
+  margin-bottom: 14px;
+  background: #f0f6ff; border: 1px solid #c8d8f0;
+}
+.modal-final-score {
+  font-size: 2rem; font-weight: 800; color: #1a3a5c;
+  line-height: 1;
+}
+.modal-rec-badge {
+  display: inline-block; padding: 4px 12px;
+  border-radius: 20px; font-weight: 700; font-size: .85rem;
+}
+.modal-prelim { font-size: .78rem; color: #666; margin-top: 2px; }
+
+.modal-section-title {
+  font-size: .78rem; font-weight: 700; color: #1a3a5c;
+  text-transform: uppercase; letter-spacing: .04em;
+  margin: 14px 0 6px; border-bottom: 1px solid #e0e8f4; padding-bottom: 4px;
+}
+.modal-components {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  margin-bottom: 8px;
+}
+.modal-comp {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px; border-radius: 6px;
+  background: #f8fafd; border: 1px solid #e0e8f4;
+}
+.modal-comp-score {
+  font-size: 1.05rem; font-weight: 800; min-width: 38px;
+  text-align: right; color: #1a3a5c;
+}
+.modal-comp-info { flex: 1; }
+.modal-comp-name { font-size: .74rem; font-weight: 600; color: #333; }
+.modal-comp-detail { font-size: .68rem; color: #777; margin-top: 1px; }
+.modal-comp-skip { opacity: .5; }
+.modal-comp-err  { background: #fff4f4; border-color: #f0c0c0; }
+
+.modal-infra-row {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding: 8px 10px; border-radius: 6px;
+  background: #f8fafd; border: 1px solid #e0e8f4;
+  margin-bottom: 8px;
+}
+.modal-report-pre {
+  white-space: pre-wrap; font-family: "Courier New", monospace;
+  font-size: .76rem; line-height: 1.5; color: #444;
+  background: #f8f8f8; border: 1px solid #e8e8e8;
+  border-radius: 6px; padding: 10px 12px;
+  max-height: 200px; overflow-y: auto;
 }
 
 /* RESPONZIVNE */

@@ -184,28 +184,136 @@ function buildCard(parcel, report) {
   return card;
 }
 
+// Mapovanie source -> { emoji, label, detailFn }
+const _COMP_META = {
+  distance_service:       { e: "📍", n: "Vzdialenosť od BA",
+    d: r => r.data?.distance_km != null ? r.data.distance_km.toFixed(1)+" km" : "" },
+  price_analysis_service: { e: "💰", n: "Cenová analýza",
+    d: r => r.data?.price_per_sqm_eur != null ? r.data.price_per_sqm_eur.toFixed(0)+" EUR/m²" : "" },
+  flood_service:          { e: "🌊", n: "Záplavy",
+    d: r => r.data?.flood_zone ?? "" },
+  terrain_service:        { e: "⛰️",  n: "Terén",
+    d: r => r.data?.slope_percent != null ? "sklon "+r.data.slope_percent+"%" : "" },
+  bpej_service:           { e: "🌱", n: "Pôda (BPEJ)",
+    d: r => r.data?.protection_class != null
+      ? "trieda "+r.data.protection_class+(r.data.suitable_for_construction?" ✅":" ⚠️") : "" },
+  overpass_service:       { e: "🛣️",  n: "Infraštruktúra",
+    d: r => {
+      const rd = r.data?.road?.distance_m; const el = r.data?.electricity?.distance_m;
+      const p = [];
+      if (rd != null && rd < 9999) p.push("cesta "+Math.round(rd)+"m");
+      if (el != null && el < 9999) p.push("el. "+Math.round(el)+"m");
+      return p.join(", ");
+    }},
+  protected_service:      { e: "🛡️",  n: "Ochranné pásma",
+    d: r => r.data?.vvn_safe === false ? "⚠️ VVN" : (r.data?.vtl_safe === false ? "⚠️ VTL" : "OK") },
+  zbgis_service:          { e: "📐", n: "Geometria (KN)",
+    d: r => r.data?.area_sqm != null ? r.data.area_sqm+" m²" : "" },
+  cadastral_service:      { e: "📋", n: "Kataster",
+    d: r => r.data?.has_plombs ? "⚠️ plomba" : "" },
+};
+
+function _scoreColor(s) {
+  if (s == null) return "#aaa";
+  if (s >= 85) return "#2e7d32";
+  if (s >= 70) return "#1565c0";
+  if (s >= 50) return "#e65100";
+  return "#a02020";
+}
+
+function _recStyle(rec) {
+  return { "STRONG BUY": ["#2e7d32","#fff"], "INVESTIGATE": ["#1565c0","#fff"],
+           "CONSIDER":   ["#e65100","#fff"], "SKIP":        ["#a02020","#fff"] }[rec] || ["#888","#fff"];
+}
+
+function _buildModalHtml(parcel) {
+  const results  = parcel.results || {};
+  const fs       = parcel.final_score;
+  const hasFinal = fs != null && fs > 0;
+  const rec      = parcel.recommendation || parcel.prelim_recommendation || "";
+  const ps       = parcel.preliminary_score || 0;
+
+  const [rbg, rtx] = _recStyle(rec);
+  const scoreHtml = hasFinal
+    ? `<div class="modal-final-score">${fs.toFixed(1)}<span style="font-size:.9rem;font-weight:400">/100</span></div>`
+    : `<div class="modal-final-score" style="color:#888">${ps.toFixed(1)}<span style="font-size:.9rem;font-weight:400"> pre</span></div>`;
+  const recHtml = rec ? `<span class="modal-rec-badge" style="background:${rbg};color:${rtx}">${rec}</span>` : "";
+  const labelHtml = hasFinal
+    ? `<div class="modal-prelim">Finálne skóre (GIS)</div>`
+    : `<div class="modal-prelim">Predbežné skóre — spusti <b>Skórovať</b> pre plný GIS</div>`;
+
+  let html = `<div class="modal-score-header">${scoreHtml}<div>${recHtml}${labelHtml}</div></div>`;
+
+  if (hasFinal && Object.keys(results).length > 0) {
+    html += `<div class="modal-section-title">Rozpad skóre — GIS komponenty</div><div class="modal-components">`;
+    const ORDER = ["distance_service","price_analysis_service","flood_service","terrain_service",
+                   "bpej_service","overpass_service","protected_service","zbgis_service","cadastral_service"];
+    ORDER.forEach(src => {
+      const r = results[src]; if (!r) return;
+      const meta = _COMP_META[src] || { e: "🔹", n: src, d: () => "" };
+      const skipped = r.data?.skipped;
+      const isErr   = !r.ok && !skipped;
+      const s       = skipped ? "—" : (r.score != null ? r.score.toFixed(0) : "—");
+      const scolor  = skipped ? "#aaa" : _scoreColor(r.score);
+      const detail  = skipped ? "preskočené" : (isErr ? (r.error||"chyba") : meta.d(r));
+      const cls     = skipped ? "modal-comp modal-comp-skip" : (isErr ? "modal-comp modal-comp-err" : "modal-comp");
+      html += `<div class="${cls}">
+        <div class="modal-comp-score" style="color:${scolor}">${s}</div>
+        <div class="modal-comp-info">
+          <div class="modal-comp-name">${meta.e} ${meta.n}</div>
+          ${detail ? `<div class="modal-comp-detail">${detail}</div>` : ""}
+        </div></div>`;
+    });
+    html += `</div>`;
+
+    const ov = results.overpass_service?.data;
+    if (ov) {
+      const acc = ov.direct_access || {}; const pos = ov.village_position || {};
+      html += `<div class="modal-section-title">Infraštruktúra — dostupnosť &amp; poloha</div><div class="modal-infra-row">`;
+      if (ov.is_gem_candidate) html += `<span class="gem-badge gem-skvost">🏆 Skvost</span>`;
+      if (acc.level) {
+        const ac = acc.level==="PRIAMA" ? "gem-priama" : acc.level==="CIASTOCNA" ? "gem-ciastocna" : "";
+        html += `<span class="gem-badge ${ac}">🔌 ${acc.level}</span>`;
+        if (acc.reason) html += `<span style="font-size:.72rem;color:#555;align-self:center">${acc.reason}</span>`;
+      }
+      if (pos.position) {
+        const pc = pos.position==="OKRAJ" ? "gem-okraj" : pos.position==="STRED" ? "gem-stred" : "gem-mimo";
+        const pe = pos.position==="OKRAJ" ? "🏘️" : pos.position==="STRED" ? "🏙️" : "🌾";
+        html += `<span class="gem-badge ${pc}">${pe} ${pos.position}</span>`;
+        if (pos.reason) html += `<span style="font-size:.72rem;color:#555;align-self:center">${pos.reason}</span>`;
+      }
+      const bld = ov.buildings || {};
+      if (bld.nearest_m != null)
+        html += `<span style="font-size:.72rem;color:#555;align-self:center">dom: ${bld.nearest_m} m | 100m: ${bld.count_100m} dom. | 300m: ${bld.count_300m} dom.</span>`;
+      html += `</div>`;
+    }
+  }
+
+  const rep = results.report_service?.data?.text_report;
+  if (rep) {
+    html += `<div class="modal-section-title">Investičný report</div>
+      <div class="modal-report-pre">${rep.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div>`;
+  } else if (!hasFinal) {
+    html += `<div style="font-size:.78rem;color:#888;margin-top:8px">Detailný report bude dostupný po GIS scorovaní.</div>`;
+  }
+  return html;
+}
+
 function closeModal() {
   const ov = document.getElementById("modal-overlay");
-  if (ov) {
-    ov.style.setProperty("display", "none", "important");
-  }
+  if (ov) ov.style.setProperty("display", "none", "important");
 }
-// Globalne dostupna (pre inline onclick aj konzolu)
 window.closeModal = closeModal;
 
-function openModal(parcel, report) {
-  const text = report?.text_report || "(bez reportu)";
-  document.getElementById("modal-title").textContent = parcel.title || "Detail";
-  document.getElementById("modal-body").textContent  = text;
+function openModal(parcel, _reportLegacy) {
+  document.getElementById("modal-title").textContent = parcel.title || "Detail pozemku";
+  document.getElementById("modal-body").innerHTML = _buildModalHtml(parcel);
   const ov = document.getElementById("modal-overlay");
-  ov.style.removeProperty("display");        // zrus pripadny !important
+  ov.style.removeProperty("display");
   ov.style.setProperty("display", "flex", "important");
 }
 
-// ESC zatvorí modal
-document.addEventListener("keydown", e => {
-  if (e.key === "Escape") closeModal();
-});
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 
 // --- Helpers ---
 function getVal(id) { return (document.getElementById(id)?.value || "").trim(); }

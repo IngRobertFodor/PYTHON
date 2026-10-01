@@ -33,3 +33,5 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 data/cache/
+data/parcels.db
+# data/ priecinok sa vytvori automaticky pri prvom behu (storage_service.py)
