@@ -11,8 +11,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("btn-filter-apply").addEventListener("click", applyFilter);
   document.getElementById("btn-filter-reset").addEventListener("click", resetFilter);
   document.getElementById("chk-all").addEventListener("change", onChkAllChange);
-  document.getElementById("btn-export-csv").addEventListener("click",  onExportCsv);
-  document.getElementById("btn-export-json").addEventListener("click", onExportJson);
+  document.getElementById("btn-export-csv").addEventListener("click",       onExportCsv);
+  document.getElementById("btn-export-json").addEventListener("click",      onExportJson);
+  document.getElementById("btn-export-json-slim").addEventListener("click", onExportJsonSlim);
   document.getElementById("modal-close").addEventListener("click",  closeModal);
   document.getElementById("modal-overlay").addEventListener("click", e => {
     if (e.target.id === "modal-overlay") closeModal();
@@ -219,24 +220,49 @@ const _COMP_META = {
   terrain_service:        { e: "⛰️",  n: "Terén",
     d: r => {
       const parts = [];
-      if (r.data?.slope_percent != null)  parts.push("sklon "+r.data.slope_percent+"%");
-      if (r.data?.elevation_m   != null)  parts.push(r.data.elevation_m+" m n.m.");
-      if (r.data?.landslide_risk === true) parts.push("⚠️ zosuv");
+      if (r.data?.slope_percent  != null) parts.push("sklon "+r.data.slope_percent+"%");
+      if (r.data?.elevation_m    != null) parts.push(r.data.elevation_m+" m n.m.");
+      if (r.data?.in_landslide_zone === true)  parts.push("⚠️ zosuv");
+      if (r.data?.radon_risk_class  != null)  parts.push("radon tr."+r.data.radon_risk_class);
       return parts.join(", ");
     }},
   bpej_service:           { e: "🌱", n: "Pôda (BPEJ)",
-    d: r => r.data?.protection_class != null
-      ? "trieda "+r.data.protection_class+(r.data.suitable_for_construction?" ✅":" ⚠️") : "" },
+    d: r => {
+      const parts = [];
+      const cls  = r.data?.protection_class;
+      const odv  = r.data?.estimated_odvody_eur_per_m2;
+      const suit = r.data?.suitable_for_construction;
+      const code = r.data?.bpej_code;
+      if (cls  != null) parts.push("trieda "+cls);
+      if (code)         parts.push("("+code+")");
+      if (odv  != null) parts.push("odvody "+odv.toFixed(2)+" €/m²");
+      if (suit === true)  parts.push("✅ vhodná na stavbu");
+      if (suit === false) parts.push("⚠️ nevhodná (drahé vyňatie)");
+      return parts.join(" · ");
+    }},
   overpass_service:       { e: "🛣️",  n: "Infraštruktúra",
     d: r => {
-      const rd = r.data?.road?.distance_m; const el = r.data?.electricity?.distance_m;
-      const p = [];
-      if (rd != null && rd < 9999) p.push("cesta "+Math.round(rd)+"m");
-      if (el != null && el < 9999) p.push("el. "+Math.round(el)+"m");
-      return p.join(", ");
+      const parts = [];
+      const road = r.data?.road || {};
+      const elec = r.data?.electricity || {};
+      const noise = r.data?.noise || {};
+      const env  = r.data?.environment || {};
+      if (road.distance_m != null && road.distance_m < 9999) parts.push("cesta "+Math.round(road.distance_m)+"m");
+      if (elec.distance_m != null && elec.distance_m < 9999) parts.push("el. "+Math.round(elec.distance_m)+"m");
+      if (noise.motorway_safe === false) parts.push("⚠️ diaľnica");
+      if (env.landfill_safe   === false) parts.push("⚠️ skládka");
+      if (env.industrial_safe === false) parts.push("⚠️ priemysel");
+      return parts.join(", ");
     }},
   protected_service:      { e: "🛡️",  n: "Ochranné pásma",
-    d: r => r.data?.vvn_safe === false ? "⚠️ VVN" : (r.data?.vtl_safe === false ? "⚠️ VTL" : "OK") },
+    d: r => {
+      const parts = [];
+      if (r.data?.in_natura2000) parts.push("⚠️ Natura 2000");
+      if (r.data?.in_chko)       parts.push("⚠️ CHKO");
+      if (r.data?.in_np)         parts.push("⚠️ NP");
+      if (r.data?.in_npr_pr)     parts.push("⚠️ NPR/PR");
+      return parts.length ? parts.join(", ") : "✅ bez ochrany";
+    }},
   zbgis_service:          { e: "📐", n: "Geometria (KN)",
     d: r => {
       const parts = [];
@@ -801,6 +827,44 @@ function onExportJson() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showStatus('Exportovaných ' + data.length + ' záznamov (JSON).', 'ok');
+}
+
+function onExportJsonSlim() {
+  // Slim export — bez results{} (GIS detaily) — menší súbor pre zdieľanie
+  const src = (_filteredResults && _filteredResults.length > 0) ? _filteredResults : _allResults;
+  if (!src || src.length === 0) {
+    showStatus('Žiadne výsledky na export.', 'error');
+    return;
+  }
+  const slim = src.map(p => ({
+    url:                  p.url,
+    source_portal:        p.source_portal,
+    title:                p.title,
+    location_text:        p.location_text,
+    price_eur:            p.price_eur,
+    area_sqm:             p.area_sqm,
+    price_per_sqm:        p.price_per_sqm,
+    lat:                  p.lat,
+    lon:                  p.lon,
+    preliminary_score:    p.preliminary_score,
+    prelim_recommendation:p.prelim_recommendation,
+    final_score:          p.final_score,
+    recommendation:       p.recommendation,
+    // J1 skvostu z overpass (len kľúčové polia)
+    direct_access:        p.results?.overpass_service?.data?.direct_access?.level  || null,
+    village_position:     p.results?.overpass_service?.data?.village_position?.position || null,
+    is_gem_candidate:     p.results?.overpass_service?.data?.is_gem_candidate       || false,
+    // L3 druh pozemku
+    druh_pozemku:         p.results?.zbgis_service?.data?.druh_pozemku || null,
+    is_agricultural:      p.results?.zbgis_service?.data?.is_agricultural || false,
+  }));
+  const blob = new Blob([JSON.stringify(slim, null, 2)], { type: 'application/json;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'pozemky_slim.json';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  showStatus('Exportovaných ' + slim.length + ' záznamov (JSON slim).', 'ok');
 }
 
 async function onResearchFinished() {

@@ -36,6 +36,11 @@
 | M2: frontend modal _COMP_META - oprava detailov (price_per_sqm, flood, terrain) | HOTOVO |
 | M3: frontend modal - druh pozemku (zbgis) + is_agricultural v detail texte | HOTOVO |
 | M4: frontend modal - odhad nakladov na zasietovanie (elektrina/cesta/voda v EUR) | HOTOVO |
+| N1: frontend modal _COMP_META - oprava vsetkych 8 komponentov (protected/terrain/bpej/overpass) | HOTOVO |
+| N2: bpej_service detail v modali (trieda+kod+odvody EUR/m2+vhodnost) | HOTOVO |
+| N3: JSON slim export (bez results{}) - btn-export-json-slim | HOTOVO |
+| N4: mapa legenda rozsirena o prelim skore farebnu skalu | HOTOVO |
+| N5: README_TYMTO_ZACAT aktualizovany (85km, nove schopnosti J1/L3) | HOTOVO |
 | Limity v criteria.yaml (cena 0-10000, vymera 350-1000) | HOTOVO |
 | C0: nehnutelnosti.sk - oprava markera (T23c11 -> dynamic RSC) | HOTOVO - 46 pozemkov nazivo |
 | C0: nehnutelnosti.sk - lokalita (ZNAME_OBCE 70km od BA) | HOTOVO - 46/46 s lokalitou |

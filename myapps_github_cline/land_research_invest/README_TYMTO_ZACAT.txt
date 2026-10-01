@@ -2,7 +2,7 @@ Land Research Invest
 ====================
 
 AI agent, ktory vyhladava dostupne stavebne pozemky
-(do 70 km od Bratislavy) a automaticky ich preveruje
+(do 85 km od Bratislavy) a automaticky ich preveruje
 podla kriterii, ktore su pre vas dolezite.
 
 Vy nastavite rozpocet a poziadavky. Agent urobi prieskum.
@@ -26,6 +26,10 @@ Pri kazdom najdenom pozemku agent automaticky skontroluje:
   Prostredie        Dialnica, priemysel, skladka v okoli?
   Chranene uzemia   Natura 2000, CHKO, narodny park?
   Tvar parcely      Sirka a pravidelnost (pre stavebnú ciaru)
+  Priama dostupnost Siete tesne vedla (< 50 m) = nizke naklady na pripojky
+  Poloha v obci     Okraj / Stred / Mimo -- okraj = rozvojovy potencial
+  Druh pozemku      Orna poda / zahrada / zastav. plocha (z katastra KN)
+  Skvost flag       Okraj dediny + priame siete + polnohospodarska poda = investicna premia
 
 Kazdy pozemok dostane skore od 0 do 100:
 

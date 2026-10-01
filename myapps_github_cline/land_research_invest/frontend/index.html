@@ -115,8 +115,9 @@
         </label>
         <span id="filter-count" class="filter-count"></span>
         <span class="filter-spacer"></span>
-        <button id="btn-export-csv"  class="btn btn-sm btn-outline" title="Exportovať všetky výsledky ako CSV (SK Excel)">&#11015; CSV</button>
-        <button id="btn-export-json" class="btn btn-sm btn-outline" title="Exportovať zobrazené výsledky ako JSON">&#11015; JSON</button>
+        <button id="btn-export-csv"      class="btn btn-sm btn-outline" title="Exportovať všetky výsledky ako CSV (SK Excel)">&#11015; CSV</button>
+        <button id="btn-export-json"     class="btn btn-sm btn-outline" title="Exportovať zobrazené výsledky ako JSON (plný)">&#11015; JSON</button>
+        <button id="btn-export-json-slim" class="btn btn-sm btn-outline" title="Exportovať zobrazené výsledky ako JSON (bez GIS detailov)">&#11015; JSON slim</button>
       </div>
 
       <!-- Tabuľka -->
@@ -193,6 +194,7 @@
     <!-- LEGENDA -->
     <div class="legend">
       <h3>Legenda</h3>
+      <div style="font-size:.68rem;color:#999;margin-bottom:4px">GIS skóre (plné)</div>
       <div class="legend-item">
         <div class="legend-dot" style="background:#2d7a2d"></div>
         <span>SILNA KUPA (85-100)</span>
@@ -208,6 +210,23 @@
       <div class="legend-item">
         <div class="legend-dot" style="background:#a02020"></div>
         <span>PRESKOCIT (0-49)</span>
+      </div>
+      <div style="font-size:.68rem;color:#999;margin:6px 0 4px">Prelim skóre (bez GIS, tlmené)</div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#4caf7d;opacity:.75"></div>
+        <span>Prelim &#8805;85</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#5b8fc9;opacity:.75"></div>
+        <span>Prelim 70–84</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#f0a060;opacity:.75"></div>
+        <span>Prelim 50–69</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#bdbdbd;opacity:.75"></div>
+        <span>Prelim &lt;50</span>
       </div>
     </div>
   </div>
@@ -231,11 +250,11 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <!-- App JS -->
-<script src="/static/js/config.js?v=14"></script>
-<script src="/static/js/api.js?v=14"></script>
-<script src="/static/js/demo.js?v=14"></script>
-<script src="/static/js/map.js?v=14"></script>
-<script src="/static/js/app.js?v=14"></script>
+<script src="/static/js/config.js?v=15"></script>
+<script src="/static/js/api.js?v=15"></script>
+<script src="/static/js/demo.js?v=15"></script>
+<script src="/static/js/map.js?v=15"></script>
+<script src="/static/js/app.js?v=15"></script>
 
 </body>
 </html>
