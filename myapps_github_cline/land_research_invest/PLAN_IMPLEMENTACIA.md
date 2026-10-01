@@ -32,6 +32,10 @@
 | L2: Watchlist x diff banner - sledovane parcely zvyraznene v diff (pocty) | HOTOVO |
 | L3: zbgis_service - druh pozemku z KN (druh_pozemku, is_agricultural, is_buildable) | HOTOVO - +12 testov |
 | L4: spustit.bat - health check port 5001, mkdir data, oneskoreny browser | HOTOVO |
+| M1: scoring_service - mrtvy kod odstraneny (r.268-270 za return) | HOTOVO |
+| M2: frontend modal _COMP_META - oprava detailov (price_per_sqm, flood, terrain) | HOTOVO |
+| M3: frontend modal - druh pozemku (zbgis) + is_agricultural v detail texte | HOTOVO |
+| M4: frontend modal - odhad nakladov na zasietovanie (elektrina/cesta/voda v EUR) | HOTOVO |
 | Limity v criteria.yaml (cena 0-10000, vymera 350-1000) | HOTOVO |
 | C0: nehnutelnosti.sk - oprava markera (T23c11 -> dynamic RSC) | HOTOVO - 46 pozemkov nazivo |
 | C0: nehnutelnosti.sk - lokalita (ZNAME_OBCE 70km od BA) | HOTOVO - 46/46 s lokalitou |

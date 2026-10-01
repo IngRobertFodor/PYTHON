@@ -265,11 +265,6 @@ def preliminary_score(parcel: Parcel) -> Parcel:
     return parcel
 
 
-    # Normalizacia: prepocitame na 100% aj ked niektoré sluzby chybaju
-    normalized = (weighted_sum / used_weight)
-    return round(normalized, 4), used_weight
-
-
 def _get_recommendation(score: float, thresholds: dict) -> str:
     """
     Vrati textove odporucanie na zaklade pragov z configu.

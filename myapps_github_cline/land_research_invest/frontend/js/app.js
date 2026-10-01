@@ -202,11 +202,28 @@ const _COMP_META = {
   distance_service:       { e: "📍", n: "Vzdialenosť od BA",
     d: r => r.data?.distance_km != null ? r.data.distance_km.toFixed(1)+" km" : "" },
   price_analysis_service: { e: "💰", n: "Cenová analýza",
-    d: r => r.data?.price_per_sqm_eur != null ? r.data.price_per_sqm_eur.toFixed(0)+" EUR/m²" : "" },
+    d: r => {
+      const parts = [];
+      const ppsm = r.data?.price_per_sqm;
+      const avg  = r.data?.local_avg_per_sqm;
+      const ratio = r.data?.price_ratio;
+      if (ppsm != null) parts.push(ppsm.toFixed(0)+" EUR/m²");
+      if (avg  != null) parts.push("priemer "+avg.toFixed(0));
+      if (r.data?.is_underpriced) parts.push("📉 podhodnotené");
+      if (r.data?.is_overpriced)  parts.push("📈 nadhodnotené");
+      if (r.data?.seller_motivated) parts.push("⏰ motivovaný predajca");
+      return parts.join(" · ");
+    }},
   flood_service:          { e: "🌊", n: "Záplavy",
-    d: r => r.data?.flood_zone ?? "" },
+    d: r => r.data?.in_flood_zone_q100 === true ? "⚠️ Q100 záplava!" : (r.data?.in_flood_zone_q100 === false ? "✅ mimo záplavy" : "") },
   terrain_service:        { e: "⛰️",  n: "Terén",
-    d: r => r.data?.slope_percent != null ? "sklon "+r.data.slope_percent+"%" : "" },
+    d: r => {
+      const parts = [];
+      if (r.data?.slope_percent != null)  parts.push("sklon "+r.data.slope_percent+"%");
+      if (r.data?.elevation_m   != null)  parts.push(r.data.elevation_m+" m n.m.");
+      if (r.data?.landslide_risk === true) parts.push("⚠️ zosuv");
+      return parts.join(", ");
+    }},
   bpej_service:           { e: "🌱", n: "Pôda (BPEJ)",
     d: r => r.data?.protection_class != null
       ? "trieda "+r.data.protection_class+(r.data.suitable_for_construction?" ✅":" ⚠️") : "" },
@@ -305,6 +322,15 @@ function _buildModalHtml(parcel) {
       if (bld.nearest_m != null)
         html += `<span style="font-size:.72rem;color:#555;align-self:center">dom: ${bld.nearest_m} m | 100m: ${bld.count_100m} dom. | 300m: ${bld.count_300m} dom.</span>`;
       html += `</div>`;
+
+      // M4: Odhad nakladov na zasietovanie
+      const costLines = _estimateConnectionCosts(ov);
+      if (costLines.length > 0) {
+        html += `<div class="modal-section-title">Odhad nákladov na prípojky</div>
+          <div class="modal-infra-row" style="flex-direction:column;align-items:flex-start;gap:4px">`;
+        costLines.forEach(l => { html += `<span style="font-size:.76rem">${l}</span>`; });
+        html += `<span style="font-size:.68rem;color:#aaa">* orientačný odhad, overenie u dodávateľa nutné</span></div>`;
+      }
     }
   }
 
@@ -863,15 +889,65 @@ function _applyDiffFilter(filter) {
   else if (filter === "removed")  subset = _diffData.removed       || [];
   else { renderResultsTable(_allResults); return; }
 
-  // Zobraz len parcely ktore su v submnozine (podla URL)
   const urls = new Set(subset.map(p => p.url));
   const filtered = _allResults.filter(p => urls.has(p.url));
-  // Doplnim price_dropped data (price_prev, drop_pct) do zobrazenych zaznamov
   if (filter === "price_dropped") {
     const byUrl = Object.fromEntries((subset).map(p => [p.url, p]));
     renderResultsTable(filtered.map(p => Object.assign({}, byUrl[p.url] || p, p)));
   } else {
     renderResultsTable(filtered);
   }
+}
+
+// ----------------------------------------------------------------
+// M4: Odhad nakladov na zasietovanie (orientacny sadzobnik)
+// Vstup: overpass_service.data
+// ----------------------------------------------------------------
+function _estimateConnectionCosts(ov) {
+  const lines = [];
+  if (!ov) return lines;
+
+  const road  = ov.road        || {};
+  const elec  = ov.electricity || {};
+  const water = ov.water       || {};
+  const acc   = ov.direct_access || {};
+
+  // Elektrina - ~100 EUR/m pri podzemnom vedeni, min 2000 EUR
+  const elecM = elec.distance_m;
+  if (elecM != null && elecM < 9999) {
+    if (elecM <= 50) {
+      lines.push("⚡ Elektrina: " + Math.round(elecM) + " m → ✅ pri plote (~0–2 000 €)");
+    } else if (elecM <= 150) {
+      const est = Math.round(elecM * 100 / 1000) * 1000;
+      lines.push("⚡ Elektrina: " + Math.round(elecM) + " m → ~" + est.toLocaleString("sk-SK") + " € (odhad)");
+    } else {
+      const est = Math.round(elecM * 100 / 1000) * 1000;
+      lines.push("⚡ Elektrina: " + Math.round(elecM) + " m → ⚠️ ~" + est.toLocaleString("sk-SK") + " € (drahé, overte s ZSDIS)");
+    }
+  }
+
+  // Cesta - pristupova cesta ~50-200 EUR/m (povrch), min 5000 EUR
+  const roadM = road.distance_m;
+  if (roadM != null && roadM < 9999) {
+    if (roadM <= 20) {
+      lines.push("🛣️  Cesta:     " + Math.round(roadM) + " m → ✅ priamy prístup");
+    } else if (roadM <= 100) {
+      const est = Math.round(roadM * 100 / 1000) * 1000;
+      lines.push("🛣️  Cesta:     " + Math.round(roadM) + " m → ~" + est.toLocaleString("sk-SK") + " € (prístupovka)");
+    } else {
+      const est = Math.round(roadM * 150 / 1000) * 1000;
+      lines.push("🛣️  Cesta:     " + Math.round(roadM) + " m → ⚠️ ~" + est.toLocaleString("sk-SK") + " € (drahá prístupovka)");
+    }
+  }
+
+  // Voda - OSM waterway = vodny tok, NIE vodovod -> upozornenie
+  const waterM = water.distance_m;
+  if (waterM != null && waterM < 9999 && waterM <= 200) {
+    lines.push("💧 Vodný tok:  " + Math.round(waterM) + " m (OSM) — pre vodovod overiť u obce samostatne");
+  } else {
+    lines.push("💧 Voda:       nezistená do 200 m — studňa alebo obecný vodovod (overiť)");
+  }
+
+  return lines;
 }
 
