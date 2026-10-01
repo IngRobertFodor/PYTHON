@@ -19,6 +19,11 @@ class TestNormalizeObec:
     def test_malacky(self):          assert normalize_obec("Malacky") == "malacky"
     def test_modra(self):            assert normalize_obec("Modrá") == "modra"
     def test_double_space(self):     assert normalize_obec("Vel'ký  Biel") == "velky-biel"
+
+    def test_hyphen_velky_meder(self):   assert normalize_obec("Velky-Meder") == "velky-meder"
+    def test_hyphen_nova_vieska(self):   assert normalize_obec("Nova-Vieska") == "nova-vieska"
+    def test_hyphen_with_diacritics(self): assert normalize_obec("Ivanka-pri-Dunaji") == "ivanka-pri-dunaji"
+    def test_hyphen_in_first_part(self): assert normalize_obec("Velky-Meder, okr. Komarno") == "velky-meder"
     def test_keeps_numbers(self):    assert normalize_obec("Bratislava IV") == "bratislava-iv"
     def test_pezinok(self):          assert normalize_obec("Pezinok, Slovakia") == "pezinok"
 
@@ -57,6 +62,15 @@ class TestBuildUpLinks:
         r = build_up_links("Senec")
         urls = [l["url"] for l in r["fallback_links"]]
         assert any("gisplan" in u for u in urls)
+
+    def test_fallback_count(self):
+        r = build_up_links("Senec")
+        assert len(r["fallback_links"]) >= 5
+
+    def test_fallback_contains_obec_sk(self):
+        r = build_up_links("Senec")
+        urls = [l["url"] for l in r["fallback_links"]]
+        assert any("senec.sk" in u for u in urls)
 
     def test_fallback_contains_zbgis(self):
         r = build_up_links("Senec")

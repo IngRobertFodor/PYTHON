@@ -13,7 +13,7 @@
 | Frontend (mapa, karty, modal, demo) | HOTOVO |
 | Scraper kostra (BaseScraper, registry, scrape_all) | HOTOVO |
 | nehnutelnosti_sk parser | HOTOVO |
-| Testy | **1173, 0 zlyh** |
+| Testy | **1179, 0 zlyh** |
 | J1: overpass_service - classify_access / classify_position / is_gem_candidate | HOTOVO - +35 testov |
 | J1: criteria.yaml - access_classification sekcia (full_m, partial_m, core/edge prahy) | HOTOVO |
 | J1: frontend - Infra stlpec, skvost/priama/okraj badgese + filter | HOTOVO |
@@ -49,6 +49,10 @@
 | P1: GET /api/scrape/up-links endpoint (location, check=1) | HOTOVO |
 | P1: frontend modal - UP asistent sekcia (gisplan odkaz, fallback, checklist) | HOTOVO |
 | P1: gisplan.sk reverse-engineering - subdomeny obc, UP mapa URL vzor potvrdeny | HOTOVO |
+| P2-V1: normalize_obec - oprava slug bug (pomlcka v nazve obce, +4 testy) | HOTOVO |
+| P2-V2: fallback +stranka obce (<obec>.sk) +3 cielene Google dotazy (7 odkazov celkom) | HOTOVO |
+| P2-V3: cache warming po scrape_all (top 200 obce na pozadi) | HOTOVO |
+| P2-V3: GET /api/scrape/up-coverage (pokrytie gisplan.sk z cache, 0 HTTP) | HOTOVO |
 | Limity v criteria.yaml (cena 0-10000, vymera 350-1000) | HOTOVO |
 | C0: nehnutelnosti.sk - oprava markera (T23c11 -> dynamic RSC) | HOTOVO - 46 pozemkov nazivo |
 | C0: nehnutelnosti.sk - lokalita (ZNAME_OBCE 70km od BA) | HOTOVO - 46/46 s lokalitou |
@@ -108,8 +112,8 @@
 | spustit.bat: auto-otvorenie prehliadaca + odstraneny playwright install | HOTOVO |
 | Dokumentacia: AKO_SPUSTIT, README, ARCHITEKTURA zosúladene s realitou | HOTOVO |
 | PLAN: vsetky otvorene [ ] -> [~] SKIP (B5.3-B5.6, B6, C, D1-D3) | HOTOVO |
-| Testy | **1173, 0 zlyh** |
-| Testy | **1173, 0 zlyh** |
+| Testy | **1179, 0 zlyh** |
+| Testy | **1179, 0 zlyh** |
 
 ---
 

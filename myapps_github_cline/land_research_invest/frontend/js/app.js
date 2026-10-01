@@ -383,24 +383,38 @@ function _buildModalHtml(parcel) {
 }
 
 function _loadUpLinks(location) {
+  // check=false = z cache (instantne), check=true = live HTTP (5s)
+  // Najprv z cache, potom ak null -> live check
   apiUpLinks(location, false).then(d => {
     const el = document.getElementById("up-asistent-content");
     if (!el) return;
     let h = "";
-    // Gisplan UP mapa (ak ma)
-    if (d.gisplan_up_url && d.has_gisplan === true) {
-      h += `<a href="${d.gisplan_up_url}" target="_blank" class="up-btn up-btn-primary">
-        🗺️ Otvoriť ÚP mapu obce ${d.obec}</a>`;
-    } else if (d.gisplan_up_url) {
-      h += `<span style="color:#aaa">gisplan.sk pre túto obec neoverené — skús klik:</span>
-        <a href="${d.gisplan_up_url}" target="_blank" class="up-btn">🗺️ GISPLAN ${d.obec}</a>`;
+
+    // Gisplan UP mapa
+    if (d.gisplan_up_url) {
+      if (d.has_gisplan === true) {
+        // Potvrdene ma gisplan
+        h += `<a href="${d.gisplan_up_url}" target="_blank" class="up-btn up-btn-primary">
+          🗺️ Otvoriť ÚP mapu obce ${d.obec}</a>`;
+      } else if (d.has_gisplan === false) {
+        // Potvrdene NEMA gisplan - nezobrazuj zmatajuci odkaz
+        h += `<div style="font-size:.72rem;color:#aaa;margin-bottom:4px">
+          GISPLAN.sk pre obec <b>${d.obec}</b> nie je dostupný — použi nižšie uvedené zdroje.</div>`;
+      } else {
+        // null = neoverene (cache prazdna) - zobraz skúsit klik
+        h += `<a href="${d.gisplan_up_url}" target="_blank" class="up-btn"
+          title="Možno k dispozícii — klikni a uvidíš">🗺️ Skúsiť GISPLAN ${d.obec}</a>
+          <span style="font-size:.68rem;color:#aaa;margin-left:4px">(neoverené)</span>`;
+      }
     }
-    // Fallback odkazy
+
+    // Fallback odkazy — zobraz všetky (V2: stránka obce + 3 cielenejšie Google)
     h += `<div class="up-links-row">`;
-    (d.fallback_links || []).slice(0, 4).forEach(l => {
+    (d.fallback_links || []).forEach(l => {
       h += `<a href="${l.url}" target="_blank" class="up-link" title="${l.hint || ""}">${l.label}</a>`;
     });
     h += `</div>`;
+
     // Checklist
     const cl = d.checklist || [];
     if (cl.length) {

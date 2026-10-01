@@ -8,6 +8,7 @@ GET  /api/scrape/score-progress  -> stav plneho scoringu
 GET  /api/scrape/runs            -> zoznam poslednych behov (SQLite)
 GET  /api/scrape/diff            -> diff poslednych 2 behov (nove/zrusene/zlacnene)
 GET  /api/scrape/up-links        -> UP asistent pre danu lokalitu (?location=<text>&check=1)
+GET  /api/scrape/up-coverage     -> pokrytie gisplan.sk pre obce z behu (z cache)
 """
 
 import threading
@@ -21,7 +22,7 @@ from services.storage_service  import (
     load_last_run, list_runs, load_run,
 )
 from services.diff_service        import compute_diff
-from services.uzemny_plan_service import build_up_links
+from services.uzemny_plan_service import build_up_links, normalize_obec, warm_cache
 from models.parcel import Parcel
 
 scrape_bp = Blueprint("scrape", __name__)
@@ -108,6 +109,20 @@ def scrape_start():
                     save_run(analyzed)
                 except Exception as exc:
                     print(f"[scrape_routes] save_run failed: {exc}")
+            # V3: warm gisplan cache pre top obce (na pozadi, neblokuje)
+            if analyzed:
+                try:
+                    top_slugs = list({
+                        normalize_obec(p.get("location_text", ""))
+                        for p in analyzed[:200]
+                        if p.get("location_text")
+                    } - {""})
+                    threading.Thread(
+                        target=warm_cache, args=(top_slugs,),
+                        daemon=True, name="gisplan_warm"
+                    ).start()
+                except Exception as exc:
+                    print(f"[scrape_routes] warm_cache failed: {exc}")
         finally:
             _scrape_lock.release()
 
@@ -323,4 +338,54 @@ def scrape_up_links():
         return jsonify(links), 200
     except Exception as exc:
         return jsonify({"error": str(exc)}), 500
+
+
+@scrape_bp.route("/up-coverage", methods=["GET"])
+def scrape_up_coverage():
+    """
+    Vrati prehlad pokrytia gisplan.sk pre obce z posledneho behu.
+    Pouziva len cache (0 HTTP). Ak cache je prazdna, vrati prazdne vysledky.
+    GET /api/scrape/up-coverage
+    """
+    from services.uzemny_plan_service import _gisplan_cache, _cache_lock
+    items = _get_last_results()
+    if not items:
+        return jsonify({"coverage_pct": 0, "has_gisplan": [],
+                        "no_gisplan": [], "unchecked": 0,
+                        "total_unique_obec": 0}), 200
+
+    # Zisti unikatne obce z vysledkov
+    seen_slugs: dict = {}
+    for p in items:
+        loc = p.get("location_text", "")
+        if loc:
+            slug = normalize_obec(loc)
+            if slug and slug not in seen_slugs:
+                seen_slugs[slug] = loc.split(",")[0].strip()
+
+    with _cache_lock:
+        cache_snap = dict(_gisplan_cache)
+
+    has_gisplan, no_gisplan, unchecked = [], [], 0
+    for slug, obec in seen_slugs.items():
+        val = cache_snap.get(slug)
+        if val is True:
+            has_gisplan.append({"slug": slug, "obec": obec,
+                                 "gisplan_up": f"https://{slug}.gisplan.sk/mapa/uzemny-plan/"})
+        elif val is False:
+            no_gisplan.append({"slug": slug, "obec": obec})
+        else:
+            unchecked += 1
+
+    checked = len(has_gisplan) + len(no_gisplan)
+    pct = round(100 * len(has_gisplan) / checked) if checked > 0 else 0
+
+    return jsonify({
+        "coverage_pct":     pct,
+        "has_gisplan":      sorted(has_gisplan, key=lambda x: x["obec"]),
+        "no_gisplan_count": len(no_gisplan),
+        "unchecked":        unchecked,
+        "total_unique_obec": len(seen_slugs),
+        "checked":          checked,
+    }), 200
 

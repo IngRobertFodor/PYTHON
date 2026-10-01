@@ -55,13 +55,19 @@ def normalize_obec(location_text: str) -> str:
       "Bernolákovo"                   -> "bernolakovo"
       "Ivanka pri Dunaji, okr. Senec" -> "ivanka-pri-dunaji"
       "Kamenný Most"                  -> "kamenny-most"
+      "Velky-Meder"                   -> "velky-meder"   (pomlcka zachovana)
+      "Nova-Vieska"                   -> "nova-vieska"
     """
     if not location_text:
         return ""
     text = location_text.split(",")[0].strip()
     nfkd = unicodedata.normalize("NFKD", text)
     ascii_text = "".join(c for c in nfkd if not unicodedata.combining(c))
-    cleaned = re.sub(r"[^a-z0-9 ]", "", ascii_text.lower())
+    # Pomlcka a medzera su oba oddelovace slov -> unifikuj na medzeru
+    unified = re.sub(r"[-_]", " ", ascii_text.lower())
+    # Ponechaj len pismena, cislice a medzery
+    cleaned = re.sub(r"[^a-z0-9 ]", "", unified)
+    # Medzery na pomlcky, viac pomlciek na jednu
     slug = re.sub(r"\s+", "-", cleaned.strip())
     slug = re.sub(r"-{2,}", "-", slug)
     return slug
@@ -103,35 +109,70 @@ def build_up_links(location_text: str, check_gisplan: bool = False) -> dict:
 
 
 def _build_fallback_links(obec: str, slug: str) -> list:
-    q_up    = (obec + " územný plán").replace(" ", "+")
-    q_zmena = (obec + " zmena územný plán").replace(" ", "+")
+    """
+    Fallback odkazy pre overenie UP bez gisplan.sk.
+    Pokryva: stranku obce, ZBGIS, geoportal, cielenych Google dotazy.
+    """
+    q_up       = (obec + " územný plán").replace(" ", "+")
+    q_pdf      = ('"' + obec + '" UPN mapa OR pdf').replace(" ", "+")
+    q_zmena    = (obec + " zmena územný plán").replace(" ", "+")
+    q_samospr  = (obec + " územné plánovanie samospráva").replace(" ", "+")
+
     links = []
+
+    # 1. Priamy odkaz na stranku obce (format <slug>.sk je bezny pre SK obce)
+    if slug:
+        # Pouzij prvu cast slugu (bez okresu/kraja) pre domenove meno
+        obec_domain = slug.split("-")[0] if "-" in slug else slug
+        links.append({
+            "label": f"🏛️ Stránka obce {obec}",
+            "url":   f"https://www.{slug}.sk/",
+            "hint":  "Hladaj sekciu 'Územné plánovanie' alebo 'Samospráva > ÚP'",
+        })
+
+    # 2. gisplan.sk katalog obci
     if slug:
         links.append({
             "label": "🗺️ GISPLAN katalóg",
             "url":   f"https://{slug}.gisplan.sk/",
-            "hint":  "Skontroluj ci ma obec mapovy portal",
+            "hint":  "Skontroluj ci ma obec mapovy portal (nie vsetky obce ho maju)",
         })
+
+    # 3. ZBGIS mapovy klient
     links.append({
         "label": "📐 ZBGIS mapový klient",
         "url":   "https://zbgis.skgeodesy.sk/mkzbgis/sk/zakladna-mapa",
         "hint":  "Vyhladaj parcelu v katastrálnej mape SR",
     })
+
+    # 4. Geoportal SR
     links.append({
         "label": "🌐 Geoportál SR",
         "url":   "https://www.geoportal.gov.sk/sk/zbgis/",
         "hint":  "Mapy a GIS sluzby SR",
     })
+
+    # 5. Google: UP mapa/pdf (cielenejsi ako len 'uzemny plan')
     links.append({
-        "label": f"🔍 Google: '{obec} územný plán'",
-        "url":   f"https://www.google.sk/search?q={q_up}",
-        "hint":  "Najdi oficialnu stranku alebo PDF uzemneho planu",
+        "label": f"🔍 ÚP mapa/PDF: '{obec}'",
+        "url":   f"https://www.google.sk/search?q={q_pdf}",
+        "hint":  "Najdi PDF alebo mapovy subor uzemneho planu obce",
     })
+
+    # 6. Google: uzemne planovanie na stranke obce
     links.append({
-        "label": f"🔍 Google: zmena ÚP '{obec}'",
+        "label": f"🔍 ÚP samospráva: '{obec}'",
+        "url":   f"https://www.google.sk/search?q={q_samospr}",
+        "hint":  "Najdi sekciu uzemneho planovania na stranke samospravy",
+    })
+
+    # 7. Google: zmena UP (najdolezitejsi pre investicne rozhodnutie)
+    links.append({
+        "label": f"🔍 Zmena ÚP: '{obec}'",
         "url":   f"https://www.google.sk/search?q={q_zmena}",
         "hint":  "Zisti ci bola schvalena zmena uzemneho planu",
     })
+
     return links
 
 
