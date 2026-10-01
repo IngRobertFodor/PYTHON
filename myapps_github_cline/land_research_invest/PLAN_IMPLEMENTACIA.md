@@ -13,7 +13,7 @@
 | Frontend (mapa, karty, modal, demo) | HOTOVO |
 | Scraper kostra (BaseScraper, registry, scrape_all) | HOTOVO |
 | nehnutelnosti_sk parser | HOTOVO |
-| Testy | **1128, 0 zlyh** |
+| Testy | **1140, 0 zlyh** |
 | J1: overpass_service - classify_access / classify_position / is_gem_candidate | HOTOVO - +35 testov |
 | J1: criteria.yaml - access_classification sekcia (full_m, partial_m, core/edge prahy) | HOTOVO |
 | J1: frontend - Infra stlpec, skvost/priama/okraj badgese + filter | HOTOVO |
@@ -28,6 +28,10 @@
 | K2: testy /api/scrape/runs + /api/scrape/diff endpointov (+9 testov) | HOTOVO |
 | K3: Watchlist - hviezdicka v tabulke, localStorage, filter Sledovane | HOTOVO |
 | K4: CSV export +Priama_dostupnost, Poloha_v_obci, Skvost stlpce | HOTOVO |
+| L1: renderPrelimMap - mapa ihned po nacitani (prelim aj final score markery) | HOTOVO |
+| L2: Watchlist x diff banner - sledovane parcely zvyraznene v diff (pocty) | HOTOVO |
+| L3: zbgis_service - druh pozemku z KN (druh_pozemku, is_agricultural, is_buildable) | HOTOVO - +12 testov |
+| L4: spustit.bat - health check port 5001, mkdir data, oneskoreny browser | HOTOVO |
 | Limity v criteria.yaml (cena 0-10000, vymera 350-1000) | HOTOVO |
 | C0: nehnutelnosti.sk - oprava markera (T23c11 -> dynamic RSC) | HOTOVO - 46 pozemkov nazivo |
 | C0: nehnutelnosti.sk - lokalita (ZNAME_OBCE 70km od BA) | HOTOVO - 46/46 s lokalitou |
@@ -87,8 +91,8 @@
 | spustit.bat: auto-otvorenie prehliadaca + odstraneny playwright install | HOTOVO |
 | Dokumentacia: AKO_SPUSTIT, README, ARCHITEKTURA zosúladene s realitou | HOTOVO |
 | PLAN: vsetky otvorene [ ] -> [~] SKIP (B5.3-B5.6, B6, C, D1-D3) | HOTOVO |
-| Testy | **1128, 0 zlyh** |
-| Testy | **1128, 0 zlyh** |
+| Testy | **1140, 0 zlyh** |
+| Testy | **1140, 0 zlyh** |
 
 ---
 

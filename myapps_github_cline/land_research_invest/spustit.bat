@@ -15,6 +15,15 @@ if errorlevel 1 (
     exit /b 1
 )
 
+:: Kontrola portu 5001 - ak uz bezi, len otvor prehliadac
+netstat -ano | findstr ":5001 " | findstr "LISTENING" >nul 2>&1
+if not errorlevel 1 (
+    echo [INFO] Server uz bezi na porte 5001.
+    echo [INFO] Otvoram prehliadac...
+    start "" http://localhost:5001
+    exit /b 0
+)
+
 :: Nacitaj .env ak existuje
 if exist .env (
     for /f "tokens=1,2 delims==" %%a in (.env) do (
@@ -34,13 +43,15 @@ if errorlevel 1 (
     )
 )
 
+:: Vytvor priecinok pre databazu ak neexistuje
+if not exist data mkdir data
 
-:: Otvor prehliadac (server startujem ihned po tom)
-start "" http://localhost:5001
+:: Otvor prehliadac po 3s (server potrebuje chvilu na start)
+start "" /wait cmd /c "timeout /t 3 /nobreak >nul && start "" http://localhost:5001"
 
 :: Spustenie Flask servera
 echo [OK] Spustam server na http://localhost:5001 ...
-echo Zastavenie: stlacte Ctrl+C
+echo Zastavenie: stlacte Ctrl+C alebo zavrite toto okno
 echo.
 cd backend
 python app.py

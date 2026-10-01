@@ -55,13 +55,18 @@ def check(lat: float, lon: float,
             ok=True,
             score=score,
             data={
-                "area_sqm": geometry["area_sqm"],
-                "width_m": geometry["width_m"],
-                "length_m": geometry["length_m"],
+                "area_sqm":         geometry["area_sqm"],
+                "width_m":          geometry["width_m"],
+                "length_m":         geometry["length_m"],
                 "shape_regularity": geometry["shape_regularity"],
-                "meets_min_area": geometry["area_sqm"] >= cfg.get("min_area_sqm", 600),
-                "meets_min_width": geometry["width_m"] >= cfg.get("min_width_m", 15),
-                "parcel_number": parcel_number or "",
+                "meets_min_area":   geometry["area_sqm"] >= cfg.get("min_area_sqm", 600),
+                "meets_min_width":  geometry["width_m"]  >= cfg.get("min_width_m",  15),
+                "parcel_number":    parcel_number or "",
+                # L3: Druh pozemku z KN
+                "druh_pozemku":     geometry.get("druh_pozemku",     "neznamy"),
+                "druh_pozemku_raw": geometry.get("druh_pozemku_raw", ""),
+                "is_agricultural":  geometry.get("is_agricultural",  False),
+                "is_buildable":     geometry.get("is_buildable",     False),
             },
             source=SERVICE_NAME,
         )
@@ -177,17 +182,58 @@ def _parse_wfs_response(response: requests.Response,
                 if bbox and area:
                     width, length = _bbox_to_dimensions(bbox)
                     regularity = _calculate_regularity(area, width, length)
+                    # Druh pozemku z KN (L3) — kluc moze byt DRUH_POZEMKU alebo DRUH
+                    druh_raw = (props.get("DRUH_POZEMKU") or props.get("DRUH")
+                                or props.get("druh_pozemku") or props.get("druh") or "")
+                    druh_norm = _normalize_druh(str(druh_raw))
                     return {
                         "area_sqm": area,
                         "width_m": width,
                         "length_m": length,
                         "shape_regularity": regularity,
                         "bbox": bbox,
+                        "druh_pozemku_raw":  druh_raw,
+                        "druh_pozemku":      druh_norm,
+                        "is_agricultural":   druh_norm in {"orna_poda", "ttp", "zahrada", "ovocny_sad"},
+                        "is_buildable":      druh_norm in {"zastav_plocha", "ine"},
                     }
         except Exception:
             pass
 
     raise RuntimeError(f"Nepodarilo sa parsovat WFS: {response.text[:200]}")
+
+
+# Mapovanie slovenskych druhov pozemku na normalizovany retazec
+_DRUH_MAP = {
+    "orná pôda":            "orna_poda",
+    "orna poda":            "orna_poda",
+    "trvalý trávny porast": "ttp",
+    "trvaly travny porast": "ttp",
+    "ttp":                  "ttp",
+    "záhrada":              "zahrada",
+    "zahrada":              "zahrada",
+    "ovocný sad":           "ovocny_sad",
+    "ovocny sad":           "ovocny_sad",
+    "zastavané plochy":     "zastav_plocha",
+    "zastav":               "zastav_plocha",
+    "les":                  "lesny_pozemok",
+    "lesný pozemok":        "lesny_pozemok",
+    "lesny pozemok":        "lesny_pozemok",
+    "vodná plocha":         "vodna_plocha",
+    "vodna plocha":         "vodna_plocha",
+    "ostatná plocha":       "ine",
+    "ostatna plocha":       "ine",
+    "ine":                  "ine",
+}
+
+
+def _normalize_druh(raw: str) -> str:
+    """Normalizuje druh pozemku z KN na jednoduchy identifikator."""
+    low = raw.lower().strip()
+    for k, v in _DRUH_MAP.items():
+        if k in low:
+            return v
+    return low or "neznamy"
 
 
 def _extract_area(props: dict) -> float | None:

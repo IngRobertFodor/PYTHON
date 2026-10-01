@@ -221,7 +221,13 @@ const _COMP_META = {
   protected_service:      { e: "🛡️",  n: "Ochranné pásma",
     d: r => r.data?.vvn_safe === false ? "⚠️ VVN" : (r.data?.vtl_safe === false ? "⚠️ VTL" : "OK") },
   zbgis_service:          { e: "📐", n: "Geometria (KN)",
-    d: r => r.data?.area_sqm != null ? r.data.area_sqm+" m²" : "" },
+    d: r => {
+      const parts = [];
+      if (r.data?.area_sqm != null) parts.push(r.data.area_sqm+" m²");
+      if (r.data?.druh_pozemku && r.data.druh_pozemku !== "neznamy")
+        parts.push(r.data.druh_pozemku.replace(/_/g," "));
+      return parts.join(" · ");
+    }},
   cadastral_service:      { e: "📋", n: "Kataster",
     d: r => r.data?.has_plombs ? "⚠️ plomba" : "" },
 };
@@ -483,6 +489,9 @@ function renderResultsTable(items) {
   const fc = document.getElementById("filter-count");
   if (fc) fc.textContent = (items.length) + " pozemkov";
 
+  // Aktualizuj mapu s dostupnymi suradnicami
+  renderPrelimMap(items);
+
   items.forEach((p, idx) => {
     const score = (p.preliminary_score || 0).toFixed(1);
     const col   = prelim_color(p.preliminary_score || 0);
@@ -557,6 +566,55 @@ function renderResultsTable(items) {
 }
 // Globalne dostupna
 window.renderResultsTable = renderResultsTable;
+
+// --- Mapa pre pre-scored parcely (zobraz ihned po nacitani, bez GIS) ---
+function renderPrelimMap(items) {
+  clearMarkers();
+  let shown = 0;
+  items.forEach(p => {
+    const lat = p.lat || 0;
+    const lon = p.lon || 0;
+    if (!lat || !lon) return;
+    // Pouzij final_score ak je, inak preliminary_score
+    const hasFinal = p.final_score && p.final_score > 0;
+    const score = hasFinal ? p.final_score : (p.preliminary_score || 0);
+    const rec   = hasFinal
+      ? (p.recommendation || "N/A")
+      : (p.prelim_recommendation || "N/A");
+    // Prelim farba = seda odtien aby sa odlisila od plneho GIS
+    const col = hasFinal ? recColor(rec) : _prelimMapColor(score);
+    const icon = L.divIcon({
+      className: "",
+      html: `<div style="background:${col.bg};color:${col.text};border:2px solid ${col.border};
+        border-radius:50%;width:30px;height:30px;display:flex;align-items:center;
+        justify-content:center;font-weight:bold;font-size:10px;
+        box-shadow:0 1px 4px rgba(0,0,0,.35);cursor:pointer;
+        opacity:${hasFinal ? 1 : 0.75}">${Math.round(score)}</div>`,
+      iconSize: [30, 30], iconAnchor: [15, 15],
+    });
+    const isReal = p.url && p.url.startsWith("http") && !p.url.includes("/demo/");
+    const linkHtml = isReal ? `<br><a href="${p.url}" target="_blank" style="font-size:.78rem">Inzerát →</a>` : "";
+    const popup = `<b>${p.title||"Pozemok"}</b><br>
+      ${hasFinal ? `<span style="color:${col.bg};font-weight:bold">${rec}</span> ${score.toFixed(1)}/100` : `Prelim: ${score.toFixed(1)}`}<br>
+      ${(p.price_eur||0).toLocaleString("sk-SK")} EUR &bull; ${(p.area_sqm||0).toLocaleString("sk-SK")} m²${linkHtml}`;
+    const marker = L.marker([lat, lon], { icon })
+      .addTo(_map)
+      .bindTooltip(`<b>${p.title||"Pozemok"}</b><br>${score.toFixed(1)}${hasFinal?"/100":" pre"}`, { direction:"top", offset:[0,-16] })
+      .bindPopup(popup);
+    marker.on("click", () => openModal(p, p.results?.report_service?.data||{}));
+    _markers.push(marker);
+    shown++;
+  });
+  if (shown > 0) fitMapToMarkers();
+}
+
+function _prelimMapColor(score) {
+  // Tlmene farby pre pre-scored markery (bez GIS)
+  if (score >= 85) return { bg:"#4caf7d", text:"#fff", border:"#2e7d32" };
+  if (score >= 70) return { bg:"#5b8fc9", text:"#fff", border:"#1565c0" };
+  if (score >= 50) return { bg:"#f0a060", text:"#fff", border:"#e65100" };
+  return             { bg:"#bdbdbd", text:"#fff", border:"#757575" };
+}
 
 function applyFilter() {
   const zdroj = document.getElementById("filter-zdroj").value;
@@ -759,28 +817,31 @@ function _renderDiffBanner(d) {
   const banner = document.getElementById("diff-banner");
   if (!banner) return;
   const s = d.summary || {};
-  // Ak prvy beh (note = iba jeden beh) alebo vsetko je "nove" a nic ine -> skry
   if (!s.new && !s.removed && !s.price_dropped) {
     banner.classList.add("hidden");
     return;
   }
   banner.classList.remove("hidden");
 
+  // Watchlist prienik — koľko sledovaných sa zmenilo
+  const wl = wlLoad();
+  const wlNew     = wl.size > 0 ? (d.new           || []).filter(p => wl.has(p.url)).length : 0;
+  const wlCheap   = wl.size > 0 ? (d.price_dropped || []).filter(p => wl.has(p.url)).length : 0;
+  const wlRemoved = wl.size > 0 ? (d.removed       || []).filter(p => wl.has(p.url)).length : 0;
+
   const chips = [];
-  if (s.new)           chips.push(`<span class="diff-chip diff-new"   data-filter="new">✨ ${s.new} nových</span>`);
-  if (s.price_dropped) chips.push(`<span class="diff-chip diff-cheap" data-filter="price_dropped">📉 ${s.price_dropped} zlacneli</span>`);
-  if (s.removed)       chips.push(`<span class="diff-chip diff-gone"  data-filter="removed">🗑️ ${s.removed} zmizlo</span>`);
+  if (s.new)           chips.push(`<span class="diff-chip diff-new"   data-filter="new">✨ ${s.new} nových${wlNew ? ` <b>(⭐${wlNew})</b>` : ""}</span>`);
+  if (s.price_dropped) chips.push(`<span class="diff-chip diff-cheap" data-filter="price_dropped">📉 ${s.price_dropped} zlacneli${wlCheap ? ` <b>(⭐${wlCheap})</b>` : ""}</span>`);
+  if (s.removed)       chips.push(`<span class="diff-chip diff-gone"  data-filter="removed">🗑️ ${s.removed} zmizlo${wlRemoved ? ` <b>(⭐${wlRemoved})</b>` : ""}</span>`);
   if (s.still_here)    chips.push(`<span class="diff-chip diff-same"  data-filter="none">${s.still_here} nezmenených</span>`);
 
   const note = d.note ? `<span style="font-size:.70rem;color:#888;margin-left:4px">${d.note}</span>` : "";
   banner.innerHTML = `<span class="diff-title">Zmeny od minulého behu:</span>${chips.join("")}${note}`;
 
-  // Listenery na chipy — filter tabulky
   banner.querySelectorAll(".diff-chip[data-filter]").forEach(chip => {
     chip.addEventListener("click", () => {
       const f = chip.dataset.filter;
       if (_diffFilter === f) {
-        // Druhy klik = zrus filter
         _diffFilter = null;
         banner.querySelectorAll(".diff-chip").forEach(c => c.classList.remove("diff-filter-active"));
         renderResultsTable(_allResults);

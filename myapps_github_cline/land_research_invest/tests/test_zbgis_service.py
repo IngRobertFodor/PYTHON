@@ -200,3 +200,99 @@ class TestCheckFunction:
             r = check(BASE_LAT, BASE_LON)
         assert r.data.get("skipped") is True
 
+
+
+# ----------------------------------------------------------------
+# TestNormalizeDruh + TestDruhInGeometry (L3)
+# ----------------------------------------------------------------
+
+from services.zbgis_service import _normalize_druh
+
+
+class TestNormalizeDruh:
+    def test_orna_poda(self):
+        assert _normalize_druh("Orná pôda") == "orna_poda"
+
+    def test_orna_poda_lower(self):
+        assert _normalize_druh("orna poda") == "orna_poda"
+
+    def test_ttp(self):
+        assert _normalize_druh("TTP") == "ttp"
+
+    def test_trvaly_travny_porast(self):
+        assert _normalize_druh("trvalý trávny porast") == "ttp"
+
+    def test_zahrada(self):
+        assert _normalize_druh("Záhrada") == "zahrada"
+
+    def test_zastav(self):
+        assert _normalize_druh("zastavané plochy a nádvoria") == "zastav_plocha"
+
+    def test_les(self):
+        assert _normalize_druh("Lesný pozemok") == "lesny_pozemok"
+
+    def test_empty_returns_neznamy(self):
+        assert _normalize_druh("") == "neznamy"
+
+    def test_unknown_returns_lowercased(self):
+        r = _normalize_druh("Nieco Uplne XYZ")
+        assert r == "nieco uplne xyz"
+
+
+class TestDruhInCheckOutput:
+    def _good_geojson(self, druh_val="Orná pôda"):
+        import json
+        return json.dumps({"features": [{
+            "geometry": {"type": "Polygon", "coordinates": [
+                [[0,0],[100,0],[100,80],[0,80],[0,0]]
+            ]},
+            "properties": {"VYMERA": 8000, "DRUH_POZEMKU": druh_val}
+        }]})
+
+    @patch("services.zbgis_service.requests.get")
+    def test_druh_pozemku_in_result(self, mock_get):
+        from unittest.mock import MagicMock
+        m = MagicMock()
+        m.status_code = 200
+        m.headers = {"content-type": "application/json"}
+        m.json.return_value = {"features": [{
+            "geometry": {"type": "Polygon", "coordinates": [[[0,0],[100,0],[100,80],[0,80],[0,0]]]},
+            "properties": {"VYMERA": 8000, "DRUH_POZEMKU": "Orná pôda"}
+        }]}
+        mock_get.return_value = m
+        from services.zbgis_service import check
+        r = check(48.2, 17.4)
+        assert r.data.get("druh_pozemku") == "orna_poda"
+        assert r.data.get("is_agricultural") is True
+        assert r.data.get("is_buildable") is False
+
+    @patch("services.zbgis_service.requests.get")
+    def test_druh_zahrada_is_agricultural(self, mock_get):
+        from unittest.mock import MagicMock
+        m = MagicMock()
+        m.status_code = 200
+        m.headers = {"content-type": "application/json"}
+        m.json.return_value = {"features": [{
+            "geometry": {"type": "Polygon", "coordinates": [[[0,0],[100,0],[100,80],[0,80],[0,0]]]},
+            "properties": {"VYMERA": 700, "DRUH_POZEMKU": "Záhrada"}
+        }]}
+        mock_get.return_value = m
+        from services.zbgis_service import check
+        r = check(48.2, 17.4)
+        assert r.data.get("is_agricultural") is True
+
+    @patch("services.zbgis_service.requests.get")
+    def test_druh_missing_returns_neznamy(self, mock_get):
+        from unittest.mock import MagicMock
+        m = MagicMock()
+        m.status_code = 200
+        m.headers = {"content-type": "application/json"}
+        m.json.return_value = {"features": [{
+            "geometry": {"type": "Polygon", "coordinates": [[[0,0],[100,0],[100,80],[0,80],[0,0]]]},
+            "properties": {"VYMERA": 700}
+        }]}
+        mock_get.return_value = m
+        from services.zbgis_service import check
+        r = check(48.2, 17.4)
+        assert r.data.get("druh_pozemku") == "neznamy"
+        assert r.data.get("is_agricultural") is False
