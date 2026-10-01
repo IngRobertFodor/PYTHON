@@ -413,7 +413,49 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   max-height: 200px; overflow-y: auto;
 }
 
-/* RESPONZIVNE */
+/* ÚP asistent v modali */
+.up-btn {
+  display: inline-block; padding: 6px 14px; margin: 4px 0;
+  border-radius: 6px; font-size: .78rem; font-weight: 600;
+  text-decoration: none; color: #fff; background: #1a3a5c;
+  border: none; cursor: pointer;
+}
+.up-btn:hover { background: #24548a; }
+.up-btn-primary { background: #2e7d32; font-size: .82rem; padding: 8px 16px; }
+.up-btn-primary:hover { background: #388e3c; }
+
+.up-links-row {
+  display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0;
+}
+.up-link {
+  display: inline-block; padding: 3px 9px;
+  border-radius: 5px; font-size: .72rem;
+  text-decoration: none; color: #1a3a5c;
+  background: #e8f0fe; border: 1px solid #c8d8f0;
+}
+.up-link:hover { background: #c8d8f0; }
+
+.up-checklist-title {
+  font-size: .76rem; font-weight: 700; color: #1a3a5c;
+  margin: 10px 0 4px;
+}
+.up-checklist {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.up-checklist li {
+  padding: 5px 8px; border-radius: 5px;
+  background: #f8fafd; border: 1px solid #e0e8f4;
+  font-size: .74rem;
+}
+.up-checklist li.up-cl-kriticka {
+  background: #fff8e1; border-color: #f0c040;
+}
+.up-checklist label { display: flex; align-items: flex-start; gap: 6px; cursor: pointer; }
+.up-checklist input[type=checkbox] { margin-top: 2px; flex-shrink: 0; }
+.up-cl-hint {
+  font-size: .68rem; color: #888; margin-top: 2px; margin-left: 20px;
+}
 @media (max-width: 768px) {
   .main-layout {
     grid-template-columns: 1fr;

@@ -7,6 +7,7 @@ POST /api/scrape/score-selected  -> plny GIS scoring vybranych parciel
 GET  /api/scrape/score-progress  -> stav plneho scoringu
 GET  /api/scrape/runs            -> zoznam poslednych behov (SQLite)
 GET  /api/scrape/diff            -> diff poslednych 2 behov (nove/zrusene/zlacnene)
+GET  /api/scrape/up-links        -> UP asistent pre danu lokalitu (?location=<text>&check=1)
 """
 
 import threading
@@ -19,7 +20,8 @@ from services.storage_service  import (
     save_run, patch_parcel as db_patch,
     load_last_run, list_runs, load_run,
 )
-from services.diff_service import compute_diff
+from services.diff_service        import compute_diff
+from services.uzemny_plan_service import build_up_links
 from models.parcel import Parcel
 
 scrape_bp = Blueprint("scrape", __name__)
@@ -303,4 +305,22 @@ def scrape_results_csv():
             "Content-Length": str(len(csv_bytes)),
         },
     )
+
+
+@scrape_bp.route("/up-links", methods=["GET"])
+def scrape_up_links():
+    """
+    UP asistent pre danu lokalitu.
+    GET /api/scrape/up-links?location=<text>&check=1
+    check=1 -> vykona HTTP check dostupnosti gisplan.sk (5s timeout)
+    """
+    location = request.args.get("location", "").strip()
+    if not location:
+        return jsonify({"error": "Chyba parametra location"}), 400
+    check = request.args.get("check", "0") == "1"
+    try:
+        links = build_up_links(location, check_gisplan=check)
+        return jsonify(links), 200
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
 

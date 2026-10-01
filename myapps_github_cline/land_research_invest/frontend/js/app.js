@@ -367,7 +367,58 @@ function _buildModalHtml(parcel) {
   } else if (!hasFinal) {
     html += `<div style="font-size:.78rem;color:#888;margin-top:8px">Detailný report bude dostupný po GIS scorovaní.</div>`;
   }
+
+  // ÚP asistent — vždy prítomný (odkaz nacita sa async po otvoreni modalu)
+  const loc = parcel.location_text || parcel.title || "";
+  if (loc) {
+    html += `<div class="modal-section-title">📜 Územný plán — overiť ručne</div>
+      <div id="up-asistent-content" style="font-size:.76rem;color:#888">
+        Načítavam odkaz na ÚP pre <b>${loc.split(",")[0]}</b>...
+      </div>`;
+    // Async nacitanie UP odkazov (neblokuje render modalu)
+    _loadUpLinks(loc);
+  }
+
   return html;
+}
+
+function _loadUpLinks(location) {
+  apiUpLinks(location, false).then(d => {
+    const el = document.getElementById("up-asistent-content");
+    if (!el) return;
+    let h = "";
+    // Gisplan UP mapa (ak ma)
+    if (d.gisplan_up_url && d.has_gisplan === true) {
+      h += `<a href="${d.gisplan_up_url}" target="_blank" class="up-btn up-btn-primary">
+        🗺️ Otvoriť ÚP mapu obce ${d.obec}</a>`;
+    } else if (d.gisplan_up_url) {
+      h += `<span style="color:#aaa">gisplan.sk pre túto obec neoverené — skús klik:</span>
+        <a href="${d.gisplan_up_url}" target="_blank" class="up-btn">🗺️ GISPLAN ${d.obec}</a>`;
+    }
+    // Fallback odkazy
+    h += `<div class="up-links-row">`;
+    (d.fallback_links || []).slice(0, 4).forEach(l => {
+      h += `<a href="${l.url}" target="_blank" class="up-link" title="${l.hint || ""}">${l.label}</a>`;
+    });
+    h += `</div>`;
+    // Checklist
+    const cl = d.checklist || [];
+    if (cl.length) {
+      h += `<div class="up-checklist-title">Čo overiť v ÚP:</div><ul class="up-checklist">`;
+      cl.forEach(item => {
+        const star = item.kriticka ? " ⚠️" : "";
+        h += `<li class="${item.kriticka ? "up-cl-kriticka" : ""}">
+          <label><input type="checkbox"> ${item.otazka}${star}</label>
+          ${item.hint ? `<div class="up-cl-hint">${item.hint}</div>` : ""}
+        </li>`;
+      });
+      h += `</ul>`;
+    }
+    el.innerHTML = h;
+  }).catch(() => {
+    const el = document.getElementById("up-asistent-content");
+    if (el) el.innerHTML = `<span style="color:#aaa">ÚP asistent nedostupný.</span>`;
+  });
 }
 
 function closeModal() {

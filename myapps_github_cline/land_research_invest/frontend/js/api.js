@@ -70,3 +70,11 @@ async function apiScrapeDiff() {
   return r.json();
 }
 
+async function apiUpLinks(location, check) {
+  const url = API_BASE + "/api/scrape/up-links?location=" + encodeURIComponent(location)
+              + (check ? "&check=1" : "");
+  const r = await fetch(url);
+  if (!r.ok) throw new Error("UP links fetch failed: " + r.status);
+  return r.json();
+}
+
