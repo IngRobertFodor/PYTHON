@@ -85,7 +85,10 @@ Pre vyvojarov a AI agentov.
          flood_service          -> Q100 zaplavova zona (SHMU WMS)
          terrain_service        -> sklon, zosuvy, radon (DMR/SGUDSH)
          bpej_service           -> bonita pody, ochrana, odvody
-         overpass_service       -> cesta, elektrina, voda, okolie (OSM)
+         overpass_service       -> cesta, elektrina, voda, zastavba (building),
+                                    classify_access (PRIAMA/CIASTOCNA/ZIADNA),
+                                    classify_position (STRED/OKRAJ/MIMO),
+                                    is_gem_candidate (okraj+priama dostupnost) okolie (OSM)
          protected_service      -> VVN/VTL, Natura 2000, CHKO
          zbgis_service          -> geometria (sirka, tvar, vymera)
        run_price_service()      -> price_analysis_service EUR/m2

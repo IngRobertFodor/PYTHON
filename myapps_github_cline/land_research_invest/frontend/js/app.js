@@ -347,8 +347,38 @@ function renderResultsTable(items) {
     const link  = isRealUrl
       ? `<a href="${p.url}" target="_blank" class="tbl-link">${label}</a>`
       : "—";
+
+    // Infra badges z overpass_service (dostupne len po plnom GIS scorovani)
+    const ov  = p.results && p.results.overpass_service && p.results.overpass_service.data;
+    let infraHtml = "—";
+    if (ov) {
+      const acc = ov.direct_access   || {};
+      const pos = ov.village_position || {};
+      const gem = ov.is_gem_candidate;
+      const accLevel  = acc.level   || "";
+      const posLevel  = pos.position || "";
+      const accClass  = accLevel === "PRIAMA"    ? "gem-priama"
+                      : accLevel === "CIASTOCNA" ? "gem-ciastocna" : "";
+      const posClass  = posLevel === "OKRAJ" ? "gem-okraj"
+                      : posLevel === "STRED" ? "gem-stred"
+                      : posLevel === "MIMO"  ? "gem-mimo" : "";
+      const accLabel  = accLevel === "PRIAMA"    ? "🔌 Priama"
+                      : accLevel === "CIASTOCNA" ? "🔌 Čiastočná"
+                      : accLevel === "ZIADNA"    ? "❌ Žiadna" : "";
+      const posLabel  = posLevel === "OKRAJ" ? "🏘️ Okraj"
+                      : posLevel === "STRED" ? "🏙️ Stred"
+                      : posLevel === "MIMO"  ? "🌾 Mimo" : "";
+      const gemHtml   = gem ? `<span class="gem-badge gem-skvost">🏆 Skvost</span>` : "";
+      const accHtml   = accLabel ? `<span class="gem-badge ${accClass}">${accLabel}</span>` : "";
+      const posHtml   = posLabel ? `<span class="gem-badge ${posClass}">${posLabel}</span>` : "";
+      if (gemHtml || accHtml || posHtml) {
+        infraHtml = `<div class="badges-cell">${gemHtml}${accHtml}${posHtml}</div>`;
+      }
+    }
+
     const tr = document.createElement("tr");
     tr.dataset.url = p.url || "";
+    if (ov && ov.is_gem_candidate) tr.classList.add("gem-row");
     tr.innerHTML = `
       <td><input type="checkbox" class="row-chk" data-url="${p.url || ""}"></td>
       <td class="tbl-num">${idx + 1}</td>
@@ -358,6 +388,7 @@ function renderResultsTable(items) {
       <td class="tbl-price">${p.price_eur>0?p.price_eur.toLocaleString("sk-SK"):"—"}</td>
       <td>${p.area_sqm>0?p.area_sqm.toLocaleString("sk-SK"):"—"}</td>
       <td>${ppsm}</td>
+      <td>${infraHtml}</td>
       <td>${link}</td>`;
     tr.addEventListener("click", e => {
       if (e.target.tagName==="INPUT"||e.target.tagName==="A") return;
@@ -375,12 +406,18 @@ function applyFilter() {
   const cena  = parseFloat(document.getElementById("filter-cena").value) || Infinity;
   const vym   = parseFloat(document.getElementById("filter-vymera").value) || 0;
   const skore = parseFloat(document.getElementById("filter-skore").value) || 0;
-  renderResultsTable(_allResults.filter(p =>
-    (!zdroj || p.source_portal === zdroj) &&
-    (p.price_eur === 0 || p.price_eur <= cena) &&
-    (p.area_sqm  === 0 || p.area_sqm  >= vym) &&
-    ((p.preliminary_score || 0) >= skore)
-  ));
+  const gemOnly = document.getElementById("filter-gem")?.checked || false;
+  renderResultsTable(_allResults.filter(p => {
+    if (zdroj && p.source_portal !== zdroj) return false;
+    if (p.price_eur > 0 && p.price_eur > cena) return false;
+    if (p.area_sqm  > 0 && p.area_sqm  < vym)  return false;
+    if ((p.preliminary_score || 0) < skore) return false;
+    if (gemOnly) {
+      const ov = p.results && p.results.overpass_service && p.results.overpass_service.data;
+      if (!ov || !ov.is_gem_candidate) return false;
+    }
+    return true;
+  }));
 }
 
 function resetFilter() {
@@ -388,6 +425,8 @@ function resetFilter() {
   document.getElementById("filter-cena").value   = "";
   document.getElementById("filter-vymera").value = "";
   document.getElementById("filter-skore").value  = "";
+  const gemChk = document.getElementById("filter-gem");
+  if (gemChk) gemChk.checked = false;
   renderResultsTable(_allResults);
 }
 

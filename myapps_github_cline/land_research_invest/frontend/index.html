@@ -105,6 +105,9 @@
         </label>
         <button id="btn-filter-apply" class="btn btn-sm">Filtrovať</button>
         <button id="btn-filter-reset" class="btn btn-sm btn-outline">Reset</button>
+        <label class="filter-label" style="display:flex;align-items:center;gap:4px;cursor:pointer">
+          <input type="checkbox" id="filter-gem"> 🏆 Len skvosty
+        </label>
         <span id="filter-count" class="filter-count"></span>
         <span class="filter-spacer"></span>
         <button id="btn-export-csv"  class="btn btn-sm btn-outline" title="Exportovať všetky výsledky ako CSV (SK Excel)">&#11015; CSV</button>
@@ -124,6 +127,7 @@
               <th>Cena EUR</th>
               <th>m²</th>
               <th>EUR/m²</th>
+              <th>Infra</th>
               <th>Odkaz</th>
             </tr>
           </thead>
@@ -221,11 +225,11 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <!-- App JS -->
-<script src="/static/js/config.js?v=8"></script>
-<script src="/static/js/api.js?v=8"></script>
-<script src="/static/js/demo.js?v=8"></script>
-<script src="/static/js/map.js?v=8"></script>
-<script src="/static/js/app.js?v=8"></script>
+<script src="/static/js/config.js?v=9"></script>
+<script src="/static/js/api.js?v=9"></script>
+<script src="/static/js/demo.js?v=9"></script>
+<script src="/static/js/map.js?v=9"></script>
+<script src="/static/js/app.js?v=9"></script>
 
 </body>
 </html>

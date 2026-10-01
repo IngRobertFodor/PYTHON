@@ -284,6 +284,23 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   white-space: nowrap;
 }
 
+/* Skvost / dostupnost / poloha badgese (J1) */
+.gem-badge {
+  display: inline-block; padding: 2px 6px;
+  border-radius: 10px; font-size: .68rem; font-weight: 700;
+  white-space: nowrap; line-height: 1.4;
+}
+.gem-skvost   { background: #fff3cd; color: #7a4f00; border: 1px solid #f0b429; }
+.gem-priama   { background: #d4edda; color: #155724; border: 1px solid #28a745; }
+.gem-ciastocna{ background: #e8f0fe; color: #1a3a5c; border: 1px solid #1a3a5c; }
+.gem-okraj    { background: #fce8f3; color: #6a0050; border: 1px solid #c86eb5; }
+.gem-stred    { background: #f0f0f0; color: #555;    border: 1px solid #bbb; }
+.gem-mimo     { background: #fdecea; color: #a02020; border: 1px solid #e57373; }
+.badges-cell  { display: flex; flex-direction: column; gap: 2px; min-width: 70px; }
+/* Riadok skvosta - jemne zvyrazneny */
+.gem-row      { background: #fffde7 !important; }
+
+
 /* Score bar */
 .score-bar {
   margin-top: 10px; display: flex;

@@ -103,6 +103,22 @@ criteria:
       automation: AUTO             # OSM pipeline
 
 
+  # --- 4b. PRIAMA DOSTUPNOST A POLOHA V OBCI ---
+  # Dva nezavisle ukazovatele pre investicne rozhodovanie:
+  #   direct_access  = su siete tak blizko, ze pripojka je lacna / trivalna?
+  #   village_position = kde v ramci obce parcela lezi? (stred/okraj/mimo)
+  # Zdroj: OSM building + highway (spolahlive na SK), power/waterway len bonus.
+  # Prahy su laditelne bez restartu (len reload criteria.yaml).
+  access_classification:
+    direct_access:
+      full_m: 50          # dom+cesta do 50 m  -> PRIAMA dostupnost
+      partial_m: 150      # dom+cesta do 150 m -> CIASTOCNA dostupnost
+      # > 150 m -> ZIADNA (drahe zasietovanie, znasa kupujuci)
+    village_position:
+      core_count_100m: 30   # >= 30 domov v okruhu 100 m -> STRED obce
+      edge_min_count_300m: 3 # >= 3 domy v okruhu 300 m  -> OKRAJ obce
+      # < 3 domy do 300 m -> MIMO obce (pole / samota)
+
   # --- 5. TEREN, GEOLOGIA A HYDRO ---
   terrain:
     flood_zone_q100: false
