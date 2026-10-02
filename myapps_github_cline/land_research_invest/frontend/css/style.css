@@ -48,6 +48,7 @@ header .subtitle { font-size: 0.85rem; opacity: .75; }
 
 /* PANEL VLAVO */
 .sidebar {
+  grid-row: 1 / -1;
   background: #fff;
   border-right: none;
   display: flex;
@@ -82,9 +83,9 @@ details.form-section[open] > summary {
   margin-bottom: 12px;
 }
 
-/* Výsledková sekcia — neskryje sa za ostatnými */
+/* Výsledková sekcia */
 .results-section {
-  flex-shrink: 0;
+  flex: 1; overflow-y: auto;
   padding: 12px;
   border-bottom: 1px solid #eee;
 }
@@ -119,11 +120,6 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .status.info  { background: #e8f0fe; color: #1a3a5c; }
 
 /* KARTY VYSLEDKOV */
-.results-section {
-  flex: 1; overflow-y: auto;
-  padding: 12px;
-}
-.results-section h2 { font-size: .9rem; color: #888; margin-bottom: 10px; }
 
 .card {
   background: #fff;
@@ -158,7 +154,7 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .no-results { color: #999; font-size: .85rem; padding: 12px 0; }
 
 /* MAPA */
-.map-panel { position: relative; }
+.map-panel { grid-row: 1 / -1; position: relative; }
 #map { width: 100%; height: 100%; min-height: 300px; }
 
 /* LEGENDA */
