@@ -78,6 +78,11 @@ def create_app(test_config=None):
         app.add_url_rule("/", endpoint="frontend_index",
                           view_func=_serve_frontend)
 
+    # favicon.ico – prehliadac si ho automaticky pyta; vratime 204 aby zmizol 404 v konzole
+    @app.route("/favicon.ico")
+    def _favicon():
+        return Response(status=204)
+
     # No-cache pre staticke subory (JS/CSS/HTML) - zakazuje starovanie v prehliadaci
     # Dolezite pri vyvoji: prehliadac vzdy nacita najnovsiu verziu
     @app.after_request
