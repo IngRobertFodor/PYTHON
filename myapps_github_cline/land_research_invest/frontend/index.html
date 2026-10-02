@@ -24,9 +24,26 @@
   <!-- BOČNÝ PANEL -->
   <aside class="sidebar">
 
-    <!-- FORMULÁR - 1 pozemok -->
-    <div class="form-section">
-      <h2>&#128269; Analyzovať pozemok</h2>
+    <!-- SPUSTIŤ PRIESKUM — primárna akcia vždy viditeľná -->
+    <div class="form-section research-section">
+      <h2>&#128269; Spusti&#357; prieskum</h2>
+      <p class="research-hint">Stiahne pozemky zo v&#353;etk&#253;ch zdrojov a ohodnotí ich automaticky.</p>
+      <button id="btn-research" class="btn btn-research">&#9654;&#9654; Spusti&#357; prieskum</button>
+
+      <!-- PROGRESS BAR (skryt&#253; kym nebezi) -->
+      <div id="research-progress" class="research-progress hidden">
+        <div class="progress-label">
+          <span id="progress-text">Pripravujem...</span>
+          <span id="progress-pct">0 %</span>
+        </div>
+        <div class="progress-track">
+          <div id="progress-bar" class="progress-fill" style="width:0%"></div>
+        </div>
+        <div id="progress-sources" class="progress-sources"></div>
+      </div>
+    </div>
+    <details class="form-section">
+      <summary>&#128269; Analyzovať 1 pozemok</summary>
 
       <div class="form-group">
         <label for="f-title">Názov / popis</label>
@@ -58,7 +75,7 @@
         <button id="btn-demo"    class="btn btn-demo">&#9654; Demo</button>
       </div>
       <div id="status" class="status"></div>
-    </div>
+    </details>div>
 
     <!-- SPUSTIŤ PRIESKUM -->
     <div class="form-section research-section">
@@ -159,9 +176,9 @@
       </div>
     </div>
 
-    <!-- LIMITY (z configu) -->
-    <div class="form-section">
-      <h2>&#9881; Limity (z criteria.yaml)</h2>
+    <!-- LIMITY (z configu) — zbalené, menej dôležité -->
+    <details class="form-section">
+      <summary>&#9881; Limity (z criteria.yaml)</summary>
       <div class="form-group">
         <label>Max cena (EUR)</label>
         <input id="f-price-max" type="number" readonly style="background:#f5f5f5" value="{{MAX_PRICE}}">
@@ -177,7 +194,7 @@
         <label>Max vzdialenost od BA (km)</label>
         <input id="f-dist-max" type="number" readonly style="background:#f5f5f5" value="{{MAX_KM}}">
       </div>
-    </div>
+    </details>
 
     <!-- VYSLEDKY -->
     <div class="results-section">
@@ -186,6 +203,9 @@
     </div>
 
   </aside>
+
+  <!-- DRAG-RESIZE SPLITTER -->
+  <div class="sidebar-splitter" id="sidebar-splitter" title="Ťahaj pre zmenu šírky panelu"></div>
 
   <!-- MAPA -->
   <div class="map-panel">
@@ -250,11 +270,11 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <!-- App JS -->
-<script src="/static/js/config.js?v=17"></script>
-<script src="/static/js/api.js?v=17"></script>
-<script src="/static/js/demo.js?v=17"></script>
-<script src="/static/js/map.js?v=17"></script>
-<script src="/static/js/app.js?v=17"></script>
+<script src="/static/js/config.js?v=20"></script>
+<script src="/static/js/api.js?v=20"></script>
+<script src="/static/js/demo.js?v=20"></script>
+<script src="/static/js/map.js?v=20"></script>
+<script src="/static/js/app.js?v=20"></script>
 
 </body>
 </html>

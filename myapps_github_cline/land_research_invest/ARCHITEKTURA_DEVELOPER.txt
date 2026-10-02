@@ -274,7 +274,7 @@ VYSVETLIVKY_POUZIVATEL.txt  -- legenda stavov, farieb, GIS chyb
 9. IMPLEMENTOVANE SLUZBY (aktualny stav)
 ==============================================================
 
-  Hotove (offline-testovatelne, 1049 testov):
+  Hotove (offline-testovatelne, 1179 testov):
     pipeline_service    -- orchestrator, analyze_parcel()
     scoring_service     -- score_parcel() + preliminary_score() (0 HTTP)
     report_service      -- generate_report(), format_text_report()
@@ -302,6 +302,9 @@ VYSVETLIVKY_POUZIVATEL.txt  -- legenda stavov, farieb, GIS chyb
     ske_scraper         -- SKE exekutorske drazby (112 nazivo)
     notarske_drazby_scraper -- notar.sk PDF drazby (48 nazivo)
     obchodny_vestnik_scraper -- justice.gov.sk PDF drazby (20 nazivo)
+    storage_service     -- SQLite perzistencia behov (save_run/load_last_run)
+    diff_service        -- porovnanie behov (nove/zlacneli/zmizli/still_here)
+    uzemny_plan_service -- UP asistent (gisplan.sk + fallback + checklist)
 
   Zostava implementovat (TODO):
     llm_agent_service   -- LangChain + Gemini [PLANOVANE - C faza]
@@ -325,6 +328,14 @@ VYSVETLIVKY_POUZIVATEL.txt  -- legenda stavov, farieb, GIS chyb
   --- Scraping + dvojfazovy scoring ---
   GET  /api/scrape/progress        -> stav scrapingu (running, %, per-source)
   POST /api/scrape/start           -> spusti scrape_all + pre-scoring (background)
+  GET  /api/scrape/results         -> vysledky zoradene podla preliminary_score
+  POST /api/scrape/score-selected  -> plny GIS scoring vybranych (max 30)
+  GET  /api/scrape/score-progress  -> stav GIS scoringu
+  GET  /api/scrape/results.csv     -> CSV export (BOM, SK Excel)
+  GET  /api/scrape/runs            -> historia behov (SQLite)
+  GET  /api/scrape/diff            -> porovnanie poslednych 2 behov
+  GET  /api/scrape/up-links        -> UP asistent pre obec (?location=&check=1)
+  GET  /api/scrape/up-coverage     -> pokrytie gisplan.sk z cache
   GET  /api/scrape/results         -> vysledky (preliminary_score DESC)
   POST /api/scrape/score-selected  -> plny GIS scoring vybranych {urls:[...]}
   GET  /api/scrape/score-progress  -> stav plneho scoringu (done/total/%)
@@ -387,3 +398,39 @@ VYSVETLIVKY_POUZIVATEL.txt  -- legenda stavov, farieb, GIS chyb
 
 
 Autor: Robert Fodor | 2026
+
+
+==============================================================
+11. INVESTICNA AWARENESS -- DETEKTOR SKVOSTOV
+==============================================================
+
+  Ciel: najst orna poda na okraji dediny s priamou dostupnostou infrastruktury
+  -> potencialny stavebny pozemok (preklasifikacia v uzemnom plane = zisk)
+
+  Postup (troch-vrstvovy):
+
+  VRSTVA 1: Skvost kandidat (automaticky, 0 HTTP)
+    overpass_service.classify_position()  -> STRED / OKRAJ / MIMO
+      (proxy: hustota budov v okruhu 100 m / 300 m)
+    overpass_service.classify_access()    -> PRIAMA / CIASTOCNA / ZIADNA
+      (proxy: najblizsi dom <= 50 m + cesta <= 50 m)
+    is_gem_candidate = OKRAJ + {PRIAMA | CIASTOCNA}
+    zbgis_service.is_agricultural = True  (orna poda / zahrada / TTP)
+    -> badge [skvost] v tabulke, filter "Len skvosty", zlty riadok
+
+  VRSTVA 2: Odhad nakladov na zasietovanie (automaticky, v modali)
+    elektrina: vzdialenost z OSM power -> EUR odhad (100 EUR/m)
+    cesta: vzdialenost z OSM highway   -> EUR odhad (100-150 EUR/m)
+    voda: upozornenie (OSM waterway != vodovod)
+
+  VRSTVA 3: Uzemny plan -- rucne overenie (UP asistent)
+    uzemny_plan_service.build_up_links(location_text)
+    -> gisplan.sk UP mapa (ak obec ma: ~15-30% obci)
+       overene: malacky, modra, bernolakovo, piestany, trnava, sered
+    -> stranka obce (<slug>.sk) + zbgis + geoportal
+    -> 3 cielene Google dotazy (UP PDF, samosprava, zmena UP)
+    -> 7-bodovy checklist: zona byvania, zmena UP, zavazna cast,
+       IZP, regulativy, vedenia, pristup
+    Warm cache: po scrape_all sa na pozadi prekontroluje gisplan.sk
+    pre top 200 obci (threading.Thread, noncritical).
+    /api/scrape/up-coverage: prehlad pokrytia z cache (0 HTTP).

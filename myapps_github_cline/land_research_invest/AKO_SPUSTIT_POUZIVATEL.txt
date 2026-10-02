@@ -34,15 +34,24 @@ KROK 3: Nainstalujte zavislosti
        - 7 zdrojov paralelne (~15 min)
        - Tabulka pozemkov s rychlym skorom (0-100)
 
-  3. Filtrujte: Zdroj, Cena max, Vymera min, Min. skore
+  3. Filtrujte: Zdroj, Cena max, Vymera min, Min. skore,
+       "Len skvosty" (okraj dediny + priama dostupnost sieti)
+       "Sledovane" (hviezdicka v tabulke -> localStorage)
 
   4. Zasfajknite par pozemkov (max 30) -> "Skorovat vybrane"
        - Dukladne overenie: GPS, zaplavy, poda, siete (~20s/pozemok)
-       - Vysledky na mape
+       - Modal: 8 GIS komponentov + odhad nakladov na pripojky
+       - Mapa: plne GIS aj prelim skore markery
 
-  5. Export: "CSV" -> Excel,  "JSON" -> JSON
+  5. V modali pozri sekciu "Uzemny plan"
+       - Pre Malacky/Trnava/Piestany/Sered/Modra: priamy odkaz na UP mapu
+       - Pre ostatne obce: stranka obce + 3 cielene Google dotazy
+       - Checklist 7 otazok: zona byvania, zmena UP, zavazna cast...
 
-  6. Pre skore >= 70: overte LV na https://kataster.skgeodesy.sk
+  6. Export: "CSV" (s Priama_dostupnost, Poloha_v_obci, Skvost)
+             "JSON" (plny) / "JSON slim" (bez GIS detailov)
+
+  7. Pre skore >= 70: overte LV na https://kataster.skgeodesy.sk
 
 
 === ZDROJE (7 zdrojov automaticky) ===
@@ -70,6 +79,10 @@ KROK 3: Nainstalujte zavislosti
     GET  http://localhost:5001/api/scrape/results
     POST http://localhost:5001/api/scrape/score-selected
     GET  http://localhost:5001/api/scrape/results.csv
+    GET  http://localhost:5001/api/scrape/diff          (nove/zlacneli/zmizli)
+    GET  http://localhost:5001/api/scrape/runs          (historia behov)
+    GET  http://localhost:5001/api/scrape/up-links      (?location=<obec>)
+    GET  http://localhost:5001/api/scrape/up-coverage   (pokrytie gisplan.sk)
 
 
 === NASTAVENIE NOTIFIKACII (volitelne) ===
@@ -91,7 +104,7 @@ KROK 3: Nainstalujte zavislosti
 
 === SPUSTENIE TESTOV ===
 
-  python -m pytest tests/ -q       (1051 testov, ~35 sekund)
+  python -m pytest tests/ -q       (1179 testov, ~35 sekund)
   python -m pytest tests/ -v       (detailny vystup)
 
 

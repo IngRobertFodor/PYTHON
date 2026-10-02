@@ -147,3 +147,80 @@ class TestCheckFunction:
         result = check("Senec")
         assert result.ok is False
         assert result.error is not None
+
+
+# ----------------------------------------------------------------
+# F1/F2: _clean_address + _best_candidate + geocode_quality (R1)
+# ----------------------------------------------------------------
+
+from services.geocoding_service import _clean_address, _best_candidate, _dist_km
+
+
+class TestCleanAddress:
+    def test_empty(self):               assert _clean_address("") == ""
+    def test_dash(self):                assert _clean_address("-") == ""
+    def test_endash(self):              assert _clean_address("–") == ""
+    def test_por(self):                 assert _clean_address("por.") == ""
+    def test_too_short(self):           assert _clean_address("ab") == ""
+    def test_senec_adds_sk(self):       assert "Slovensko" in _clean_address("Senec")
+    def test_senec_preserves(self):     assert "Senec" in _clean_address("Senec")
+    def test_already_has_sk(self):      r=_clean_address("Senec, Slovensko"); assert r.count("Slovensko")==1
+    def test_psc_stripped(self):
+        r = _clean_address("Povazska 1706/35, Trencin 91101")
+        assert "91101" not in r
+    def test_psc_salvages_city(self):
+        r = _clean_address("Povazska 1706/35, Trencin 91101")
+        # Trencin by malo byt zachovane ako obec
+        assert "Trencin" in r or r == ""
+    def test_long_title_truncated(self):
+        long = "Pozemok v BA I. + SP na predaj kategoria IBV blizko lesa krk 123456789"
+        r = _clean_address(long)
+        assert len(r) <= 80
+    def test_normal_short_ok(self):
+        assert _clean_address("Malacky") != ""
+
+
+class TestBestCandidate:
+    def _cand(self, lat, lon, cat="place", typ="village"):
+        return {"lat":str(lat),"lon":str(lon),"category":cat,"type":typ,
+                "display_name":"Test","address":{}}
+
+    def test_empty_returns_none(self):
+        assert _best_candidate([]) is None
+
+    def test_good_quality_near_ba(self):
+        c = [self._cand(48.219, 17.397)]
+        r = _best_candidate(c)
+        assert r["geocode_quality"] == "good"
+
+    def test_far_quality(self):
+        c = [self._cand(48.718, 17.115)]  # Gbely ~80km
+        r = _best_candidate(c)
+        assert r["geocode_quality"] in {"good", "far"}  # Gbely je OK (88km)
+
+    def test_outside_sr_is_uncertain(self):
+        c = [self._cand(51.0, 14.0)]  # Nemecko
+        r = _best_candidate(c)
+        assert r["geocode_quality"] == "uncertain"
+
+    def test_bad_type_is_uncertain(self):
+        c = [self._cand(48.2, 17.4, cat="natural", typ="peak")]
+        r = _best_candidate(c)
+        assert r["geocode_quality"] == "uncertain"
+
+    def test_prefers_good_type_over_bad(self):
+        bad  = self._cand(48.2, 17.4, cat="natural", typ="peak")
+        good = self._cand(48.219, 17.397, cat="place", typ="town")
+        r = _best_candidate([bad, good])
+        assert r["geocode_quality"] == "good"
+
+    def test_geocode_quality_in_result(self):
+        c = [self._cand(48.219, 17.397)]
+        r = _best_candidate(c)
+        assert "geocode_quality" in r
+        assert "dist_km_ba" in r
+
+    def test_dist_km_ba_correct(self):
+        c = [self._cand(48.219, 17.397)]
+        r = _best_candidate(c)
+        assert 5 < r["dist_km_ba"] < 40

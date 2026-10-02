@@ -19,6 +19,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (e.target.id === "modal-overlay") closeModal();
   });
 
+  // P3: Drag-resize splitter
+  _initSplitter();
+
   // Az po registracii listenerov - moze trvat dlhsie / hodit exception
   await loadConfigDefaults();
 
@@ -38,6 +41,54 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   } catch (e) { /* backend nedostupny - ignoruj */ }
 });
+
+// ----------------------------------------------------------------
+// P1: Používateľsky čitateľné chybové hlášky
+// ----------------------------------------------------------------
+
+function humanError(e) {
+  const msg = (e && (e.message || String(e))) || "";
+  const lmsg = msg.toLowerCase();
+
+  // Sieťová chyba / server nebeží
+  if (lmsg.includes("failed to fetch") || lmsg.includes("networkerror")
+      || lmsg.includes("connection refused") || lmsg.includes("timeout")) {
+    return "Server neodpovedá — beží aplikácia? Skúste spustiť spustit.bat.";
+  }
+  // 409 — dvojité spustenie
+  if (lmsg.includes("409") || lmsg.includes("uz bezi") || lmsg.includes("lock")) {
+    return "Prieskum/skórovanie už prebieha — počkajte na dokončenie.";
+  }
+  // 500 — chyba servera
+  if (lmsg.includes("500") || lmsg.includes("internal server")) {
+    return "Server narazil na chybu. Skúste to znova o chvíľu.";
+  }
+  // 400 — zlý vstup
+  if (lmsg.includes("400") || lmsg.includes("chyba parametra") || lmsg.includes("missing")) {
+    return "Chýbajú povinné údaje. Skontrolujte vyplnené polia.";
+  }
+  // 404 — nič sa nenašlo
+  if (lmsg.includes("404") || lmsg.includes("nenajdene") || lmsg.includes("not found")) {
+    return "Dáta sa nenašli — skúste spustiť nový prieskum.";
+  }
+  // Nominatim / geocoding
+  if (lmsg.includes("adresa nenajdena") || lmsg.includes("geocod")) {
+    return "Lokalitu sa nepodarilo nájsť na mape — skóre prebehne bez GPS.";
+  }
+  // Timeout GIS
+  if (lmsg.includes("timeout") || lmsg.includes("readtimeout")) {
+    return "GIS služba neodpovedá včas — skórovanie prebehlo bez tejto služby.";
+  }
+  // Ziadne vysledky
+  if (lmsg.includes("ziadne") || lmsg.includes("prazdny") || lmsg.includes("no results")) {
+    return "Žiadne výsledky — najprv spustite prieskum (▶▶ Spustiť prieskum).";
+  }
+  // Fallback — skrátime technickú chybu
+  if (msg.length > 80) {
+    return "Nastala chyba: " + msg.substring(0, 70) + "…";
+  }
+  return msg || "Nastala neočakávaná chyba.";
+}
 
 // --- Config ---
 async function loadConfigDefaults() {
@@ -95,7 +146,7 @@ async function onAnalyzeClick() {
     renderResults([{ parcel: res.parcel, report: res.report }]);
     showStatus("Analyza dokoncena.", "ok");
   } catch (e) {
-    showStatus("Chyba: " + e.message, "error");
+    showStatus("Chyba: " + humanError(e), "error");
   } finally {
     setLoading(false);
   }
@@ -111,7 +162,7 @@ async function onDemoClick() {
     renderResults(items);
     showStatus("Demo: " + res.count + " pozemkov analysovanych.", "ok");
   } catch (e) {
-    showStatus("Chyba: " + e.message, "error");
+    showStatus("Chyba: " + humanError(e), "error");
   } finally {
     setLoading(false);
   }
@@ -452,6 +503,61 @@ function openModal(parcel, _reportLegacy) {
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 
 // ----------------------------------------------------------------
+// P3: Drag-resize splitter — ukladá šírku do localStorage
+// ----------------------------------------------------------------
+
+function _initSplitter() {
+  const splitter = document.getElementById("sidebar-splitter");
+  const layout   = document.querySelector(".main-layout");
+  if (!splitter || !layout) return;
+
+  const STORAGE_KEY = "lri_sidebar_w";
+  const MIN_W = 280, MAX_W = 700;
+
+  // Obnov uloženú šírku
+  const saved = parseInt(localStorage.getItem(STORAGE_KEY));
+  if (saved && saved >= MIN_W && saved <= MAX_W) {
+    layout.style.setProperty("--sidebar-w", saved + "px");
+  }
+
+  let dragging = false, startX = 0, startW = 0;
+
+  splitter.addEventListener("mousedown", e => {
+    dragging = true;
+    startX = e.clientX;
+    startW = parseInt(getComputedStyle(document.documentElement)
+                      .getPropertyValue("--sidebar-w")) || 400;
+    splitter.classList.add("dragging");
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    e.preventDefault();
+  });
+
+  document.addEventListener("mousemove", e => {
+    if (!dragging) return;
+    const delta = e.clientX - startX;
+    const newW  = Math.min(MAX_W, Math.max(MIN_W, startW + delta));
+    layout.style.setProperty("--sidebar-w", newW + "px");
+  });
+
+  document.addEventListener("mouseup", () => {
+    if (!dragging) return;
+    dragging = false;
+    splitter.classList.remove("dragging");
+    document.body.style.cursor = "";
+    document.body.style.userSelect = "";
+    // Ulož šírku
+    const w = parseInt(getComputedStyle(document.documentElement)
+                       .getPropertyValue("--sidebar-w")) || 400;
+    localStorage.setItem(STORAGE_KEY, w);
+    // Obnov mapu (Leaflet) po zmene veľkosti
+    if (typeof _map !== "undefined" && _map) {
+      setTimeout(() => _map.invalidateSize(), 50);
+    }
+  });
+}
+
+// ----------------------------------------------------------------
 // Watchlist — localStorage perzistencia hviezdicky
 // ----------------------------------------------------------------
 
@@ -508,7 +614,7 @@ async function onResearchClick() {
   } catch (e) {
     // 409 = uz bezi -> pokracuj v pollingu
     if (!e.message.includes("bezi")) {
-      showStatus("Chyba spustenia: " + e.message, "error");
+      showStatus(humanError(e), "error");
       return;
     }
   }
@@ -692,17 +798,27 @@ function renderPrelimMap(items) {
     const lat = p.lat || 0;
     const lon = p.lon || 0;
     if (!lat || !lon) return;
+
+    // F5: preskoc parcely s neistou geolokáciou (geocode_quality=uncertain)
+    const geoQ = p.results?.geocoding_service?.data?.geocode_quality;
+    if (geoQ === "uncertain") return;  // nesprav zavádzajúci marker
+
     // Pouzij final_score ak je, inak preliminary_score
     const hasFinal = p.final_score && p.final_score > 0;
     const score = hasFinal ? p.final_score : (p.preliminary_score || 0);
     const rec   = hasFinal
       ? (p.recommendation || "N/A")
       : (p.prelim_recommendation || "N/A");
-    // Prelim farba = seda odtien aby sa odlisila od plneho GIS
     const col = hasFinal ? recColor(rec) : _prelimMapColor(score);
+
+    // F5: "far" parcela (>120 km) dostane žltý okraj a tooltip
+    const isFar    = geoQ === "far";
+    const borderStyle = isFar ? "3px dashed #f0b429" : `2px solid ${col.border}`;
+    const farNote  = isFar ? "<br><span style='font-size:.72rem;color:#e09000'>⚠️ Ďaleká lokalita (>120 km)</span>" : "";
+
     const icon = L.divIcon({
       className: "",
-      html: `<div style="background:${col.bg};color:${col.text};border:2px solid ${col.border};
+      html: `<div style="background:${col.bg};color:${col.text};border:${borderStyle};
         border-radius:50%;width:30px;height:30px;display:flex;align-items:center;
         justify-content:center;font-weight:bold;font-size:10px;
         box-shadow:0 1px 4px rgba(0,0,0,.35);cursor:pointer;
@@ -713,10 +829,10 @@ function renderPrelimMap(items) {
     const linkHtml = isReal ? `<br><a href="${p.url}" target="_blank" style="font-size:.78rem">Inzerát →</a>` : "";
     const popup = `<b>${p.title||"Pozemok"}</b><br>
       ${hasFinal ? `<span style="color:${col.bg};font-weight:bold">${rec}</span> ${score.toFixed(1)}/100` : `Prelim: ${score.toFixed(1)}`}<br>
-      ${(p.price_eur||0).toLocaleString("sk-SK")} EUR &bull; ${(p.area_sqm||0).toLocaleString("sk-SK")} m²${linkHtml}`;
+      ${(p.price_eur||0).toLocaleString("sk-SK")} EUR &bull; ${(p.area_sqm||0).toLocaleString("sk-SK")} m²${farNote}${linkHtml}`;
     const marker = L.marker([lat, lon], { icon })
       .addTo(_map)
-      .bindTooltip(`<b>${p.title||"Pozemok"}</b><br>${score.toFixed(1)}${hasFinal?"/100":" pre"}`, { direction:"top", offset:[0,-16] })
+      .bindTooltip(`<b>${p.title||"Pozemok"}</b><br>${score.toFixed(1)}${hasFinal?"/100":" pre"}${isFar?" ⚠️":""}`, { direction:"top", offset:[0,-16] })
       .bindPopup(popup);
     marker.on("click", () => openModal(p, p.results?.report_service?.data||{}));
     _markers.push(marker);

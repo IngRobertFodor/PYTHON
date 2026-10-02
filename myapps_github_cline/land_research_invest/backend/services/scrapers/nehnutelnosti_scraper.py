@@ -262,15 +262,15 @@ def _extract_location(title: str, url: str) -> str:
     1. Zoznam znamych obci BA regionu - hlada v nazve aj URL slugu
        (diakritika-necitlive): 'Vajnory', 'Lamac', 'Senec'...
     2. Zatvorka v nazve: '... (Chorvatsky Grob)' -> 'Chorvatsky Grob'
-    3. Fallback: posledne slovo URL slugu (ocistene)
+    3. Slug - vsetky slova slugu zhromazdene (nie len posledne)
+       F4: zahodime skomolene pady (konci -i/-e z lokalu), ktore Nominatim
+       nespravne geocoduje (napr. 'Bystrici' -> Banska Bystrica miesto BA kraja)
     """
     title_n = _normalize(title)
-    # Z URL vytiahneme slug (posledna cast cesty)
     slug = url.rstrip("/").split("/")[-1] if "/" in url else ""
     slug_n = _normalize(slug.replace("-", " "))
 
     # --- Uroven 1: zoznam znamych obci ---
-    # Hladame od najdlhsich nazov (Chorvátsky Grob pred Grob)
     for obec_norm, obec_orig in sorted(
         _OBEC_NORM.items(), key=lambda x: -len(x[0])
     ):
@@ -282,13 +282,40 @@ def _extract_location(title: str, url: str) -> str:
     if m:
         return m.group(1).strip()
 
-    # --- Uroven 3: posledne slovo slugu ---
+    # --- Uroven 3: slug words (F4 fix) ---
     if slug:
         parts = [p for p in slug.split("-") if len(p) > 2 and p.isalpha()]
-        if parts:
-            return parts[-1].title()
+        # Zahodime skomolene pady - slova ktore konca na typicky lokativny/genitivny
+        # sufix (-i, -e, -y ak nie su v obci liste) a su dlhsie nez 6 znakov
+        # Pouzijeme VSETKY parts (nie len posledne) - hladame kludkovitejsie zhody
+        for word in reversed(parts):
+            if not _is_slug_word_valid(word):
+                continue
+            return word.title()
 
     return ""
+
+
+def _is_slug_word_valid(word: str) -> bool:
+    """
+    Overí či slovo zo slugu moze byt platna obec.
+    Zahodíme pravdepodobne skomolene pády (genitivne/lokativne formy).
+    """
+    w = word.lower()
+    # Velmi kratke
+    if len(w) < 3:
+        return False
+    # Generické slová z URL (nie obec)
+    SKIP = {"pozemok", "predaj", "predaj", "pozemky", "stavba",
+            "ibv", "inzerat", "detail", "kategoria", "ponuka"}
+    if w in SKIP:
+        return False
+    # Skomoleny pad: slovo > 6 znakov a konci na -i/-e/-u ale nie je v zozname obci
+    # Dlhe slova konciace tymito sufixy su casto lokal/genitiv zo slugu
+    # (napr. 'bystrici' z 'banska-bystrici', 'mederi' z 'velkeho-mederi')
+    if len(w) >= 6 and w[-1] in "iue" and _normalize(w) not in _OBEC_NORM:
+        return False
+    return True
 
 
 def _unescape_rsc(raw):

@@ -371,29 +371,57 @@ def extract_lv(text):
 
 def extract_location_ov(text):
     """
-    Extrahuje lokalitu (katastralne uzemie) zo sekcie Zakladna specifikacia.
+    Extrahuje lokalitu (katastralne uzemie / obec) zo sekcie Zakladna specifikacia.
     Format: '... 1672 Okres Obec KatastralneUzemie KatastralneUzemie Pozemky ...'
     Vracia retazec alebo ''.
+
+    F3: validacia - vracia len hodnoty ktore vyzraju ako obec (nie '-', 'por.' atd.)
     """
     i = text.find("pecifik")
     block = text[i:i+500] if i >= 0 else text[:600]
+
     # Format: LV Okres Obec KU KU (4 slova za cislom LV)
     m = re.search(r"(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+Pozemky", block)
     if m:
-        # skupina 4 alebo 5 = katastralne uzemie (posledne pred Pozemky)
-        return m.group(5).strip()
-    # Fallback: obec (skupina 3)
+        val = m.group(5).strip()
+        if _is_valid_location(val):
+            return val
+        # Fallback na obec (skupina 3)
+        val3 = m.group(3).strip()
+        if _is_valid_location(val3):
+            return val3
+
     m2 = re.search(r"(\d+)\s+(\S+)\s+(\S+)\s+(\S+)", block)
     if m2:
-        return m2.group(3).strip()
-    # Povodny regex fallback
+        val = m2.group(3).strip()
+        if _is_valid_location(val):
+            return val
+
     mk = _KU_RE.search(block)
     if mk:
-        return mk.group(1).strip()
+        val = mk.group(1).strip()
+        if _is_valid_location(val):
+            return val
+
     mo = _OBEC_RE.search(block)
     if mo:
-        return mo.group(1).strip()
+        val = mo.group(1).strip()
+        if _is_valid_location(val):
+            return val
+
     return ""
+
+
+def _is_valid_location(s: str) -> bool:
+    """Overí či reťazec vyzerá ako platná lokalita (nie útržok)."""
+    if not s or len(s) < 2:
+        return False
+    if s in ("-", "\u2013", "por.", "...", "n/a"):
+        return False
+    # Musí začínať veľkým písmenom a obsahovať aspoň 2 písmená
+    import unicodedata as _ud
+    letters = [c for c in s if _ud.category(c).startswith("L")]
+    return len(letters) >= 2 and s[0].isupper()
 
 
 def extract_parcels_area(text):

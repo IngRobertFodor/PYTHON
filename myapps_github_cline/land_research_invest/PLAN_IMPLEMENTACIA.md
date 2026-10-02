@@ -13,7 +13,7 @@
 | Frontend (mapa, karty, modal, demo) | HOTOVO |
 | Scraper kostra (BaseScraper, registry, scrape_all) | HOTOVO |
 | nehnutelnosti_sk parser | HOTOVO |
-| Testy | **1179, 0 zlyh** |
+| Testy | **1199, 0 zlyh** |
 | J1: overpass_service - classify_access / classify_position / is_gem_candidate | HOTOVO - +35 testov |
 | J1: criteria.yaml - access_classification sekcia (full_m, partial_m, core/edge prahy) | HOTOVO |
 | J1: frontend - Infra stlpec, skvost/priama/okraj badgese + filter | HOTOVO |
@@ -53,6 +53,18 @@
 | P2-V2: fallback +stranka obce (<obec>.sk) +3 cielene Google dotazy (7 odkazov celkom) | HOTOVO |
 | P2-V3: cache warming po scrape_all (top 200 obce na pozadi) | HOTOVO |
 | P2-V3: GET /api/scrape/up-coverage (pokrytie gisplan.sk z cache, 0 HTTP) | HOTOVO |
+| Q3: demo.js aktualizovany - 5 realnych lokalit (skvost/drazba/stred/mimo/spf) | HOTOVO |
+| Q4: AKO_SPUSTIT - nove kroky (filter skvosty, UP asistent, JSON slim), API, 1179 testov | HOTOVO |
+| R1-F1: geocoding_service limit:5 + _best_candidate (place/boundary, najblizsi BA) | HOTOVO - +8 testov |
+| R1-F2: _clean_address (PSC, utrzky, kratke) + fallback obec + pridaj Slovensko | HOTOVO - +12 testov |
+| R1-F3: notarske_drazby_extract_city (adresa dlznika -> len mesto) | HOTOVO |
+| R1-F3: obchodny_vestnik _is_valid_location (validacia 'por.','-') | HOTOVO |
+| R1-F4: nehnutelnosti_scraper _is_slug_word_valid (skomolene pady zahodene) | HOTOVO |
+| R1-F5: mapa uncertain=nez. marker, far=zltý okraj+tooltip | HOTOVO |
+| S1-P1: humanError() - citatelne SK chybove hlasky (409/500/404/network/timeout) | HOTOVO |
+| S1-P2: layout - zbalitelne sekcie (<details>) pre formular+limity, prieskum vzadu | HOTOVO |
+| S1-P3: layout - sidebar 400px + drag-resize splitter (ulada do localStorage) | HOTOVO |
+| Q4: ARCHITEKTURA - nove sluzby (storage/diff/uzemny_plan), API endpointy, sekcia 11 (skvost) | HOTOVO |
 | Limity v criteria.yaml (cena 0-10000, vymera 350-1000) | HOTOVO |
 | C0: nehnutelnosti.sk - oprava markera (T23c11 -> dynamic RSC) | HOTOVO - 46 pozemkov nazivo |
 | C0: nehnutelnosti.sk - lokalita (ZNAME_OBCE 70km od BA) | HOTOVO - 46/46 s lokalitou |
@@ -112,8 +124,8 @@
 | spustit.bat: auto-otvorenie prehliadaca + odstraneny playwright install | HOTOVO |
 | Dokumentacia: AKO_SPUSTIT, README, ARCHITEKTURA zosúladene s realitou | HOTOVO |
 | PLAN: vsetky otvorene [ ] -> [~] SKIP (B5.3-B5.6, B6, C, D1-D3) | HOTOVO |
-| Testy | **1179, 0 zlyh** |
-| Testy | **1179, 0 zlyh** |
+| Testy | **1199, 0 zlyh** |
+| Testy | **1199, 0 zlyh** |
 
 ---
 

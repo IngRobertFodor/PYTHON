@@ -236,17 +236,23 @@ def extract_detail_title(soup, text):
 
 
 def extract_detail_location(text):
-    """Extrahuje miesto konania drazby (adresa mesta) z textu detailu.
+    """Extrahuje miesto konania drazby z textu detailu.
 
-    Poznamka: NCRdr HTML neobsahuje adresu predmetu drazby (len v PDF).
-    Pouzijeme 'Miesto konania drazby' ako orientacnu lokalitu pre GIS.
-    Format: 'Hlavna 1, Trnava 91701' alebo 'Bratislava 81102'.
+    Poznamka: NCRdr HTML neobsahuje adresu PREDMETU drazby (len v PDF).
+    Pouzijeme 'Miesto konania drazby' a extrahujeme z nej LEN OBEC/MESTO
+    (nie plnu adresu s ulicou a PSC) pre pouzitie v geocodingu.
+
+    Format vstupu: 'Hlavna 1, Trnava 91701' -> vratime 'Trnava'
+                   'Bratislava 81102'        -> vratime 'Bratislava'
     """
     m = _LOCATION_RE.search(text)
     if m:
         raw = m.group(1).strip()
-        # Orez za "Blizšie oznacenie" alebo "Datum"
         raw = re.split(r"\s+Bli\u017e\u0161ie|\s+D\u00e1tum", raw)[0].strip()
+        # Vyextrahuj len obec/mesto (bez ulice a PSC)
+        obec = _extract_city_from_address(raw)
+        if obec:
+            return obec
         return raw[:60]
     # Fallback: Obec / Mesto
     for pat in [
@@ -256,6 +262,26 @@ def extract_detail_location(text):
         fm = re.search(pat, text)
         if fm:
             return fm.group(1).strip()[:60]
+    return ""
+
+
+def _extract_city_from_address(address: str) -> str:
+    """
+    Z plnej adresy ('Ulica 12, Mesto 91234') vyextrahuje len obec/mesto.
+    Pouziva sa pre location_text v notarskych drazbách aby geocoding
+    nedostal adresu dlznika ale len mesto kde sa drazba kona.
+    """
+    if not address:
+        return ""
+    # Vzor: posledna cast pred PSC alebo za poslednou ciarkou
+    # 'Povazska 1706/35, Trencin 91101' -> 'Trencin'
+    parts = [p.strip() for p in address.split(",")]
+    for part in reversed(parts):
+        # Odstran PSC (5-ciselny blok) a cisla ulice
+        clean = re.sub(r"\b\d+[\/\d]*\b", "", part).strip()
+        clean = re.sub(r"\s{2,}", " ", clean).strip()
+        if clean and len(clean) >= 2 and not re.search(r"\d{4}", clean):
+            return clean
     return ""
 
 
