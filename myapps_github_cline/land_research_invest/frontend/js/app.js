@@ -118,7 +118,7 @@ async function _autoLoadLastResults() {
     const data = await apiScrapeResults();
     if (!data.results || data.results.length === 0) return;
     _allResults = data.results;
-    renderResultsTable(_allResults);
+    renderResultsTable(_dedupLatestRun(_allResults));
     showStatus("Načítaných " + data.count + " pozemkov z posledného behu.", "info");
     // Nacitaj diff (ticho)
     loadDiffBanner().catch(() => {});
@@ -185,7 +185,14 @@ function renderResults(items) {
     addParcelMarker(parcel, report, openModal);
   });
 
-  fitMapToMarkers();
+    fitMapToMarkers();
+
+  // P4: Ensure single-parcel VYSLEDKY section is visible
+  const _sec = document.querySelector(".results-section");
+  if (_sec) {
+    _sec.classList.add("results-section-active");
+    setTimeout(() => _sec.scrollIntoView({ behavior: "smooth", block: "nearest" }), 120);
+  }
 }
 
 function buildCard(parcel, report) {
@@ -702,6 +709,42 @@ function prelim_color(score) {
   return "#757575";
 }
 
+// P3c: Sort state
+let _sortCol = "preliminary_score";
+let _sortDir = -1;  // -1 = desc, 1 = asc
+
+function _sortItems(items) {
+  return [...items].sort((a, b) => {
+    let va, vb;
+    if (_sortCol === "preliminary_score") {
+      va = a.preliminary_score || 0; vb = b.preliminary_score || 0;
+    } else if (_sortCol === "price_eur") {
+      va = a.price_eur || 0; vb = b.price_eur || 0;
+    } else if (_sortCol === "price_per_sqm") {
+      va = a.price_per_sqm > 0 ? a.price_per_sqm : (a.area_sqm > 0 ? a.price_eur/a.area_sqm : 0);
+      vb = b.price_per_sqm > 0 ? b.price_per_sqm : (b.area_sqm > 0 ? b.price_eur/b.area_sqm : 0);
+    } else if (_sortCol === "area_sqm") {
+      va = a.area_sqm || 0; vb = b.area_sqm || 0;
+    } else { return 0; }
+    return (va - vb) * _sortDir;
+  });
+}
+
+function _setSortCol(col) {
+  if (_sortCol === col) { _sortDir *= -1; }
+  else { _sortCol = col; _sortDir = -1; }
+  _updateSortHeaders();
+  renderResultsTable(_filteredResults || _allResults);
+}
+
+function _updateSortHeaders() {
+  document.querySelectorAll(".results-table th[data-sort]").forEach(th => {
+    th.classList.remove("sort-asc", "sort-desc");
+    if (th.dataset.sort === _sortCol)
+      th.classList.add(_sortDir === -1 ? "sort-desc" : "sort-asc");
+  });
+}
+
 function renderResultsTable(items) {
   showTableSection(items && items.length > 0);
   const tbody = document.getElementById("results-tbody");
@@ -714,6 +757,10 @@ function renderResultsTable(items) {
 
   // Aktualizuj mapu s dostupnymi suradnicami
   renderPrelimMap(items);
+
+  // P3c: Apply sort
+  items = _sortItems(items);
+  _updateSortHeaders();
 
   items.forEach((p, idx) => {
     const score = (p.preliminary_score || 0).toFixed(1);
@@ -849,16 +896,34 @@ function _prelimMapColor(score) {
   return             { bg:"#bdbdbd", text:"#fff", border:"#757575" };
 }
 
+// P3b: Dedup — zobraz len najnovsí run_id pre kazdu URL
+function _dedupLatestRun(items) {
+  let maxRun = 0;
+  items.forEach(p => { if ((p.run_id || 0) > maxRun) maxRun = p.run_id || 0; });
+  if (maxRun === 0) return items;
+  return items.filter(p => (p.run_id || 0) === maxRun);
+}
+
+// P3a: Skupinovy filter zdrojov
+const _DRAZOBNE_SOURCES_UI  = ["ske_drazobne_vyhlasky", "notarske_drazby", "obchodny_vestnik"];
+const _INZERAT_SOURCES_UI   = ["nehnutelnosti_sk", "topreality_sk", "reality_sk"];
+
 function applyFilter() {
-  const zdroj = document.getElementById("filter-zdroj").value;
-  const cena  = parseFloat(document.getElementById("filter-cena").value) || Infinity;
-  const vym   = parseFloat(document.getElementById("filter-vymera").value) || 0;
-  const skore = parseFloat(document.getElementById("filter-skore").value) || 0;
-  const gemOnly = document.getElementById("filter-gem")?.checked || false;
-  const wlOnly  = document.getElementById("filter-watchlist")?.checked || false;
+  const zdroj     = document.getElementById("filter-zdroj").value;
+  const cena      = parseFloat(document.getElementById("filter-cena").value) || Infinity;
+  const vym       = parseFloat(document.getElementById("filter-vymera").value) || 0;
+  const skore     = parseFloat(document.getElementById("filter-skore").value) || 0;
+  const gemOnly   = document.getElementById("filter-gem")?.checked || false;
+  const wlOnly    = document.getElementById("filter-watchlist")?.checked || false;
+  const latestRun = document.getElementById("filter-latest-run")?.checked !== false;
+  const typeFilter = document.querySelector(".filter-type-btn.active")?.dataset.ftype || "";
   const wl = wlOnly ? wlLoad() : null;
-  renderResultsTable(_allResults.filter(p => {
+  let data = latestRun ? _dedupLatestRun(_allResults) : _allResults;
+  renderResultsTable(data.filter(p => {
     if (zdroj && p.source_portal !== zdroj) return false;
+    if (typeFilter === "drazby"   && !_DRAZOBNE_SOURCES_UI.includes(p.source_portal))  return false;
+    if (typeFilter === "inzeraty" && !_INZERAT_SOURCES_UI.includes(p.source_portal)) return false;
+    if (typeFilter === "spf"      && p.source_portal !== "spf") return false;
     if (p.price_eur > 0 && p.price_eur > cena) return false;
     if (p.area_sqm  > 0 && p.area_sqm  < vym)  return false;
     if ((p.preliminary_score || 0) < skore) return false;
@@ -880,7 +945,8 @@ function resetFilter() {
   if (gemChk) gemChk.checked = false;
   const wlChk = document.getElementById("filter-watchlist");
   if (wlChk) wlChk.checked = false;
-  renderResultsTable(_allResults);
+  document.querySelectorAll(".filter-type-btn").forEach(b => b.classList.remove("active"));
+  renderResultsTable(_dedupLatestRun(_allResults));
 }
 
 function onChkAllChange(e) {
@@ -1196,3 +1262,12 @@ function _estimateConnectionCosts(ov) {
   return lines;
 }
 
+// P3a: Toggle skupinovy filter
+function toggleTypeFilter(btn) {
+  const wasActive = btn.classList.contains("active");
+  document.querySelectorAll(".filter-type-btn").forEach(b => b.classList.remove("active"));
+  if (!wasActive) btn.classList.add("active");
+  applyFilter();
+}
+window.toggleTypeFilter = toggleTypeFilter;
+window._setSortCol = _setSortCol;

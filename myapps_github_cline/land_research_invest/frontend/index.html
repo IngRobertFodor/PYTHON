@@ -103,6 +103,16 @@
         <label class="filter-label">Min. skóre:
           <input id="filter-skore" type="number" class="filter-input" placeholder="0" min="0" max="100" style="width:52px">
         </label>
+        <!-- P3a: Skupinový filter zdrojov -->
+        <div class="filter-type-group">
+          <button class="filter-type-btn btn-sm" data-ftype="drazby"   onclick="toggleTypeFilter(this)">&#128296; Dra&#382;by</button>
+          <button class="filter-type-btn btn-sm" data-ftype="inzeraty" onclick="toggleTypeFilter(this)">&#127991; Inzer&#225;ty</button>
+          <button class="filter-type-btn btn-sm" data-ftype="spf"      onclick="toggleTypeFilter(this)">&#127963; SPF</button>
+        </div>
+        <!-- P3b: Latest run dedup -->
+        <label class="filter-label" style="display:flex;align-items:center;gap:4px;cursor:pointer">
+          <input type="checkbox" id="filter-latest-run" checked onchange="applyFilter()"> &#x1F550; Posl. beh
+        </label>
         <button id="btn-filter-apply" class="btn btn-sm">Filtrovať</button>
         <button id="btn-filter-reset" class="btn btn-sm btn-outline">Reset</button>
         <label class="filter-label" style="display:flex;align-items:center;gap:4px;cursor:pointer">
@@ -126,12 +136,12 @@
               <th><input type="checkbox" id="chk-all" title="Vybrať všetky"></th>
               <th>#</th>
               <th>⭐</th>
-              <th>Skóre</th>
+              <th data-sort="preliminary_score" class="sortable sort-desc" onclick="_setSortCol('preliminary_score')" title="Triediť podľa skóre">Skóre &#8597;</th>
               <th>Zdroj</th>
               <th>Lokalita</th>
-              <th>Cena EUR</th>
-              <th>m²</th>
-              <th>EUR/m²</th>
+              <th data-sort="price_eur" class="sortable" onclick="_setSortCol('price_eur')" title="Triediť podľa ceny">Cena EUR &#8597;</th>
+              <th data-sort="area_sqm" class="sortable" onclick="_setSortCol('area_sqm')" title="Triediť podľa výmery">m² &#8597;</th>
+              <th data-sort="price_per_sqm" class="sortable" onclick="_setSortCol('price_per_sqm')" title="Triediť podľa EUR/m²">EUR/m² &#8597;</th>
               <th>Infra</th>
               <th>Odkaz</th>
             </tr>
@@ -251,11 +261,11 @@
 <script src="/static/lib/leaflet/leaflet.js"></script>
 
 <!-- App JS -->
-<script src="/static/js/config.js?v=22"></script>
-<script src="/static/js/api.js?v=22"></script>
-<script src="/static/js/demo.js?v=22"></script>
-<script src="/static/js/map.js?v=22"></script>
-<script src="/static/js/app.js?v=22"></script>
+<script src="/static/js/config.js?v=23"></script>
+<script src="/static/js/api.js?v=23"></script>
+<script src="/static/js/demo.js?v=23"></script>
+<script src="/static/js/map.js?v=23"></script>
+<script src="/static/js/app.js?v=23"></script>
 
 </body>
 </html>

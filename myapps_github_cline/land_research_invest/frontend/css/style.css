@@ -504,3 +504,24 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   }
   .map-panel { height: 280px; }
 }
+
+/* P3a type-filter buttons */
+.filter-type-group { display:flex; gap:3px; }
+.filter-type-btn { background:#e8f0fe; color:#1a3a5c; border:1px solid #c8d8f0;
+  border-radius:4px; padding:3px 8px; font-size:.73rem; cursor:pointer;
+  transition:background .12s,color .12s; }
+.filter-type-btn:hover  { background:#c8d8f0; }
+.filter-type-btn.active { background:#1a3a5c; color:#fff; border-color:#1a3a5c; }
+
+/* P3c sortable headers */
+.results-table th.sortable { cursor:pointer; user-select:none; }
+.results-table th.sortable:hover { background:#24548a; }
+.results-table th.sort-asc  { background:#1a5c3a !important; }
+.results-table th.sort-desc { background:#1a3a5c !important; }
+
+/* P4 VYSLEDKY section active */
+.results-section { margin-top:12px; border-top:2px solid transparent;
+  transition:border-color .3s; }
+.results-section-active { border-top:2px solid #2e7d32; background:#f0fff4;
+  border-radius:0 0 8px 8px; padding:4px 0 8px; }
+.results-section h2 { font-size:.88rem; color:#1a3a5c; margin:8px 0 6px; }
