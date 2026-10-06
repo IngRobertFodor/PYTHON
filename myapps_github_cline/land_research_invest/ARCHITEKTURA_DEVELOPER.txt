@@ -386,22 +386,7 @@ VYSVETLIVKY_POUZIVATEL.txt  -- legenda stavov, farieb, GIS chyb
 
 
 ==============================================================
-12. TESTOVANIE
-==============================================================
-
-  python -m pytest tests/ -v --rootdir=.
-  python -m pytest tests/test_pipeline_service.py -v
-  python -m pytest tests/test_config_validator.py -v
-
-  Spustit len rychle (offline) testy:
-  python -m pytest tests/ -q
-
-
-Autor: Robert Fodor | 2026
-
-
-==============================================================
-11. INVESTICNA AWARENESS -- DETEKTOR SKVOSTOV
+12. INVESTICNA AWARENESS -- DETEKTOR SKVOSTOV
 ==============================================================
 
   Ciel: najst orna poda na okraji dediny s priamou dostupnostou infrastruktury
@@ -434,3 +419,18 @@ Autor: Robert Fodor | 2026
     Warm cache: po scrape_all sa na pozadi prekontroluje gisplan.sk
     pre top 200 obci (threading.Thread, noncritical).
     /api/scrape/up-coverage: prehlad pokrytia z cache (0 HTTP).
+
+
+==============================================================
+13. TESTOVANIE
+==============================================================
+
+  python -m pytest tests/ -v --rootdir=.
+  python -m pytest tests/test_pipeline_service.py -v
+  python -m pytest tests/test_config_validator.py -v
+
+  Spustit len rychle (offline) testy:
+  python -m pytest tests/ -q
+
+
+Autor: Robert Fodor | 2026
