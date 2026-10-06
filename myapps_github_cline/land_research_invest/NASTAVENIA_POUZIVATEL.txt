@@ -1,153 +1,174 @@
-NASTAVENIA -- Ako prispusobit vyhladavanie
+NASTAVENIA — Ako prispôsobiť vyhľadávanie
 ==========================================
 
-Vsetko sa meni v JEDINOM subore:  config/criteria.yaml
-Po kazdej zmene staci restartovat aplikaciu. Ziadna kompilacia.
+Všetko sa mení v JEDINOM súbore:  config/criteria.yaml
+Po každej zmene stačí reštartovať aplikáciu. Žiadna kompilácia.
 
-Format YAML: odsadenie = medzery (NIE tabulatory).
+Formát YAML: odsadenie = medzery (NIE tabulátory).
 
 
 ==============================================================
 1. CENA  (criteria -> price)
 ==============================================================
-  max_eur: 50000             maximalna cena
-  min_eur: 10000             lacnejsie ignorovat
+  max_eur: 10000             maximálna cena
+  min_eur: 0                 lacnejšie ignorovať
   max_price_per_sqm_eur: 100 max za m2
 
-  >> max_eur: 70000           zvysit rozpocet na 70 000 EUR
-  >> max_price_per_sqm_eur: 60  prisnejsi limit na m2
+  >> max_eur: 70000           zvýšiť rozpočet na 70 000 EUR
+  >> max_price_per_sqm_eur: 60  prísnejší limit na m2
 
 
 ==============================================================
 2. VZDIALENOST  (criteria -> location)
 ==============================================================
-  max_distance_km: 70
+  max_distance_km: 85
 
   >> max_distance_km: 50      len do 50 km od BA
-  >> center_lat: 48.3774      iny stred (napr. Trnava)
+  >> center_lat: 48.3774      iný stred (napr. Trnava)
      center_lon: 17.5853
+
+  Poznámka: vzdialenosť v predbežnom skóre sa odhaduje z názvu
+  obce (offline). Nerozpoznaná lokalita = neutrálny príspevok.
 
 
 ==============================================================
 3. VELKOST POZEMKU  (criteria -> parcel)
 ==============================================================
-  min_area_sqm: 600    min. vymera v m2
-  max_area_sqm: 1500   max. vymera v m2
-  min_width_m: 15      min. sirka (stavebna ciara)
+  min_area_sqm: 350    min. výmera v m2
+  max_area_sqm: 1000   max. výmera v m2
+  min_width_m: 15      min. šírka (stavebná čiara)
 
-  >> min_area_sqm: 800        len vacsie pozemky
+  >> min_area_sqm: 600        len väčšie pozemky
 
 
 ==============================================================
-4. CO JE DOLEZITEJSIE  (scoring -> weights)
+4. PLNE GIS SKORE — VAHY KOMPONENTOV  (scoring -> weights)
 ==============================================================
-!!! SUCET MUSI BYT PRESNE 1.0 -- ak zvysite jednu, znizite inu !!!
+
+Váhy pre PLNÉ GIS skóre (po "Skórovať vybrané").
+SÚČET MUSÍ BYŤ PRESNE 1.0 — ak zvýšite jednu, znížte inú.
 
   price:            0.18   cena a hodnota za peniaze
-  distance:         0.12   vzdialenost od Bratislavy
-  infrastructure:   0.20   cesta, elektrina, voda
-  legal_proxy:      0.18   cisty list vlastnictva
-  flood_risk:       0.10   nie v zaplavovej zone
-  soil_quality:     0.08   bonita pody (odvody za vynatie)
-  terrain:          0.07   sklon, zosuvy, radon
+  distance:         0.12   vzdialenosť od Bratislavy (GPS)
+  infrastructure:   0.20   cesta, elektrina, voda (OSM)
+  legal_proxy:      0.18   čistý list vlastníctva / geometria KN
+  flood_risk:       0.10   nie v záplavovej zóne
+  soil_quality:     0.08   bonita pôdy (odvody za vyňatie)
+  terrain:          0.07   sklon, zosuvy, radón
   protected_zones:  0.07   nie v NP ani Natura 2000
                    -----
-  SUCET:            1.00  <- musi zostat 1.00
+  SÚČET:            1.00  <- musí zostať 1.00
 
-  >> cena najdolezitejsia:  price: 0.25, distance: 0.05
-  >> pravna bezpecnost:     legal_proxy: 0.25, terrain: 0.00
+  >> cena najdôležitejšia:  price: 0.25, distance: 0.05
+  >> právna bezpečnosť:     legal_proxy: 0.25, terrain: 0.00
+
+
+Rýchle predbežné skóre — FIXNÉ VÁHY (nemení sa v YAML)
+-------------------------------------------------------
+  cena          30%   EUR v konfigurovanom rozsahu
+  výmera        25%   m2 v konfigurovanom rozsahu
+  EUR/m2        20%   pod limitom; podozrivo nízke z inzerátov = 0
+  vzdialenosť   10%   odhad z názvu obce (offline)
+  typ zdroja    10%   dražby = bonus, inzeráty = neutrál
+  kvalita dát    5%   penalizácia za chýbajúce polia
+
+  Dôsledky: vzdialené pozemky (>85 km) a inzeráty
+  s nevierohodne nízkou cenou (<1.5 EUR/m2) dostanú
+  automaticky nižšie predbežné skóre.
 
 
 ==============================================================
 5. HODNOTENIE  (scoring -> thresholds)
 ==============================================================
-  strong_buy:  85    top vyber -- konajte rychlo
-  investigate: 70    dobry tip -- overte a navstivte
-  consider:    50    mozne     -- ma urcite nedostatky
-                     pod 50    = preskocit
-  checklist_min_score: 70   od tohto skore vygenerovat LV checklist
+  strong_buy:  85    top výber — konajte rýchlo
+  investigate: 70    dobrý tip — overte a navštívte
+  consider:    50    možné     — má určité nedostatky
+                     pod 50    = preskočiť
+  checklist_min_score: 70
 
-  >> strong_buy: 90           byt selektyvnejsi
+  >> strong_buy: 90           byť selektívnejší
 
 
 ==============================================================
 6. KDE HLADAT  (sources -> enabled: true/false)
 ==============================================================
-  nehnutelnosti_sk   ZAP   GREEN  hlavny portal
-  topreality_sk      ZAP   GREEN  limit 10 req/min
-  notarske_drazby    ZAP   GREEN  notarske drazby
-  spf                ZAP   GREEN  statne pozemky
-  obchodny_vestnik   ZAP   GREEN  konkurzy a drazby  (!)
-  exekutorske_drazby ZAP   GREEN  exekucne predaje   (!)
-  drazby_net         ZAP   GREEN  agregator drazob
-  eks_statny_majetok ZAP   GREEN  majetok statu
-  bsk_kraj           ZAP   GREEN  prebytocny majetok BSK
-  obce_uradne_tabule ZAP   GREEN  obecne predaje
-  reality_sk         ZAP   ZLTA   opatrne
-  byty_sk            ZAP   ZLTA   overit robots.txt
-  bazos_sk           VYP   ZLTA   vyhladavanie blokovane
-  bankove_drazby     VYP   ZLTA   overit podmienky banky
-  facebook_mktplace  VYP   CERVENA  NIKDY -- zakazane
 
-  (!) = najlepsie zdroje pre podhodnotene pozemky
-  >> vypnut:  sources -> NAZOV -> enabled: false
+  Zapnuté (enabled: true):
+    nehnutelnosti_sk        hlavný portál
+    topreality_sk           limit 10 req/min
+    reality_sk
+    byty_sk
+    notarske_drazby         (!) najlepšie zdroje pre podhodnotené
+    ske_drazobne_vyhlasky   (!) exekučné predaje
+    obchodny_vestnik        (!) konkurzy a dražby
+    spf                     štátne pozemky
+    eks_statny_majetok      aukcie štátu
+    bsk_kraj                prebytočný majetok BSK
+    obce_uradne_tabule      obecné predaje
+
+  Vypnuté (enabled: false):
+    bazos_sk           vyhľadávanie blokované
+    bankove_drazby     overiť podmienky banky
+    facebook_marketplace  ToS zakazuje — NIKDY
+
+  >> vypnúť zdroj:  sources -> NAZOV -> enabled: false
 
 
 ==============================================================
 7. KONTROLY  (features -> true/false)
 ==============================================================
-  >> use_terrain: false          vynechat teren
-  >> use_cadastral_semi: true    zapnut kataster (1 klik CAPTCHA)
-  >> use_notifications: true     zapnut notifikacie (Telegram / email)
+  >> use_terrain: false          vynechať terén
+  >> use_cadastral_semi: true    zapnúť kataster (1 klik CAPTCHA)
+  >> use_notifications: true     zapnúť notifikácie
 
-  Notifikacie sa posielaju len ak skore >= min_score_to_notify.
-  Kanaly a kredencialy nastavte v .env (nie v YAML - bezpecnost).
-  Podrobny navod: AKO_SPUSTIT_POUZIVATEL.txt sekcia NOTIFIKACIE.
+  Vypnutá služba dostane neutrálne skóre 50 (skip_result).
 
-  Vypnuta sluzba automaticky dostane neutralne skore 50
-  (skip_result) -- analyza prebehne bez nej.
+  Notifikácie — nastavenie v .env (nie v YAML, bezpečnosť):
+    Telegram: TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID
+    Email:    EMAIL_FROM + EMAIL_TO + EMAIL_PASSWORD
+    Prah:     notifications -> min_score_to_notify: 75
 
 
 ==============================================================
 8. TEREN  (criteria -> terrain)
 ==============================================================
   max_slope_percent: 15      max sklon v %
-  max_elevation_m: 400       max nadmorska vyska
-  max_radon_risk_class: 2    radon: 1=nizky, 2=stredny, 3=vysoky
+  max_elevation_m: 400       max nadmorská výška
+  max_radon_risk_class: 2    radón: 1=nízky, 2=stredný, 3=vysoký
 
-  >> max_slope_percent: 8     len rovne pozemky
+  >> max_slope_percent: 8     len rovné pozemky
 
 
 ==============================================================
 9. BONITA PODY  (criteria -> soil)
 ==============================================================
-  max_protection_class: 6    (1=najdrahsia, 9=bez poplatkov)
+  max_protection_class: 6    (1=najdrahšia, 9=bez poplatkov)
 
-  >> max_protection_class: 9  len poda bez odvodov
+  >> max_protection_class: 9  len pôda bez odvodov
 
 
 ==============================================================
 CASTE CHYBY
 ==============================================================
-  Zly sucet vah:  scoring.weights musi davat 1.0
-  min > max:      min_eur musi byt mensie ako max_eur
-  Zly YAML:       python -c "import yaml; yaml.safe_load(open('config/criteria.yaml'))"
-  Zle prahy:      strong_buy > investigate > consider
+  Zlý súčet váh:  scoring.weights musí dávať 1.0
+  min > max:      min_eur musí byť menšie ako max_eur
+  Zlý YAML:       python -c "import yaml; yaml.safe_load(open('config/criteria.yaml'))"
+  Zlé prahy:      strong_buy > investigate > consider
 
-  Overit po kazdej zmene:
+  Overiť po každej zmene:
     python -m pytest tests/test_config_validator.py -v
 
 
 ==============================================================
 RYCHLY PREHLAD
 ==============================================================
-  Lacnejsie:       criteria -> price -> max_eur
-  Dalej od BA:     criteria -> location -> max_distance_km
-  Vacsie:          criteria -> parcel -> min_area_sqm
-  Vahy:            scoring -> weights  (sucet = 1.0)
-  Filter:          scoring -> thresholds -> strong_buy
-  Vypnut zdroj:    sources -> NAZOV -> enabled: false
-  Vypnut kontrolu: features -> use_XXX: false
+  Lacnejšie:       criteria -> price -> max_eur
+  Bližšie k BA:    criteria -> location -> max_distance_km
+  Väčšie:          criteria -> parcel -> min_area_sqm
+  Váhy GIS:        scoring -> weights  (súčet = 1.0)
+  Filter prahov:   scoring -> thresholds -> strong_buy
+  Vypnúť zdroj:    sources -> NAZOV -> enabled: false
+  Vypnúť kontrolu: features -> use_XXX: false
 
 
 Autor: Robert Fodor | 2026
