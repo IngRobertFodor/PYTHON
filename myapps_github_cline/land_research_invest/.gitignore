@@ -35,3 +35,10 @@ Thumbs.db
 data/cache/
 data/parcels.db
 # data/ priecinok sa vytvori automaticky pri prvom behu (storage_service.py)
+
+# Config záloha (generuje sa automaticky pri uložení cez UI)
+config/criteria.yaml.bak
+
+# Analyza výstupov (lokálne testovacie dáta, nepatria do repo)
+_analyza/
+

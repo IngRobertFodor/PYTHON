@@ -70,7 +70,17 @@ async function apiScrapeDiff() {
   return r.json();
 }
 
-async function apiUpLinks(location, check) {
+async function apiSaveLimits(payload) {
+  const r = await fetch(API_BASE + "/api/config/limits", {
+    method:  "POST",
+    headers: { "Content-Type": "application/json" },
+    body:    JSON.stringify(payload),
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error((data.errors || []).join(" | ") || "Chyba uloženia.");
+  return data;
+}
+
   const url = API_BASE + "/api/scrape/up-links?location=" + encodeURIComponent(location)
               + (check ? "&check=1" : "");
   const r = await fetch(url);

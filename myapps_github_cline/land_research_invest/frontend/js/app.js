@@ -1262,6 +1262,55 @@ function _estimateConnectionCosts(ov) {
   return lines;
 }
 
+// ----------------------------------------------------------------
+// Uloženie limitov cez UI (POST /api/config/limits)
+// ----------------------------------------------------------------
+
+async function onSaveLimits() {
+  const btn    = document.getElementById("btn-save-limits");
+  const status = document.getElementById("limits-status");
+
+  const maxEur  = parseFloat(document.getElementById("f-price-max")?.value);
+  const minArea = parseFloat(document.getElementById("f-area-min")?.value);
+  const maxArea = parseFloat(document.getElementById("f-area-max")?.value);
+  const maxKm   = parseFloat(document.getElementById("f-dist-max")?.value);
+
+  const payload = {};
+  if (!isNaN(maxEur))  payload.max_eur          = maxEur;
+  if (!isNaN(minArea)) payload.min_area_sqm      = minArea;
+  if (!isNaN(maxArea)) payload.max_area_sqm      = maxArea;
+  if (!isNaN(maxKm))   payload.max_distance_km   = maxKm;
+
+  if (Object.keys(payload).length === 0) {
+    status.textContent = "Žiadne hodnoty na uloženie.";
+    status.className   = "status error";
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+  status.textContent = "Ukladám...";
+  status.className   = "status info";
+
+  try {
+    const data = await apiSaveLimits(payload);
+    status.textContent = "✅ Uložené — zmeny platia okamžite (bez reštartu).";
+    status.className   = "status ok";
+    // Aktualizuj subtitle (max km sa mohol zmeniť)
+    if (payload.max_distance_km != null) {
+      const sub = document.getElementById("app-subtitle");
+      if (sub) sub.textContent =
+        "AI agent pre vyhľadávanie stavebných pozemkov do "
+        + payload.max_distance_km + " km od Bratislavy";
+    }
+  } catch (e) {
+    status.textContent = "❌ " + e.message;
+    status.className   = "status error";
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+window.onSaveLimits = onSaveLimits;
+
 // P3a: Toggle skupinovy filter
 function toggleTypeFilter(btn) {
   const wasActive = btn.classList.contains("active");

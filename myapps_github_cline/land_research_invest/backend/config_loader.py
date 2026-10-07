@@ -40,6 +40,47 @@ def reload_config() -> dict:
     return get_config()
 
 
+def save_config(new_config: dict) -> None:
+    """
+    Zapíše nový config do criteria.yaml.
+    Pred zápisom:
+      1. Uloží zálohu criteria.yaml -> criteria.yaml.bak
+      2. Zapíše cez temp súbor + atomické premenovanie
+         (nikdy neostane poškodený YAML pri výpadku)
+      3. Invaliduje cache -> reload_config()
+    Raises:
+        OSError ak sa zápis nepodarí
+    """
+    import shutil
+    import tempfile
+
+    path = os.path.abspath(_CONFIG_PATH)
+    bak  = path + ".bak"
+
+    # 1. záloha
+    if os.path.exists(path):
+        shutil.copy2(path, bak)
+
+    # 2. atomický zápis cez temp súbor v tom istom adresári
+    dir_path = os.path.dirname(path)
+    fd, tmp_path = tempfile.mkstemp(dir=dir_path, suffix=".yaml.tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            yaml.dump(new_config, f,
+                      allow_unicode=True,
+                      default_flow_style=False,
+                      sort_keys=False)
+        os.replace(tmp_path, path)   # atomické na rovnakom filesystem
+    except Exception:
+        # pri chybe vyčisti temp a re-raise
+        try: os.unlink(tmp_path)
+        except OSError: pass
+        raise
+
+    # 3. invaliduj cache
+    reload_config()
+
+
 def get_criteria() -> dict:
     """Vrati sekciu criteria (vsetky kriteria vyhladavania)."""
     return get_config().get("criteria", {})
