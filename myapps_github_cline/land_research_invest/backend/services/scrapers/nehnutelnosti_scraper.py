@@ -255,12 +255,107 @@ def _normalize(s: str) -> str:
     return "".join(c for c in n if unicodedata.category(c) != "Mn")
 
 
+# Slovanske deklinacne sufixy — triedene od najdlhsich (inskej) po najkratsie (a)
+_SK_SUFFIXES = (
+    "inskych", "inskemu", "inskej", "inskym", "inskou",
+    "nskych",  "nskemu",  "nskej",  "nskym",  "nskou",
+    "ovskej",  "ovskym",  "ovskou", "ovskych",
+    "oveho",   "ovemu",   "ovych",  "ovymi",
+    "skych",   "skemu",   "skej",   "skym",   "skou",
+    "ackej",   "ackym",   "ackou",
+    "nych",    "nemu",    "nej",    "nym",    "nou",
+    "ych",     "emu",     "ej",     "om",     "ou",    "ym",
+    "ci",      "ka",      "ke",     "ko",     "ku",
+    "e",       "a",       "y",      "i",      "u",
+)
+
+
+def _stem(word: str) -> str:
+    """
+    Vrati kmen slova pre slovansku deklinaciu (min 3 znaky v kmeni).
+    Priklady: 'devinskej'->'devinsk'  'novej'->'nov'  'vsi'->'vs'
+              'senci'->'sen'           'raci'->'rac'   'raca'->'rac'
+    """
+    w = word.lower()
+    if len(w) <= 3:
+        return w
+    for suf in _SK_SUFFIXES:
+        if w.endswith(suf) and len(w) - len(suf) >= 3:
+            return w[: -len(suf)]
+    return w
+
+
+def _obec_stems(obec_norm: str) -> list[str]:
+    """Zoznam kmenov vsetkych slov nazvu obce (dlzka >= 2)."""
+    return [_stem(w) for w in obec_norm.split() if len(w) >= 2]
+
+
+def _stem_match(obec_norm: str, text_n: str) -> bool:
+    """
+    True ak kazdy token z nazvu obce ma spolocny prefix (min 4 znaky)
+    s nejakym tokenom v text_n.
+
+    Viacslovne ('devinska nova ves') matchne 'v devinskej novej vsi':
+      'devinska' ~ 'devinskej'  (spolocny prefix 'devins')
+      'nova'     ~ 'novej'      (spolocny prefix 'nove')  -- kratsi match
+      OK: oba maju min 4 znaky spolocne
+
+    Jednoslovne ('devin') NESMIE matchnut 'devinskej':
+      token 'devinskej'(9) > 'devin'(5) + 3 -> odmietnuty
+      token 'devine'(6) <= 5+3=8 -> prijaty (sklonovanie 'Devine')
+    """
+    import re as _re
+    words  = obec_norm.split()
+    tokens = _re.split(r"[\s,;/()+\-]+", text_n)
+    tokens = [t for t in tokens if len(t) >= 2]
+    is_multi = len(words) > 1
+    # Aliasy pre specificke sklonovania (ves ~ vsi, atd.)
+    _ALIASES = {
+        "ves": {"vsi", "vsa", "vs", "ve"},
+        "dvor": {"dvora", "dvore", "dvori"},
+    }
+    MIN_COMMON = 3
+
+    for w in words:
+        if len(w) < 2:
+            continue
+        matched = False
+        for tok in tokens:
+            if tok in _ALIASES.get(w, set()):
+                matched = True; break
+            if len(w) < MIN_COMMON or len(tok) < MIN_COMMON:
+                if w == tok:
+                    matched = True; break
+                continue
+            # Dynamicke MIN_COMMON: dlhsie slova vyzaduju dlhsi spolocny prefix
+            # min(len(w),len(tok))-2 zabranuje 'mal'(3) aby matchol 'malacky'~'malinovo'
+            min_common = max(3, min(len(w), len(tok)) - 2)
+            # Najdi spolocny prefix
+            common_len = min(len(w), len(tok))
+            found_len  = 0
+            for ln in range(common_len, min_common - 1, -1):
+                if w[:ln] == tok[:ln]:
+                    found_len = ln; break
+            if found_len >= min_common:
+                if not is_multi and (
+                    len(tok) > len(w) + 2 or   # token privelmi dlhy
+                    len(w)   > len(tok) + 2     # obec privelmi dlha vs token
+                ):
+                    continue  # privelmi rozdielne dlzky -> ina obec
+                matched = True; break
+        if not matched:
+            return False
+    return True
+
+
 def _extract_location(title: str, url: str) -> str:
     """
     Vytiahne lokalitu z inzeratu v 3 urovniach (od najpresnejsej):
 
-    1. Zoznam znamych obci BA regionu - hlada v nazve aj URL slugu
-       (diakritika-necitlive): 'Vajnory', 'Lamac', 'Senec'...
+    1. Zoznam znamych obci BA regionu - stem-match (diakritika-necitlive,
+       sklonovanie-necitlive): 'Devinska Nova Ves' matchne 'devinskej novej vsi',
+       'Senec' matchne 'v Senci', ale 'Devin' NESMIE matchnut vnútri 'devinskej'.
+       Triedi sa od najspecifickejsich (dlhe nazvy) po najkratsie.
     2. Zatvorka v nazve: '... (Chorvatsky Grob)' -> 'Chorvatsky Grob'
     3. Slug - vsetky slova slugu zhromazdene (nie len posledne)
        F4: zahodime skomolene pady (konci -i/-e z lokalu), ktore Nominatim
@@ -270,11 +365,11 @@ def _extract_location(title: str, url: str) -> str:
     slug = url.rstrip("/").split("/")[-1] if "/" in url else ""
     slug_n = _normalize(slug.replace("-", " "))
 
-    # --- Uroven 1: zoznam znamych obci ---
+    # --- Uroven 1: stem-match zoznam znamych obci ---
     for obec_norm, obec_orig in sorted(
         _OBEC_NORM.items(), key=lambda x: -len(x[0])
     ):
-        if obec_norm in title_n or obec_norm in slug_n:
+        if _stem_match(obec_norm, title_n) or _stem_match(obec_norm, slug_n):
             return obec_orig
 
     # --- Uroven 2: zatvorka v nazve ---

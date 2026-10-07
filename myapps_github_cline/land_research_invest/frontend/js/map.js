@@ -21,23 +21,39 @@ function addParcelMarker(parcel, report, onClickCb) {
   const lon = parcel.lon || 0;
   if (!lat || !lon) return;
 
+  // P2: Geocoding quality — uncertain = žlté varovanie, far = žltý okraj
+  const geoQ = parcel.results?.geocoding_service?.data?.geocode_quality;
+  const isUncertain = geoQ === "uncertain";
+  const isFar       = geoQ === "far";
+  const geoWarn     = isUncertain
+    ? "<br><span style='font-size:.72rem;color:#c85a00'>⚠️ Neistá poloha — nemusí byť presná</span>"
+    : (isFar ? "<br><span style='font-size:.72rem;color:#e09000'>⚠️ Ďaleká lokalita (>120 km)</span>" : "");
+
   const rec   = parcel.recommendation || "N/A";
   const col   = recColor(rec);
   const score = parcel.final_score || 0;
 
+  // Pre uncertain: žlté pozadie markeru + varovný okraj
+  const markerBg     = isUncertain ? "#fff3cd" : col.bg;
+  const markerText   = isUncertain ? "#7a4f00" : col.text;
+  const markerBorder = isUncertain ? "2px dashed #f0b429"
+                     : isFar       ? "2px dashed #f0b429"
+                     : `2px solid ${col.border}`;
+  const markerLabel  = isUncertain ? "⚠️" : Math.round(score);
+
   const icon = L.divIcon({
     className: "",
     html: `<div style="
-      background:${col.bg};
-      color:${col.text};
-      border:2px solid ${col.border};
+      background:${markerBg};
+      color:${markerText};
+      border:${markerBorder};
       border-radius:50%;
       width:36px; height:36px;
       display:flex; align-items:center; justify-content:center;
       font-weight:bold; font-size:11px;
       box-shadow:0 2px 6px rgba(0,0,0,.4);
       cursor:pointer;
-    ">${Math.round(score)}</div>`,
+    ">${markerLabel}</div>`,
     iconSize: [36, 36],
     iconAnchor: [18, 18],
   });
@@ -78,7 +94,7 @@ function addParcelMarker(parcel, report, onClickCb) {
     &nbsp; ${score.toFixed(1)}/100<br>
     Cena: <b>${(parcel.price_eur || 0).toLocaleString("sk-SK")} EUR</b><br>
     Plocha: ${(parcel.area_sqm || 0).toLocaleString("sk-SK")} m&sup2;<br>
-    EUR/m&sup2;: ${ppsmStr}${linkHtml}
+    EUR/m&sup2;: ${ppsmStr}${geoWarn}${linkHtml}
   `;
 
   const marker = L.marker([lat, lon], { icon })

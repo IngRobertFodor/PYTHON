@@ -223,6 +223,14 @@ function buildCard(parcel, report) {
     && !parcel.url.includes("/demo/")
     && parcel.url.startsWith("http");
 
+  // P2: Geocoding quality — varovanie pri neistej polohe
+  const geoQ     = parcel.results?.geocoding_service?.data?.geocode_quality;
+  const geoWarnHtml = geoQ === "uncertain"
+    ? `<div class="geo-warn-banner">⚠️ Poloha na mape je orientačná — lokalitu sa nepodarilo presne určiť.</div>`
+    : (geoQ === "far"
+    ? `<div class="geo-warn-banner geo-warn-far">⚠️ Ďaleká lokalita (>120 km od BA).</div>`
+    : "");
+
   // Popisok odkazu podla zdroja:
   // - drazobne zdroje -> "Oznamenie o drazbe (PDF)" (klik = stiahne sken s cenou/vymerou)
   // - realitne portaly -> "Inzerat"
@@ -249,6 +257,7 @@ function buildCard(parcel, report) {
         ${budget_st} ${sqm_st}
       </div>
       ${flags_html ? `<ul class="card-flags">${flags_html}</ul>` : ""}
+      ${geoWarnHtml}
       ${linkHtml}
     </div>
   `;

@@ -525,3 +525,16 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .results-section-active { border-top:2px solid #2e7d32; background:#f0fff4;
   border-radius:0 0 8px 8px; padding:4px 0 8px; }
 .results-section h2 { font-size:.88rem; color:#1a3a5c; margin:8px 0 6px; }
+
+/* P2: Geocoding quality — varovanie v karte */
+.geo-warn-banner {
+  margin: 6px 0 2px;
+  padding: 5px 8px;
+  background: #fff3cd; color: #7a4f00;
+  border: 1px solid #f0b429; border-radius: 5px;
+  font-size: .74rem; line-height: 1.4;
+}
+.geo-warn-far {
+  background: #fce8f3; color: #6a0050;
+  border-color: #c86eb5;
+}

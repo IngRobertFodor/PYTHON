@@ -1,70 +1,52 @@
-# ================================================================
-# Land Research Invest - kriteria.yaml (config/criteria.yaml)
-# Kompletne kriteria, zdroje a nastavenia agenta.
-# Zmeny robte tu - po ulozeni staci restartovat aplikaciu.
-#
-# LEGENDA automatizacie:
-#   AUTO   = agent vyriesi plne sam, bezi paralelne bez cakania
-#   SEMI   = agent pripravi 90%, ty spravís 1 krok (napr. CAPTCHA)
-#   MANUAL = agent vygeneruje checklist/ziadost, kontrola rucna
-# ================================================================
-
-
-# ================================================================
-# A. KRITERIA VYHLADAVANIA
-# ================================================================
-
 criteria:
-
-  # --- 1. LOKACIA A CENA ---
   location:
     center_lat: 48.1486
     center_lon: 17.1077
-    max_distance_km: 85
-    automation: AUTO           # Haversine offline
-
+    max_distance_km: 82
+    automation: AUTO
   price:
     min_eur: 0
     max_eur: 10000
     max_price_per_sqm_eur: 100
-    automation: AUTO           # priamo z inzeratu
-
+    automation: AUTO
   parcel:
     min_area_sqm: 350
-    max_area_sqm: 1000
+    max_area_sqm: 800
     min_width_m: 15
     min_length_m: 20
-    preferred_shape: rectangular   # obdlznikovy tvar = mensie naklady
-    min_shape_regularity: 0.5      # 0-1, 1=dokonaly obdlznik
-    automation: AUTO               # ZBGIS WFS geometria
-
-  # --- 2. UZEMNO-PRAVNE (UPI, IZP, UPZ, odstupy) ---
+    preferred_shape: rectangular
+    min_shape_regularity: 0.5
+    automation: AUTO
   zoning:
-    required_zones: ["IBV", "rodinne domy", "obytna zona"]
-    excluded_zones: ["priemyselna", "commercial", "skladova", "polnohospodarska"]
-    min_izp: 0.20              # index zastavanosti
+    required_zones:
+    - IBV
+    - rodinne domy
+    - obytna zona
+    excluded_zones:
+    - priemyselna
+    - commercial
+    - skladova
+    - polnohospodarska
+    min_izp: 0.2
     preferred_izp: 0.25
-    upz_required_blocks: true  # ak obec vyzaduje UPZ -> zamietnut
+    upz_required_blocks: true
     min_setback_from_road_m: 5
     min_setback_from_neighbor_m: 2
-    automation_zone_check: SEMI    # OCR z PDF UP + LLM (~70-85%)
-    automation_izp: SEMI           # extrahovane z UP dokumentu
-    automation_upz: SEMI           # z UP dokumentu
-    automation_setbacks: AUTO      # ZBGIS geometria
-
-
-  # --- 3. LIST VLASTNICTVA A KATASTER ---
-  # Poloautomat: Playwright predvyplni, ty kliknes CAPTCHA,
-  # agent precita sekcie B/C/D automaticky.
+    automation_zone_check: SEMI
+    automation_izp: SEMI
+    automation_upz: SEMI
+    automation_setbacks: AUTO
   cadastral:
     no_active_plombs:
       enabled: true
-      plomb_types: ["V", "Z"]
+      plomb_types:
+      - V
+      - Z
       automation: SEMI
     encumbrances:
-      no_lien: true            # zalozne pravo
-      no_preemption: true      # predkupne pravo statu/obce
-      no_usufruct: true        # pravo dozitia
+      no_lien: true
+      no_preemption: true
+      no_usufruct: true
       no_unknown_easement: true
       automation: SEMI
     ownership:
@@ -75,189 +57,149 @@ criteria:
       no_unknown_owners: true
       automation: SEMI
     road_access_legal:
-      verified: true           # vecne bremeno alebo obecne vlastnictvo cesty
+      verified: true
       automation: SEMI
-
-
-  # --- 4. PRISTUPOVA CESTA A INFRASTRUKTURA ---
   infrastructure:
     road:
-      min_width_m: 6           # min. pre hasicov
+      min_width_m: 6
       max_distance_m: 100
-      surface_ok: ["asphalt", "concrete", "paved", "cobblestone"]
-      automation: AUTO         # OSM highway + width tag
+      surface_ok:
+      - asphalt
+      - concrete
+      - paved
+      - cobblestone
+      automation: AUTO
     electricity:
       required: true
       max_distance_m: 200
-      automation_proximity: AUTO   # OSM power=line/pole
-      automation_capacity: MANUAL  # potvrdit s ZSDIS
+      automation_proximity: AUTO
+      automation_capacity: MANUAL
     water:
       required: false
       max_distance_m: 200
-      automation: AUTO             # OSM waterway/pipeline
+      automation: AUTO
     sewage:
-      required: false              # zumpa/COV je OK
-      automation: AUTO             # OSM sewer tag
+      required: false
+      automation: AUTO
     gas:
       required: false
-      automation: AUTO             # OSM pipeline
-
-
-  # --- 4b. PRIAMA DOSTUPNOST A POLOHA V OBCI ---
-  # Dva nezavisle ukazovatele pre investicne rozhodovanie:
-  #   direct_access  = su siete tak blizko, ze pripojka je lacna / trivalna?
-  #   village_position = kde v ramci obce parcela lezi? (stred/okraj/mimo)
-  # Zdroj: OSM building + highway (spolahlive na SK), power/waterway len bonus.
-  # Prahy su laditelne bez restartu (len reload criteria.yaml).
+      automation: AUTO
   access_classification:
     direct_access:
-      full_m: 50          # dom+cesta do 50 m  -> PRIAMA dostupnost
-      partial_m: 150      # dom+cesta do 150 m -> CIASTOCNA dostupnost
-      # > 150 m -> ZIADNA (drahe zasietovanie, znasa kupujuci)
+      full_m: 50
+      partial_m: 150
     village_position:
-      core_count_100m: 30   # >= 30 domov v okruhu 100 m -> STRED obce
-      edge_min_count_300m: 3 # >= 3 domy v okruhu 300 m  -> OKRAJ obce
-      # < 3 domy do 300 m -> MIMO obce (pole / samota)
-
-  # --- 5. TEREN, GEOLOGIA A HYDRO ---
+      core_count_100m: 30
+      edge_min_count_300m: 3
   terrain:
     flood_zone_q100: false
-    automation_flood: AUTO         # SHMU WMS - kriticky bloker
+    automation_flood: AUTO
     max_slope_percent: 15
     preferred_slope_percent: 5
-    automation_slope: AUTO         # DMR 5.0 WCS (UGKK)
-    preferred_aspects: ["S", "SE", "SW"]
-    automation_aspect: AUTO        # DMR 5.0
+    automation_slope: AUTO
+    preferred_aspects:
+    - S
+    - SE
+    - SW
+    automation_aspect: AUTO
     max_elevation_m: 400
-    automation_elevation: AUTO     # DMR 5.0
+    automation_elevation: AUTO
     landslide_zone: false
-    automation_landslide: AUTO     # SGUDSH WMS
+    automation_landslide: AUTO
     max_radon_risk_class: 2
-    automation_radon: AUTO         # SGUDSH WMS
+    automation_radon: AUTO
     high_groundwater_warning: true
-    automation_groundwater: SEMI   # BPEJ proxy + geologicka mapa
-
-
-  # --- 6. OCHRANE PASMA A ENVIRONMENT ---
+    automation_groundwater: SEMI
   protected_zones:
-    no_vvn_overhead_line: true     # vysokonapatiove vedenie
-    vvn_buffer_m: 25               # ochranne pasmo VVN
-    automation_vvn: AUTO           # OSM power=line + buffer
-    no_vtl_gas_pipeline: true      # vysokotlakovy plyn
+    no_vvn_overhead_line: true
+    vvn_buffer_m: 25
+    automation_vvn: AUTO
+    no_vtl_gas_pipeline: true
     vtl_buffer_m: 50
-    automation_vtl: AUTO           # OSM pipeline + buffer
+    automation_vtl: AUTO
     no_forest_buffer: true
-    forest_buffer_m: 50            # 50m od lesa
-    automation_forest: AUTO        # OSM landuse=forest + buffer
+    forest_buffer_m: 50
+    automation_forest: AUTO
     no_archaeological_zone: true
-    automation_archaeology: MANUAL # KPU - ziadne verejne API
+    automation_archaeology: MANUAL
     no_natura2000: true
-    automation_natura: AUTO        # ŠOP SR WMS
-    no_chko: true                  # chranena krajinna oblast
-    automation_chko: AUTO          # ŠOP SR WMS
-    no_npr_npr: true               # narodna prirodna rezervacia
-    automation_npr: AUTO           # ŠOP SR WMS
-
+    automation_natura: AUTO
+    no_chko: true
+    automation_chko: AUTO
+    no_npr_npr: true
+    automation_npr: AUTO
   environment:
     no_landfill_nearby: true
     landfill_buffer_m: 500
-    automation_landfill: AUTO      # OSM landuse=landfill
+    automation_landfill: AUTO
     no_industrial_nearby: true
     industrial_buffer_m: 300
-    automation_industrial: AUTO    # OSM landuse=industrial
-    no_environmental_burden: true  # stara ekologicka zataz
-    automation_burden: SEMI        # SAŽP register (ak dostupny WMS)
-
+    automation_industrial: AUTO
+    no_environmental_burden: true
+    automation_burden: SEMI
   noise:
-    max_highway_distance_m: 200    # min. odstup od dialnice (hluk)
-    # Pozor: chceme byt blizko dialnice pre dostupnost, ale nie prilis blizko
+    max_highway_distance_m: 200
     min_highway_distance_m: 50
     max_railway_distance_m: 150
-    automation_noise: AUTO         # OSM highway + railway + buffer
-
-
-  # --- 7. BONITA PODY (BPEJ) ---
+    automation_noise: AUTO
   soil:
-    max_protection_class: 6        # 1-9, nizsia = cennejsia poda = drazsie vynatie
-    # Triedy 1-4 = vysoke odvody za vynatie z PPF (moze byt tisice EUR/m2)
-    high_cost_classes: [1, 2, 3, 4]
-    automation_bpej: AUTO          # BPEJ WMS + odhad odvodov
-
-
-  # --- 8. TRHOVA ANALYZA ---
+    max_protection_class: 6
+    high_cost_classes:
+    - 1
+    - 2
+    - 3
+    - 4
+    automation_bpej: AUTO
   market:
-    max_listing_age_days: 180      # inzerat visí dlhšie = znizena cena mozna
-    price_vs_local_avg_max_ratio: 1.2  # max 20% nad lokalnym priemerom
-    underpriced_threshold_ratio: 0.8   # pod 80% = podhodnoteny = zaujimave
-    automation: AUTO               # vlastna DB + historia inzeratu
-
-
-  # --- 9. OKOLIE A DOSTUPNOST (bonus kriteria) ---
+    max_listing_age_days: 180
+    price_vs_local_avg_max_ratio: 1.2
+    underpriced_threshold_ratio: 0.8
+    automation: AUTO
   amenities:
-    max_school_distance_m: 5000    # skola pre rodiny s detmi
+    max_school_distance_m: 5000
     max_shop_distance_m: 3000
     max_bus_stop_distance_m: 2000
-    max_motorway_access_distance_m: 20000   # dalnicovy privazan
-    automation: AUTO               # OSM Overpass
-
-
-
-# ================================================================
-# B. SKOROVACI ALGORITMUS
-# ================================================================
-
+    max_motorway_access_distance_m: 20000
+    automation: AUTO
 scoring:
   weights:
-    price:            0.18
-    distance:         0.12
-    infrastructure:   0.20
-    legal_proxy:      0.18
-    flood_risk:       0.10
-    soil_quality:     0.08
-    terrain:          0.07
-    protected_zones:  0.07
-
+    price: 0.18
+    distance: 0.12
+    infrastructure: 0.2
+    legal_proxy: 0.18
+    flood_risk: 0.1
+    soil_quality: 0.08
+    terrain: 0.07
+    protected_zones: 0.07
   thresholds:
-    strong_buy:   85
-    investigate:  70
-    consider:     50
-
+    strong_buy: 85
+    investigate: 70
+    consider: 50
   checklist_min_score: 70
-
-
-# ================================================================
-# C. ZDROJE INZERATOV
-# ZONY: GREEN=bezpecne | YELLOW=opatrne | RED=nevyuzivat
-# ================================================================
-
 sources:
-
-  # GREEN - bezi naplno
-
   nehnutelnosti_sk:
     enabled: true
     zone: GREEN
     automation: AUTO
     use_sitemap: true
     rate_limit_per_min: 30
-    note: "sitemap-listings namiesto /search; /api/ blokovane"
-
+    note: sitemap-listings namiesto /search; /api/ blokovane
   topreality_sk:
     enabled: true
     zone: GREEN
     automation: AUTO
     rate_limit_per_min: 10
-    note: "robots.txt Request-rate 10/1m - dodrzat"
-
+    note: robots.txt Request-rate 10/1m - dodrzat
   notarske_drazby:
     enabled: true
     zone: GREEN
     automation: AUTO
     rate_limit_per_min: 4
     max_pages: 3
-    url_hint: "https://www.notar.sk/drazby"
-    note: "Verejny register zo zakona. rate_limit 4/min (15s) - notar.sk blokuje rychlejsie. max_pages=3 (~40 drazieb, ~15min). parcel.url = PDF Oznamenie o drazbe (cena/vymera/adresa v skene)."
-
+    url_hint: https://www.notar.sk/drazby
+    note: Verejny register zo zakona. rate_limit 4/min (15s) - notar.sk blokuje rychlejsie.
+      max_pages=3 (~40 drazieb, ~15min). parcel.url = PDF Oznamenie o drazbe (cena/vymera/adresa
+      v skene).
   spf:
     enabled: true
     zone: GREEN
@@ -265,190 +207,145 @@ sources:
     rate_limit_per_min: 10
     filter_okresy_70km: true
     max_pdf: 30
-    url_hint: "https://pozfond.sk/zoznam-pozemkov-na-prenajom/"
-    note: "Verejne obchodne sutaze SPF. Nova domena: pozfond.sk. filter_okresy_70km=true: len okresy do 70km od BA. max_pdf=30: max 30 PDF na beh (~3min, archiv ma 557 relevantnych PDF)."
-
+    url_hint: https://pozfond.sk/zoznam-pozemkov-na-prenajom/
+    note: 'Verejne obchodne sutaze SPF. Nova domena: pozfond.sk. filter_okresy_70km=true:
+      len okresy do 70km od BA. max_pdf=30: max 30 PDF na beh (~3min, archiv ma 557
+      relevantnych PDF).'
   obchodny_vestnik:
     enabled: true
     zone: GREEN
     automation: AUTO
     rate_limit_per_min: 10
     timeout_sec: 30
-    url_hint: "https://www.justice.gov.sk/PortalApp/ObchodnyVestnik"
-    note: "ZLATO: oficialny register konkurzov, drazob, likvidacii. timeout_sec=30 (vladny server, obcas pomaly)"
-
+    url_hint: https://www.justice.gov.sk/PortalApp/ObchodnyVestnik
+    note: 'ZLATO: oficialny register konkurzov, drazob, likvidacii. timeout_sec=30
+      (vladny server, obcas pomaly)'
   exekutorske_drazby:
     enabled: false
     zone: GREEN
     automation: AUTO
     rate_limit_per_min: 10
-    url_hint: "https://www.sexe.sk"
-    note: "NAHRADENE: sexe.sk nedostupne - pouzivame ske_drazobne_vyhlasky"
-
+    url_hint: https://www.sexe.sk
+    note: 'NAHRADENE: sexe.sk nedostupne - pouzivame ske_drazobne_vyhlasky'
   ske_drazobne_vyhlasky:
     enabled: true
     zone: GREEN
     automation: AUTO
     rate_limit_per_min: 10
     timeout_sec: 30
-    url_hint: "https://ske.sk/drazobne-vyhlasky/"
-    note: "Exekutorske drazby nehnutelnosti (SKE) - verejna HTML tabulka bez registracie, data z OV. timeout_sec=30 (pomalsi server)"
-
+    url_hint: https://ske.sk/drazobne-vyhlasky/
+    note: Exekutorske drazby nehnutelnosti (SKE) - verejna HTML tabulka bez registracie,
+      data z OV. timeout_sec=30 (pomalsi server)
   drazby_net:
     enabled: false
     zone: GREEN
     automation: AUTO
     rate_limit_per_min: 10
-    url_hint: "https://www.drazby.net"
-    note: "VYRADENE: ceska drazobn kancelaria (Olomouc), nie slovensky zdroj"
-
+    url_hint: https://www.drazby.net
+    note: 'VYRADENE: ceska drazobn kancelaria (Olomouc), nie slovensky zdroj'
   eks_statny_majetok:
     enabled: true
     zone: GREEN
     automation: AUTO
     rate_limit_per_min: 10
-    url_hint: "https://www.eks.sk"
-    note: "Elektronicke aukcie statu a samosprav"
-
+    url_hint: https://www.eks.sk
+    note: Elektronicke aukcie statu a samosprav
   bsk_kraj:
     enabled: true
     zone: GREEN
     automation: AUTO
     rate_limit_per_min: 5
-    url_hint: "https://www.regionbratislava.sk"
-    note: "BSK prebytocny majetok"
-
+    url_hint: https://www.regionbratislava.sk
+    note: BSK prebytocny majetok
   obce_uradne_tabule:
     enabled: true
     zone: GREEN
     automation: SEMI
     rate_limit_per_min: 5
-    note: "Verejne predaje obecnych pozemkov - parser per-obec"
-
-  # YELLOW - opatrne
-
+    note: Verejne predaje obecnych pozemkov - parser per-obec
   reality_sk:
     enabled: true
     zone: GREEN
     automation: AUTO
     rate_limit_per_min: 15
     use_neutral_useragent: true
-    note: "Zakazuje AI-bot UA (anthropic-ai) - pouzit neutralny UA (uz implementovane v RealitySkScraper)"
-
+    note: Zakazuje AI-bot UA (anthropic-ai) - pouzit neutralny UA (uz implementovane
+      v RealitySkScraper)
   byty_sk:
     enabled: true
     zone: YELLOW
     automation: AUTO
     rate_limit_per_min: 10
     use_neutral_useragent: true
-    note: "Overit robots.txt pred spustenim"
-
+    note: Overit robots.txt pred spustenim
   bazos_sk:
     enabled: false
     zone: YELLOW
     automation: SEMI
     rate_limit_per_min: 10
-    note: "/search.php blokovany - len priame URL linky"
-
+    note: /search.php blokovany - len priame URL linky
   bankove_drazby:
     enabled: false
     zone: YELLOW
     automation: SEMI
     rate_limit_per_min: 5
-    note: "ToS per-banka - overit individualne pred zapnutim"
-
-  # RED - nevyuzivat
-
+    note: ToS per-banka - overit individualne pred zapnutim
   facebook_marketplace:
     enabled: false
     zone: RED
     automation: MANUAL
-    note: "ToS explicitne zakazuje automatizovany pristup"
-
-
-
-# ================================================================
-# D. FEATURE FLAGS
-# true  = bezi automaticky
-# false = vypnute (agent preskoci, neutralne skore 50)
-# ================================================================
-
+    note: ToS explicitne zakazuje automatizovany pristup
 features:
-  # AUTO - bezi bez brzdenia, paralelne
-  use_distance:         true
-  use_flood:            true
-  use_terrain:          true
-  use_slope:            true
-  use_aspect:           true
-  use_elevation:        true
-  use_landslide:        true
-  use_radon:            true
-  use_bpej:             true
-  use_overpass:         true
-  use_vvn_vtl:          true
-  use_forest_buffer:    true
-  use_natura_chko:      true
-  use_noise:            true
-  use_amenities:        true
-  use_price_analysis:   true
-  use_environment:      true
-
-  # SEMI - vyzaduje 1 manualny krok
-  use_cadastral_semi:   false   # poloautomat LV - zapnut az budes pripraveny
-  use_zoning_ocr:       true    # OCR uzemneho planu (SEMI)
-
-  # Experimentalne
-  use_ortofoto:         false
-  use_llm_vision:       false
-  use_groundwater:      false
-
-  # Infrastruktura agenta
-  use_monitoring:       false
-  use_notifications:    false
-
-
-# ================================================================
-# E. NOTIFIKACIE
-# ================================================================
-
+  use_distance: true
+  use_flood: true
+  use_terrain: true
+  use_slope: true
+  use_aspect: true
+  use_elevation: true
+  use_landslide: true
+  use_radon: true
+  use_bpej: true
+  use_overpass: true
+  use_vvn_vtl: true
+  use_forest_buffer: true
+  use_natura_chko: true
+  use_noise: true
+  use_amenities: true
+  use_price_analysis: true
+  use_environment: true
+  use_cadastral_semi: false
+  use_zoning_ocr: true
+  use_ortofoto: false
+  use_llm_vision: false
+  use_groundwater: false
+  use_monitoring: false
+  use_notifications: false
 notifications:
-  min_score_to_notify: 75     # 0-100, parcely s nizsim skorom sa nenotifikuju
+  min_score_to_notify: 75
   channels:
-    telegram: false           # zapnut: true (vyzaduje TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID)
-    email:    false           # zapnut: true (vyzaduje EMAIL_FROM, EMAIL_TO, EMAIL_PASSWORD)
+    telegram: false
+    email: false
   telegram:
-    bot_token_env: TELEGRAM_BOT_TOKEN   # nazov env premennej (nie hodnota!)
-    chat_id_env:   TELEGRAM_CHAT_ID
+    bot_token_env: TELEGRAM_BOT_TOKEN
+    chat_id_env: TELEGRAM_CHAT_ID
   email:
-    smtp_host:    smtp.gmail.com
-    smtp_port:    587
-    from_env:     EMAIL_FROM
-    to_env:       EMAIL_TO
+    smtp_host: smtp.gmail.com
+    smtp_port: 587
+    from_env: EMAIL_FROM
+    to_env: EMAIL_TO
     password_env: EMAIL_PASSWORD
-
-
-# ================================================================
-# G. PERIODICKE SKENOVANIE
-# ================================================================
-
 periodic_scan:
-  interval_minutes: 60       # ako casto skenovat (min 5)
-  max_parcels_per_scan: 50   # ochrana pred pretazenim
-  run_on_start: false        # spustit scan hned pri starte
-
-# F. EXTERNE ENDPOINTY
-# Vzdy overit GetCapabilities pred implementaciou sluzby.
-# ================================================================
-
+  interval_minutes: 60
+  max_parcels_per_scan: 50
+  run_on_start: false
 endpoints:
-  zbgis_wfs:       "https://zbgis.skgeodesy.sk/wfs/default"
-  zbgis_wms:       "https://zbgis.skgeodesy.sk/wms"
-  dmr_wcs:         "https://zbgis.skgeodesy.sk/wcs"
-  shmu_wms:        "https://geo.shmu.sk/wms"
-  bpej_wms:        "https://geodata.gov.sk/geoserver/wms"
-  sgudsh_wms:      "https://gis.geology.sk/arcgis/services"
-  sop_sr_wms:      "https://maps.sopsr.sk/geoserver/wms"
-  overpass:        "https://overpass-api.de/api/interpreter"
-  overpass_mirror: "https://overpass.kumi.systems/api/interpreter"
-  nominatim:       "https://nominatim.openstreetmap.org/search"
-
+  zbgis_wfs: https://zbgis.skgeodesy.sk/wfs/default
+  zbgis_wms: https://zbgis.skgeodesy.sk/wms
+  dmr_wcs: https://zbgis.skgeodesy.sk/wcs
+  shmu_wms: https://geo.shmu.sk/wms
+  bpej_wms: https://geodata.gov.sk/geoserver/wms
+  sgudsh_wms: https://gis.geology.sk/arcgis/services
+  sop_sr_wms: https://maps.sopsr.sk/geoserver/wms
+  overpass: https://overpass-api.de/api/interpreter
+  overpass_mirror: https://overpass.kumi.systems/api/interpreter
+  nominatim: https://nominatim.openstreetmap.org/search

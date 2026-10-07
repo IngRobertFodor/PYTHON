@@ -169,6 +169,50 @@ class TestExtractLocation:
     def test_empty_when_no_info(self):
         assert isinstance(_extract_location("Pozemok", "https://example.com/detail/abc/pozemok"), str)
 
+    # --- P1/P2 stem-match: skloňovanie ---
+
+    def test_devinska_nova_ves_sklonovana(self):
+        """Reálny prípad: URL obsahuje 'devinskej-novej-vsi' -> Devínska Nová Ves, nie Devín."""
+        url = "https://www.nehnutelnosti.sk/detail/JuX4T7tOPvS/pozemok-pod-sandbergom-v-devinskej-novej-vsi-na-predaj"
+        result = _extract_location("Pozemok pod Sandbergom v Devínskej Novej Vsi", url)
+        assert "devínska" in result.lower() or "devinska" in result.lower()
+
+    def test_devin_samotny_nie_devinska(self):
+        """'Devín' samotný sa nesmie rozpoznať ako 'Devínska Nová Ves'."""
+        url = "https://www.nehnutelnosti.sk/detail/x/pozemok-devin-predaj"
+        result = _extract_location("Pozemok Devín na predaj", url)
+        assert "devín" in result.lower() or "devin" in result.lower()
+        assert "nová" not in result.lower() and "nova" not in result.lower()
+
+    def test_raca_sklonovana(self):
+        result = _extract_location("Pozemok v Rači", "https://nehnutelnosti.sk/detail/x/pozemok-v-raci")
+        assert "rač" in result.lower() or "raca" in result.lower() or "raci" in result.lower()
+
+    def test_senec_sklonovany(self):
+        result = _extract_location("Pozemok v Senci", "https://nehnutelnosti.sk/detail/x/pozemok-v-senci")
+        assert "senec" in result.lower()
+
+    def test_zahorska_bystrica_sklonovana(self):
+        result = _extract_location("Pozemok v Záhorskej Bystrici", "https://nehnutelnosti.sk/detail/x/zahorska-bystrica")
+        assert "záhorsk" in result.lower() or "zahorsk" in result.lower()
+
+    def test_chorvatsky_grob_sklonovany(self):
+        result = _extract_location("Pozemok v Chorvátskom Grobe", "https://nehnutelnosti.sk/detail/x/chorvatsky-grob")
+        assert "grob" in result.lower()
+
+    def test_malacky_sklonovane(self):
+        result = _extract_location("Pozemok v Malackách", "https://nehnutelnosti.sk/detail/x/malacky")
+        assert "malack" in result.lower()
+
+    def test_senkvice_nie_senec(self):
+        """'Šenkvice' nesmie byť rozpoznané ako 'Senec'."""
+        result = _extract_location("Pozemok Šenkvice", "https://nehnutelnosti.sk/detail/x/senkvice")
+        assert "senkvic" in result.lower() or "šenkvic" in result.lower()
+
+    def test_dunajska_luzna_sklonovana(self):
+        result = _extract_location("Pozemok v Dunajskej Lužnej", "https://nehnutelnosti.sk/detail/x/dunajska-luzna")
+        assert "dunajsk" in result.lower()
+
 
 # ----------------------------------------------------------------
 # TestNehnutelnostiScraper
