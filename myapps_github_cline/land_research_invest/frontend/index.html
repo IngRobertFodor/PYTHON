@@ -51,7 +51,11 @@
       </div>
       <div class="form-group">
         <label for="f-url">URL inzerátu</label>
-        <input id="f-url" type="url" placeholder="https://nehnutelnosti.sk/...">
+        <div style="display:flex;gap:6px;align-items:center">
+          <input id="f-url" type="url" placeholder="https://nehnutelnosti.sk/..." style="flex:1">
+          <button id="btn-fetch-url" class="btn btn-sm" onclick="onFetchUrlClick()" title="Načítať dáta z URL inzerátu">&#128229; Načítať</button>
+        </div>
+        <div id="fetch-url-status" style="font-size:.73rem;margin-top:3px"></div>
       </div>
       <div class="form-group">
         <label for="f-location">Lokalita *</label>
@@ -267,11 +271,11 @@
 <script src="/static/lib/leaflet/leaflet.js"></script>
 
 <!-- App JS -->
-<script src="/static/js/config.js?v=25"></script>
-<script src="/static/js/api.js?v=25"></script>
-<script src="/static/js/demo.js?v=25"></script>
-<script src="/static/js/map.js?v=25"></script>
-<script src="/static/js/app.js?v=25"></script>
+<script src="/static/js/config.js?v=26"></script>
+<script src="/static/js/api.js?v=26"></script>
+<script src="/static/js/demo.js?v=26"></script>
+<script src="/static/js/map.js?v=26"></script>
+<script src="/static/js/app.js?v=26"></script>
 
 </body>
 </html>

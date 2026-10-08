@@ -81,6 +81,17 @@ async function apiSaveLimits(payload) {
   return data;
 }
 
+async function apiFetchUrl(url) {
+  const r = await fetch(API_BASE + "/api/parcels/fetch-url", {
+    method:  "POST",
+    headers: { "Content-Type": "application/json" },
+    body:    JSON.stringify({ url }),
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || "Chyba nacitania URL.");
+  return data;
+}
+
 async function apiUpLinks(location, check) {
   const url = API_BASE + "/api/scrape/up-links?location=" + encodeURIComponent(location)
               + (check ? "&check=1" : "");

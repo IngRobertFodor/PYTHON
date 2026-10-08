@@ -2,6 +2,7 @@
 ===============
 POST /api/analyze             -> analyza 1 pozemku
 POST /api/parcels/analyze-batch -> analyza N pozemkov, zoradene podla skore
+POST /api/parcels/fetch-url   -> stiahne a vyparsuje detail pozemku z URL
 """
 
 from flask import Blueprint, jsonify, request
@@ -117,3 +118,44 @@ def analyze_batch():
         "count":   len(results),
         "errors":  errors,
     }), 200
+
+
+@parcel_bp.route("/parcels/fetch-url", methods=["POST"])
+def fetch_url_endpoint():
+    """
+    Stiahne a vyparsuje detail-stranku pozemku z URL.
+    Pouziva sa na predvyplnenie formulara v UI (autofill z URL).
+
+    Request JSON:
+        { "url": "https://www.nehnutelnosti.sk/detail/..." }
+
+    Returns:
+        200 { ok: true,  parcel: {title, price_eur, area_sqm, location_text,
+                                   description, source_portal, url,
+                                   price_per_sqm, parse_quality} }
+        400 { ok: false, error: "Neplatna URL / nepodporovany portal" }
+        502 { ok: false, error: "Stranku sa nepodarilo nacitat" }
+        500 { ok: false, error: "Chyba parsera" }
+    """
+    data = request.get_json(silent=True) or {}
+    url  = (data.get("url") or "").strip()
+
+    if not url:
+        return jsonify({"ok": False, "error": "Chyba parameter 'url'."}), 400
+
+    try:
+        from services.url_fetch_service import fetch_parcel_from_url
+        parcel = fetch_parcel_from_url(url)
+        return jsonify({"ok": True, "parcel": parcel}), 200
+
+    except ValueError as e:
+        return jsonify({"ok": False, "error": str(e)}), 400
+
+    except Exception as e:
+        import requests as _req
+        if isinstance(e, (_req.ConnectionError, _req.Timeout, _req.HTTPError)):
+            return jsonify({"ok": False, "error": f"Stranku sa nepodarilo nacitat: {e}"}), 502
+        msg = str(e).lower()
+        if any(k in msg for k in ("connection", "timeout", "ssl", "http error", "network")):
+            return jsonify({"ok": False, "error": f"Stranku sa nepodarilo nacitat: {e}"}), 502
+        return jsonify({"ok": False, "error": f"Chyba parsera: {e}"}), 500

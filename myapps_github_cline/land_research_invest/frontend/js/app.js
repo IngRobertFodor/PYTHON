@@ -126,6 +126,40 @@ async function _autoLoadLastResults() {
 }
 
 // --- Formular - analyza 1 pozemku ---
+async function onFetchUrlClick() {
+  const urlVal  = (document.getElementById("f-url")?.value || "").trim();
+  const statusEl = document.getElementById("fetch-url-status");
+  const btn      = document.getElementById("btn-fetch-url");
+
+  if (!urlVal) {
+    if (statusEl) { statusEl.textContent = "Zadajte URL inzerátu."; statusEl.style.color = "#c00"; }
+    return;
+  }
+  if (btn) btn.disabled = true;
+  if (statusEl) { statusEl.textContent = "Načítavam..."; statusEl.style.color = "#555"; }
+
+  try {
+    const data   = await apiFetchUrl(urlVal);
+    const parcel = data.parcel || {};
+
+    // Predvyplnenie formulára
+    if (parcel.title)         setVal("f-title",    parcel.title);
+    if (parcel.price_eur > 0) setVal("f-price",    parcel.price_eur);
+    if (parcel.area_sqm  > 0) setVal("f-area",     parcel.area_sqm);
+    if (parcel.location_text) setVal("f-location",  parcel.location_text);
+
+    const quality = parcel.parse_quality === "structured"
+      ? "✅ Načítané"
+      : "⚠️ Načítané (skontrolujte hodnoty)";
+    if (statusEl) { statusEl.textContent = quality; statusEl.style.color = parcel.parse_quality === "structured" ? "#2e7d32" : "#c85a00"; }
+  } catch (e) {
+    if (statusEl) { statusEl.textContent = "❌ " + e.message; statusEl.style.color = "#c00"; }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+window.onFetchUrlClick = onFetchUrlClick;
+
 async function onAnalyzeClick() {
   const parcel = {
     title:         getVal("f-title")    || "Moj pozemok",
