@@ -188,13 +188,13 @@ async function onAnalyzeClick() {
 
 // --- Demo ---
 async function onDemoClick() {
-  showStatus("Nacitavam demo pozemky...", "info");
+  showStatus("Načítavam ukážkové pozemky...", "info");
   setLoading(true);
   try {
     const res = await apiAnalyzeBatch(DEMO_PARCELS);
     const items = res.results.map(p => ({ parcel: p, report: p.results?.report_service?.data || {} }));
     renderResults(items);
-    showStatus("Demo: " + res.count + " pozemkov analysovanych.", "ok");
+    showStatus("Ukážka: " + res.count + " pozemkov analyzovaných.", "ok");
   } catch (e) {
     showStatus("Chyba: " + humanError(e), "error");
   } finally {
