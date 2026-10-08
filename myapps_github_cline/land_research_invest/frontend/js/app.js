@@ -178,7 +178,7 @@ async function onAnalyzeClick() {
   try {
     const res = await apiAnalyzeOne(parcel);
     renderResults([{ parcel: res.parcel, report: res.report }]);
-    showStatus("Analyza dokoncena.", "ok");
+    showStatus("Analýza dokončená.", "ok");
   } catch (e) {
     showStatus("Chyba: " + humanError(e), "error");
   } finally {

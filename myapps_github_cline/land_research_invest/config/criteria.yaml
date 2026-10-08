@@ -10,7 +10,7 @@ criteria:
     max_price_per_sqm_eur: 100
     automation: AUTO
   parcel:
-    min_area_sqm: 350
+    min_area_sqm: 300
     max_area_sqm: 800
     min_width_m: 15
     min_length_m: 20

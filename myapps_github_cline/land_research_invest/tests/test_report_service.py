@@ -281,8 +281,8 @@ class TestBuildInvestmentView:
         assert build_investment_view(p)["verdict"] == "FAIL"
 
     def test_area_mismatch_too_small(self):
-        # 300 m2 < min 350
-        p = make_parcel(price_eur=8000.0, area_sqm=300.0)
+        # 250 m2 < min 300 (z config/criteria.yaml)
+        p = make_parcel(price_eur=8000.0, area_sqm=250.0)
         inv = build_investment_view(p)
         assert inv["area_ok"] is False
         assert inv["verdict"] == "AREA_MISMATCH"

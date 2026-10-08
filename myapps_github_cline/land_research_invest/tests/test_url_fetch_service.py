@@ -103,7 +103,14 @@ class TestParseReality:
     def test_senec_area(self):
         assert abs(self._r("reality_detail_senec.html", self.URL_SE)["area_sqm"] - 551) < 20
     def test_senec_price_from_ppsm(self):
-        assert self._r("reality_detail_senec.html", self.URL_SE)["price_eur"] > 50000
+        # 210 EUR/m2 * 551 m2 = 115710
+        price = self._r("reality_detail_senec.html", self.URL_SE)["price_eur"]
+        assert abs(price - 115710) < 500
+    def test_senec_price_per_sqm(self):
+        ppsm = self._r("reality_detail_senec.html", self.URL_SE)["price_per_sqm"]
+        assert abs(ppsm - 210.0) < 5
+    def test_senec_parse_quality_partial(self):
+        assert self._r("reality_detail_senec.html", self.URL_SE)["parse_quality"] == "partial"
     def test_senec_location_not_empty(self):
         assert self._r("reality_detail_senec.html", self.URL_SE)["location_text"] != ""
 

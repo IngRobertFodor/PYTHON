@@ -338,20 +338,30 @@ def _normalize_loc(text: str) -> str:
 def _estimate_distance_km(location_text: str) -> float | None:
     """
     Odhadne vzdialenosť od BA na základe location_text (bez GPS).
-    Prehľadá slovník SK miest (s diakritikou aj bez). Vracia km alebo None.
+    Prehľadá najprv kompletný register SK sídiel (GeoNames, ~9 200),
+    potom fallback na interný slovník _SK_TOWN_COORDS.
     """
     if not location_text:
         return None
+
+    # 1. sk_places (kompletný register GeoNames) — preferovaný
+    try:
+        from services.sk_places import dist_to_ba as _dtba
+        km = _dtba(location_text)
+        if km is not None:
+            return km
+    except Exception:
+        pass
+
+    # 2. Fallback: pôvodný interný slovník _SK_TOWN_COORDS
     loc     = location_text.lower().strip()
     loc_asc = _normalize_loc(location_text)
 
-    # 1. Presná zhoda (s diakritikou aj bez)
     for key in (loc, loc_asc):
         if key in _SK_TOWN_COORDS:
             lat, lon = _SK_TOWN_COORDS[key]
             return _haversine_km(_BA_LAT, _BA_LON, lat, lon)
 
-    # 2. Čiastočná zhoda — town IN loc alebo loc IN town (obe varianty)
     for town, coords in _SK_TOWN_COORDS.items():
         town_asc = _normalize_loc(town)
         if (town in loc or loc_asc in town_asc

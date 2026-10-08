@@ -241,6 +241,10 @@ ZNAME_OBCE = [
 ]
 
 # Normalizacna mapa: ASCII verzia -> originalny nazov
+# POZOR: _OBEC_NORM sa pouziva len pre stem-match v _extract_location.
+# Obsahuje iba rucne overeny zoznam (ZNAME_OBCE).
+# GeoNames register (sk_places) sa pouziva SEPARATNE len pre presnu/substring zhodu
+# a pre GPS vzdialenost -- nie pre stem-match (prevencija false positive).
 _OBEC_NORM: dict[str, str] = {}
 for _o in ZNAME_OBCE:
     _key = unicodedata.normalize("NFD", _o.lower())
@@ -365,24 +369,51 @@ def _extract_location(title: str, url: str) -> str:
     slug = url.rstrip("/").split("/")[-1] if "/" in url else ""
     slug_n = _normalize(slug.replace("-", " "))
 
-    # --- Uroven 1: stem-match zoznam znamych obci ---
+    # --- Uroven 1: stem-match rucne overeny zoznam obci (BA region + okolie) ---
     for obec_norm, obec_orig in sorted(
         _OBEC_NORM.items(), key=lambda x: -len(x[0])
     ):
         if _stem_match(obec_norm, title_n) or _stem_match(obec_norm, slug_n):
             return obec_orig
 
+    # --- Uroven 1b: GeoNames presna/substring zhoda (cely SR) ---
+    # Nepouziva stem-match (false positive riziko), len presnu zhodu a substring.
+    # Skusa jednotlive slova z titulku (nie cely retazec - predide "niteula" z "Pozemok Nitra")
+    try:
+        from services.sk_places import find_place as _fp
+        # Skus slug slova (najspolahlivejsie - su to ciste nazvy obci)
+        slug_words = [w for w in slug.replace("-", " ").split() if len(w) >= 3]
+        # Bigram a trigram zo slugu (pre viacslovne nazvy: Dunajska Streda)
+        for n in (3, 2):
+            if len(slug_words) >= n:
+                candidate = " ".join(slug_words[-n:])
+                res = _fp(candidate)
+                if res:
+                    return res[0]
+        # Jednotlive slova zo slugu
+        for w in reversed(slug_words):
+            res = _fp(w)
+            if res and res[0].lower() != "slovensko":
+                return res[0]
+        # Jednotlive slova z titulku (menej spolahlivé)
+        title_words = [w.strip("(),.-") for w in title.split() if len(w.strip("(),.-")) >= 4]
+        for w in reversed(title_words):
+            res = _fp(w)
+            if res and res[0].lower() != "slovensko":
+                return res[0]
+    except Exception:
+        pass
+
     # --- Uroven 2: zatvorka v nazve ---
     m = re.search(r'\(([^)]{3,40})\)\s*$', title)
     if m:
         return m.group(1).strip()
 
-    # --- Uroven 3: slug words (F4 fix) ---
+    # --- Uroven 3: slug words (posledna zachrana pre neznamy slug) ---
     if slug:
         parts = [p for p in slug.split("-") if len(p) > 2 and p.isalpha()]
         # Zahodime skomolene pady - slova ktore konca na typicky lokativny/genitivny
         # sufix (-i, -e, -y ak nie su v obci liste) a su dlhsie nez 6 znakov
-        # Pouzijeme VSETKY parts (nie len posledne) - hladame kludkovitejsie zhody
         for word in reversed(parts):
             if not _is_slug_word_valid(word):
                 continue

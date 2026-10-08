@@ -207,21 +207,29 @@ def _parse_reality(html: str, url: str) -> dict:
         if pm:
             try: area_f = float(pm.group(1).replace(" ",""))
             except ValueError: pass
-    if price_f <= 0:
+    # Dopocet z jednotkovej ceny (JSON-LD) PRED HTML-regex fallbackmi
+    if price_f <= 0 and ppsm_f > 0 and area_f > 0:
+        price_f = round(ppsm_f * area_f, 0)
+        quality = "partial"   # cena je odvodena, nie doslovne z inzeratu
+    # HTML-regex fallback — len ked nemame ani ppsm_f (posledna zachrana)
+    if price_f <= 0 and ppsm_f <= 0:
         tp = re.search(r"([\d,]+)\s*[\u20ac]", title)
         if tp: price_f = _normalize_price(tp.group(1))
-    if price_f <= 0:
-        clean = re.sub(r"<[^>]+>", " ", html)
-        for pat in [r"(\d{2,3}[,\s]\d{3})\s*[\u20ac]",
-                    r"Celkov\u00e1 cena[:\s]*([\d\s,\.]+)\s*[\u20ac]"]:
+    if price_f <= 0 and ppsm_f <= 0:
+        # Hladame len v hlavnom detail bloku (prvy vyskyt) aby sme nezobierali
+        # cudzie ceny z "podobnych ponuk" na konci stranky
+        detail_html = html[:html.find("podobn", 0) if "podobn" in html.lower() else len(html)]
+        clean = re.sub(r"<[^>]+>", " ", detail_html)
+        for pat in [r"Celkov\u00e1 cena[:\s]*([\d\s,\.]+)\s*[\u20ac]",
+                    r"(\d{2,3}[,\s]\d{3})\s*[\u20ac]"]:
             m2 = re.search(pat, clean, re.IGNORECASE)
             if m2:
                 price_f = _normalize_price(m2.group(1))
                 if price_f > 0: break
-    if price_f <= 0 and area_f > 0:
+    if price_f <= 0 and ppsm_f <= 0 and area_f > 0:
         ppm = re.search(r"(\d+)\s*[\u20ac]/m", title, re.IGNORECASE)
         if not ppm: ppm = re.search(r"(\d+)\s*[\u20ac]/m", html[:2000], re.IGNORECASE)
-        if ppm: ppsm_f = float(ppm.group(1)); price_f = round(ppsm_f*area_f, 0)
+        if ppm: ppsm_f = float(ppm.group(1)); price_f = round(ppsm_f*area_f, 0); quality = "partial"
     desc = _extract_desc(html, r"Popis nehnutel|Info\b")
     fm   = re.search(r"Funk[c\u010d].{0,4}vyu\u017eitie[:\s]*([^\n<]{3,60})", html)
     if fm: desc = ("Funkc. vyuzitie: "+fm.group(1).strip()+"\n"+desc)[:500]
