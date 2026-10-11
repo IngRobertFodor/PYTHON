@@ -2,7 +2,7 @@ Land Research Invest — ZAČNITE TÝMTO
 ======================================
 
 AI agent, ktorý vyhľadáva dostupné stavebné pozemky
-(do 85 km od Bratislavy) a automaticky ich preveruje
+(do 82 km od Bratislavy) a automaticky ich preveruje
 podľa vašich kritérií.
 
 Vy nastavíte rozpočet a požiadavky. Agent urobí prieskum.
@@ -47,12 +47,14 @@ Každý pozemok dostane skóre od 0 do 100:
 Dve fázy skórovania
 -------------------
   Rýchle predbežné skóre  (ihneď po prieskume, 0 HTTP požiadaviek)
-    Zohľadňuje: cena / výmera / EUR/m2 / vzdialenosť (odhad) / zdroj
-    Váhy: cena 30% | výmera 25% | EUR/m2 20% | vzdialenosť 10%
-          typ zdroja 10% | kvalita dát 5%
-    Zobrazuje sa v tabuľke prieskumu (farebný odznak Skóre).
-    Pozor: vzdialené pozemky (>85 km) a inzeráty s nevierohodnou
-    cenou (<1.5 EUR/m2) dostanú automaticky nižšie predbežné skóre.
+    Zohľadňuje: cena / výmera / EUR/m2 / vzdialenosť (odhad) / typ zdroja
+    Váhy: cena 30% | výmera 25% | EUR/m2 20% | vzdialenosť 10% | zdroj 10%
+    Chýbajúci údaj: komponent sa vynechá (váha = 0) — skóre sa nezníži.
+    Namiesto toho sa zobrazí "istota" (napr. 70 %) a zoznam "čo chýba".
+    Verdikt NEDOSTATOK_DAT = skóre nie je spoľahlivé (< 50 % váhy dostupných).
+    Investičné signály: 🟢 príležitosť (BLIZKO_BA, DRAZBA_PODHODNOTENA)
+                        🔴 riziko (CENA_PODOZRIVA, PRILIS_DALEKO)
+    Zobrazuje sa v tabuľke prieskumu (farebný odznak Skóre + signály).
 
   Plné GIS skóre  (spustíte ručne pre vybrané pozemky, ~20s/pozemok)
     Zohľadňuje: 8 GIS komponentov (záplavy, terén, pôda, siete...)

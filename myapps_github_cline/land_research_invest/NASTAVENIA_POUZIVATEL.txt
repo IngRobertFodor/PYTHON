@@ -10,9 +10,9 @@ Formát YAML: odsadenie = medzery (NIE tabulátory).
 ==============================================================
 1. CENA  (criteria -> price)
 ==============================================================
-  max_eur: 10000             maximálna cena
-  min_eur: 0                 lacnejšie ignorovať
-  max_price_per_sqm_eur: 100 max za m2
+  max_eur: 200000          maximálna cena
+  min_eur: 0               lacnejšie ignorovať
+  max_price_per_sqm_eur: 300 max za m2
 
   >> max_eur: 70000           zvýšiť rozpočet na 70 000 EUR
   >> max_price_per_sqm_eur: 60  prísnejší limit na m2
@@ -21,7 +21,7 @@ Formát YAML: odsadenie = medzery (NIE tabulátory).
 ==============================================================
 2. VZDIALENOST  (criteria -> location)
 ==============================================================
-  max_distance_km: 85
+  max_distance_km: 82
 
   >> max_distance_km: 50      len do 50 km od BA
   >> center_lat: 48.3774      iný stred (napr. Trnava)
@@ -34,11 +34,11 @@ Formát YAML: odsadenie = medzery (NIE tabulátory).
 ==============================================================
 3. VELKOST POZEMKU  (criteria -> parcel)
 ==============================================================
-  min_area_sqm: 350    min. výmera v m2
-  max_area_sqm: 1000   max. výmera v m2
+  min_area_sqm: 300    min. výmera v m2
+  max_area_sqm: 800    max. výmera v m2
   min_width_m: 15      min. šírka (stavebná čiara)
 
-  >> min_area_sqm: 600        len väčšie pozemky
+  >> min_area_sqm: 500        len väčšie pozemky
 
 
 ==============================================================
@@ -67,14 +67,27 @@ Rýchle predbežné skóre — FIXNÉ VÁHY (nemení sa v YAML)
 -------------------------------------------------------
   cena          30%   EUR v konfigurovanom rozsahu
   výmera        25%   m2 v konfigurovanom rozsahu
-  EUR/m2        20%   pod limitom; podozrivo nízke z inzerátov = 0
-  vzdialenosť   10%   odhad z názvu obce (offline)
+  EUR/m2        20%   pod limitom; podozrivo nízke z inzerátov = vynechané
+  vzdialenosť   10%   odhad z názvu obce (offline, GeoNames ~8300 SK sídiel)
   typ zdroja    10%   dražby = bonus, inzeráty = neutrál
-  kvalita dát    5%   penalizácia za chýbajúce polia
 
-  Dôsledky: vzdialené pozemky (>85 km) a inzeráty
-  s nevierohodne nízkou cenou (<1.5 EUR/m2) dostanú
-  automaticky nižšie predbežné skóre.
+  Normalizácia: chýbajúci údaj = váha 0, skóre sa NEZNÍŽI.
+  Informácia sa zobrazí ako "istota" (%) a "čo chýba".
+  Verdikt NEDOSTATOK_DAT ak dostupných váh < 50 %.
+
+  Investičné signály (prelim):
+    🟢 BLIZKO_BA          — menej ako 25 km od BA
+    🟢 DRAZBA_PODHODNOTENA — dražba s cenou v rozsahu
+    🔴 CENA_PODOZRIVA      — podozrivo nízka €/m² z inzerátu
+    🔴 PRILIS_DALEKO       — viac ako 82 km od BA
+
+  Po plnom GIS scoringu ďalšie signály (v modali):
+    🟢 PREKLASIFIKACIA     — orná pôda, OKRAJ dediny, prístup + BPEJ ≥ 5
+    🟢 LACNE_VYNATIE       — BPEJ trieda ≥ 7 (odvody ≤ 0.10 €/m²)
+    🟢 PODHODNOTENE        — cena ≤ 30 % mediánu v okolí
+    🔴 DRAHE_VYNATIE       — BPEJ trieda ≤ 4 (drahé odvody)
+    🔴 ZAPLAVA             — záplavová zóna Q100
+    🔴 CHRANENE_UZEMIE     — Natura2000 / CHKO / VVN / VTL
 
 
 ==============================================================

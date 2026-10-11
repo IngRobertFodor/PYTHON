@@ -48,7 +48,11 @@ class Parcel:
 
     # --- Lacny pre-scoring (bez HTTP, instantny po scrape_all) ---
     preliminary_score: float = 0.0
-    prelim_recommendation: str = "" # STRONG BUY / INVESTIGATE / CONSIDER / SKIP
+    prelim_recommendation: str = "" # STRONG BUY / INVESTIGATE / CONSIDER / SKIP / NEDOSTATOK_DAT
+    prelim_confidence: float = 1.0  # 0.0-1.0: podiel vah pouzitych pri vypocte skore
+    prelim_missing: list = field(default_factory=list)   # ["cena", "poloha"] atd.
+    prelim_breakdown: dict = field(default_factory=dict) # {"price": 100.0, "area": None, ...}
+    signals: list = field(default_factory=list)          # investicne signaly (prelim + GIS)
 
     def add_result(self, result: ServiceResult) -> None:
         """Prida vysledok sluzby do results dict."""
@@ -85,5 +89,9 @@ class Parcel:
             "recommendation": self.recommendation,
             "preliminary_score": self.preliminary_score,
             "prelim_recommendation": self.prelim_recommendation,
+            "prelim_confidence": self.prelim_confidence,
+            "prelim_missing": self.prelim_missing,
+            "prelim_breakdown": self.prelim_breakdown,
+            "signals": self.signals,
             "results": {k: v.to_dict() for k, v in self.results.items()},
         }

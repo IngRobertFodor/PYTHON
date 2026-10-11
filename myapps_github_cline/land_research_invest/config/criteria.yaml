@@ -6,8 +6,8 @@ criteria:
     automation: AUTO
   price:
     min_eur: 0
-    max_eur: 10000
-    max_price_per_sqm_eur: 100
+    max_eur: 200000
+    max_price_per_sqm_eur: 300
     automation: AUTO
   parcel:
     min_area_sqm: 300
@@ -172,10 +172,10 @@ scoring:
     terrain: 0.07
     protected_zones: 0.07
   thresholds:
-    strong_buy: 85
-    investigate: 70
-    consider: 50
-  checklist_min_score: 70
+    strong_buy: 75
+    investigate: 55
+    consider: 40
+  checklist_min_score: 55
 sources:
   nehnutelnosti_sk:
     enabled: true
@@ -349,3 +349,11 @@ endpoints:
   overpass: https://overpass-api.de/api/interpreter
   overpass_mirror: https://overpass.kumi.systems/api/interpreter
   nominatim: https://nominatim.openstreetmap.org/search
+signals:
+  blizko_ba_km: 25
+  prilis_daleko_km: 82
+  cena_podozriva_ppsm: 1.5
+  drazba_max_eur: 200000
+  preklasifikacia_min_bpej_class: 5
+  lacne_vynatie_min_bpej_class: 7
+  podhodnotene_max_ratio: 0.30

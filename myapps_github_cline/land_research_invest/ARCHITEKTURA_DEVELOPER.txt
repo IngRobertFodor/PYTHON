@@ -66,12 +66,18 @@ Pre vyvojarov a AI agentov.
        -> dedup podla (url + parcel_number)
        -> vysledok: list[Parcel] (typicky 2000-5000 kusov)
   3. scoring_service.preliminary_score() pre KAZDY pozemok (0 HTTP):
-       price_score    (35%) -> cena v konfigurovanom rozsahu
-       area_score     (30%) -> vymera v konfigurovanom rozsahu
+       price_score    (30%) -> cena v konfigurovanom rozsahu
+       area_score     (25%) -> vymera v konfigurovanom rozsahu
        ppsm_score     (20%) -> EUR/m2 pod limitom
+       dist_score     (10%) -> odhad vzdialenosti od BA z location_text
        source_bonus   (10%) -> drazbove zdroje = bonus (podhodnotene)
-       data_quality   ( 5%) -> penalizacia za chybajuce polia
+       [Normalizacia vah: chybajuci udaj = komponent vynechany, nie penalizacia]
      -> parcel.preliminary_score (0-100) + prelim_recommendation
+        + prelim_confidence (0.0-1.0) + prelim_missing (zoznam)
+        + prelim_breakdown (rozpis komponentov)
+        + signals (investicne signaly, napr. BLIZKO_BA, DRAZBA_PODHODNOTENA)
+     Verdikt: STRONG BUY / INVESTIGATE / CONSIDER / SKIP / NEDOSTATOK_DAT
+     (NEDOSTATOK_DAT ak confidence < 0.5 -- malo dat na spolahlive skore)
   4. Zoradeny zoznam (tabulka) + filter (zdroj / cena max / vymera min)
      Pouzivatel zafajkne kandidatov (max 30)
 
@@ -112,11 +118,24 @@ Pre vyvojarov a AI agentov.
 
   Kriterium             | Vaha  | Zdroj dat
   ----------------------|-------|---------------------------
-  Cena v rozsahu        | 35 %  | parcel.price_eur
-  Vymera v rozsahu      | 30 %  | parcel.area_sqm
+  Cena v rozsahu        | 30 %  | parcel.price_eur
+  Vymera v rozsahu      | 25 %  | parcel.area_sqm
   EUR/m2 pod limitom    | 20 %  | parcel.price_per_sqm
+  Vzdialenost od BA     | 10 %  | location_text (sk_places/GeoNames)
   Bonus drazbovy zdroj  | 10 %  | parcel.source_portal
-  Datova kvalita        |  5 %  | price_eur>0 AND area_sqm>0
+
+  Normalizacia vah: ak vstup chyba, komponent sa VYNECHA (vaha 0).
+  Chybajuci udaj nezniži skore -- reportuje sa ako "missing".
+  Suspicious cena (<1.5 EUR/m2 z inzeratu) tiez vynecha ppsm komponent.
+
+  Nove polia Parcel:
+    prelim_confidence (0.0-1.0): podiel pouzitych vah (1.0 = vsetky data OK)
+    prelim_missing (list):       co chybalo, napr. ["cena", "poloha"]
+    prelim_breakdown (dict):     skore per komponent (None = vynechany)
+    signals (list):              investicne signaly -- pozri sekciu 12
+
+  Verdikt: STRONG BUY / INVESTIGATE / CONSIDER / SKIP
+           alebo NEDOSTATOK_DAT ak confidence < 0.5
 
   -> parcel.preliminary_score (0-100) + prelim_recommendation
   Rozsahy z criteria.yaml: price.min/max_eur, parcel.min/max_area_sqm

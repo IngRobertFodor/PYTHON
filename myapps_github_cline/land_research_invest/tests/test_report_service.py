@@ -263,21 +263,24 @@ class TestBuildInvestmentView:
         assert build_investment_view(p)["verdict"] == "PASS"
 
     def test_over_budget_verdict(self):
-        p = make_parcel(price_eur=15000.0, area_sqm=800.0)
+        # max_eur=200000 v criteria.yaml, max_ppsm=300
+        # 220000 EUR / 800 m2 = 275 EUR/m2 < 300 -> iba over_budget, nie over_sqm
+        p = make_parcel(price_eur=220000.0, area_sqm=800.0)
         inv = build_investment_view(p)
         assert inv["over_budget"] is True
         assert inv["verdict"] == "OVER_BUDGET"
 
     def test_over_sqm_verdict(self):
-        # 8000 / 40 = 200 EUR/m2 > 100 limit; cena 8000 < max 10000 (nie over_budget)
-        p = make_parcel(price_eur=8000.0, area_sqm=40.0)
+        # max_price_per_sqm_eur=300 v criteria.yaml
+        # 8000 / 20 = 400 EUR/m2 > 300; cena 8000 < max 200000 (nie over_budget)
+        p = make_parcel(price_eur=8000.0, area_sqm=20.0)
         inv = build_investment_view(p)
         assert inv["over_sqm_limit"] is True
         assert inv["verdict"] == "OVER_SQM"
 
     def test_fail_verdict_both_over(self):
-        # 15000 EUR budget + 15000/40 = 375 EUR/m2
-        p = make_parcel(price_eur=15000.0, area_sqm=40.0)
+        # Cena nad max + EUR/m2 nad max
+        p = make_parcel(price_eur=250000.0, area_sqm=20.0)
         assert build_investment_view(p)["verdict"] == "FAIL"
 
     def test_area_mismatch_too_small(self):
@@ -288,7 +291,7 @@ class TestBuildInvestmentView:
         assert inv["verdict"] == "AREA_MISMATCH"
 
     def test_area_mismatch_too_large(self):
-        # 1200 m2 > max 1000; cena 8000 < max 10000
+        # 1200 m2 > max 800 (criteria.yaml); cena 8000 < max 200000
         p = make_parcel(price_eur=8000.0, area_sqm=1200.0)
         inv = build_investment_view(p)
         assert inv["area_ok"] is False
@@ -309,10 +312,13 @@ class TestBuildInvestmentView:
         assert inv["area_ok"] is False
 
     def test_limits_read_from_config(self):
+        # Overuje ze funkcia cita limity z configu (nie hardcoded)
         p = make_parcel()
         inv = build_investment_view(p)
-        assert inv["max_eur"] == 10000
-        assert inv["max_price_per_sqm"] == 100
+        from config_loader import get_criteria
+        cfg = get_criteria()
+        assert inv["max_eur"] == cfg["price"]["max_eur"]
+        assert inv["max_price_per_sqm"] == cfg["price"]["max_price_per_sqm_eur"]
 
 
 # ----------------------------------------------------------------
