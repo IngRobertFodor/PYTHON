@@ -54,6 +54,12 @@ class Parcel:
     prelim_breakdown: dict = field(default_factory=dict) # {"price": 100.0, "area": None, ...}
     signals: list = field(default_factory=list)          # investicne signaly (prelim + GIS)
 
+    # --- Rezoning — kvantifikácia zisku z preklasifikácie (rezoning_service) ---
+    rezoning_profit_eur: float = 0.0    # čistý odhadovaný zisk v EUR
+    rezoning_cost_eur:   float = 0.0    # náklady (vyňatie + zasieťovanie)
+    rezoning_value_eur:  float = 0.0    # odhadovaná hodnota ako stavebný
+    rezoning_breakdown:  dict  = field(default_factory=dict)  # rozpis položiek
+
     def add_result(self, result: ServiceResult) -> None:
         """Prida vysledok sluzby do results dict."""
         self.results[result.source] = result
@@ -93,5 +99,9 @@ class Parcel:
             "prelim_missing": self.prelim_missing,
             "prelim_breakdown": self.prelim_breakdown,
             "signals": self.signals,
+            "rezoning_profit_eur":  self.rezoning_profit_eur,
+            "rezoning_cost_eur":    self.rezoning_cost_eur,
+            "rezoning_value_eur":   self.rezoning_value_eur,
+            "rezoning_breakdown":   self.rezoning_breakdown,
             "results": {k: v.to_dict() for k, v in self.results.items()},
         }

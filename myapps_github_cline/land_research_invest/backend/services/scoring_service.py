@@ -32,9 +32,29 @@ def score_parcel(parcel: Parcel) -> Parcel:
     total_score, _ = _calculate_weighted_score(parcel.results, weights)
     parcel.final_score = round(total_score, 2)
     parcel.recommendation = _get_recommendation(total_score, thresholds)
+    # GIS signály + merge s prelim
     try:
         from services.signals import gis_signals as _gs, merge_signals as _ms
         parcel.signals = _ms(parcel.signals or [], _gs(parcel))
+    except Exception:
+        pass
+    # Kvantifikácia zisku z preklasifikácie (ak je poľnohosp. pôda)
+    try:
+        zbgis_d = (parcel.get_result("zbgis_service") or type("R", (), {"data": {}})()).data
+        if zbgis_d.get("is_agricultural", False):
+            from services.rezoning_service import estimate_rezoning_profit as _erp
+            _erp(parcel)
+            # Doplniť zisk do dovodu signálu PREKLASIFIKACIA
+            if parcel.rezoning_profit_eur != 0:
+                for sig in parcel.signals:
+                    if sig.get("kod") == "PREKLASIFIKACIA":
+                        profit = parcel.rezoning_profit_eur
+                        cost   = parcel.rezoning_cost_eur
+                        value  = parcel.rezoning_value_eur
+                        sig["dovod"] += (
+                            f" | Est. zisk: {profit:+,.0f} € "
+                            f"(hodnota {value:,.0f} € − náklady {cost:,.0f} €)"
+                        )
     except Exception:
         pass
     return parcel

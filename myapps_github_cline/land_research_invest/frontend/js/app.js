@@ -469,6 +469,50 @@ function _buildModalHtml(parcel) {
     html += `<div style="font-size:.78rem;color:#888;margin-top:8px">Detailný report bude dostupný po GIS scorovaní.</div>`;
   }
 
+  // --- Investičné signály ---
+  const sigs = parcel.signals || [];
+  if (sigs.length > 0) {
+    html += `<div class="modal-section-title">📊 Investičné signály</div>
+      <div class="modal-infra-row" style="flex-direction:column;align-items:flex-start;gap:6px">`;
+    sigs.forEach(s => {
+      const isOpp = s.typ === "PRILEZITOST";
+      const ico   = isOpp ? "🟢" : "🔴";
+      const clr   = isOpp ? "#1b5e20" : "#b71c1c";
+      const bg    = isOpp ? "#e8f5e9" : "#ffebee";
+      html += `<div style="background:${bg};border-radius:6px;padding:4px 8px;width:100%">
+        <span style="font-weight:600;color:${clr}">${ico} ${s.nazov}</span>
+        <span style="font-size:.73rem;color:#555;display:block;margin-top:1px">${s.dovod}</span>
+        <span style="font-size:.68rem;color:#999">dôvera: ${(s.dovera*100).toFixed(0)} %</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // --- Kvantifikácia zisku z preklasifikácie ---
+  const rprofit = parcel.rezoning_profit_eur;
+  const rbd     = parcel.rezoning_breakdown || {};
+  if (rprofit !== undefined && rprofit !== 0 && rbd.hodnota_stavebna_eur) {
+    const profitColor = rprofit > 0 ? "#1b5e20" : "#b71c1c";
+    const profitSign  = rprofit > 0 ? "+" : "";
+    html += `<div class="modal-section-title">💰 Odhad zisku z preklasifikácie</div>
+      <div style="background:#f3f8f3;border-radius:8px;padding:10px 14px;font-size:.76rem;line-height:1.7">
+        <div><b>Odhadovaná hodnota ako stavebný:</b> ${(rbd.hodnota_stavebna_eur||0).toLocaleString()} € 
+          <span style="color:#888">(${rbd.stavebna_cena_per_m2||0} €/m² × ${rbd.area_sqm||0} m²)</span></div>
+        <div><b>Kúpna cena:</b> ${(rbd.kupna_cena_eur||0).toLocaleString()} €</div>
+        <div><b>Náklady — vyňatie z PPF:</b> ${(rbd.naklad_vynatie_eur||0).toLocaleString()} €
+          <span style="color:#888">(${rbd.bpej_odvody_per_m2||0} €/m²)</span></div>
+        <div><b>Náklady — zasieťovanie:</b> ${(rbd.naklad_zasietovanie_eur||0).toLocaleString()} €
+          <span style="color:#888">(elektrina ${rbd.elec_dist_m||0} m, cesta ${rbd.road_dist_m||0} m)</span></div>
+        <div style="margin-top:6px;font-size:.85rem;font-weight:700;color:${profitColor}">
+          Est. čistý zisk: ${profitSign}${rprofit.toLocaleString()} €
+        </div>
+        <div style="font-size:.68rem;color:#aaa;margin-top:4px">
+          ⚠️ Orientačný odhad ±30–50 %. Dôvera: ${((rbd.confidence||0)*100).toFixed(0)} %.
+          Nie právny ani finančný poradca.
+        </div>
+      </div>`;
+  }
+
   // ÚP asistent — vždy prítomný (odkaz nacita sa async po otvoreni modalu)
   const loc = parcel.location_text || parcel.title || "";
   if (loc) {
@@ -849,11 +893,26 @@ function renderResultsTable(items) {
     tr.dataset.url = p.url || "";
     if (ov && ov.is_gem_candidate) tr.classList.add("gem-row");
     const starred = wlHas(p.url || "");
+    // Signálové odznaky (prelim)
+    const sigs     = p.signals || [];
+    const oppSigs  = sigs.filter(s => s.typ === "PRILEZITOST");
+    const riskSigs = sigs.filter(s => s.typ === "RIZIKO");
+    const sigHtml  = [
+      ...oppSigs.map(s =>
+        `<span title="${s.nazov}: ${s.dovod}" class="sig-badge sig-opp">🟢</span>`),
+      ...riskSigs.map(s =>
+        `<span title="${s.nazov}: ${s.dovod}" class="sig-badge sig-risk">🔴</span>`),
+    ].join("");
+    // Istota (confidence)
+    const conf    = p.prelim_confidence ?? 1.0;
+    const confTxt = conf < 1.0
+      ? `<span class="conf-badge" title="Istota ${(conf*100).toFixed(0)}% — chýba: ${(p.prelim_missing||[]).join(', ')}">${(conf*100).toFixed(0)}%</span>`
+      : "";
     tr.innerHTML = `
       <td><input type="checkbox" class="row-chk" data-url="${p.url || ""}"></td>
       <td class="tbl-num">${idx + 1}</td>
       <td><button class="star-btn${starred ? " active" : ""}" data-url="${p.url || ""}" title="Sledovať">${starred ? "★" : "☆"}</button></td>
-      <td><span class="prelim-badge" style="background:${col}">${score}</span></td>
+      <td><span class="prelim-badge" style="background:${col}">${score}</span>${confTxt}${sigHtml}</td>
       <td class="tbl-src">${(p.source_portal||"").replace(/_/g," ")}</td>
       <td class="tbl-loc">${p.location_text||"—"}</td>
       <td class="tbl-price">${p.price_eur>0?p.price_eur.toLocaleString("sk-SK"):"—"}</td>

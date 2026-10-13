@@ -324,6 +324,20 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   white-space: nowrap;
 }
 
+/* Signálové odznaky v tabuľke */
+.sig-badge {
+  display: inline-block; font-size: .78rem;
+  margin-left: 2px; cursor: default;
+  vertical-align: middle;
+}
+.conf-badge {
+  display: inline-block; padding: 0px 4px;
+  border-radius: 6px; font-size: .63rem; font-weight: 600;
+  background: #fff3cd; color: #7a4f00;
+  margin-left: 3px; vertical-align: middle;
+  cursor: default;
+}
+
 /* Skvost / dostupnost / poloha badgese (J1) */
 .gem-badge {
   display: inline-block; padding: 2px 6px;

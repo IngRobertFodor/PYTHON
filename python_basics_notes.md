@@ -132,6 +132,27 @@ print(f"Age: {age}")          # Age: 30   – f-string is usually cleaner
 
 > 💡 `*` also works on strings for repetition: `"ab" * 3` → `"ababab"`.
 
+### f-strings (formatted strings)
+
+**Theory:** Put an `f` before the opening quote and write variables or any expression inside `{}`. Python evaluates them and inserts the result into the string. No `str()` conversion needed.
+
+```python
+name = "Alice"
+age = 30
+print(f"{name} is {age} years old.")   # Alice is 30 years old.
+```
+
+Expressions work too — function calls, indexing, math:
+```python
+people = ["Alice", "Bob", "Charlie"]
+print(f"There are {len(people)} people waiting, the first one's name is {people[0]}.")
+# There are 3 people waiting, the first one's name is Alice.
+
+print(f"2 + 3 = {2 + 3}")   # 2 + 3 = 5
+```
+
+> 💡 f-strings are usually cleaner and less error-prone than joining strings with `+`.
+
 ### Escape characters
 
 **Theory:** Special characters inside a string, written with a backslash `\`. Most common: `\n` (new line) and `\t` (tab).

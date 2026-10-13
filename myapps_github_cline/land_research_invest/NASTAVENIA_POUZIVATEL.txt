@@ -83,11 +83,33 @@ Rýchle predbežné skóre — FIXNÉ VÁHY (nemení sa v YAML)
 
   Po plnom GIS scoringu ďalšie signály (v modali):
     🟢 PREKLASIFIKACIA     — orná pôda, OKRAJ dediny, prístup + BPEJ ≥ 5
+                             (vrátane odhadu zisku z preklasifikácie)
     🟢 LACNE_VYNATIE       — BPEJ trieda ≥ 7 (odvody ≤ 0.10 €/m²)
-    🟢 PODHODNOTENE        — cena ≤ 30 % mediánu v okolí
-    🔴 DRAHE_VYNATIE       — BPEJ trieda ≤ 4 (drahé odvody)
+    🟢 PODHODNOTENE        — cena ≤ 30 % miestneho priemeru
+    🔴 DRAHE_VYNATIE       — BPEJ trieda ≤ 4 (drahé odvody za vyňatie)
     🔴 ZAPLAVA             — záplavová zóna Q100
-    🔴 CHRANENE_UZEMIE     — Natura2000 / CHKO / VVN / VTL
+    🔴 CHRANENE_UZEMIE     — Natura2000 / CHKO / NPR / NP
+
+
+==============================================================
+4b. KVANTIFIKÁCIA ZISKU Z PREKLASIFIKÁCIE  (criteria -> rezoning)
+==============================================================
+
+Orientačný odhad zisku: kúpiť pole → preklasifikovať → predať ako stavebný.
+POZOR: ±30-50 % odchylka. Nie finančný ani právny poradca!
+
+  stavebne_ceny_podla_km:   orientačné ceny stavebných pozemkov EUR/m2
+    - do 15 km:  180 EUR/m2  (BA okolie: Senec, Bernolakovo...)
+    - do 30 km:  120 EUR/m2  (Trnava, Malacky, Pezinok)
+    - do 50 km:   75 EUR/m2  (Galanta, Hlohovec)
+    - do 85 km:   45 EUR/m2  (Nitra región)
+    - ďalej:      30 EUR/m2
+
+  zasietovanie_eur_per_m:
+    elektrina: 100 EUR/m, cesta: 120 EUR/m
+    (len vzdialenosť > 10 m od pozemku sa počíta)
+
+  >> Upravte čísla v criteria.yaml sekcia rezoning, ak sú vaše reálne náklady iné.
 
 
 ==============================================================

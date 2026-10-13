@@ -357,3 +357,15 @@ signals:
   preklasifikacia_min_bpej_class: 5
   lacne_vynatie_min_bpej_class: 7
   podhodnotene_max_ratio: 0.30
+rezoning:
+  # Orientačné ceny stavebných pozemkov EUR/m2 podľa vzdialenosti od BA
+  # POZOR: regionálny priemer, nie konkrétna obec (±30-50 % odchylka!)
+  stavebne_ceny_podla_km:
+    - {max_km: 15,  eur_per_m2: 180}   # BA okolie (Senec, Bernolakovo, Sv. Jur)
+    - {max_km: 30,  eur_per_m2: 120}   # 15-30 km (Trnava smer, Malacky, Pezinok)
+    - {max_km: 50,  eur_per_m2: 75}    # 30-50 km (Galanta, Sala, Hlohovec)
+    - {max_km: 85,  eur_per_m2: 45}    # 50-85 km (Nitra region)
+    - {max_km: 999, eur_per_m2: 30}    # >85 km
+  zasietovanie_eur_per_m:
+    elektrina: 100
+    cesta: 120

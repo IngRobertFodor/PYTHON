@@ -411,21 +411,43 @@ VYSVETLIVKY_POUZIVATEL.txt  -- legenda stavov, farieb, GIS chyb
   Ciel: najst orna poda na okraji dediny s priamou dostupnostou infrastruktury
   -> potencialny stavebny pozemok (preklasifikacia v uzemnom plane = zisk)
 
-  Postup (troch-vrstvovy):
+  Implementovane v: backend/services/signals.py (gis_signals, preliminary_signals)
+  Testy: tests/test_signals.py (30 testov, 100% na realnom tvare ServiceResult.data)
+  Testy: tests/test_rezoning_service.py (16 testov)
 
-  VRSTVA 1: Skvost kandidat (automaticky, 0 HTTP)
-    overpass_service.classify_position()  -> STRED / OKRAJ / MIMO
-      (proxy: hustota budov v okruhu 100 m / 300 m)
-    overpass_service.classify_access()    -> PRIAMA / CIASTOCNA / ZIADNA
-      (proxy: najblizsi dom <= 50 m + cesta <= 50 m)
-    is_gem_candidate = OKRAJ + {PRIAMA | CIASTOCNA}
-    zbgis_service.is_agricultural = True  (orna poda / zahrada / TTP)
-    -> badge [skvost] v tabulke, filter "Len skvosty", zlty riadok
+  VRSTVA 1: Skvost kandidat (automaticky, po GIS scoringu)
+    Vstupy zo sluzieb (presne kluce ServiceResult.data):
+      zbgis_service:     data["is_agricultural"]            -> bool
+      overpass_service:  data["village_position"]["position"] -> STRED/OKRAJ/MIMO
+                         data["direct_access"]["level"]       -> PRIAMA/CIASTOCNA/ZIADNA
+                         data["electricity"]["distance_m"]    -> float (m)
+                         data["road"]["distance_m"]           -> float (m)
+      bpej_service:      data["protection_class"]            -> int 1-9
+                         data["estimated_odvody_eur_per_m2"] -> float
 
-  VRSTVA 2: Odhad nakladov na zasietovanie (automaticky, v modali)
-    elektrina: vzdialenost z OSM power -> EUR odhad (100 EUR/m)
-    cesta: vzdialenost z OSM highway   -> EUR odhad (100-150 EUR/m)
-    voda: upozornenie (OSM waterway != vodovod)
+    Signaly (signals.py gis_signals):
+      PREKLASIFIKACIA: is_agricultural + OKRAJ + {PRIAMA|CIASTOCNA} + bpej >= 5
+      LACNE_VYNATIE:   is_agricultural + bpej >= 7 (odvody <= 0.10 EUR/m2)
+      DRAHE_VYNATIE:   is_agricultural + bpej <= 4 (odvody >= 3 EUR/m2)
+
+    Prelim signaly (signals.py preliminary_signals, 0 HTTP):
+      BLIZKO_BA:           odhad km z sk_places < 25 km
+      PRILIS_DALEKO:       odhad km z sk_places > 82 km
+      CENA_PODOZRIVA:      inzerat + ppsm < 1.5 EUR/m2
+      DRAZBA_PODHODNOTENA: drazobny zdroj + cena v rozsahu
+
+  VRSTVA 2: Kvantifikacia zisku (IMPLEMENTOVANA v rezoning_service.py)
+    estimate_rezoning_profit(parcel) -> parcel (in-place):
+      naklad_vynatie     = bpej.estimated_odvody_eur_per_m2 x area_sqm
+      naklad_zasietovanie = max(0, elec_dist-10)*100 + max(0,road_dist-10)*120  EUR
+      hodnota_stavebna   = criteria.yaml rezoning.stavebne_ceny_podla_km[dist_km] x area
+      cisty_zisk_est     = hodnota_stavebna - kupna_cena - naklady
+    Polia: parcel.rezoning_profit_eur, .rezoning_cost_eur,
+           .rezoning_value_eur, .rezoning_breakdown
+    Spusta sa v score_parcel() ak zbgis.is_agricultural==True.
+    Zisk sa doplni do dovodu signalu PREKLASIFIKACIA.
+    Testy: tests/test_rezoning_service.py (16 testov)
+    POZOR: Orientacne +-30-50%, nie pravny ani financny poradca.
 
   VRSTVA 3: Uzemny plan -- rucne overenie (UP asistent)
     uzemny_plan_service.build_up_links(location_text)

@@ -100,7 +100,18 @@ def preliminary_signals(parcel: "Parcel") -> list[dict]:
 # ----------------------------------------------------------------
 
 def gis_signals(parcel: "Parcel") -> list[dict]:
-    """Signály po plnom GIS scoringu — čerpá z parcel.results."""
+    """
+    Signály po plnom GIS scoringu — čerpá z parcel.results.
+
+    Presné kľúče podľa reálnych ServiceResult.data z každej služby:
+      bpej_service:      protection_class, estimated_odvody_eur_per_m2
+      zbgis_service:     is_agricultural, is_buildable, druh_pozemku
+      overpass_service:  village_position.position, direct_access.level
+                         electricity.distance_m, road.distance_m
+      flood_service:     in_flood_zone_q100
+      protected_service: in_natura2000, in_chko, in_npr_pr, in_np
+      price_analysis:    price_ratio, local_avg_per_sqm, price_per_sqm
+    """
     cfg    = _cfg()
     result = []
 
@@ -115,29 +126,40 @@ def gis_signals(parcel: "Parcel") -> list[dict]:
     protected_d = _d("protected_service")
     price_d     = _d("price_analysis_service")
 
+    # Správne kľúče po kontrole zdrojového kódu každej služby
     bpej_class = int(bpej_d.get("protection_class", 0))
     is_agri    = bool(zbgis_d.get("is_agricultural", False))
-    position   = overpass_d.get("position", "")
-    access     = overpass_d.get("access_level", "")
+    # overpass: vnorené dicts (village_position, direct_access)
+    position   = (overpass_d.get("village_position") or {}).get("position", "")
+    access     = (overpass_d.get("direct_access")    or {}).get("level",    "")
     odvody     = float(bpej_d.get("estimated_odvody_eur_per_m2", -1))
+    # vzdialenosti pre zasietovanie (pre Blok 2)
+    elec_dist_m = float((overpass_d.get("electricity") or {}).get("distance_m", 9999))
+    road_dist_m = float((overpass_d.get("road")        or {}).get("distance_m", 9999))
 
-    # PREKLASIFIKACIA
+    # --- PREKLASIFIKACIA ---
+    # Orná pôda na OKRAJI dediny s PRIAMOU/CIASTOCNOU dostupnosťou + nízka bonita
     if (is_agri and position == "OKRAJ"
             and access in ("PRIAMA", "CIASTOCNA")
             and bpej_class >= int(cfg["preklasifikacia_min_bpej_class"])):
+        dovod = (
+            f"Poľnohospodárska pôda, poloha OKRAJ dediny, "
+            f"prístup {access}, BPEJ trieda {bpej_class} "
+            f"(odvody ≈ {odvody:.2f} €/m²)"
+        )
         result.append(_s("PREKLASIFIKACIA", "PRILEZITOST",
             "Kandidát na preklasifikáciu (pole → stavebný)",
-            (f"Poľnohospodárska pôda, OKRAJ dediny, prístup {access}, "
-             f"BPEJ trieda {bpej_class}"),
-            0.8 if access == "PRIAMA" else 0.6))
+            dovod, 0.8 if access == "PRIAMA" else 0.6))
 
-    # LACNE_VYNATIE
+    # --- LACNE_VYNATIE ---
+    # Poľnohosp. pôda s BPEJ trieda ≥ 7 (odvody ≤ 0.10 €/m²) = lacné vyňatie
     if is_agri and bpej_class >= int(cfg["lacne_vynatie_min_bpej_class"]) and odvody >= 0:
         result.append(_s("LACNE_VYNATIE", "PRILEZITOST",
             "Lacné vyňatie z PPF",
             f"BPEJ trieda {bpej_class}, odvody ≈ {odvody:.2f} €/m²", 0.9))
 
-    # DRAHE_VYNATIE
+    # --- DRAHE_VYNATIE ---
+    # BPEJ trieda 1-4 = vysoko chránená pôda = drahé vyňatie (tisíce €/m²)
     if is_agri and 0 < bpej_class <= 4:
         odvody_s = f"{odvody:.2f} €/m²" if odvody >= 0 else "neznáme"
         result.append(_s("DRAHE_VYNATIE", "RIZIKO",
@@ -145,31 +167,39 @@ def gis_signals(parcel: "Parcel") -> list[dict]:
             f"BPEJ trieda {bpej_class} (vysoko chránená pôda), odvody ≈ {odvody_s}",
             0.9))
 
-    # PODHODNOTENE
-    median_ppsm = float(price_d.get("median_ppsm", 0))
-    par_ppsm    = parcel.price_per_sqm
-    if median_ppsm > 0 and par_ppsm > 0:
-        if par_ppsm <= median_ppsm * float(cfg["podhodnotene_max_ratio"]):
-            result.append(_s("PODHODNOTENE", "PRILEZITOST",
-                "Výrazne pod trhom",
-                f"{par_ppsm:.0f} €/m² vs. medián {median_ppsm:.0f} €/m² v okolí",
-                0.7))
+    # --- PODHODNOTENE ---
+    # price_analysis vracia price_ratio (parcel/local_avg) a local_avg_per_sqm
+    price_ratio     = float(price_d.get("price_ratio", 1.0))
+    local_avg_ppsm  = float(price_d.get("local_avg_per_sqm", 0))
+    par_ppsm        = float(price_d.get("price_per_sqm", 0)) or parcel.price_per_sqm
+    max_ratio       = float(cfg["podhodnotene_max_ratio"])   # default 0.30
+    if local_avg_ppsm > 0 and par_ppsm > 0 and price_ratio <= max_ratio:
+        result.append(_s("PODHODNOTENE", "PRILEZITOST",
+            "Výrazne pod trhom",
+            f"{par_ppsm:.0f} €/m² vs. local avg {local_avg_ppsm:.0f} €/m² "
+            f"(ratio {price_ratio:.2f}, limit {max_ratio})",
+            0.7))
 
-    # ZAPLAVA
-    if flood_d.get("flood_zone_q100", False):
+    # --- ZAPLAVA ---
+    # flood_service vracia in_flood_zone_q100 (nie flood_zone_q100!)
+    if flood_d.get("in_flood_zone_q100", False):
         result.append(_s("ZAPLAVA", "RIZIKO",
             "Záplavová zóna Q100",
             "SHMU WMS: pozemok leží v záplavovej zóne 100-ročnej vody", 0.9))
 
-    # CHRANENE_UZEMIE
+    # --- CHRANENE_UZEMIE ---
+    # protected_service vracia in_natura2000, in_chko, in_npr_pr, in_np
+    # VVN/VTL: overpass nerozlišuje typ napätia → nie je spoľahlivé, vynechané
     hits = []
-    if protected_d.get("natura2000"):        hits.append("Natura 2000")
-    if protected_d.get("chko"):              hits.append("CHKO")
-    if protected_d.get("vvn_overhead_line"): hits.append("VVN vedenie")
-    if protected_d.get("vtl_gas_pipeline"):  hits.append("VTL plynovod")
+    if protected_d.get("in_natura2000"): hits.append("Natura 2000")
+    if protected_d.get("in_chko"):       hits.append("CHKO")
+    if protected_d.get("in_npr_pr"):     hits.append("NPR/PR rezervácia")
+    if protected_d.get("in_np"):         hits.append("Národný park")
     if hits:
         result.append(_s("CHRANENE_UZEMIE", "RIZIKO",
             "Chránené / obmedzené územie", ", ".join(hits), 0.9))
+
+    return result
 
     return result
 
