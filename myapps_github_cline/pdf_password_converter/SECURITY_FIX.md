@@ -1,6 +1,24 @@
-# Security Fix: pypdf Vulnerabilities
+﻿# Security Fix: pypdf Vulnerabilities
 
-## Latest Fix (Aug 2026)
+## Latest Fix (Oct 2026)
+
+- Package: pypdf
+- Severity: HIGH
+- CVEs: CVE-2026-102997, CVE-2026-102998, CVE-2026-102996, CVE-2026-102995, CVE-2026-102993
+- Affected versions: pypdf < 6.18.1
+- Fixed in: pypdf >= 6.18.1
+
+### Fix Applied
+
+File: requirements.txt
+Before: pypdf==6.16.2
+After:  pypdf~=6.18.1  (>=6.18.1, <6.19.0 -- allows patch updates within 6.18.x)
+
+Source: GitHub Security Alert digest, week of Oct 7-Oct 14, 2026
+
+---
+
+## Previous Fix (Aug 2026)
 
 - Package: pypdf
 - Severity: MODERATE
@@ -12,7 +30,7 @@
 
 File: requirements.txt
 Before: pypdf==6.14.2
-After:  pypdf==6.16.2 (latest stable)
+After:  pypdf==6.16.2 (latest stable at the time)
 
 ---
 
@@ -46,22 +64,25 @@ A malicious PDF as input could trigger the infinite loop in encrypt_pdf().
 ## Current Version Status
 
 File: requirements.txt
-Current: pypdf==6.16.2
+Current: pypdf~=6.18.1  (>=6.18.1, <6.19.0)
 
-Pinning to exact version 6.16.2 ensures:
-1. All known CVEs (CVE-2026-71852, CVE-2026-71870) are patched
-2. Version is well above the DoS patch threshold (5.1.0)
-3. No accidental downgrade to a vulnerable version is possible
-4. Reproducible and predictable builds
+Using the pessimistic constraint ~=6.18.1 ensures:
+1. All known CVEs (CVE-2026-102997, CVE-2026-102998, CVE-2026-102996,
+   CVE-2026-102995, CVE-2026-102993) are patched -- all fixed in >= 6.18.1
+2. All prior CVEs (CVE-2026-71852, CVE-2026-71870) remain patched
+3. Version is well above the DoS patch threshold (5.1.0)
+4. Patch-level updates within 6.18.x are allowed automatically
+5. No accidental downgrade below 6.18.1 is possible
 
 ## Verification
 
 Run: pip show pypdf
-Expected: Version: 6.16.2
+Expected: Version: 6.18.x  (any 6.18.x release, e.g. 6.18.1 or higher)
 
 ## References
 
+- GitHub Security Alert digest: week of Oct 7-Oct 14, 2026
+- CVEs: CVE-2026-102997, CVE-2026-102998, CVE-2026-102996, CVE-2026-102995, CVE-2026-102993
 - GitHub Security Advisory: CVE-2026-71852, CVE-2026-71870
 - GitHub Security Advisory: pypdf infinite loop (ASCII85 and ASCIIHex filter)
-- Fixed in pypdf 6.15.0+ release
 - https://pypdf.readthedocs.io/en/stable/meta/changelog.html
