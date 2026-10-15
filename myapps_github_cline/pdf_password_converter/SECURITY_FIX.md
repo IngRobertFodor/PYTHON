@@ -16,6 +16,16 @@ After:  pypdf~=6.18.1  (>=6.18.1, <6.19.0 -- allows patch updates within 6.18.x)
 
 Source: GitHub Security Alert digest, week of Oct 7-Oct 14, 2026
 
+### Additional Change (Python 3.14 Compatibility)
+
+File: requirements.txt
+Before: pyinstaller==6.11.1
+After:  pyinstaller>=6.15.0
+
+pyinstaller 6.11.1 does not support Python 3.14 (bundled WinPython version).
+Constraint relaxed to >=6.15.0 which is the earliest version supporting Python 3.14.
+This is a build tool only -- it does not affect the running application.
+
 ---
 
 ## Previous Fix (Aug 2026)

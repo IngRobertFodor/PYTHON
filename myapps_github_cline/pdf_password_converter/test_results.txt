@@ -5,10 +5,10 @@
 #1 | 2026-05-18 00:21 | 12 PASSED / 0 FAILED / 12 TOTAL | ALL PASSED
 --------------------------------------------------
   [TEST 1]  Importy                  - PASSED
-  [TEST 2]  Arial font              - PASSED
-  [TEST 3]  Vystupny priecinok      - PASSED
-  [TEST 4]  Keyring R/W             - PASSED
-  [TEST 5]  Zamestnanec CRUD        - PASSED
+  [TEST 2]  Vystupny priecinok      - PASSED
+  [TEST 3]  Keyring R/W             - PASSED
+  [TEST 4]  Zamestnanec CRUD        - PASSED
+  [TEST 5]  Viacero zamestnancov    - PASSED
   [TEST 6]  Viacero zamestnancov    - PASSED
   [TEST 7]  Nazov - auto            - PASSED
   [TEST 8]  Nazov - 12 mesiacov     - PASSED
@@ -20,3 +20,4 @@
 #2 | 2026-08-27 11:04 | 12 PASSED / 0 FAILED / 12 TOTAL | ALL PASSED
 #3 | 2026-08-27 11:07 | 12 PASSED / 0 FAILED / 12 TOTAL | ALL PASSED
 #4 | 2026-10-15 10:27 | 12 PASSED / 0 FAILED / 12 TOTAL | ALL PASSED
+#5 | 2026-10-15 10:36 | 12 PASSED / 0 FAILED / 12 TOTAL | ALL PASSED
