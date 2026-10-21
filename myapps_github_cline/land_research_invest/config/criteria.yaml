@@ -363,6 +363,9 @@ signals:
   horice_dlho_days: 180       # dlho + pokles → HORICE (kombinácia)
   # B2 — dražby
   drazba_min_zlava_pct: 20.0  # min. % zľavy pod znaleckou → DRAZBA_POD_ZNALECKOU
+  # B3 — peer comparison
+  peer_min_count: 4           # min. pozemkov v obci pre porovnanie
+  peer_lacny_ratio: 0.6       # pod 60 % mediánu obce = výrazne lacný
 rezoning:
   # Orientačné ceny stavebných pozemkov EUR/m2 podľa vzdialenosti od BA
   # POZOR: regionálny priemer, nie konkrétna obec (±30-50 % odchylka!)

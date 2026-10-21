@@ -552,6 +552,28 @@ function _buildModalHtml(parcel) {
       html += `<div style="margin-top:4px;color:#784212;font-weight:700">Rozdiel: ${(znal-vyv).toLocaleString("sk-SK")} € pod znaleckou hodnotou</div>`;
     html += `</div>`;
   }
+
+  // --- B3: Peer comparison ---
+  const peerMedian = parcel.peer_median_ppsm || 0;
+  const peerCnt    = parcel.peer_count || 0;
+  const peerRatio  = parcel.peer_ratio || 0;
+  const peerSigM   = (parcel.signals||[]).find(s => s.kod === "LACNEJSI_AKO_OKOLIE");
+  if (peerMedian > 0 && peerCnt > 0) {
+    const ppsm = parcel.price_per_sqm > 0
+      ? parcel.price_per_sqm
+      : (parcel.area_sqm > 0 ? parcel.price_eur / parcel.area_sqm : 0);
+    const pctOd = ppsm > 0 ? ((peerMedian - ppsm) / peerMedian * 100).toFixed(1) : null;
+    const clr   = peerSigM && peerSigM.typ === "RIZIKO" ? "#6e2f0f" : "#1a3a6e";
+    const bg    = peerSigM && peerSigM.typ === "RIZIKO" ? "#fdf2e9" : "#eaf0fb";
+    html += `<div class="modal-section-title">📊 Peer comparison v obci</div>
+      <div style="background:${bg};border-radius:8px;padding:8px 14px;font-size:.75rem;line-height:1.8">
+        <div><b>Mediánová cena v obci:</b> <span style="color:${clr};font-weight:700">${peerMedian.toFixed(0)} €/m²</span> <span style="color:#888">(n=${peerCnt} pozemkov)</span></div>
+        ${ppsm > 0 ? `<div><b>Cena tohto pozemku:</b> ${ppsm.toFixed(0)} €/m²</div>` : ""}
+        ${pctOd !== null ? `<div style="color:${clr};font-weight:700">${parseFloat(pctOd) > 0 ? `−${pctOd} % pod mediánom` : `+${Math.abs(pctOd)} % nad mediánom`}</div>` : ""}
+        ${peerSigM && peerSigM.typ === "RIZIKO" ? `<div style="margin-top:3px;font-size:.68rem;color:#a04020">⚠️ ${peerSigM.dovod}</div>` : ""}
+      </div>`;
+  }
+
   const rprofit = parcel.rezoning_profit_eur;
   const rbd     = parcel.rezoning_breakdown || {};
   if (rprofit !== undefined && rprofit !== 0 && rbd.hodnota_stavebna_eur) {
@@ -959,7 +981,8 @@ function renderResultsTable(items) {
     // Signálové odznaky (prelim) — štandardné 🟢/🔴 (okrem B1+B2 vlajočiek)
     const sigs     = p.signals || [];
     const FLAG_KODY = new Set(["HORICE", "DLHO_V_PONUKE", "CENA_KLESA",
-                                "DRAZBA_POD_ZNALECKOU", "DRAZBA_OPAKOVANA"]);
+                                "DRAZBA_POD_ZNALECKOU", "DRAZBA_OPAKOVANA",
+                                "LACNEJSI_AKO_OKOLIE"]);
     const oppSigs  = sigs.filter(s => s.typ === "PRILEZITOST" && !FLAG_KODY.has(s.kod));
     const riskSigs = sigs.filter(s => s.typ === "RIZIKO");
     const sigHtml  = [
@@ -975,12 +998,15 @@ function renderResultsTable(items) {
     // B2 — Vlajočky dražieb
     const drazSig = sigs.find(s => s.kod === "DRAZBA_POD_ZNALECKOU");
     const opakSig = !drazSig && sigs.find(s => s.kod === "DRAZBA_OPAKOVANA");
+    // B3 — Peer comparison vlajočka
+    const peerSig = sigs.find(s => s.kod === "LACNEJSI_AKO_OKOLIE");
     const flagHtml = [
       hotSig  ? `<span class="flag-badge flag-hot"   title="${hotSig.dovod}">🔥 ${hotSig.nazov.replace("🔥 ","")}</span>` : "",
       ageSig  ? `<span class="flag-badge flag-age"   title="${ageSig.dovod}">${ageSig.nazov}</span>` : "",
       dropSig ? `<span class="flag-badge flag-drop"  title="${dropSig.dovod}">${dropSig.nazov}</span>` : "",
       drazSig ? `<span class="flag-badge flag-draz"  title="${drazSig.dovod}">${drazSig.nazov}</span>` : "",
       opakSig ? `<span class="flag-badge flag-opak"  title="${opakSig.dovod}">${opakSig.nazov}</span>` : "",
+      peerSig ? `<span class="flag-badge ${peerSig.typ === 'RIZIKO' ? 'flag-peer-hazik' : 'flag-peer'}" title="${peerSig.dovod}">${peerSig.nazov}</span>` : "",
     ].join("");
     // Istota (confidence)
     const conf    = p.prelim_confidence ?? 1.0;

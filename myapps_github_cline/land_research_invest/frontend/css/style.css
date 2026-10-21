@@ -378,6 +378,16 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   background: #fef9e7; color: #7d6608;
   border: 1px solid #f4d03f;
 }
+/* 📊 LACNEJSI_AKO_OKOLIE — príležitosť */
+.flag-peer {
+  background: #eaf0fb; color: #1a3a6e;
+  border: 1px solid #5b8dee;
+}
+/* 📊 LACNEJSI_AKO_OKOLIE — háčik */
+.flag-peer-hazik {
+  background: #fdf2e9; color: #6e2f0f;
+  border: 1px solid #e08050;
+}
 
 /* Skvost / dostupnost / poloha badgese (J1) */
 .gem-badge {

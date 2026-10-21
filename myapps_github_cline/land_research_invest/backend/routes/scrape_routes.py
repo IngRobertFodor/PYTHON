@@ -22,6 +22,7 @@ from services.storage_service  import (
     load_last_run, list_runs, load_run,
 )
 from services.signals          import history_signals, drazba_signals
+from services.peer_analysis_service import apply_peer_signals
 from services.diff_service        import compute_diff
 from services.uzemny_plan_service import build_up_links, normalize_obec, warm_cache
 from models.parcel import Parcel
@@ -133,6 +134,11 @@ def scrape_start():
                                 if sig["kod"] not in existing_kody:
                                     d.setdefault("signals", []).append(sig)
                         enriched.append(d)
+                    # B3: Peer comparison — po history_signals (potrebuje celý dataset)
+                    try:
+                        apply_peer_signals(enriched)
+                    except Exception as exc:
+                        print(f"[scrape_routes] peer_signals failed: {exc}")
                     _set_last_results(enriched)
                 except Exception as exc:
                     print(f"[scrape_routes] save_run/history failed: {exc}")

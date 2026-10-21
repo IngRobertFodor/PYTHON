@@ -70,6 +70,11 @@ class Parcel:
     znalecka_hodnota_eur:  float = 0.0  # odhad/znalecká hodnota predmetu dražby
     drazba_kolo:           int   = 0    # 0=neznáme, 1=prvé kolo, 2+=opakovaná dražba
 
+    # --- B3: Peer comparison ---
+    peer_median_ppsm: float = 0.0  # mediánová €/m² v obci (z aktuálneho behu)
+    peer_count:       int   = 0    # počet pozemkov v obci použitých pre porovnanie
+    peer_ratio:       float = 0.0  # ratio pozemku vs. mediánu (< 1.0 = lacnejší)
+
     def add_result(self, result: ServiceResult) -> None:
         """Prida vysledok sluzby do results dict."""
         self.results[result.source] = result
@@ -119,5 +124,8 @@ class Parcel:
             "vyvolavacia_cena_eur": self.vyvolavacia_cena_eur,
             "znalecka_hodnota_eur": self.znalecka_hodnota_eur,
             "drazba_kolo":          self.drazba_kolo,
+            "peer_median_ppsm":     self.peer_median_ppsm,
+            "peer_count":           self.peer_count,
+            "peer_ratio":           self.peer_ratio,
             "results": {k: v.to_dict() for k, v in self.results.items()},
         }
