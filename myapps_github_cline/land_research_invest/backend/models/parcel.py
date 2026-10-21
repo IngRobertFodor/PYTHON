@@ -65,6 +65,11 @@ class Parcel:
     price_drop_pct:   float = 0.0       # % pokles ceny (prvá vs. posledná v histórii)
     price_history:    list  = field(default_factory=list)  # [{date, price_eur}, ...]
 
+    # --- B2: Dražobné polia ---
+    vyvolavacia_cena_eur:  float = 0.0  # najnižšie podanie (vyvolávacia cena dražby)
+    znalecka_hodnota_eur:  float = 0.0  # odhad/znalecká hodnota predmetu dražby
+    drazba_kolo:           int   = 0    # 0=neznáme, 1=prvé kolo, 2+=opakovaná dražba
+
     def add_result(self, result: ServiceResult) -> None:
         """Prida vysledok sluzby do results dict."""
         self.results[result.source] = result
@@ -111,5 +116,8 @@ class Parcel:
             "listing_age_days":     self.listing_age_days,
             "price_drop_pct":       self.price_drop_pct,
             "price_history":        self.price_history,
+            "vyvolavacia_cena_eur": self.vyvolavacia_cena_eur,
+            "znalecka_hodnota_eur": self.znalecka_hodnota_eur,
+            "drazba_kolo":          self.drazba_kolo,
             "results": {k: v.to_dict() for k, v in self.results.items()},
         }

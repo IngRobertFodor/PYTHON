@@ -35,6 +35,8 @@ _DEFAULTS = {
     "ponuka_dlho_days":              120,  # inzerát starší → DLHO_V_PONUKE
     "pokles_min_pct":                5.0,  # min. pokles ceny → CENA_KLESA
     "horice_dlho_days":              180,  # kombinovaný prah → HORICE
+    # B2 — dražby
+    "drazba_min_zlava_pct":          20.0, # min. % zľavy pod znaleckou → DRAZBA_POD_ZNALECKOU
 }
 
 
@@ -183,6 +185,63 @@ def history_signals(parcel: "Parcel") -> list[dict]:
         result.append(_s("CENA_KLESA", "PRILEZITOST",
             f"🏷️ Cena klesla −{drop_pct:.1f} %",
             dovod, round(dovera, 2)))
+
+    return result
+
+
+# ----------------------------------------------------------------
+# B2 — Dražobné signály
+# ----------------------------------------------------------------
+
+def drazba_signals(parcel: "Parcel") -> list[dict]:
+    """Signály z dražobných dát.
+
+    Vstupy z parcel (plní scrapery):
+      parcel.vyvolavacia_cena_eur  — najnižšie podanie
+      parcel.znalecka_hodnota_eur  — odhad/znalecká hodnota (SKE HTML)
+      parcel.drazba_kolo           — 1=prvé, 2+=opakovaná dražba
+      parcel.source_portal         — ske_drazobne_vyhlasky / obchodny_vestnik / notarske_drazby
+
+    Signály:
+      DRAZBA_POD_ZNALECKOU  — vyvolávacia cena výrazne pod znaleckou hodnotou
+                              (SKE: priamy výpočet; OV/notárske: nie je dostupná → bez signálu)
+      DRAZBA_OPAKOVANA      — opakovaná dražba (kolo 2+) = ďalšia zľava z trhových podmienok
+    """
+    cfg    = _cfg()
+    result = []
+    source    = parcel.source_portal or ""
+    vyv_cena  = float(parcel.vyvolavacia_cena_eur or 0)
+    znalecka  = float(parcel.znalecka_hodnota_eur or 0)
+    kolo      = int(parcel.drazba_kolo or 0)
+    min_zlava = float(cfg.get("drazba_min_zlava_pct", 20.0))
+
+    # DRAZBA_POD_ZNALECKOU — len ak máme obe hodnoty a zmysluplný rozdiel
+    if vyv_cena > 0 and znalecka > vyv_cena:
+        zlava_pct = (znalecka - vyv_cena) / znalecka * 100
+        if zlava_pct >= min_zlava:
+            dovera = min(0.95, 0.70 + zlava_pct / 200)
+            # Ak aj opakovaná → vyššia dôvera
+            if kolo >= 2:
+                dovera = min(0.97, dovera + 0.08)
+            result.append(_s(
+                "DRAZBA_POD_ZNALECKOU", "PRILEZITOST",
+                f"🔨 Dražba pod znaleckou −{zlava_pct:.0f} %",
+                (f"Vyvolávacia {vyv_cena:,.0f} € vs. znalecká {znalecka:,.0f} € "
+                 f"(rozdiel {znalecka - vyv_cena:,.0f} €, zľava {zlava_pct:.1f} %). "
+                 f"{'Opakovaná dražba (kolo ' + str(kolo) + ') — ešte vyšší tlak na cenu.' if kolo >= 2 else ''}").rstrip(),
+                round(dovera, 2),
+            ))
+
+    # DRAZBA_OPAKOVANA — opakovaná dražba bez znaleckej (OV, notárske)
+    # Len ak DRAZBA_POD_ZNALECKOU nebola vygenerovaná (aby nebolo 2x)
+    if kolo >= 2 and not any(s["kod"] == "DRAZBA_POD_ZNALECKOU" for s in result):
+        result.append(_s(
+            "DRAZBA_OPAKOVANA", "PRILEZITOST",
+            f"🔨 Opakovaná dražba (kolo {kolo})",
+            (f"Opakovaná dražba — predchádzajúce kolo prebehlo bez záujemcov. "
+             f"Vyšší tlak na zníženie ceny, priestor na rokovanie."),
+            0.70,
+        ))
 
     return result
 

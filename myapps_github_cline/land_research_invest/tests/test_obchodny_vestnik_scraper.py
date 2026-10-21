@@ -54,7 +54,7 @@ class TestExtractPdfText:
         assert "  " not in fixture_text
 
     def test_contains_diacritics(self, fixture_text):
-        assert any(c in fixture_text for c in "áéíóúäôčšžýľ")
+        assert any(c in fixture_text for c in "├í├⌐├¡├│├║├ñ├┤─ì┼í┼╛├╜─╛")
 
     def test_reads_from_bytes(self):
         pdf_bytes = FIXTURE_PDF.read_bytes()
@@ -251,7 +251,7 @@ class TestObchodnyVestnikScraperRegistry:
 
 
 # ----------------------------------------------------------------
-# TestScrapePdfUrlFix — url=b'%PDF...' bug fix
+# TestScrapePdfUrlFix ΓÇö url=b'%PDF...' bug fix
 # ----------------------------------------------------------------
 
 class TestScrapePdfUrlFix:
@@ -359,7 +359,7 @@ class TestObchodnyVestnikListingCrawler:
             assert "FormularDetail" in url or "formulardetail" in url.lower()
 
     def test_parse_listing_skips_non_drazba_rows(self, scraper, listing_html):
-        """Riadky 'Upovedomenia exekvtorov' nesmú byť v zozname."""
+        """Riadky 'Upovedomenia exekvtorov' nesm├║ by┼Ñ v zozname."""
         urls = scraper._parse_listing_html(listing_html)
         # V fixture je 87 upovedomeni a len 9 drazob - urls musi byt << 87
         assert len(urls) <= 15
@@ -392,3 +392,41 @@ class TestObchodnyVestnikListingCrawler:
         assert result == "https://example.com/file.pdf"
 
 
+# ----------------------------------------------------------------
+# B2 - Testy drazobnych poli v OV scraper
+# ----------------------------------------------------------------
+
+from services.scrapers.obchodny_vestnik_scraper import _OPAKOVANA_RE as _OV_OPAKOVANA_RE
+
+
+class TestB2OvDrazobneFields:
+
+    def test_pdf_to_parcel_ma_b2_polia(self, fixture_text, fixture_parcel):
+        if fixture_parcel is None:
+            pytest.skip("fixture_parcel je None")
+        assert hasattr(fixture_parcel, "vyvolavacia_cena_eur")
+        assert hasattr(fixture_parcel, "znalecka_hodnota_eur")
+        assert hasattr(fixture_parcel, "drazba_kolo")
+
+    def test_vyvolavacia_rovnaka_ako_price_eur(self, fixture_text, fixture_parcel):
+        if fixture_parcel is None:
+            pytest.skip("fixture_parcel je None")
+        assert fixture_parcel.vyvolavacia_cena_eur == pytest.approx(
+            fixture_parcel.price_eur, abs=1.0
+        )
+
+    def test_znalecka_je_nula_v_ov(self, fixture_text, fixture_parcel):
+        if fixture_parcel is None:
+            pytest.skip("fixture_parcel je None")
+        assert fixture_parcel.znalecka_hodnota_eur == 0.0
+
+    def test_ov_opakovana_re(self):
+        assert _OV_OPAKOVANA_RE.search("opakovan\u00e1 dra\u017eba nehnutel\u0027nosti")
+        assert _OV_OPAKOVANA_RE.search("Druh\u00e9 kolo dra\u017eby")
+        assert not _OV_OPAKOVANA_RE.search("prv\u00e1 dra\u017eba")
+
+    def test_kolo1_pre_normalnu_drazbu(self, fixture_text, fixture_parcel):
+        if fixture_parcel is None:
+            pytest.skip("fixture_parcel je None")
+        if not _OV_OPAKOVANA_RE.search(fixture_text):
+            assert fixture_parcel.drazba_kolo == 1

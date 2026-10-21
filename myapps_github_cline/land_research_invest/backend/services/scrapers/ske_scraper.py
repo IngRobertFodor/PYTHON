@@ -50,6 +50,11 @@ _OV_CISLO_RE = re.compile(
     r"\u010c\u00edslo zverejnenia v OV\s+(X\d+)")
 _NEHNUT_KEYS = ["nehnutelnost", "nehnut"]
 _SKIP_DRUH   = ["zrusenie", "oprava", "zmena"]
+# B2 — opakovaná dražba (kolo 2+)
+_OPAKOVANA_RE = re.compile(
+    r"opakovan[aá]\s+dra[zž]b|druhé?\s+kolo|2\.\s*kolo|op\.\s*dra[zž]b",
+    re.IGNORECASE,
+)
 
 
 class SkeScraper(BaseScraper):
@@ -179,7 +184,7 @@ class SkeScraper(BaseScraper):
         if ov_cislo:
             desc.append(f"OV: {ov_cislo}")
 
-        return self._make_parcel(
+        p = self._make_parcel(
             title         = title,
             url           = url,
             price_eur     = price,
@@ -189,6 +194,17 @@ class SkeScraper(BaseScraper):
             parcel_number = lv,
             description   = " | ".join(desc)[:500],
         )
+        # B2: naplň dražobné polia
+        if p is not None:
+            self._set_b2_fields(p, price, odhad, text)
+        return p
+
+    @staticmethod
+    def _set_b2_fields(parcel, price, odhad, text):
+        """Naplní B2 dražobné polia na Parcel objekte (po _make_parcel)."""
+        parcel.vyvolavacia_cena_eur = float(price or 0)
+        parcel.znalecka_hodnota_eur = float(odhad or 0)
+        parcel.drazba_kolo = 2 if _OPAKOVANA_RE.search(text) else 1
 
 
 # ----------------------------------------------------------------

@@ -21,7 +21,7 @@ from services.storage_service  import (
     save_run, patch_parcel as db_patch,
     load_last_run, list_runs, load_run,
 )
-from services.signals          import history_signals
+from services.signals          import history_signals, drazba_signals
 from services.diff_service        import compute_diff
 from services.uzemny_plan_service import build_up_links, normalize_obec, warm_cache
 from models.parcel import Parcel

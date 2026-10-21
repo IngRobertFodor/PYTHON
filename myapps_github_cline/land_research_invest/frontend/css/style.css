@@ -367,6 +367,17 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   background: #eafaf1; color: #1d6a3a;
   border: 1px solid #52be80;
 }
+/* 🔨 DRAZBA_POD_ZNALECKOU */
+.flag-draz {
+  background: #fdf2e9; color: #784212;
+  border: 1px solid #e59866;
+  font-weight: 700;
+}
+/* 🔨 DRAZBA_OPAKOVANA */
+.flag-opak {
+  background: #fef9e7; color: #7d6608;
+  border: 1px solid #f4d03f;
+}
 
 /* Skvost / dostupnost / poloha badgese (J1) */
 .gem-badge {

@@ -361,6 +361,8 @@ signals:
   ponuka_dlho_days: 120       # inzerát starší ako N dní → DLHO_V_PONUKE
   pokles_min_pct: 5.0         # pokles ceny o N % → CENA_KLESA
   horice_dlho_days: 180       # dlho + pokles → HORICE (kombinácia)
+  # B2 — dražby
+  drazba_min_zlava_pct: 20.0  # min. % zľavy pod znaleckou → DRAZBA_POD_ZNALECKOU
 rezoning:
   # Orientačné ceny stavebných pozemkov EUR/m2 podľa vzdialenosti od BA
   # POZOR: regionálny priemer, nie konkrétna obec (±30-50 % odchylka!)

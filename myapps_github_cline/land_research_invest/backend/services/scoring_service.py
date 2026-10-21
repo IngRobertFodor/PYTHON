@@ -275,8 +275,15 @@ def preliminary_score(parcel: Parcel) -> Parcel:
            else _get_recommendation(total, thresholds))
 
     try:
-        from services.signals import preliminary_signals as _psig
+        from services.signals import preliminary_signals as _psig, drazba_signals as _dsig
         parcel.signals = _psig(parcel)
+        # B2: dražobné signály — dostupné ihneď po scrape (vyvolavacia/znalecka/kolo)
+        d_sigs = _dsig(parcel)
+        if d_sigs:
+            existing = {s["kod"] for s in parcel.signals}
+            for sig in d_sigs:
+                if sig["kod"] not in existing:
+                    parcel.signals.append(sig)
     except Exception:
         parcel.signals = []
 

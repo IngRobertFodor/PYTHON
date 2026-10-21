@@ -530,7 +530,28 @@ function _buildModalHtml(parcel) {
     html += `<div style="font-size:.73rem;color:#888;margin:4px 0 2px">⏱️ V ponuke ${ageStr}</div>`;
   }
 
-  // --- Kvantifikácia zisku z preklasifikácie ---
+  // --- B2: Dražobné detaily ---
+  const vyv  = parcel.vyvolavacia_cena_eur || 0;
+  const znal = parcel.znalecka_hodnota_eur || 0;
+  const kolo = parcel.drazba_kolo || 0;
+  if (vyv > 0 || znal > 0 || kolo > 0) {
+    html += `<div class="modal-section-title">🔨 Dražobné detaily</div>
+      <div style="background:#fdf2e9;border-radius:8px;padding:8px 14px;font-size:.75rem;line-height:1.8">`;
+    if (kolo > 0)
+      html += `<div><b>Kolo dražby:</b> ${kolo === 1 ? "1. kolo" : `${kolo}. kolo (opakovaná dražba)`}</div>`;
+    if (vyv > 0)
+      html += `<div><b>Vyvolávacia cena:</b> ${vyv.toLocaleString("sk-SK")} €</div>`;
+    if (znal > 0) {
+      const zlavaPct = vyv > 0 ? ((znal - vyv) / znal * 100).toFixed(1) : null;
+      html += `<div><b>Znalecká/Odhad hodnoty:</b> ${znal.toLocaleString("sk-SK")} €`;
+      if (zlavaPct && zlavaPct > 0)
+        html += ` <span style="color:#784212;font-weight:700">(pod znaleckou o ${zlavaPct} %)</span>`;
+      html += `</div>`;
+    }
+    if (znal > 0 && vyv > 0 && znal > vyv)
+      html += `<div style="margin-top:4px;color:#784212;font-weight:700">Rozdiel: ${(znal-vyv).toLocaleString("sk-SK")} € pod znaleckou hodnotou</div>`;
+    html += `</div>`;
+  }
   const rprofit = parcel.rezoning_profit_eur;
   const rbd     = parcel.rezoning_breakdown || {};
   if (rprofit !== undefined && rprofit !== 0 && rbd.hodnota_stavebna_eur) {
@@ -935,10 +956,11 @@ function renderResultsTable(items) {
     tr.dataset.url = p.url || "";
     if (ov && ov.is_gem_candidate) tr.classList.add("gem-row");
     const starred = wlHas(p.url || "");
-    // Signálové odznaky (prelim) — štandardné 🟢/🔴 (okrem B1 vlajočiek)
+    // Signálové odznaky (prelim) — štandardné 🟢/🔴 (okrem B1+B2 vlajočiek)
     const sigs     = p.signals || [];
-    const B1_KODY  = new Set(["HORICE", "DLHO_V_PONUKE", "CENA_KLESA"]);
-    const oppSigs  = sigs.filter(s => s.typ === "PRILEZITOST" && !B1_KODY.has(s.kod));
+    const FLAG_KODY = new Set(["HORICE", "DLHO_V_PONUKE", "CENA_KLESA",
+                                "DRAZBA_POD_ZNALECKOU", "DRAZBA_OPAKOVANA"]);
+    const oppSigs  = sigs.filter(s => s.typ === "PRILEZITOST" && !FLAG_KODY.has(s.kod));
     const riskSigs = sigs.filter(s => s.typ === "RIZIKO");
     const sigHtml  = [
       ...oppSigs.map(s =>
@@ -946,14 +968,19 @@ function renderResultsTable(items) {
       ...riskSigs.map(s =>
         `<span title="${s.nazov}: ${s.dovod}" class="sig-badge sig-risk">🔴</span>`),
     ].join("");
-    // B1 — Vlajočky motivovaného predajcu (vykreslené osobitne, výraznejšie)
+    // B1 — Vlajočky motivovaného predajcu
     const hotSig  = sigs.find(s => s.kod === "HORICE");
     const ageSig  = !hotSig && sigs.find(s => s.kod === "DLHO_V_PONUKE");
     const dropSig = !hotSig && sigs.find(s => s.kod === "CENA_KLESA");
+    // B2 — Vlajočky dražieb
+    const drazSig = sigs.find(s => s.kod === "DRAZBA_POD_ZNALECKOU");
+    const opakSig = !drazSig && sigs.find(s => s.kod === "DRAZBA_OPAKOVANA");
     const flagHtml = [
-      hotSig  ? `<span class="flag-badge flag-hot"  title="${hotSig.dovod}">🔥 ${hotSig.nazov.replace("🔥 ","")}</span>` : "",
-      ageSig  ? `<span class="flag-badge flag-age"  title="${ageSig.dovod}">${ageSig.nazov}</span>` : "",
-      dropSig ? `<span class="flag-badge flag-drop" title="${dropSig.dovod}">${dropSig.nazov}</span>` : "",
+      hotSig  ? `<span class="flag-badge flag-hot"   title="${hotSig.dovod}">🔥 ${hotSig.nazov.replace("🔥 ","")}</span>` : "",
+      ageSig  ? `<span class="flag-badge flag-age"   title="${ageSig.dovod}">${ageSig.nazov}</span>` : "",
+      dropSig ? `<span class="flag-badge flag-drop"  title="${dropSig.dovod}">${dropSig.nazov}</span>` : "",
+      drazSig ? `<span class="flag-badge flag-draz"  title="${drazSig.dovod}">${drazSig.nazov}</span>` : "",
+      opakSig ? `<span class="flag-badge flag-opak"  title="${opakSig.dovod}">${opakSig.nazov}</span>` : "",
     ].join("");
     // Istota (confidence)
     const conf    = p.prelim_confidence ?? 1.0;

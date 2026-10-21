@@ -72,6 +72,11 @@ _DRAZOBNIK_RE = re.compile(
     r"Obchodn[e\u00e9]\s+meno[^:]*:\s*([A-Z\u00c0-\u017e][^\n]{3,60}?)(?:\s+I\.|$)",
     re.IGNORECASE,
 )
+# B2 — opakovaná dražba
+_OPAKOVANA_RE = re.compile(
+    r"opakovan[a\u00e1]\s+dra[z\u017e]b|druh\u00e9?\s+kolo|2\.\s*kolo",
+    re.IGNORECASE,
+)
 
 
 class ObchodnyVestnikScraper(BaseScraper):
@@ -522,7 +527,7 @@ def pdf_to_parcel(text, source_url=""):
     if location:
         title += " (" + location + ")"
 
-    return BaseScraper._make_parcel(
+    p = BaseScraper._make_parcel(
         title         = title,
         url           = source_url,
         price_eur     = price,
@@ -531,4 +536,10 @@ def pdf_to_parcel(text, source_url=""):
         source_portal = SOURCE_NAME,
         description   = " | ".join(parts)[:500],
     )
+    # B2: naplň dražobné polia
+    if p is not None:
+        p.vyvolavacia_cena_eur = float(price or 0)
+        p.znalecka_hodnota_eur = 0.0   # v PDF OV nie je znalecká hodnota
+        p.drazba_kolo = 2 if _OPAKOVANA_RE.search(text) else 1
+    return p
 

@@ -259,3 +259,61 @@ class TestSkeScraperRegistry:
         assert extract_detail_title(BeautifulSoup("<html></html>", "html.parser")) == ""
 
 
+# ----------------------------------------------------------------
+# B2 - Testy drazobnych poli (vyvolavacia, znalecka, kolo)
+# ----------------------------------------------------------------
+
+from services.scrapers.ske_scraper import SkeScraper as _SkeScraper2, _OPAKOVANA_RE
+
+
+class TestB2SkeDrazobneFields:
+
+    def test_odhad_parsed_from_sample(self):
+        from services.scrapers.ske_scraper import extract_detail_odhad
+        assert extract_detail_odhad(SAMPLE_TEXT) == pytest.approx(20500.0)
+
+    def test_price_parsed_from_sample(self):
+        from services.scrapers.ske_scraper import extract_detail_price
+        assert extract_detail_price(SAMPLE_TEXT) == pytest.approx(20500.0)
+
+    def test_set_b2_fields_plni(self):
+        from models.parcel import Parcel
+        p = Parcel(url="x", price_eur=20500, area_sqm=500,
+                   source_portal="ske_drazobne_vyhlasky")
+        _SkeScraper2._set_b2_fields(p, price=20500.0, odhad=35000.0, text=SAMPLE_TEXT)
+        assert p.vyvolavacia_cena_eur == pytest.approx(20500.0)
+        assert p.znalecka_hodnota_eur == pytest.approx(35000.0)
+        assert p.drazba_kolo == 1
+
+    def test_set_b2_opakovana(self):
+        from models.parcel import Parcel
+        p = Parcel(url="x", price_eur=15000, area_sqm=500,
+                   source_portal="ske_drazobne_vyhlasky")
+        text_opak = SAMPLE_TEXT + " Opakovan\u00e1 dra\u017eba"
+        _SkeScraper2._set_b2_fields(p, price=15000.0, odhad=25000.0, text=text_opak)
+        assert p.drazba_kolo == 2
+
+    def test_opakovana_re(self):
+        assert _OPAKOVANA_RE.search("opakovan\u00e1 dra\u017eba")
+        assert _OPAKOVANA_RE.search("druh\u00e9 kolo")
+        assert _OPAKOVANA_RE.search("2. kolo")
+        assert not _OPAKOVANA_RE.search("prv\u00e9 kolo")
+
+    def test_b2_defaults(self):
+        from models.parcel import Parcel
+        p = Parcel()
+        assert p.vyvolavacia_cena_eur == 0.0
+        assert p.znalecka_hodnota_eur == 0.0
+        assert p.drazba_kolo == 0
+
+    def test_to_dict_b2(self):
+        from models.parcel import Parcel
+        p = Parcel(url="x", price_eur=20000, area_sqm=500,
+                   source_portal="ske_drazobne_vyhlasky")
+        p.vyvolavacia_cena_eur = 20000.0
+        p.znalecka_hodnota_eur = 30000.0
+        p.drazba_kolo = 1
+        d = p.to_dict()
+        assert d["vyvolavacia_cena_eur"] == pytest.approx(20000.0)
+        assert d["znalecka_hodnota_eur"] == pytest.approx(30000.0)
+        assert d["drazba_kolo"] == 1

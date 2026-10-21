@@ -35,6 +35,10 @@ SEARCH_PARAMS = (
 DEFAULT_MAX_PAGES = 3
 
 _SKIP_TYPES  = ["upustenie", "zrusenie", "zanik"]
+# B2 — opakovaná dražba
+_OPAKOVANA_RE = re.compile(
+    r"opakovan[aá]\s+dra[zž]b|druh[eé]?\s+kolo|2\.\s*kolo", re.IGNORECASE
+)
 _PRICE_RE    = re.compile(
     r"(\d[\d\s\.]{1,10}\d)[,\.]?[-\s]?\s*(?:eur|EUR|\u20ac)", re.IGNORECASE)
 _AREA_RE     = re.compile(r"(\d[\d\s]{0,5}?)\s*m\s*(?:2|\xb2|\u00b2)", re.IGNORECASE)
@@ -174,7 +178,7 @@ class NotarskeDrazbyaScraper(BaseScraper):
         ]
         description = " | ".join(p for p in desc_parts if p.split(": ", 1)[-1].strip())
 
-        return self._make_parcel(
+        p = self._make_parcel(
             title        = title or f"Notarska drazba NCRdr {entry.get('ncr', '')}",
             url          = final_url,
             price_eur    = 0.0,
@@ -183,6 +187,12 @@ class NotarskeDrazbyaScraper(BaseScraper):
             source_portal= SOURCE_NAME,
             description  = description,
         )
+        # B2: naplň dražobné polia (cena je v PDF, nie v HTML)
+        if p is not None:
+            p.vyvolavacia_cena_eur = 0.0   # cena je v PDF skene, nie v HTML
+            p.znalecka_hodnota_eur = 0.0
+            p.drazba_kolo = 2 if _OPAKOVANA_RE.search(text) else 1
+        return p
 
 
 

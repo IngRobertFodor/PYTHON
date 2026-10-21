@@ -9,7 +9,7 @@ ServiceResult.data z každej GIS služby (overene zo zdrojoveho kodu sluzieb).
 import pytest
 from models.parcel import Parcel
 from models.result import ServiceResult
-from services.signals import gis_signals, preliminary_signals, merge_signals, history_signals
+from services.signals import gis_signals, preliminary_signals, merge_signals, history_signals, drazba_signals
 
 
 # ----------------------------------------------------------------
@@ -372,6 +372,105 @@ class TestHistorySignals:
         assert _dov(365) > _dov(180)
 
     def test_cena_klesa_text_viacnasobny_pokles(self):
+        hist = [
+            {"date": "2025-01-01T00:00:00+00:00", "price_eur": 50000},
+            {"date": "2025-04-01T00:00:00+00:00", "price_eur": 45000},
+            {"date": "2025-09-01T00:00:00+00:00", "price_eur": 40000},
+        ]
+        p = _hist_parcel(age_days=50, drop_pct=20.0, history=hist)
+        klesa = next((s for s in history_signals(p) if s["kod"] == "CENA_KLESA"), None)
+        assert klesa is not None
+        assert "2\u00d7" in klesa["dovod"]
+
+
+# ----------------------------------------------------------------
+# B2 — Testy drazba_signals
+# ----------------------------------------------------------------
+
+def _draz_parcel(vyv: float = 0, znal: float = 0,
+                 kolo: int = 0, source: str = "ske_drazobne_vyhlasky") -> Parcel:
+    p = Parcel(url="x", price_eur=vyv, area_sqm=500, source_portal=source)
+    p.vyvolavacia_cena_eur = vyv
+    p.znalecka_hodnota_eur = znal
+    p.drazba_kolo          = kolo
+    return p
+
+
+class TestDrazbaSignals:
+
+    def test_ziadny_signal_bez_dat(self):
+        p = _draz_parcel(vyv=0, znal=0, kolo=0)
+        assert drazba_signals(p) == []
+
+    def test_pod_znaleckou_spusti_sa(self):
+        """vyv=70000, znal=100000 → 30 % zľava ≥ 20 % → DRAZBA_POD_ZNALECKOU."""
+        p = _draz_parcel(vyv=70000, znal=100000, kolo=1)
+        kody = [s["kod"] for s in drazba_signals(p)]
+        assert "DRAZBA_POD_ZNALECKOU" in kody
+
+    def test_pod_znaleckou_tesne_pod_prahom(self):
+        """vyv=82000, znal=100000 → 18 % < 20 % → žiadny signál."""
+        p = _draz_parcel(vyv=82000, znal=100000, kolo=1)
+        assert not any(s["kod"] == "DRAZBA_POD_ZNALECKOU" for s in drazba_signals(p))
+
+    def test_znalecka_nizsia_nez_vyvolavacia(self):
+        """Ak znalecká < vyvolávacia → žiadny signál (nezvyčajné, ale nemá crashovať)."""
+        p = _draz_parcel(vyv=50000, znal=30000, kolo=1)
+        assert not any(s["kod"] == "DRAZBA_POD_ZNALECKOU" for s in drazba_signals(p))
+
+    def test_bez_znaleckej_ziadny_pod_znaleckou(self):
+        """OV/notárske: znalecká = 0 → DRAZBA_POD_ZNALECKOU sa nespustí."""
+        p = _draz_parcel(vyv=50000, znal=0, kolo=1)
+        assert not any(s["kod"] == "DRAZBA_POD_ZNALECKOU" for s in drazba_signals(p))
+
+    def test_opakovana_drazba_kolo2(self):
+        """kolo=2, bez znaleckej → DRAZBA_OPAKOVANA."""
+        p = _draz_parcel(vyv=50000, znal=0, kolo=2)
+        kody = [s["kod"] for s in drazba_signals(p)]
+        assert "DRAZBA_OPAKOVANA" in kody
+
+    def test_opakovana_s_znaleckou_len_pod_znaleckou(self):
+        """kolo=2 + vyv pod znaleckou → iba DRAZBA_POD_ZNALECKOU (nie aj DRAZBA_OPAKOVANA)."""
+        p = _draz_parcel(vyv=60000, znal=100000, kolo=2)
+        kody = [s["kod"] for s in drazba_signals(p)]
+        assert "DRAZBA_POD_ZNALECKOU" in kody
+        assert "DRAZBA_OPAKOVANA" not in kody
+
+    def test_pod_znaleckou_kolo2_vyssia_dovera(self):
+        """Opakovaná dražba pod znaleckou → dôvera vyššia ako prvé kolo."""
+        def _dov(kolo):
+            p = _draz_parcel(vyv=60000, znal=100000, kolo=kolo)
+            return next(s["dovera"] for s in drazba_signals(p)
+                        if s["kod"] == "DRAZBA_POD_ZNALECKOU")
+        assert _dov(2) > _dov(1)
+
+    def test_dovod_obsahuje_percento_zlavy(self):
+        p = _draz_parcel(vyv=70000, znal=100000, kolo=1)
+        sig = next(s for s in drazba_signals(p) if s["kod"] == "DRAZBA_POD_ZNALECKOU")
+        assert "30" in sig["dovod"]
+
+    def test_dovod_obsahuje_obe_ceny(self):
+        p = _draz_parcel(vyv=70000, znal=100000, kolo=1)
+        sig = next(s for s in drazba_signals(p) if s["kod"] == "DRAZBA_POD_ZNALECKOU")
+        assert "70" in sig["dovod"]
+        assert "100" in sig["dovod"]
+
+    def test_struktura_signalu_spravna(self):
+        p = _draz_parcel(vyv=70000, znal=100000, kolo=1)
+        for sig in drazba_signals(p):
+            assert {"kod", "typ", "nazov", "dovod", "dovera"} <= set(sig.keys())
+            assert sig["typ"] == "PRILEZITOST"
+            assert 0.0 <= sig["dovera"] <= 1.0
+
+    def test_kolo1_bez_znaleckej_nic(self):
+        """kolo=1 bez znaleckej → žiadny signál."""
+        p = _draz_parcel(vyv=50000, znal=0, kolo=1)
+        assert drazba_signals(p) == []
+
+    def test_kolo0_bez_dat_nic(self):
+        p = _draz_parcel(vyv=0, znal=0, kolo=0)
+        assert drazba_signals(p) == []
+
         hist = [
             {"date": "2025-01-01T00:00:00+00:00", "price_eur": 50000},
             {"date": "2025-04-01T00:00:00+00:00", "price_eur": 45000},
