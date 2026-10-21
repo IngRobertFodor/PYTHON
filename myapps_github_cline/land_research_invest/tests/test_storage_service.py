@@ -206,6 +206,112 @@ class TestB1Schema:
             );
         """)
         conn.commit()
+        conn.close()  # Zatvoriť pred save_run aby sa predišlo PermissionError na Windows
+        result = save_run([SAMPLE[0]])
+        assert result > 0
+        rows = load_last_run()
+        assert rows[0].get("first_seen") is not None
+        assert isinstance(rows[0].get("price_history"), list)
+
+
+# ================================================================
+# H2 — Testy perzistencie B2–B4 polí (signály, investment_index...)
+# ================================================================
+
+class TestH2Perzistencia:
+    """Overuje, že signály a B2–B4 polia sa uložia do DB a načítajú späť."""
+
+    def _sample_enriched(self):
+        p = dict(SAMPLE[0])
+        p["signals"] = [
+            {"kod": "HORICE", "typ": "PRILEZITOST", "nazov": "test",
+             "dovod": "test dovod", "dovera": 0.9},
+            {"kod": "ZAPLAVA", "typ": "RIZIKO",     "nazov": "zaplava",
+             "dovod": "test", "dovera": 0.8},
+        ]
+        p["investment_index"]     = 67
+        p["investment_summary"]   = "Testové zdôvodnenie."
+        p["peer_median_ppsm"]     = 45.0
+        p["peer_count"]           = 6
+        p["peer_ratio"]           = 0.44
+        p["vyvolavacia_cena_eur"] = 35000.0
+        p["znalecka_hodnota_eur"] = 50000.0
+        p["drazba_kolo"]          = 2
+        return p
+
+    def test_signals_sa_ulozi_a_nacita(self):
+        p = self._sample_enriched()
+        save_run([p])
+        rows = load_last_run()
+        sigs = rows[0].get("signals", [])
+        kody = [s["kod"] for s in sigs]
+        assert "HORICE" in kody
+        assert "ZAPLAVA" in kody
+
+    def test_investment_index_sa_ulozi(self):
+        save_run([self._sample_enriched()])
+        rows = load_last_run()
+        assert rows[0].get("investment_index") == 67
+
+    def test_investment_summary_sa_ulozi(self):
+        save_run([self._sample_enriched()])
+        rows = load_last_run()
+        assert rows[0].get("investment_summary") == "Testové zdôvodnenie."
+
+    def test_peer_polia_sa_ulozia(self):
+        save_run([self._sample_enriched()])
+        rows = load_last_run()
+        r = rows[0]
+        assert r.get("peer_median_ppsm") == pytest.approx(45.0)
+        assert r.get("peer_count") == 6
+        assert r.get("peer_ratio") == pytest.approx(0.44)
+
+    def test_drazobne_polia_sa_ulozia(self):
+        save_run([self._sample_enriched()])
+        rows = load_last_run()
+        r = rows[0]
+        assert r.get("vyvolavacia_cena_eur") == pytest.approx(35000.0)
+        assert r.get("znalecka_hodnota_eur") == pytest.approx(50000.0)
+        assert r.get("drazba_kolo") == 2
+
+    def test_signals_prazdny_zoznam_nehavaruje(self):
+        p = dict(SAMPLE[0])
+        p["signals"] = []
+        save_run([p])
+        rows = load_last_run()
+        assert rows[0].get("signals") == []
+
+    def test_stara_db_bez_stlpcov_migruje(self):
+        """Existujúca DB bez B2–B4 stĺpcov sa migruje bez chyby."""
+        import services.storage_service as ss
+        import sqlite3
+        conn = sqlite3.connect(str(ss._DB_PATH))
+        conn.executescript("""
+            CREATE TABLE IF NOT EXISTS runs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                started_at TEXT NOT NULL, finished_at TEXT,
+                parcel_count INTEGER DEFAULT 0
+            );
+            CREATE TABLE IF NOT EXISTS parcels (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                run_id INTEGER NOT NULL, url TEXT, source_portal TEXT, title TEXT,
+                price_eur REAL DEFAULT 0, area_sqm REAL DEFAULT 0,
+                location_text TEXT, parcel_number TEXT,
+                lat REAL DEFAULT 0, lon REAL DEFAULT 0, price_per_sqm REAL DEFAULT 0,
+                preliminary_score REAL DEFAULT 0, prelim_recommendation TEXT,
+                final_score REAL DEFAULT 0, recommendation TEXT,
+                results_json TEXT DEFAULT '{}', created_at TEXT NOT NULL
+            );
+        """)
+        conn.commit()
+        conn.close()
+        # Po migrácii musí save_run + load_last_run fungovať
+        result = save_run([SAMPLE[0]])
+        assert result > 0
+        rows = load_last_run()
+        assert rows[0].get("signals") is not None
+        assert isinstance(rows[0].get("investment_index"), int)
+
         conn.close()
         result = save_run([SAMPLE[0]])
         assert result > 0

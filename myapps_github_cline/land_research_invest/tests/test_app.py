@@ -100,9 +100,20 @@ class TestHealthRoute:
         assert "version" in r.get_json()
 
     def test_cors_header(self, client):
+        """CORS je povolený pre localhost:5001 (nie pre arbitrary origins)."""
+        # Povolený origin (localhost:5001)
         r = client.get("/api/health",
-                        headers={"Origin": "http://localhost:3000"})
+                        headers={"Origin": "http://localhost:5001"})
         assert "Access-Control-Allow-Origin" in r.headers
+
+    def test_cors_blocked_for_external_origin(self, client):
+        """CORS blokuje arbitrary externé origins (ochrana pred S2)."""
+        r = client.get("/api/health",
+                        headers={"Origin": "http://evil.com"})
+        # Flask-CORS buď vráti header s hodnotou 'http://evil.com' (old behavior)
+        # alebo ho vynechá — v každom prípade NE-smie byť '*'
+        acao = r.headers.get("Access-Control-Allow-Origin", "")
+        assert acao != "*", "CORS nesmie povolovat * origins"
 
 
 # ----------------------------------------------------------------

@@ -30,12 +30,40 @@ from models.parcel import Parcel
 
 scrape_bp = Blueprint("scrape", __name__)
 
+
+def _enrich_from_db(items: list) -> list:
+    """Obnoví B1–B4 signály na dátach načítaných z DB (pri štarte / po reštarte).
+
+    Signály sú teraz uložené v DB (signals_json), ale peer comparison a
+    investment_index sú tiež uložené — takže pri load sú dostupné automaticky.
+    Táto funkcia doplní history_signals ak chýbajú (staré DB záznamy pred H2).
+    """
+    for d in items:
+        # listing_age_days + price_drop_pct sú vypočítané v _load_run_rows
+        # history_signals: ak signál ešte neexistuje (stará DB), pridaj ho
+        existing_kody = {s.get("kod") for s in (d.get("signals") or [])}
+        if "DLHO_V_PONUKE" not in existing_kody and "HORICE" not in existing_kody:
+            try:
+                tmp = Parcel(
+                    listing_age_days = d.get("listing_age_days", 0),
+                    price_drop_pct   = d.get("price_drop_pct",   0.0),
+                    price_history    = d.get("price_history",    []),
+                )
+                for sig in history_signals(tmp):
+                    if sig["kod"] not in existing_kody:
+                        d.setdefault("signals", []).append(sig)
+                        existing_kody.add(sig["kod"])
+            except Exception as exc:
+                print(f"[scrape_routes._enrich] history_signals: {exc}")
+    return items
+
 # --- Scraping ---
 _scrape_lock  = threading.Lock()
 _results_lock = threading.Lock()
 # Nacitaj posledny beh z DB pri starte (perzistencia medzi restartmi)
+# _enrich_from_db doplní history_signals ak chýbajú (stará DB pred H2)
 try:
-    _last_results: list = load_last_run()
+    _last_results: list = _enrich_from_db(load_last_run())
 except Exception:
     _last_results: list = []
 
@@ -222,6 +250,21 @@ def score_selected():
                         price_per_sqm        = float(item.get("price_per_sqm", 0)),
                         preliminary_score    = float(item.get("preliminary_score", 0)),
                         prelim_recommendation= item.get("prelim_recommendation", ""),
+                        prelim_confidence    = float(item.get("prelim_confidence", 1.0)),
+                        prelim_missing       = item.get("prelim_missing", []),
+                        # B1–B4: preniesť existujúce polia aby sa po GIS scoringu nezmazali
+                        signals              = list(item.get("signals") or []),
+                        listing_age_days     = int(item.get("listing_age_days", 0) or 0),
+                        price_drop_pct       = float(item.get("price_drop_pct", 0) or 0),
+                        price_history        = list(item.get("price_history") or []),
+                        investment_index     = int(item.get("investment_index", 0) or 0),
+                        investment_summary   = item.get("investment_summary", "") or "",
+                        peer_median_ppsm     = float(item.get("peer_median_ppsm", 0) or 0),
+                        peer_count           = int(item.get("peer_count", 0) or 0),
+                        peer_ratio           = float(item.get("peer_ratio", 0) or 0),
+                        vyvolavacia_cena_eur = float(item.get("vyvolavacia_cena_eur", 0) or 0),
+                        znalecka_hodnota_eur = float(item.get("znalecka_hodnota_eur", 0) or 0),
+                        drazba_kolo          = int(item.get("drazba_kolo", 0) or 0),
                     )
                     analyze_parcel(p)
                     scored = p.to_dict()

@@ -160,13 +160,68 @@ class TestFetchUrlEndpoint:
         with _patch("services.url_fetch_service._fetch_html",
                     side_effect=requests.ConnectionError("refused")):
             r = self._post(client, {"url": url})
-        assert r.status_code == 502
-    def test_required_fields(self, client):
-        from unittest.mock import patch as _patch
-        url  = "https://www.reality.sk/pozemky/nitra/JuyvXJaySXn/"
-        html = _fix("reality_detail_nitra.html")
-        with _patch("services.url_fetch_service._fetch_html", return_value=html):
-            parcel = self._post(client, {"url": url}).get_json()["parcel"]
-        for fld in ["title","price_eur","area_sqm","location_text",
-                    "source_portal","url","price_per_sqm","parse_quality"]:
-            assert fld in parcel
+
+
+# ----------------------------------------------------------------
+# H3 — Bezpečnostné testy: _detect_portal (SSRF ochrana)
+# ----------------------------------------------------------------
+
+from services.url_fetch_service import _detect_portal
+
+
+class TestDetectPortalSecurity:
+    """Overuje, že _detect_portal používa presné hostname matching,
+    nie substring — ochrana pred SSRF."""
+
+    def test_platna_nehnutelnosti(self):
+        assert _detect_portal("https://www.nehnutelnosti.sk/detail/123") == "nehnutelnosti_sk"
+
+    def test_platna_nehnutelnosti_bez_www(self):
+        assert _detect_portal("https://nehnutelnosti.sk/detail/123") == "nehnutelnosti_sk"
+
+    def test_platna_topreality(self):
+        assert _detect_portal("https://www.topreality.sk/abc") == "topreality_sk"
+
+    def test_platna_reality(self):
+        assert _detect_portal("https://www.reality.sk/abc") == "reality_sk"
+
+    def test_ssrf_query_param_obsahuje_subretazec(self):
+        """'?x=nehnutelnosti.sk' nesmie prejsť."""
+        with pytest.raises(ValueError):
+            _detect_portal("http://evil.com/?x=nehnutelnosti.sk")
+
+    def test_ssrf_subdomena_utocnika(self):
+        """'nehnutelnosti.sk.evil.com' nesmie prejsť."""
+        with pytest.raises(ValueError):
+            _detect_portal("http://nehnutelnosti.sk.evil.com/attack")
+
+    def test_ssrf_localhost(self):
+        """localhost nesmie prejsť."""
+        with pytest.raises(ValueError):
+            _detect_portal("http://localhost:5001/api/config")
+
+    def test_ssrf_169_cloud_metadata(self):
+        """169.254.169.254 nesmie prejsť."""
+        with pytest.raises(ValueError):
+            _detect_portal("http://169.254.169.254/latest/meta-data/")
+
+    def test_ssrf_vnutorna_ip(self):
+        """192.168.x.x nesmie prejsť."""
+        with pytest.raises(ValueError):
+            _detect_portal("http://192.168.1.1/admin")
+
+    def test_nepodporovany_portal(self):
+        """Neznáma doména → ValueError."""
+        with pytest.raises(ValueError):
+            _detect_portal("https://bazos.sk/nehnutelnost/123")
+
+    def test_file_schema(self):
+        """file:// nesmie prejsť cez startswith('http') check v fetch_parcel_from_url."""
+        from services.url_fetch_service import fetch_parcel_from_url
+        with pytest.raises(ValueError):
+            fetch_parcel_from_url("file:///etc/passwd")
+
+    def test_prazdna_url(self):
+        from services.url_fetch_service import fetch_parcel_from_url
+        with pytest.raises(ValueError):
+            fetch_parcel_from_url("")

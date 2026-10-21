@@ -36,8 +36,8 @@ def score_parcel(parcel: Parcel) -> Parcel:
     try:
         from services.signals import gis_signals as _gs, merge_signals as _ms
         parcel.signals = _ms(parcel.signals or [], _gs(parcel))
-    except Exception:
-        pass
+    except Exception as exc:
+        print(f"[scoring_service] gis_signals failed: {exc}")
     # Kvantifikácia zisku z preklasifikácie (ak je poľnohosp. pôda)
     try:
         zbgis_d = (parcel.get_result("zbgis_service") or type("R", (), {"data": {}})()).data
@@ -55,8 +55,8 @@ def score_parcel(parcel: Parcel) -> Parcel:
                             f" | Est. zisk: {profit:+,.0f} € "
                             f"(hodnota {value:,.0f} € − náklady {cost:,.0f} €)"
                         )
-    except Exception:
-        pass
+    except Exception as exc:
+        print(f"[scoring_service] rezoning failed: {exc}")
     return parcel
 
 

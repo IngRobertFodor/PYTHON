@@ -5,9 +5,20 @@ Bez novych zavislosti -- len sqlite3 (stdlib) + json.
 save_run / patch_parcel / load_last_run / load_run / list_runs / get_run_meta
 
 B1 — História cien a čas na trhu:
-  first_seen     TEXT  — ISO dátum prvého výskytu URL (z prvého behu)
-  price_history  TEXT  — JSON [{\"date\": ISO, \"price_eur\": float}, ...]
-  listing_age_days INT — vypočítaný z first_seen pri načítaní
+  first_seen       TEXT  — ISO dátum prvého výskytu URL
+  price_history    TEXT  — JSON [{\"date\": ISO, \"price_eur\": float}, ...]
+  listing_age_days INT   — vypočítaný z first_seen pri načítaní
+
+B2–B4 — Signály, index, peer, dražobné polia (H2 fix: perzistencia):
+  signals_json     TEXT  — JSON zoznam všetkých signálov
+  investment_index INT   — 0–100 (B4)
+  invest_summary   TEXT  — textové zdôvodnenie (B4)
+  peer_median_ppsm REAL  — mediánová €/m² v obci (B3)
+  peer_count       INT   — počet peerov (B3)
+  peer_ratio       REAL  — ratio pozemku vs. mediánu (B3)
+  vyvolavacia_eur  REAL  — vyvolávacia cena dražby (B2)
+  znalecka_eur     REAL  — znalecká/odhad hodnota (B2)
+  drazba_kolo      INT   — 1=prvé, 2+=opakovaná (B2)
 """
 import sqlite3, json, threading
 from datetime import datetime, timezone
@@ -16,6 +27,21 @@ from pathlib import Path
 SERVICE_NAME = "storage_service"
 _DB_PATH = Path(__file__).parent.parent.parent / "data" / "parcels.db"
 _lock    = threading.Lock()
+
+# Nové stĺpce pridané po B1 (migrácia ich pridá do existujúcej DB)
+_NEW_COLUMNS = [
+    ("first_seen",        "ALTER TABLE parcels ADD COLUMN first_seen TEXT"),
+    ("price_history",     "ALTER TABLE parcels ADD COLUMN price_history TEXT DEFAULT '[]'"),
+    ("signals_json",      "ALTER TABLE parcels ADD COLUMN signals_json TEXT DEFAULT '[]'"),
+    ("investment_index",  "ALTER TABLE parcels ADD COLUMN investment_index INTEGER DEFAULT 0"),
+    ("invest_summary",    "ALTER TABLE parcels ADD COLUMN invest_summary TEXT DEFAULT ''"),
+    ("peer_median_ppsm",  "ALTER TABLE parcels ADD COLUMN peer_median_ppsm REAL DEFAULT 0"),
+    ("peer_count",        "ALTER TABLE parcels ADD COLUMN peer_count INTEGER DEFAULT 0"),
+    ("peer_ratio",        "ALTER TABLE parcels ADD COLUMN peer_ratio REAL DEFAULT 0"),
+    ("vyvolavacia_eur",   "ALTER TABLE parcels ADD COLUMN vyvolavacia_eur REAL DEFAULT 0"),
+    ("znalecka_eur",      "ALTER TABLE parcels ADD COLUMN znalecka_eur REAL DEFAULT 0"),
+    ("drazba_kolo",       "ALTER TABLE parcels ADD COLUMN drazba_kolo INTEGER DEFAULT 0"),
+]
 
 
 def _get_conn() -> sqlite3.Connection:
@@ -55,30 +81,42 @@ def _create_schema(conn: sqlite3.Connection) -> None:
             results_json          TEXT DEFAULT '{}',
             created_at            TEXT NOT NULL,
             first_seen            TEXT,
-            price_history         TEXT DEFAULT '[]'
+            price_history         TEXT DEFAULT '[]',
+            signals_json          TEXT DEFAULT '[]',
+            investment_index      INTEGER DEFAULT 0,
+            invest_summary        TEXT DEFAULT '',
+            peer_median_ppsm      REAL DEFAULT 0,
+            peer_count            INTEGER DEFAULT 0,
+            peer_ratio            REAL DEFAULT 0,
+            vyvolavacia_eur       REAL DEFAULT 0,
+            znalecka_eur          REAL DEFAULT 0,
+            drazba_kolo           INTEGER DEFAULT 0
         );
         CREATE INDEX IF NOT EXISTS idx_parcels_run ON parcels(run_id);
         CREATE INDEX IF NOT EXISTS idx_parcels_url ON parcels(url);
+        CREATE INDEX IF NOT EXISTS idx_parcels_url_id ON parcels(url, id);
     """)
 
 
 def _migrate_schema(conn: sqlite3.Connection) -> None:
-    """Pridá nové stĺpce do existujúcej DB (idempotentné — ignoruje 'already exists')."""
+    """Pridá nové stĺpce do existujúcej DB (idempotentné — ignoruje 'already exists').
+    Používa centrálny zoznam _NEW_COLUMNS definovaný na úrovni modulu."""
     existing = {
         row[1]
         for row in conn.execute("PRAGMA table_info(parcels)").fetchall()
     }
-    migrations = [
-        ("first_seen",     "ALTER TABLE parcels ADD COLUMN first_seen TEXT"),
-        ("price_history",  "ALTER TABLE parcels ADD COLUMN price_history TEXT DEFAULT '[]'"),
-    ]
-    for col, sql in migrations:
+    for col, sql in _NEW_COLUMNS:
         if col not in existing:
             try:
                 conn.execute(sql)
                 conn.commit()
             except Exception:
                 pass  # stĺpec uz existuje alebo ina nekriticka chyba
+    # Pridaj nové indexy ak neexistujú
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_parcels_url_id ON parcels(url, id)"
+    )
+    conn.commit()
 
 def _find_prev_parcel(conn: sqlite3.Connection, url: str) -> dict | None:
     """Nájde posledný zaznamenaný výskyt URL (akýkoľvek predošlý beh).
@@ -135,8 +173,11 @@ def save_run(parcels: list) -> int:
                      location_text, parcel_number, lat, lon, price_per_sqm,
                      preliminary_score, prelim_recommendation,
                      final_score, recommendation, results_json, created_at,
-                     first_seen, price_history)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                     first_seen, price_history,
+                     signals_json, investment_index, invest_summary,
+                     peer_median_ppsm, peer_count, peer_ratio,
+                     vyvolavacia_eur, znalecka_eur, drazba_kolo)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """, (
                     run_id,
                     url,
@@ -157,6 +198,16 @@ def save_run(parcels: list) -> int:
                     now,
                     first_seen,
                     json.dumps(history, ensure_ascii=False),
+                    # B2–B4 perzistencia
+                    json.dumps(p.get("signals", []),  ensure_ascii=False),
+                    int(p.get("investment_index",  0) or 0),
+                    p.get("investment_summary", "") or "",
+                    float(p.get("peer_median_ppsm", 0) or 0),
+                    int(p.get("peer_count",          0) or 0),
+                    float(p.get("peer_ratio",        0) or 0),
+                    float(p.get("vyvolavacia_cena_eur", 0) or 0),
+                    float(p.get("znalecka_hodnota_eur", 0) or 0),
+                    int(p.get("drazba_kolo",            0) or 0),
                 ))
             conn.commit()
             return run_id
@@ -253,6 +304,16 @@ def _load_run_rows(conn: sqlite3.Connection, run_id: int) -> list:
             d["price_history"] = json.loads(d.get("price_history") or "[]")
         except Exception:
             d["price_history"] = []
+        # Deserializácia signals_json (B2–B4 perzistencia)
+        try:
+            d["signals"] = json.loads(d.pop("signals_json") or "[]")
+        except Exception:
+            d.pop("signals_json", None)
+            d["signals"] = []
+        # Premenuj stĺpce DB → parcel kľúče (B2–B4)
+        d["investment_summary"]   = d.pop("invest_summary",    "")
+        d["vyvolavacia_cena_eur"] = d.pop("vyvolavacia_eur",   0.0)
+        d["znalecka_hodnota_eur"] = d.pop("znalecka_eur",      0.0)
         # Vypočítaj listing_age_days z first_seen
         first_seen_str = d.get("first_seen")
         if first_seen_str:

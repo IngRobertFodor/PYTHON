@@ -378,3 +378,22 @@ rezoning:
   zasietovanie_eur_per_m:
     elektrina: 100
     cesta: 120
+opportunity:
+  # Váhy mispricingových signálov pre Investičný index (B4)
+  # Upraviteľné podľa vlastných preferencií — väčšie číslo = väčší vplyv na index
+  mispricing_weights:
+    HORICE:               1.00   # kombinácia dlho + pokles = max signál
+    DRAZBA_POD_ZNALECKOU: 0.90   # dražba pod znaleckou hodnotou
+    LACNEJSI_AKO_OKOLIE:  0.75   # lacnejší ako okolie (peer comparison)
+    CENA_KLESA:           0.60   # klesajúca cena
+    DLHO_V_PONUKE:        0.50   # dlho v ponuke
+    DRAZBA_OPAKOVANA:     0.45   # opakovaná dražba
+    DRAZBA_PODHODNOTENA:  0.30   # slabý fallback dražobný signál
+  # Penalizácie za rizikové signály (body odpočítané od indexu)
+  risk_penalties:
+    ZAPLAVA:         20          # záplavová zóna
+    CHRANENE_UZEMIE: 15          # chránené/obmedzené územie
+    DRAHE_VYNATIE:   12          # drahé vyňatie z PPF
+    PRILIS_DALEKO:   10          # príliš ďaleko od BA
+    CENA_PODOZRIVA:   8          # podozrivo nízka cena (parsovacia chyba?)
+

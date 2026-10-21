@@ -28,7 +28,14 @@ def create_app(test_config=None):
     if test_config:
         app.config.update(test_config)
 
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    # CORS — obmedzený na localhost (lokálny single-user nástroj)
+    # Nepovoľujeme * origins: ľubovoľná stránka v prehliadači by mohla
+    # volať POST /api/config/limits alebo /api/scrape/start.
+    _cors_origins = os.environ.get(
+        "CORS_ORIGINS",
+        "http://localhost:5001,http://127.0.0.1:5001",
+    ).split(",")
+    CORS(app, resources={r"/api/*": {"origins": _cors_origins}})
 
     from routes.health_routes import health_bp
     from routes.config_routes import config_bp
@@ -98,5 +105,10 @@ def create_app(test_config=None):
 
 if __name__ == "__main__":
     port  = int(os.environ.get("PORT", 5001))
-    debug = os.environ.get("FLASK_DEBUG", "True").lower() == "true"
-    create_app().run(host="0.0.0.0", port=port, debug=debug)
+    # debug=False default — Werkzeug debugger je RCE vektor pri sieťovom prístupe.
+    # Zapni len explicitne: FLASK_DEBUG=true python app.py
+    debug = os.environ.get("FLASK_DEBUG", "False").lower() == "true"
+    # host=127.0.0.1 — počúvaj len na localhost, nie na celej sieti.
+    # Ak potrebuješ sieťový prístup (napr. z iného zariadenia): HOST=0.0.0.0
+    host  = os.environ.get("HOST", "127.0.0.1")
+    create_app().run(host=host, port=port, debug=debug)

@@ -14,11 +14,28 @@ def _normalize_price(raw: str) -> float:
 
 
 def _detect_portal(url: str) -> str:
-    u = url.lower()
-    if "nehnutelnosti.sk" in u: return "nehnutelnosti_sk"
-    if "topreality.sk"    in u: return "topreality_sk"
-    if "reality.sk"       in u: return "reality_sk"
-    raise ValueError(f"Nepodporovany portal: {url}")
+    """Zistí portal z URL — presná doménová kontrola (nie substring).
+
+    Používa urllib.parse.urlparse pre extrakciu hostname aby sa predišlo
+    SSRF cez trik 'http://evil.com/?x=nehnutelnosti.sk' alebo
+    'http://nehnutelnosti.sk.attacker.com/'.
+    """
+    from urllib.parse import urlparse
+    try:
+        host = urlparse(url).hostname or ""
+    except Exception:
+        host = ""
+    # Normalizácia: odstrán www. prefix
+    host_norm = host.lower().removeprefix("www.")
+    _ALLOWLIST = {
+        "nehnutelnosti.sk": "nehnutelnosti_sk",
+        "topreality.sk":    "topreality_sk",
+        "reality.sk":       "reality_sk",
+    }
+    portal = _ALLOWLIST.get(host_norm)
+    if portal:
+        return portal
+    raise ValueError(f"Nepodporovany portal: {url!r} (host: {host!r})")
 
 
 def _extract_og_title(html: str) -> str:
@@ -106,7 +123,8 @@ def _parse_nehnutelnosti(html: str, url: str) -> dict:
             if not title: title = str(listing_node.get("name",""))
             if not desc:  desc  = str(listing_node.get("description",""))[:500]
         if title and not loc: loc = _extract_location(title, url)
-    except Exception: pass
+    except Exception as exc:
+        print(f"[url_fetch] nehnutelnosti JSON-LD parse warning: {exc}")
     if not title: title = _extract_og_title(html)
     if not loc:
         from services.scrapers.nehnutelnosti_scraper import _extract_location as _el
@@ -244,6 +262,7 @@ def fetch_parcel_from_url(url: str) -> dict:
     """Stiahne a vyparsuje detail-stranku pozemku z URL."""
     if not url or not url.startswith("http"):
         raise ValueError(f"Neplatna URL: {url!r}")
+    # _detect_portal overí presný hostname (ochrana pred SSRF)
     portal = _detect_portal(url)
     html   = _fetch_html(url, portal)
     parsers = {
@@ -258,6 +277,10 @@ def fetch_parcel_from_url(url: str) -> dict:
 
 
 def _fetch_html(url: str, portal: str) -> str:
+    """Stiahne HTML z URL cez príslušný scraper.
+    Scrapery používajú BaseScraper.fetch_html() s rate-limitom a timeoutom.
+    SSRF ochrana: _detect_portal() overil hostname pred volaním tejto funkcie.
+    """
     from services.scrapers.nehnutelnosti_scraper import NehnutelnostiScraper
     from services.scrapers.topreality_scraper    import TopRealityScraper
     from services.scrapers.reality_sk_scraper    import RealitySkScraper

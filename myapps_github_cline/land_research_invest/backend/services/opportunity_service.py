@@ -2,11 +2,13 @@
 opportunity_service.py — Investičný index + zdôvodnenie
 =========================================================
 B4: Kombinovaný index (0–100) + textové „prečo toto".
+Váhy a penalizácie sa načítajú z criteria.yaml (sekcia opportunity).
 """
 
 import math
 
-_MISPRICING_WEIGHTS = {
+# Fallback váhy ak criteria.yaml sekcia opportunity chýba
+_DEFAULT_MISPRICING_WEIGHTS = {
     "HORICE":               1.00,
     "DRAZBA_POD_ZNALECKOU": 0.90,
     "LACNEJSI_AKO_OKOLIE":  0.75,
@@ -16,7 +18,7 @@ _MISPRICING_WEIGHTS = {
     "DRAZBA_PODHODNOTENA":  0.30,
 }
 
-_RISK_PENALTIES = {
+_DEFAULT_RISK_PENALTIES = {
     "ZAPLAVA":         20,
     "CHRANENE_UZEMIE": 15,
     "DRAHE_VYNATIE":   12,
@@ -27,6 +29,23 @@ _RISK_PENALTIES = {
 _EXPLAIN_MIN_INDEX = 30
 
 
+def _get_weights() -> tuple[dict, dict]:
+    """Načíta váhy z criteria.yaml sekcia opportunity, alebo použije defaults."""
+    try:
+        from config_loader import get_criteria
+        opp = get_criteria().get("opportunity", {})
+        weights  = opp.get("mispricing_weights", _DEFAULT_MISPRICING_WEIGHTS)
+        penalties = opp.get("risk_penalties",    _DEFAULT_RISK_PENALTIES)
+        return weights, penalties
+    except Exception:
+        return _DEFAULT_MISPRICING_WEIGHTS, _DEFAULT_RISK_PENALTIES
+
+
+# Pre spätnu kompatibilitu (testy importujú priamo)
+_MISPRICING_WEIGHTS = _DEFAULT_MISPRICING_WEIGHTS
+_RISK_PENALTIES     = _DEFAULT_RISK_PENALTIES
+
+
 def investment_index(parcel: dict) -> int:
     """Investičný index 0–100.
 
@@ -35,7 +54,11 @@ def investment_index(parcel: dict) -> int:
       misprint_pts   (0–35): váhované mispricingové signály (B1+B2+B3)
       confidence_pts (0–15): prelim_confidence × 15
       risk_penalty   (0–25): rizikové signály odpočítajú body
+
+    Váhy sa načítavajú z criteria.yaml sekcia opportunity
+    (fallback na hardcoded defaults ak sekcia chýba).
     """
+    mispricing_weights, risk_penalties = _get_weights()
     sigs       = parcel.get("signals") or []
     confidence = float(parcel.get("prelim_confidence") or 1.0)
 
@@ -47,11 +70,11 @@ def investment_index(parcel: dict) -> int:
     misprint_pts = 0.0
     for sig in sigs:
         kod = sig.get("kod", "")
-        if kod not in _MISPRICING_WEIGHTS:
+        if kod not in mispricing_weights:
             continue
         if kod == "LACNEJSI_AKO_OKOLIE" and sig.get("typ") != "PRILEZITOST":
             continue
-        misprint_pts += _MISPRICING_WEIGHTS[kod] * float(sig.get("dovera") or 0.5) * 35.0
+        misprint_pts += mispricing_weights[kod] * float(sig.get("dovera") or 0.5) * 35.0
     misprint_pts = min(35.0, misprint_pts)
 
     # 3. Confidence (0–15)
@@ -60,7 +83,7 @@ def investment_index(parcel: dict) -> int:
     # 4. Penalty (0–25)
     penalty = 0.0
     for sig in sigs:
-        p = _RISK_PENALTIES.get(sig.get("kod", ""), 0)
+        p = risk_penalties.get(sig.get("kod", ""), 0)
         if p:
             penalty += p * float(sig.get("dovera") or 0.5)
     penalty = min(25.0, penalty)
