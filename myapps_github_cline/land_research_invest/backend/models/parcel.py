@@ -75,6 +75,12 @@ class Parcel:
     peer_count:       int   = 0    # počet pozemkov v obci použitých pre porovnanie
     peer_ratio:       float = 0.0  # ratio pozemku vs. mediánu (< 1.0 = lacnejší)
 
+
+    # --- B4: Investičný index ---
+    investment_index:   int = 0    # 0–100, kombinovaný index príležitosti
+    investment_summary: str = ""   # textové zdôvodnenie "prečo toto"
+
+
     def add_result(self, result: ServiceResult) -> None:
         """Prida vysledok sluzby do results dict."""
         self.results[result.source] = result
@@ -127,5 +133,7 @@ class Parcel:
             "peer_median_ppsm":     self.peer_median_ppsm,
             "peer_count":           self.peer_count,
             "peer_ratio":           self.peer_ratio,
+            "investment_index":     self.investment_index,
+            "investment_summary":   self.investment_summary,
             "results": {k: v.to_dict() for k, v in self.results.items()},
         }

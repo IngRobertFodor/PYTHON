@@ -498,7 +498,24 @@ function _buildModalHtml(parcel) {
     html += `</div>`;
   }
 
-  // --- B1: História cien ---
+  // --- B4: Investičný index + zdôvodnenie ---
+  const invIdx = parcel.investment_index || 0;
+  const invSum = parcel.investment_summary || "";
+  if (invIdx > 0) {
+    const invCls  = invIdx >= 70 ? "inv-high" : invIdx >= 40 ? "inv-mid" : "inv-low";
+    const invLabel = invIdx >= 70 ? "Silná príležitosť" : invIdx >= 40 ? "Stredná príležitosť" : "Slabá / nízka priorita";
+    html += `<div class="modal-section-title">🏆 Investičný index</div>
+      <div style="background:#f7f9fc;border-radius:8px;padding:10px 14px;font-size:.75rem;line-height:1.8">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span class="inv-badge ${invCls}" style="width:44px;height:26px;font-size:.9rem">${invIdx}</span>
+          <span style="font-weight:700;color:${invIdx>=70?"#1a7a3c":invIdx>=40?"#2a6496":"#888"}">${invLabel}</span>
+        </div>
+        ${invSum ? `<div style="font-size:.74rem;color:#444;line-height:1.6">${invSum}</div>` : ""}
+        <div style="font-size:.65rem;color:#aaa;margin-top:4px">
+          ⓘ Index = rezoning zisk + mispricingové signály + kvalita dát − riziká (0–100)
+        </div>
+      </div>`;
+  }
   const priceHistory = parcel.price_history || [];
   if (priceHistory.length >= 2) {
     const p0     = priceHistory[0].price_eur;
@@ -881,14 +898,16 @@ function prelim_color(score) {
   return "#757575";
 }
 
-// P3c: Sort state
-let _sortCol = "preliminary_score";
+// P3c: Sort state — default: investment_index (B4)
+let _sortCol = "investment_index";
 let _sortDir = -1;  // -1 = desc, 1 = asc
 
 function _sortItems(items) {
   return [...items].sort((a, b) => {
     let va, vb;
-    if (_sortCol === "preliminary_score") {
+    if (_sortCol === "investment_index") {
+      va = a.investment_index || 0; vb = b.investment_index || 0;
+    } else if (_sortCol === "preliminary_score") {
       va = a.preliminary_score || 0; vb = b.preliminary_score || 0;
     } else if (_sortCol === "price_eur") {
       va = a.price_eur || 0; vb = b.price_eur || 0;
@@ -1013,11 +1032,20 @@ function renderResultsTable(items) {
     const confTxt = conf < 1.0
       ? `<span class="conf-badge" title="Istota ${(conf*100).toFixed(0)}% — chýba: ${(p.prelim_missing||[]).join(', ')}">${(conf*100).toFixed(0)}%</span>`
       : "";
+    // B4 — Investičný index badge
+    const invIdx  = p.investment_index || 0;
+    const invCls  = invIdx >= 70 ? "inv-high" : invIdx >= 40 ? "inv-mid" : "inv-low";
+    const invTip  = p.investment_summary
+      ? `title="${p.investment_summary.replace(/"/g,"'")}"`
+      : `title="Investičný index ${invIdx}"`;
+    const invBadge = invIdx > 0
+      ? `<span class="inv-badge ${invCls}" ${invTip}>${invIdx}</span>`
+      : "";
     tr.innerHTML = `
       <td><input type="checkbox" class="row-chk" data-url="${p.url || ""}"></td>
       <td class="tbl-num">${idx + 1}</td>
       <td><button class="star-btn${starred ? " active" : ""}" data-url="${p.url || ""}" title="Sledovať">${starred ? "★" : "☆"}</button></td>
-      <td><span class="prelim-badge" style="background:${col}">${score}</span>${confTxt}${sigHtml}${flagHtml}</td>
+      <td>${invBadge}<span class="prelim-badge" style="background:${col}">${score}</span>${confTxt}${sigHtml}${flagHtml}</td>
       <td class="tbl-src">${(p.source_portal||"").replace(/_/g," ")}</td>
       <td class="tbl-loc">${p.location_text||"—"}</td>
       <td class="tbl-price">${p.price_eur>0?p.price_eur.toLocaleString("sk-SK"):"—"}</td>
