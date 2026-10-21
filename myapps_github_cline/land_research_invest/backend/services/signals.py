@@ -31,6 +31,10 @@ _DEFAULTS = {
     "preklasifikacia_min_bpej_class":  5,
     "lacne_vynatie_min_bpej_class":    7,
     "podhodnotene_max_ratio":       0.30,
+    # B1 — história cien
+    "ponuka_dlho_days":              120,  # inzerát starší → DLHO_V_PONUKE
+    "pokles_min_pct":                5.0,  # min. pokles ceny → CENA_KLESA
+    "horice_dlho_days":              180,  # kombinovaný prah → HORICE
 }
 
 
@@ -91,6 +95,94 @@ def preliminary_signals(parcel: "Parcel") -> list[dict]:
         result.append(_s("DRAZBA_PODHODNOTENA", "PRILEZITOST",
             "Dražba — potenciálne podhodnotené",
             f"{source} za {price:,.0f} € — dražby bývajú pod trhom", 0.6))
+
+    return result
+
+
+# ----------------------------------------------------------------
+# B1 — Signály histórie cien (motivovaný predajca)
+# ----------------------------------------------------------------
+
+def history_signals(parcel: "Parcel") -> list[dict]:
+    """Signály z histórie cien a času na trhu.
+
+    Vstupy z parcel (plní scrape_routes po save_run / z DB load):
+      parcel.listing_age_days  — počet dní od first_seen
+      parcel.price_drop_pct    — % pokles od prvej ceny (pozitívne = zlacnelo)
+      parcel.price_history     — [{date, price_eur}, ...]
+
+    Signály:
+      DLHO_V_PONUKE  — inzerát visí dlhšie ako ponuka_dlho_days
+      CENA_KLESA     — cena klesla o pokles_min_pct alebo viac
+      HORICE         — kombinácia: DLHO + CENA_KLESA + výrazný pokles
+                       → silný signál motivovaného predajcu
+    """
+    cfg      = _cfg()
+    result   = []
+    age_days = int(parcel.listing_age_days or 0)
+    drop_pct = float(parcel.price_drop_pct or 0.0)
+    history  = parcel.price_history or []
+
+    dlho_prah  = int(cfg.get("ponuka_dlho_days", 120))
+    pokles_pct = float(cfg.get("pokles_min_pct",   5.0))
+    horice_dni = int(cfg.get("horice_dlho_days",  180))
+
+    # Pomocné texty
+    def _age_txt(days: int) -> str:
+        if days >= 30:
+            months = days // 30
+            return f"{months} mes." if months < 12 else f"{months // 12} r. {months % 12} mes."
+        return f"{days} dní"
+
+    def _drop_txt(pct: float, hist: list) -> str:
+        if len(hist) >= 2:
+            p0  = hist[0]["price_eur"]
+            p1  = hist[-1]["price_eur"]
+            eur = p0 - p1
+            return f"−{pct:.1f} % (z {p0:,.0f} → {p1:,.0f} €, ušetrenie {eur:,.0f} €)"
+        return f"−{pct:.1f} %"
+
+    is_dlho  = age_days >= dlho_prah
+    is_klesa = drop_pct >= pokles_pct
+
+    # --- HORICE (kombinovaný super-signál, má prednosť pred DLHO aj CENA_KLESA) ---
+    if is_dlho and is_klesa and age_days >= horice_dni:
+        dovod = (
+            f"V ponuke {_age_txt(age_days)}, cena klesla {_drop_txt(drop_pct, history)}. "
+            f"Silne motivovaný predajca — výrazný priestor na vyjednávanie."
+        )
+        result.append(_s("HORICE", "PRILEZITOST",
+            "🔥 Horúce — motivovaný predajca",
+            dovod, min(0.95, 0.7 + age_days / 1000)))
+        return result
+
+    # --- DLHO_V_PONUKE ---
+    if is_dlho:
+        dovera = min(0.9, 0.6 + age_days / 1000)
+        dovod  = (
+            f"V ponuke {_age_txt(age_days)} (limit {dlho_prah} dní). "
+            f"Motivovaný predajca — priestor na vyjednávanie."
+        )
+        result.append(_s("DLHO_V_PONUKE", "PRILEZITOST",
+            f"⏳ Dlho v ponuke ({_age_txt(age_days)})",
+            dovod, round(dovera, 2)))
+
+    # --- CENA_KLESA ---
+    if is_klesa:
+        n_poklesov = sum(
+            1 for i in range(1, len(history))
+            if history[i]["price_eur"] < history[i - 1]["price_eur"]
+        )
+        pokles_str = _drop_txt(drop_pct, history)
+        krat_str   = f"{n_poklesov}× znížená" if n_poklesov > 1 else "znížená"
+        dovod      = (
+            f"Cena {krat_str}: {pokles_str}. "
+            f"Predajca prichádza k realite trhu."
+        )
+        dovera = min(0.9, 0.65 + drop_pct / 100)
+        result.append(_s("CENA_KLESA", "PRILEZITOST",
+            f"🏷️ Cena klesla −{drop_pct:.1f} %",
+            dovod, round(dovera, 2)))
 
     return result
 

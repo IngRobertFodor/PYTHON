@@ -60,6 +60,11 @@ class Parcel:
     rezoning_value_eur:  float = 0.0    # odhadovaná hodnota ako stavebný
     rezoning_breakdown:  dict  = field(default_factory=dict)  # rozpis položiek
 
+    # --- B1: História cien a čas na trhu ---
+    listing_age_days: int   = 0         # počet dní od first_seen (z DB po save_run)
+    price_drop_pct:   float = 0.0       # % pokles ceny (prvá vs. posledná v histórii)
+    price_history:    list  = field(default_factory=list)  # [{date, price_eur}, ...]
+
     def add_result(self, result: ServiceResult) -> None:
         """Prida vysledok sluzby do results dict."""
         self.results[result.source] = result
@@ -103,5 +108,8 @@ class Parcel:
             "rezoning_cost_eur":    self.rezoning_cost_eur,
             "rezoning_value_eur":   self.rezoning_value_eur,
             "rezoning_breakdown":   self.rezoning_breakdown,
+            "listing_age_days":     self.listing_age_days,
+            "price_drop_pct":       self.price_drop_pct,
+            "price_history":        self.price_history,
             "results": {k: v.to_dict() for k, v in self.results.items()},
         }

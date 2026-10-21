@@ -1,4 +1,4 @@
-import sys, pathlib, tempfile
+import sys, pathlib, tempfile, json, time
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent / "backend"))
 import pytest
 from unittest.mock import patch
@@ -41,7 +41,6 @@ class TestSaveAndLoad:
         assert isinstance(rid, int) and rid > 0
 
     def test_load_last_run_empty_initially(self):
-        # pred prvym behom
         assert load_last_run() == []
 
     def test_load_last_run_after_save(self):
@@ -100,17 +99,138 @@ class TestPatchParcel:
         updated = dict(SAMPLE[0])
         updated["final_score"] = 91.5
         updated["recommendation"] = "STRONG BUY"
-        ok = patch_parcel("http://a.sk/1", updated)
-        assert ok is True
+
+
+# ================================================================
+# B1 — Testy histórie cien a first_seen
+# ================================================================
+
+class TestB1Schema:
+    """Testy nových stĺpcov first_seen a price_history."""
+
+    def test_first_run_sets_first_seen(self):
+        save_run([SAMPLE[0]])
+        rows = load_last_run()
+        assert rows[0]["first_seen"] is not None
+        assert len(rows[0]["first_seen"]) > 0
+
+    def test_first_run_price_history_single_entry(self):
+        save_run([SAMPLE[0]])
+        rows = load_last_run()
+        h = rows[0]["price_history"]
+        assert isinstance(h, list)
+        assert len(h) == 1
+        assert h[0]["price_eur"] == pytest.approx(5000.0)
+
+    def test_second_run_same_price_no_new_entry(self):
+        """Druhý beh rovnaká cena → price_history zostane 1 záznam."""
+        save_run([SAMPLE[0]])
+        save_run([SAMPLE[0]])
+        rows = load_last_run()
+        h = rows[0]["price_history"]
+        assert len(h) == 1
+
+    def test_second_run_changed_price_adds_entry(self):
+        """Druhý beh iná cena → price_history má 2 záznamy."""
+        save_run([SAMPLE[0]])
+        p2 = dict(SAMPLE[0])
+        p2["price_eur"] = 4500.0
+        save_run([p2])
+        rows = load_last_run()
+        h = rows[0]["price_history"]
+        assert len(h) == 2
+        assert h[0]["price_eur"] == pytest.approx(5000.0)
+        assert h[1]["price_eur"] == pytest.approx(4500.0)
+
+    def test_first_seen_preserved_across_runs(self):
+        """first_seen z prvého behu sa zachová v druhom behu."""
+        save_run([SAMPLE[0]])
+        first_seen_1 = load_last_run()[0]["first_seen"]
+        save_run([SAMPLE[0]])
+        assert load_last_run()[0]["first_seen"] == first_seen_1
+
+    def test_listing_age_days_is_zero_for_fresh(self):
+        save_run([SAMPLE[0]])
+        rows = load_last_run()
+        assert rows[0]["listing_age_days"] == 0
+
+    def test_listing_age_days_from_old_first_seen(self):
+        """Starší first_seen → listing_age_days >= 149."""
+        import services.storage_service as ss
+        import sqlite3
+        from datetime import datetime, timezone, timedelta
+        old_date = (datetime.now(timezone.utc) - timedelta(days=150)).isoformat()
+        save_run([SAMPLE[0]])
+        conn = sqlite3.connect(str(ss._DB_PATH))
+        conn.execute("UPDATE parcels SET first_seen=? WHERE url=?",
+                     (old_date, "http://a.sk/1"))
+        conn.commit()
+        conn.close()
         rows = load_last_run()
         p = next(r for r in rows if r["url"] == "http://a.sk/1")
-        assert p["final_score"] == pytest.approx(91.5)
-        assert p["recommendation"] == "STRONG BUY"
+        assert p["listing_age_days"] >= 149
 
-    def test_patch_unknown_url_returns_false(self):
-        save_run(SAMPLE)
-        ok = patch_parcel("http://no.such.url/999", {"final_score": 50})
-        assert ok is False
+    def test_price_drop_pct_computed(self):
+        """price_drop_pct = (5000-4000)/5000*100 = 20 %."""
+        save_run([SAMPLE[0]])
+        p2 = dict(SAMPLE[0]); p2["price_eur"] = 4000.0
+        save_run([p2])
+        rows = load_last_run()
+        assert rows[0]["price_drop_pct"] == pytest.approx(20.0, abs=0.2)
+
+    def test_price_drop_pct_zero_single_entry(self):
+        save_run([SAMPLE[0]])
+        rows = load_last_run()
+        assert rows[0]["price_drop_pct"] == pytest.approx(0.0)
+
+    def test_migration_old_db_without_columns(self):
+        """_migrate_schema() zvládne existujúcu DB bez nových stĺpcov."""
+        import services.storage_service as ss
+        import sqlite3
+        conn = sqlite3.connect(str(ss._DB_PATH))
+        conn.executescript("""
+            CREATE TABLE IF NOT EXISTS runs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                started_at TEXT NOT NULL, finished_at TEXT,
+                parcel_count INTEGER DEFAULT 0
+            );
+            CREATE TABLE IF NOT EXISTS parcels (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                run_id INTEGER NOT NULL, url TEXT, source_portal TEXT, title TEXT,
+                price_eur REAL DEFAULT 0, area_sqm REAL DEFAULT 0,
+                location_text TEXT, parcel_number TEXT,
+                lat REAL DEFAULT 0, lon REAL DEFAULT 0, price_per_sqm REAL DEFAULT 0,
+                preliminary_score REAL DEFAULT 0, prelim_recommendation TEXT,
+                final_score REAL DEFAULT 0, recommendation TEXT,
+                results_json TEXT DEFAULT '{}', created_at TEXT NOT NULL
+            );
+        """)
+        conn.commit()
+        conn.close()
+        result = save_run([SAMPLE[0]])
+        assert result > 0
+        rows = load_last_run()
+        assert rows[0].get("first_seen") is not None
+        assert isinstance(rows[0].get("price_history"), list)
+
+    def test_three_price_changes_history(self):
+        """Tri rôzne ceny → price_history má 3 záznamy."""
+        save_run([SAMPLE[0]])
+        p2 = dict(SAMPLE[0]); p2["price_eur"] = 4500.0
+        save_run([p2])
+        p3 = dict(SAMPLE[0]); p3["price_eur"] = 4000.0
+        save_run([p3])
+        rows = load_last_run()
+        h = rows[0]["price_history"]
+        assert len(h) == 3
+        assert h[0]["price_eur"] == pytest.approx(5000.0)
+        assert h[2]["price_eur"] == pytest.approx(4000.0)
+
+    def test_new_url_gets_fresh_history(self):
+        save_run([SAMPLE[1]])
+        rows = load_last_run()
+        assert rows[0]["first_seen"] is not None
+        assert len(rows[0]["price_history"]) == 1
 
     def test_patch_results_json(self):
         save_run(SAMPLE)

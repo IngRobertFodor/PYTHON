@@ -9,7 +9,7 @@ ServiceResult.data z každej GIS služby (overene zo zdrojoveho kodu sluzieb).
 import pytest
 from models.parcel import Parcel
 from models.result import ServiceResult
-from services.signals import gis_signals, preliminary_signals, merge_signals
+from services.signals import gis_signals, preliminary_signals, merge_signals, history_signals
 
 
 # ----------------------------------------------------------------
@@ -280,6 +280,116 @@ class TestPrelimSignals:
 # ----------------------------------------------------------------
 
 class TestMergeSignals:
+    pass
+
+
+# ----------------------------------------------------------------
+# B1 — Testy history_signals (motivovaný predajca)
+# ----------------------------------------------------------------
+
+def _hist_parcel(age_days: int = 0, drop_pct: float = 0.0,
+                 history: list = None) -> Parcel:
+    p = Parcel(url="x", price_eur=10000, area_sqm=500,
+               source_portal="nehnutelnosti_sk")
+    p.listing_age_days = age_days
+    p.price_drop_pct   = drop_pct
+    p.price_history    = history or []
+    return p
+
+
+class TestHistorySignals:
+
+    def test_ziadne_signaly_novy_pozemok(self):
+        p = _hist_parcel(age_days=0, drop_pct=0.0)
+        assert history_signals(p) == []
+
+    def test_dlho_v_ponuke_spusti_sa(self):
+        p = _hist_parcel(age_days=130, drop_pct=0.0)
+        kody = [s["kod"] for s in history_signals(p)]
+        assert "DLHO_V_PONUKE" in kody
+
+    def test_dlho_v_ponuke_tesne_pod_prahom(self):
+        p = _hist_parcel(age_days=119, drop_pct=0.0)
+        assert history_signals(p) == []
+
+    def test_cena_klesa_spusti_sa(self):
+        hist = [{"date": "2025-01-01T00:00:00+00:00", "price_eur": 10000},
+                {"date": "2025-06-01T00:00:00+00:00", "price_eur": 9000}]
+        p = _hist_parcel(age_days=50, drop_pct=10.0, history=hist)
+        kody = [s["kod"] for s in history_signals(p)]
+        assert "CENA_KLESA" in kody
+
+    def test_cena_klesa_tesne_pod_prahom(self):
+        p = _hist_parcel(age_days=50, drop_pct=4.9)
+        assert not any(s["kod"] == "CENA_KLESA" for s in history_signals(p))
+
+    def test_horice_kombinacia_dlho_aj_pokles(self):
+        """age >= 180 + drop >= 5 → HORICE, nie DLHO + CENA zvlášť."""
+        hist = [{"date": "2025-01-01T00:00:00+00:00", "price_eur": 45000},
+                {"date": "2025-06-01T00:00:00+00:00", "price_eur": 38000}]
+        p = _hist_parcel(age_days=243, drop_pct=15.6, history=hist)
+        kody = [s["kod"] for s in history_signals(p)]
+        assert "HORICE" in kody
+        assert "DLHO_V_PONUKE" not in kody
+        assert "CENA_KLESA" not in kody
+
+    def test_horice_len_dlho_bez_poklesu_nespusti(self):
+        p = _hist_parcel(age_days=243, drop_pct=0.0)
+        kody = [s["kod"] for s in history_signals(p)]
+        assert "HORICE" not in kody
+        assert "DLHO_V_PONUKE" in kody
+
+    def test_horice_len_pokles_bez_veku_nespusti(self):
+        hist = [{"date": "2025-01-01T00:00:00+00:00", "price_eur": 10000},
+                {"date": "2025-03-01T00:00:00+00:00", "price_eur": 8500}]
+        p = _hist_parcel(age_days=50, drop_pct=15.0, history=hist)
+        kody = [s["kod"] for s in history_signals(p)]
+        assert "HORICE" not in kody
+        assert "CENA_KLESA" in kody
+
+    def test_struktury_signalu_su_spravne(self):
+        hist = [{"date": "2025-01-01T00:00:00+00:00", "price_eur": 10000},
+                {"date": "2025-06-01T00:00:00+00:00", "price_eur": 9000}]
+        p = _hist_parcel(age_days=200, drop_pct=10.0, history=hist)
+        for sig in history_signals(p):
+            assert {"kod", "typ", "nazov", "dovod", "dovera"} <= set(sig.keys())
+            assert sig["typ"] == "PRILEZITOST"
+            assert 0.0 <= sig["dovera"] <= 1.0
+
+    def test_dovod_obsahuje_percentualny_pokles(self):
+        hist = [{"date": "2025-01-01T00:00:00+00:00", "price_eur": 50000},
+                {"date": "2025-09-01T00:00:00+00:00", "price_eur": 42500}]
+        p = _hist_parcel(age_days=50, drop_pct=15.0, history=hist)
+        klesa = next(s for s in history_signals(p) if s["kod"] == "CENA_KLESA")
+        assert "15" in klesa["dovod"]
+
+    def test_horice_dovera_rastie_s_vekom(self):
+        def _dov(age):
+            hist = [{"date": "d", "price_eur": 10000}, {"date": "d2", "price_eur": 8000}]
+            p = _hist_parcel(age_days=age, drop_pct=20.0, history=hist)
+            return next((s["dovera"] for s in history_signals(p)
+                         if s["kod"] == "HORICE"), 0)
+        assert _dov(365) > _dov(180)
+
+    def test_cena_klesa_text_viacnasobny_pokles(self):
+        hist = [
+            {"date": "2025-01-01T00:00:00+00:00", "price_eur": 50000},
+            {"date": "2025-04-01T00:00:00+00:00", "price_eur": 45000},
+            {"date": "2025-09-01T00:00:00+00:00", "price_eur": 40000},
+        ]
+        p = _hist_parcel(age_days=50, drop_pct=20.0, history=hist)
+        klesa = next((s for s in history_signals(p) if s["kod"] == "CENA_KLESA"), None)
+        assert klesa is not None
+        assert "2×" in klesa["dovod"]
+
+    def test_dlho_nazov_obsahuje_mesiace(self):
+        p = _hist_parcel(age_days=150, drop_pct=0.0)
+        dlho = next(s for s in history_signals(p) if s["kod"] == "DLHO_V_PONUKE")
+        assert "mes." in dlho["nazov"]
+
+    def test_prazdne_history_nepadne(self):
+        p = _hist_parcel(age_days=200, drop_pct=20.0, history=[])
+        assert isinstance(history_signals(p), list)
 
     def test_gis_prepise_prelim_rovnaky_kod(self):
         prelim = [{"kod":"BLIZKO_BA","typ":"PRILEZITOST","nazov":"old","dovod":"p","dovera":0.5}]

@@ -1,0 +1,26 @@
+NÁVOD: Skratka na ploche pre Land Research Invest
+===================================================
+
+Chceš spustiť aplikáciu jedným klikom z plochy?
+
+POSTUP (Windows):
+1. Pravý klik na ploche → Nový → Skratka
+2. Umiestnenie: C:\__TESTAUTOMATION\SCRIPTS\PYTHON\myapps_github_cline\land_research_invest\spustit.bat
+   (alebo klikni "Prehľadávať" a nájdi spustit.bat)
+3. Názov skratky: Land Research Invest
+4. Klikni Dokončiť
+
+Voliteľne — ikonka:
+- Pravý klik na skratku → Vlastnosti → Zmeniť ikonu
+- Zadaj: C:\Windows\System32\shell32.dll → ikona č. 22 (zemeguľa) alebo 23 (dom)
+
+Po kliknutí na skratku:
+- Otvorí sa príkazový riadok s Flaskovým serverom
+- O 3 sekundy sa automaticky otvorí prehliadač na http://localhost:5001
+- Ak server už beží, otvorí len prehliadač (nespustí duplikát)
+- Zastavenie: zavri okno príkazového riadku (Ctrl+C alebo zatvor)
+
+HISTÓRIA CEN — Vlna B1:
+- Signály 🔥⏳🏷️ sa zobrazujú po 2+ behoch (historia sa buduje postupne)
+- Odporúčané: spúšťaj prieskum každý týždeň alebo 2× do mesiaca
+- Po niekoľkých behoch uvidíš v tabuľke farebné vlajočky motivovaných predajcov

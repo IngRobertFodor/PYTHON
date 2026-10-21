@@ -476,9 +476,19 @@ function _buildModalHtml(parcel) {
       <div class="modal-infra-row" style="flex-direction:column;align-items:flex-start;gap:6px">`;
     sigs.forEach(s => {
       const isOpp = s.typ === "PRILEZITOST";
-      const ico   = isOpp ? "🟢" : "🔴";
-      const clr   = isOpp ? "#1b5e20" : "#b71c1c";
-      const bg    = isOpp ? "#e8f5e9" : "#ffebee";
+      // B1 vlajočky — špeciálne pozadie
+      const isHot  = s.kod === "HORICE";
+      const isAge  = s.kod === "DLHO_V_PONUKE";
+      const isDrop = s.kod === "CENA_KLESA";
+      const ico    = isHot ? "🔥" : isAge ? "⏳" : isDrop ? "🏷️" : isOpp ? "🟢" : "🔴";
+      const clr    = isHot  ? "#b84a00"
+                   : isAge  ? "#1a5276"
+                   : isDrop ? "#1d6a3a"
+                   : isOpp  ? "#1b5e20" : "#b71c1c";
+      const bg     = isHot  ? "#fff0e0"
+                   : isAge  ? "#e8f4fd"
+                   : isDrop ? "#eafaf1"
+                   : isOpp  ? "#e8f5e9" : "#ffebee";
       html += `<div style="background:${bg};border-radius:6px;padding:4px 8px;width:100%">
         <span style="font-weight:600;color:${clr}">${ico} ${s.nazov}</span>
         <span style="font-size:.73rem;color:#555;display:block;margin-top:1px">${s.dovod}</span>
@@ -486,6 +496,38 @@ function _buildModalHtml(parcel) {
       </div>`;
     });
     html += `</div>`;
+  }
+
+  // --- B1: História cien ---
+  const priceHistory = parcel.price_history || [];
+  if (priceHistory.length >= 2) {
+    const p0     = priceHistory[0].price_eur;
+    const pLast  = priceHistory[priceHistory.length - 1].price_eur;
+    const dropPct = parcel.price_drop_pct || 0;
+    const ageDays = parcel.listing_age_days || 0;
+    const ageStr  = ageDays >= 30
+      ? `${Math.floor(ageDays/30)} mes.`
+      : `${ageDays} dní`;
+    html += `<div class="modal-section-title">📈 História ceny</div>
+      <div style="background:#f7f9fc;border-radius:8px;padding:8px 14px;font-size:.75rem;line-height:1.8">
+        <div><b>V ponuke:</b> ${ageStr}</div>
+        <div><b>Prvá cena:</b> ${p0.toLocaleString("sk-SK")} €</div>
+        <div><b>Aktuálna cena:</b> ${pLast.toLocaleString("sk-SK")} €
+          ${dropPct > 0 ? `<span style="color:#1d6a3a;font-weight:700"> (−${dropPct.toFixed(1)} %)</span>` : ""}
+        </div>
+        <div style="margin-top:4px;font-size:.68rem;color:#888">
+          ${priceHistory.map(h => {
+            const d = new Date(h.date);
+            const ds = d.toLocaleDateString("sk-SK", {day:"2-digit",month:"2-digit",year:"numeric"});
+            return `${ds}: ${h.price_eur.toLocaleString("sk-SK")} €`;
+          }).join(" → ")}
+        </div>
+      </div>`;
+  } else if ((parcel.listing_age_days || 0) > 0) {
+    // Len vek, bez poklesu
+    const ageDays = parcel.listing_age_days;
+    const ageStr  = ageDays >= 30 ? `${Math.floor(ageDays/30)} mes.` : `${ageDays} dní`;
+    html += `<div style="font-size:.73rem;color:#888;margin:4px 0 2px">⏱️ V ponuke ${ageStr}</div>`;
   }
 
   // --- Kvantifikácia zisku z preklasifikácie ---
@@ -893,15 +935,25 @@ function renderResultsTable(items) {
     tr.dataset.url = p.url || "";
     if (ov && ov.is_gem_candidate) tr.classList.add("gem-row");
     const starred = wlHas(p.url || "");
-    // Signálové odznaky (prelim)
+    // Signálové odznaky (prelim) — štandardné 🟢/🔴 (okrem B1 vlajočiek)
     const sigs     = p.signals || [];
-    const oppSigs  = sigs.filter(s => s.typ === "PRILEZITOST");
+    const B1_KODY  = new Set(["HORICE", "DLHO_V_PONUKE", "CENA_KLESA"]);
+    const oppSigs  = sigs.filter(s => s.typ === "PRILEZITOST" && !B1_KODY.has(s.kod));
     const riskSigs = sigs.filter(s => s.typ === "RIZIKO");
     const sigHtml  = [
       ...oppSigs.map(s =>
         `<span title="${s.nazov}: ${s.dovod}" class="sig-badge sig-opp">🟢</span>`),
       ...riskSigs.map(s =>
         `<span title="${s.nazov}: ${s.dovod}" class="sig-badge sig-risk">🔴</span>`),
+    ].join("");
+    // B1 — Vlajočky motivovaného predajcu (vykreslené osobitne, výraznejšie)
+    const hotSig  = sigs.find(s => s.kod === "HORICE");
+    const ageSig  = !hotSig && sigs.find(s => s.kod === "DLHO_V_PONUKE");
+    const dropSig = !hotSig && sigs.find(s => s.kod === "CENA_KLESA");
+    const flagHtml = [
+      hotSig  ? `<span class="flag-badge flag-hot"  title="${hotSig.dovod}">🔥 ${hotSig.nazov.replace("🔥 ","")}</span>` : "",
+      ageSig  ? `<span class="flag-badge flag-age"  title="${ageSig.dovod}">${ageSig.nazov}</span>` : "",
+      dropSig ? `<span class="flag-badge flag-drop" title="${dropSig.dovod}">${dropSig.nazov}</span>` : "",
     ].join("");
     // Istota (confidence)
     const conf    = p.prelim_confidence ?? 1.0;
@@ -912,7 +964,7 @@ function renderResultsTable(items) {
       <td><input type="checkbox" class="row-chk" data-url="${p.url || ""}"></td>
       <td class="tbl-num">${idx + 1}</td>
       <td><button class="star-btn${starred ? " active" : ""}" data-url="${p.url || ""}" title="Sledovať">${starred ? "★" : "☆"}</button></td>
-      <td><span class="prelim-badge" style="background:${col}">${score}</span>${confTxt}${sigHtml}</td>
+      <td><span class="prelim-badge" style="background:${col}">${score}</span>${confTxt}${sigHtml}${flagHtml}</td>
       <td class="tbl-src">${(p.source_portal||"").replace(/_/g," ")}</td>
       <td class="tbl-loc">${p.location_text||"—"}</td>
       <td class="tbl-price">${p.price_eur>0?p.price_eur.toLocaleString("sk-SK"):"—"}</td>

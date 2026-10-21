@@ -3,6 +3,11 @@ Storage Service - SQLite perzistencia vysledkov
 ================================================
 Bez novych zavislosti -- len sqlite3 (stdlib) + json.
 save_run / patch_parcel / load_last_run / load_run / list_runs / get_run_meta
+
+B1 — História cien a čas na trhu:
+  first_seen     TEXT  — ISO dátum prvého výskytu URL (z prvého behu)
+  price_history  TEXT  — JSON [{\"date\": ISO, \"price_eur\": float}, ...]
+  listing_age_days INT — vypočítaný z first_seen pri načítaní
 """
 import sqlite3, json, threading
 from datetime import datetime, timezone
@@ -18,6 +23,7 @@ def _get_conn() -> sqlite3.Connection:
     conn = sqlite3.connect(str(_DB_PATH), check_same_thread=False)
     conn.row_factory = sqlite3.Row
     _create_schema(conn)
+    _migrate_schema(conn)
     return conn
 
 
@@ -47,14 +53,57 @@ def _create_schema(conn: sqlite3.Connection) -> None:
             final_score           REAL DEFAULT 0,
             recommendation        TEXT,
             results_json          TEXT DEFAULT '{}',
-            created_at            TEXT NOT NULL
+            created_at            TEXT NOT NULL,
+            first_seen            TEXT,
+            price_history         TEXT DEFAULT '[]'
         );
         CREATE INDEX IF NOT EXISTS idx_parcels_run ON parcels(run_id);
         CREATE INDEX IF NOT EXISTS idx_parcels_url ON parcels(url);
     """)
 
+
+def _migrate_schema(conn: sqlite3.Connection) -> None:
+    """Pridá nové stĺpce do existujúcej DB (idempotentné — ignoruje 'already exists')."""
+    existing = {
+        row[1]
+        for row in conn.execute("PRAGMA table_info(parcels)").fetchall()
+    }
+    migrations = [
+        ("first_seen",     "ALTER TABLE parcels ADD COLUMN first_seen TEXT"),
+        ("price_history",  "ALTER TABLE parcels ADD COLUMN price_history TEXT DEFAULT '[]'"),
+    ]
+    for col, sql in migrations:
+        if col not in existing:
+            try:
+                conn.execute(sql)
+                conn.commit()
+            except Exception:
+                pass  # stĺpec uz existuje alebo ina nekriticka chyba
+
+def _find_prev_parcel(conn: sqlite3.Connection, url: str) -> dict | None:
+    """Nájde posledný zaznamenaný výskyt URL (akýkoľvek predošlý beh).
+    Vráti dict s first_seen, price_history, price_eur — alebo None."""
+    row = conn.execute(
+        "SELECT first_seen, price_history, price_eur FROM parcels "
+        "WHERE url=? ORDER BY id DESC LIMIT 1",
+        (url,)
+    ).fetchone()
+    if row is None:
+        return None
+    return {
+        "first_seen":    row["first_seen"],
+        "price_history": row["price_history"] or "[]",
+        "price_eur":     row["price_eur"] or 0.0,
+    }
+
+
 def save_run(parcels: list) -> int:
-    """Ulozi novy beh + vsetky parcely. Vracia run_id."""
+    """Ulozi novy beh + vsetky parcely. Vracia run_id.
+
+    B1: Pre každú parcelu:
+      - Ak URL už existuje v DB → zachová first_seen + aktualizuje price_history
+      - Ak nová URL → first_seen = teraz, začne novú price_history
+    """
     now = datetime.now(timezone.utc).isoformat()
     with _lock:
         conn = _get_conn()
@@ -65,19 +114,35 @@ def save_run(parcels: list) -> int:
             )
             run_id = cur.lastrowid
             for p in parcels:
+                url       = p.get("url", "")
+                price_eur = float(p.get("price_eur", 0) or 0)
+
+                # --- História cien (B1) ---
+                prev = _find_prev_parcel(conn, url) if url else None
+                if prev:
+                    first_seen = prev["first_seen"] or now
+                    history    = json.loads(prev["price_history"] or "[]")
+                    # pridaj nový záznam len ak sa cena zmenila alebo je história prázdna
+                    if not history or abs(history[-1]["price_eur"] - price_eur) > 0.01:
+                        history.append({"date": now, "price_eur": price_eur})
+                else:
+                    first_seen = now
+                    history    = [{"date": now, "price_eur": price_eur}]
+
                 conn.execute("""
                     INSERT INTO parcels
                     (run_id, url, source_portal, title, price_eur, area_sqm,
                      location_text, parcel_number, lat, lon, price_per_sqm,
                      preliminary_score, prelim_recommendation,
-                     final_score, recommendation, results_json, created_at)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                     final_score, recommendation, results_json, created_at,
+                     first_seen, price_history)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """, (
                     run_id,
-                    p.get("url", ""),
+                    url,
                     p.get("source_portal", ""),
                     p.get("title", ""),
-                    float(p.get("price_eur",  0) or 0),
+                    price_eur,
                     float(p.get("area_sqm",   0) or 0),
                     p.get("location_text", ""),
                     p.get("parcel_number", ""),
@@ -90,6 +155,8 @@ def save_run(parcels: list) -> int:
                     p.get("recommendation", ""),
                     json.dumps(p.get("results", {}), ensure_ascii=False),
                     now,
+                    first_seen,
+                    json.dumps(history, ensure_ascii=False),
                 ))
             conn.commit()
             return run_id
@@ -173,6 +240,7 @@ def _load_run_rows(conn: sqlite3.Connection, run_id: int) -> list:
         "SELECT * FROM parcels WHERE run_id=? ORDER BY preliminary_score DESC",
         (run_id,)
     ).fetchall()
+    now = datetime.now(timezone.utc)
     result = []
     for r in rows:
         d = dict(r)
@@ -180,6 +248,35 @@ def _load_run_rows(conn: sqlite3.Connection, run_id: int) -> list:
             d["results"] = json.loads(d.pop("results_json") or "{}")
         except Exception:
             d["results"] = {}
+        # Deserializácia price_history
+        try:
+            d["price_history"] = json.loads(d.get("price_history") or "[]")
+        except Exception:
+            d["price_history"] = []
+        # Vypočítaj listing_age_days z first_seen
+        first_seen_str = d.get("first_seen")
+        if first_seen_str:
+            try:
+                fs = datetime.fromisoformat(first_seen_str)
+                if fs.tzinfo is None:
+                    from datetime import timezone as _tz
+                    fs = fs.replace(tzinfo=_tz.utc)
+                d["listing_age_days"] = max(0, (now - fs).days)
+            except Exception:
+                d["listing_age_days"] = 0
+        else:
+            d["listing_age_days"] = 0
+        # Vypočítaj price_drop_pct z price_history
+        history = d["price_history"]
+        if len(history) >= 2:
+            p_first = history[0]["price_eur"]
+            p_last  = history[-1]["price_eur"]
+            if p_first > 0:
+                d["price_drop_pct"] = round((p_first - p_last) / p_first * 100, 1)
+            else:
+                d["price_drop_pct"] = 0.0
+        else:
+            d["price_drop_pct"] = 0.0
         d.pop("id",         None)
         d.pop("run_id",     None)
         d.pop("created_at", None)

@@ -357,6 +357,10 @@ signals:
   preklasifikacia_min_bpej_class: 5
   lacne_vynatie_min_bpej_class: 7
   podhodnotene_max_ratio: 0.30
+  # B1 — história cien a motivovaný predajca
+  ponuka_dlho_days: 120       # inzerát starší ako N dní → DLHO_V_PONUKE
+  pokles_min_pct: 5.0         # pokles ceny o N % → CENA_KLESA
+  horice_dlho_days: 180       # dlho + pokles → HORICE (kombinácia)
 rezoning:
   # Orientačné ceny stavebných pozemkov EUR/m2 podľa vzdialenosti od BA
   # POZOR: regionálny priemer, nie konkrétna obec (±30-50 % odchylka!)

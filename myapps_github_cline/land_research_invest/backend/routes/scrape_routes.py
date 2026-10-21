@@ -21,6 +21,7 @@ from services.storage_service  import (
     save_run, patch_parcel as db_patch,
     load_last_run, list_runs, load_run,
 )
+from services.signals          import history_signals
 from services.diff_service        import compute_diff
 from services.uzemny_plan_service import build_up_links, normalize_obec, warm_cache
 from models.parcel import Parcel
@@ -102,13 +103,41 @@ def scrape_start():
                     pass
                 analyzed.append(p.to_dict())
             analyzed.sort(key=lambda d: d.get("preliminary_score", 0), reverse=True)
-            _set_last_results(analyzed)
             # Uloz do SQLite len ak mame realne vysledky (nie prazdny beh)
             if analyzed:
                 try:
                     save_run(analyzed)
+                    # B1: Po save_run načítaj históriu z DB a pridaj history_signals
+                    # save_run zapíše first_seen + price_history; load ich späť
+                    db_rows = {r["url"]: r for r in load_last_run() if r.get("url")}
+                    enriched = []
+                    for d in analyzed:
+                        url = d.get("url", "")
+                        db_row = db_rows.get(url)
+                        if db_row:
+                            d["listing_age_days"] = db_row.get("listing_age_days", 0)
+                            d["price_drop_pct"]   = db_row.get("price_drop_pct",   0.0)
+                            d["price_history"]    = db_row.get("price_history",    [])
+                            d["first_seen"]       = db_row.get("first_seen",       "")
+                        # Vytvor dočasný Parcel len na spustenie history_signals
+                        from models.parcel import Parcel as _P
+                        tmp = _P(
+                            listing_age_days=d.get("listing_age_days", 0),
+                            price_drop_pct=d.get("price_drop_pct", 0.0),
+                            price_history=d.get("price_history", []),
+                        )
+                        h_sigs = history_signals(tmp)
+                        if h_sigs:
+                            existing_kody = {s["kod"] for s in d.get("signals", [])}
+                            for sig in h_sigs:
+                                if sig["kod"] not in existing_kody:
+                                    d.setdefault("signals", []).append(sig)
+                        enriched.append(d)
+                    _set_last_results(enriched)
                 except Exception as exc:
-                    print(f"[scrape_routes] save_run failed: {exc}")
+                    print(f"[scrape_routes] save_run/history failed: {exc}")
+            else:
+                _set_last_results(analyzed)
             # V3: warm gisplan cache pre top obce (na pozadi, neblokuje)
             if analyzed:
                 try:

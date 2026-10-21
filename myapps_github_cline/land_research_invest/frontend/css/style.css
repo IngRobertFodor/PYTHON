@@ -338,6 +338,36 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   cursor: default;
 }
 
+/* B1 — Vlajočky motivovaného predajcu */
+.flag-badge {
+  display: inline-flex; align-items: center; gap: 2px;
+  padding: 1px 6px; border-radius: 8px;
+  font-size: .68rem; font-weight: 700;
+  white-space: nowrap; margin-left: 3px;
+  vertical-align: middle; cursor: default;
+  line-height: 1.5;
+}
+/* 🔥 HORICE — kombinácia dlho + pokles */
+.flag-hot {
+  background: #fff0e0; color: #b84a00;
+  border: 1px solid #f4a040;
+  animation: flag-pulse 2.2s ease-in-out infinite;
+}
+@keyframes flag-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(244,160,64,.0); }
+  50%       { box-shadow: 0 0 0 3px rgba(244,160,64,.35); }
+}
+/* ⏳ DLHO_V_PONUKE */
+.flag-age {
+  background: #e8f4fd; color: #1a5276;
+  border: 1px solid #5dade2;
+}
+/* 🏷️ CENA_KLESA */
+.flag-drop {
+  background: #eafaf1; color: #1d6a3a;
+  border: 1px solid #52be80;
+}
+
 /* Skvost / dostupnost / poloha badgese (J1) */
 .gem-badge {
   display: inline-block; padding: 2px 6px;
