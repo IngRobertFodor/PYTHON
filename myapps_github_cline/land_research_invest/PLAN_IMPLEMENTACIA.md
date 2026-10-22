@@ -12,7 +12,7 @@
 | Backend služby (GIS, scoring, report, pipeline, notifier, API) | HOTOVO |
 | Frontend (mapa, karty, modal, demo) | HOTOVO |
 | Scraper kostra (BaseScraper, registry, scrape_all) | HOTOVO |
-| Testy | **1463+, 0 zlyhaní** |
+| Testy | **1472+, 0 zlyhaní** |
 
 | J1: overpass_service - classify_access / classify_position / is_gem_candidate | HOTOVO - +35 testov |
 | J1: criteria.yaml - access_classification sekcia (full_m, partial_m, core/edge prahy) | HOTOVO |
@@ -440,4 +440,10 @@ Potom AI: precita fixture, extrahuje strukturu, napise presny parser.
 | **L1-L4** | Prelim mapa, watchlist×diff, druh pozemku KN, spustit.bat | ✅ HOTOVO | +12 |
 | **M1-M4** | Modal detaily, naklady na pripojky, mrtvy kod | ✅ HOTOVO | - |
 | **N1-N5** | Vsetky modal komp., slim JSON, legenda, README | ✅ HOTOVO | - |
-| **TOTAL** | | | **1140** |
+| **Vlna A (B1–B4)** | Motivovaný predajca, Dražby, Peer comparison, Investičný index | ✅ HOTOVO | +105 |
+| **Hardening H1–H5** | CORS, debug, SSRF, DB perzistencia B2–B4, váhy do YAML | ✅ HOTOVO | +19 |
+| **UX F1–F5** | Preklepy, diagnostika zdrojov, error hlášky, tooltipy, docs | ✅ HOTOVO | +9 |
+| **P1** | IDE import warnings (pyrightconfig + .vscode/settings.json) | ✅ HOTOVO | - |
+| **P2** | Záloha histórie (backup_service, backup_routes, UI, auto-backup) | ✅ HOTOVO | +23 |
+| **TOTAL** | | | **1495** |
+

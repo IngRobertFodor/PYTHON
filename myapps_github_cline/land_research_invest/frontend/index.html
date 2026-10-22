@@ -8,7 +8,7 @@
   <!-- Leaflet CSS (lokálne – žiadne CDN, žiadny tracking prevention) -->
   <link rel="stylesheet" href="/static/lib/leaflet/leaflet.css" />
   <!-- App CSS -->
-  <link rel="stylesheet" href="/static/css/style.css?v=32">
+  <link rel="stylesheet" href="/static/css/style.css?v=33">
 </head>
 <body>
 
@@ -208,6 +208,31 @@
       <div id="limits-status" class="status" style="margin-top:6px"></div>
     </details>
 
+    <!-- ZÁLOHA HISTÓRIE -->
+    <details class="form-section" id="backup-section">
+      <summary>&#128190; Záloha histórie prieskumov</summary>
+      <div id="backup-status-info" class="backup-status-info">
+        <span class="backup-info-loading">Načítavam...</span>
+      </div>
+      <div class="btn-row" style="margin-top:8px">
+        <button class="btn btn-sm btn-outline" onclick="onBackupExport()"
+                title="Stiahne aktuálnu zálohu ako parcels_latest.sql.gz — môžeš ju commitnúť do GitHub a preniesť na iný PC">
+          &#128229; Stiahnuť zálohu
+        </button>
+        <label class="btn btn-sm btn-outline" title="Nahraj zálohu (.sql.gz) zo súboru — história sa zlúči, lokálne dáta sa NEzmažú"
+               style="cursor:pointer;margin:0">
+          &#128228; Obnoviť zo súboru
+          <input type="file" id="backup-import-input" accept=".gz,.sql.gz"
+                 onchange="onBackupImport(this)" style="display:none">
+        </label>
+      </div>
+      <div id="backup-import-status" class="status" style="margin-top:6px"></div>
+      <p style="font-size:.7rem;color:#888;margin-top:8px">
+        Záloha = gzip SQL dump DB. Commitni <code>data/backups/parcels_latest.sql.gz</code>
+        do GitHub → na novom PC klikni „Obnoviť zo súboru".
+      </p>
+    </details>
+
     <!-- VYSLEDKY -->
     <div class="results-section">
       <h2>VYSLEDKY <span id="results-count"></span></h2>
@@ -282,11 +307,11 @@
 <script src="/static/lib/leaflet/leaflet.js"></script>
 
 <!-- App JS -->
-<script src="/static/js/config.js?v=32"></script>
-<script src="/static/js/api.js?v=32"></script>
-<script src="/static/js/demo.js?v=32"></script>
-<script src="/static/js/map.js?v=32"></script>
-<script src="/static/js/app.js?v=32"></script>
+<script src="/static/js/config.js?v=33"></script>
+<script src="/static/js/api.js?v=33"></script>
+<script src="/static/js/demo.js?v=33"></script>
+<script src="/static/js/map.js?v=33"></script>
+<script src="/static/js/app.js?v=33"></script>
 
 </body>
 </html>

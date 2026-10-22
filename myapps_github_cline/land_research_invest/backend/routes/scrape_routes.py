@@ -174,6 +174,14 @@ def scrape_start():
                     except Exception as exc:
                         print(f"[scrape_routes] opportunity failed: {exc}")
                     _set_last_results(enriched)
+                    # P2: Automatická záloha po každom úspešnom scrape
+                    try:
+                        from services.backup_service import auto_backup as _auto_bk
+                        threading.Thread(
+                            target=_auto_bk, daemon=True, name="auto_backup"
+                        ).start()
+                    except Exception as exc:
+                        print(f"[scrape_routes] auto_backup failed: {exc}")
                 except Exception as exc:
                     print(f"[scrape_routes] save_run/history failed: {exc}")
             else:

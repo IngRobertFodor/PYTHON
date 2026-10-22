@@ -576,6 +576,23 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .up-checklist li {
   padding: 5px 8px; border-radius: 5px;
   background: #f8fafd; border: 1px solid #e0e8f4;
+/* BACKUP PANEL */
+.backup-status-info {
+  background: #f8fafd;
+  border: 1px solid #d0daea;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: .75rem;
+  color: #445;
+}
+.backup-status-info .backup-row {
+  display: flex; justify-content: space-between; gap: 8px;
+  padding: 2px 0;
+}
+.backup-status-info .backup-row span:first-child { color: #667; }
+.backup-status-info .backup-row span:last-child  { font-weight: 600; }
+.backup-info-loading { color: #888; font-style: italic; }
+
   font-size: .74rem;
 }
 .up-checklist li.up-cl-kriticka {

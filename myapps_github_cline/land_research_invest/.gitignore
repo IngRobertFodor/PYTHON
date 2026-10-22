@@ -16,7 +16,8 @@ build/
 .env.local
 
 # IDE
-.vscode/
+.vscode/*
+!.vscode/settings.json
 .idea/
 *.swp
 *.swo
@@ -35,6 +36,13 @@ Thumbs.db
 data/cache/
 data/parcels.db
 # data/ priecinok sa vytvori automaticky pri prvom behu (storage_service.py)
+
+# Záloha histórie (Variant Y):
+#   parcels_latest.sql.gz — COMMITNI TOTO do GitHub (prenos histórie na iný PC)
+#   history/ — lokálny rotovaný archív, NEcommituj (rastie rýchlo)
+data/backups/history/
+# Odkomentuj riadok nizsie ak NECHCES commitovat ani parcels_latest.sql.gz:
+# data/backups/
 
 # Config záloha (generuje sa automaticky pri uložení cez UI)
 config/criteria.yaml.bak

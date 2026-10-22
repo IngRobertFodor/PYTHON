@@ -1,5 +1,7 @@
 {
-    "pythonVersion": "3.14",
+    "pythonVersion": "3.11",
     "extraPaths": ["backend"],
-    "reportMissingImports": false
+    "reportMissingImports": false,
+    "reportMissingModuleSource": false
 }
+

@@ -1456,6 +1456,76 @@ function _renderDiffBanner(d) {
   const note = d.note ? `<span style="font-size:.70rem;color:#888;margin-left:4px">${d.note}</span>` : "";
   banner.innerHTML = `<span class="diff-title">Zmeny od minulého behu:</span>${chips.join("")}${note}`;
 
+// =============================================================================
+// P2 — Záloha histórie prieskumov
+// =============================================================================
+
+async function _loadBackupStatus() {
+  const el = document.getElementById("backup-status-info");
+  if (!el) return;
+  try {
+    const r = await fetch("/api/backup/status");
+    if (!r.ok) throw new Error(r.statusText);
+    const d = await r.json();
+    const fmt = iso => iso
+      ? new Date(iso).toLocaleString("sk-SK", {dateStyle:"short", timeStyle:"short"})
+      : "—";
+    const fmtSize = kb => kb >= 1024 ? `${(kb/1024).toFixed(1)} MB` : `${kb} kB`;
+    el.innerHTML = `
+      <div class="backup-row"><span>Posledná záloha:</span><span>${fmt(d.latest_backup)}</span></div>
+      <div class="backup-row"><span>Veľkosť zálohy:</span><span>${d.latest_backup ? fmtSize(d.latest_size_kb) : "—"}</span></div>
+      <div class="backup-row"><span>Archív (history/):</span><span>${d.history_count} súborov</span></div>
+      <div class="backup-row"><span>DB — behy:</span><span>${d.db_runs}</span></div>
+      <div class="backup-row"><span>DB — pozemky:</span><span>${d.db_parcels.toLocaleString("sk-SK")}</span></div>
+      <div class="backup-row"><span>DB — veľkosť:</span><span>${fmtSize(d.db_size_kb)}</span></div>`;
+  } catch (e) {
+    if (el) el.innerHTML = `<span class="backup-info-loading">Záloha: nedostupná (${e.message})</span>`;
+  }
+}
+
+function onBackupExport() {
+  const a = document.createElement("a");
+  a.href = "/api/backup/export";
+  a.download = "parcels_latest.sql.gz";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+async function onBackupImport(inputEl) {
+  const statusEl = document.getElementById("backup-import-status");
+  const file = inputEl.files[0];
+  if (!file) return;
+  statusEl.textContent = "⏳ Importujem zálohu...";
+  statusEl.style.color = "#888";
+  const fd = new FormData();
+  fd.append("file", file);
+  try {
+    const r = await fetch("/api/backup/import", { method: "POST", body: fd });
+    const d = await r.json();
+    if (r.ok && d.ok) {
+      statusEl.textContent = d.message;
+      statusEl.style.color = "#2a7a2a";
+      _loadBackupStatus();
+    } else {
+      statusEl.textContent = "❌ " + (d.error || "Import zlyhal.");
+      statusEl.style.color = "#c00";
+    }
+  } catch (e) {
+    statusEl.textContent = "❌ " + humanError(e);
+    statusEl.style.color = "#c00";
+  }
+  // Reset file input pre opakovaný výber
+  inputEl.value = "";
+}
+
+// Načítaj stav zálohy pri kliknutí na details element
+document.addEventListener("DOMContentLoaded", () => {
+  const sec = document.getElementById("backup-section");
+  if (sec) sec.addEventListener("toggle", () => { if (sec.open) _loadBackupStatus(); });
+});
+
+
   banner.querySelectorAll(".diff-chip[data-filter]").forEach(chip => {
     chip.addEventListener("click", () => {
       const f = chip.dataset.filter;
