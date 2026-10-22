@@ -468,7 +468,20 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 }
 .src-running { background: #fff3cd; border-color: #f0ad00; color: #7a5800; }
 .src-done    { background: #d4edda; border-color: #28a745; color: #155724; }
-.src-zero    { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+.src-zero    { background: #f0f0f0; border-color: #bbb;    color: #555; }    /* prázdne — sivá, nie červená (portál OK) */
+.src-error   { background: #f8d7da; border-color: #dc3545; color: #721c24; } /* chyba — červená */
+
+/* F2: Súhrnná lišta o nedostupných zdrojoch */
+.scrape-warn-banner {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: #fff3cd;
+  border: 1px solid #f0ad00;
+  border-radius: 6px;
+  font-size: .73rem;
+  color: #7a5800;
+  line-height: 1.4;
+}
 
 #modal-body {
   font-size: .85rem; line-height: 1.5; color: #222;

@@ -52,16 +52,25 @@ function humanError(e) {
 
   // Sieťová chyba / server nebeží
   if (lmsg.includes("failed to fetch") || lmsg.includes("networkerror")
-      || lmsg.includes("connection refused") || lmsg.includes("timeout")) {
+      || lmsg.includes("connection refused")) {
     return "Server neodpovedá — beží aplikácia? Skúste spustiť spustit.bat.";
   }
   // 409 — dvojité spustenie
   if (lmsg.includes("409") || lmsg.includes("uz bezi") || lmsg.includes("lock")) {
     return "Prieskum/skórovanie už prebieha — počkajte na dokončenie.";
   }
+  // 429 — rate-limit
+  if (lmsg.includes("429") || lmsg.includes("too many") || lmsg.includes("rate limit")) {
+    return "Portál nás dočasne spomalil (príliš veľa požiadaviek) — počkajte pár minút a skúste znova.";
+  }
   // 500 — chyba servera
   if (lmsg.includes("500") || lmsg.includes("internal server")) {
     return "Server narazil na chybu. Skúste to znova o chvíľu.";
+  }
+  // 502 / 503 — portál nedostupný
+  if (lmsg.includes("502") || lmsg.includes("503") || lmsg.includes("nepodarilo nacitat")
+      || lmsg.includes("stranku sa nepodarilo")) {
+    return "Inzerát sa nepodarilo načítať — možno bol zmazaný alebo portál práve nefunguje.";
   }
   // 400 — zlý vstup
   if (lmsg.includes("400") || lmsg.includes("chyba parametra") || lmsg.includes("missing")) {
@@ -71,17 +80,25 @@ function humanError(e) {
   if (lmsg.includes("404") || lmsg.includes("nenajdene") || lmsg.includes("not found")) {
     return "Dáta sa nenašli — skúste spustiť nový prieskum.";
   }
+  // Nepodporovaný portál (SSRF ochrana)
+  if (lmsg.includes("nepodporovany portal") || lmsg.includes("nepodporovany") || lmsg.includes("allowlist")) {
+    return "Tento portál nie je podporovaný. Funguje len: nehnutelnosti.sk, topreality.sk, reality.sk.";
+  }
+  // SSL / certifikát
+  if (lmsg.includes("ssl") || lmsg.includes("certificate") || lmsg.includes("certifikat")) {
+    return "Server portálu má problém s certifikátom — skúste neskôr.";
+  }
   // Nominatim / geocoding
   if (lmsg.includes("adresa nenajdena") || lmsg.includes("geocod")) {
     return "Lokalitu sa nepodarilo nájsť na mape — skóre prebehne bez GPS.";
   }
   // Timeout GIS
-  if (lmsg.includes("timeout") || lmsg.includes("readtimeout")) {
+  if (lmsg.includes("readtimeout") || lmsg.includes("timeout")) {
     return "GIS služba neodpovedá včas — skórovanie prebehlo bez tejto služby.";
   }
-  // Ziadne vysledky
+  // Prázdny prieskum
   if (lmsg.includes("ziadne") || lmsg.includes("prazdny") || lmsg.includes("no results")) {
-    return "Žiadne výsledky — najprv spustite prieskum (▶▶ Spustiť prieskum).";
+    return "Žiadne výsledky — skúste zvýšiť max. cenu alebo vzdialenosť v Nastaveniach a spustiť prieskum znova.";
   }
   // Fallback — skrátime technickú chybu
   if (msg.length > 80) {
@@ -153,7 +170,8 @@ async function onFetchUrlClick() {
       : "⚠️ Načítané (skontrolujte hodnoty)";
     if (statusEl) { statusEl.textContent = quality; statusEl.style.color = parcel.parse_quality === "structured" ? "#2e7d32" : "#c85a00"; }
   } catch (e) {
-    if (statusEl) { statusEl.textContent = "❌ " + e.message; statusEl.style.color = "#c00"; }
+    // F3: napojenie na humanError() pre zrozumiteľné hlásenia
+    if (statusEl) { statusEl.textContent = "❌ " + humanError(e); statusEl.style.color = "#c00"; }
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -866,15 +884,43 @@ function updateProgressUI(p) {
     } else if (p.running) {
       text.textContent = done + " / " + total + " zdrojov";
     } else {
-      text.textContent = "Pripravávam...";
+      text.textContent = "Pripravujem...";
     }
   }
   if (srcs && p.per_source) {
+    const statusMap = p.per_source_status || {};
     srcs.innerHTML = Object.entries(p.per_source).map(([src, cnt]) => {
-      const val = cnt === null ? "⏳" : cnt;
-      const cls = cnt === null ? "src-running" : (cnt > 0 ? "src-done" : "src-zero");
-      return "<span class=\"src-chip " + cls + "\">" + src.replace(/_/g," ") + ": " + val + "</span>";
+      const st  = statusMap[src] || {};
+      const status = st.status || (cnt === null ? "running" : cnt > 0 ? "ok" : "empty");
+      const label  = src.replace(/_/g, " ");
+      if (status === "running" || cnt === null) {
+        return `<span class="src-chip src-running" title="${label} — prebieha...">⏳ ${label}</span>`;
+      }
+      if (status === "error") {
+        const err = (st.error || "chyba").substring(0, 60);
+        return `<span class="src-chip src-error" title="${label}: ${err}">❌ ${label}</span>`;
+      }
+      if (status === "timeout") {
+        return `<span class="src-chip src-error" title="${label}: timeout — zdroj neodpovedal včas">⏱️ ${label}</span>`;
+      }
+      if (status === "empty" || cnt === 0) {
+        return `<span class="src-chip src-zero" title="${label}: 0 pozemkov (portál je dostupný, ale nič nevyhovuje kritériám)">⚪ ${label}: 0</span>`;
+      }
+      return `<span class="src-chip src-done" title="${label}: ${cnt} pozemkov nájdených">✅ ${label}: ${cnt}</span>`;
     }).join("");
+  }
+
+  // F2: Súhrnná lišta o zlyhaných zdrojoch (zobrazí sa po dokončení)
+  const warnBanner = document.getElementById("scrape-warn-banner");
+  if (warnBanner) {
+    const failed = p.failed_sources || [];
+    if (p.finished && failed.length > 0) {
+      const names = failed.map(s => s.replace(/_/g, " ")).join(", ");
+      warnBanner.textContent = `⚠️ ${failed.length} zdroj${failed.length > 1 ? "e" : ""} nedostupn${failed.length > 1 ? "é" : "ý"}: ${names} — výsledky môžu byť neúplné.`;
+      warnBanner.classList.remove("hidden");
+    } else if (p.finished) {
+      warnBanner.classList.add("hidden");
+    }
   }
 }
 

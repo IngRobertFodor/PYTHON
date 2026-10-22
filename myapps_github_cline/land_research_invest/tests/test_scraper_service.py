@@ -171,7 +171,7 @@ class TestScraperService:
         assert all(isinstance(p, Parcel) for p in parcels)
 
     def test_scrape_all_calls_nehnutelnosti(self, fixture_html):
-        """scrape_all paralelne — mockujeme _scrape_one aby sme nevolali web."""
+        """scrape_all paralelne ΓÇö mockujeme _scrape_one aby sme nevolali web."""
         import services.scraper_service as ss
 
         def fake_scrape_one(src, criteria=None):
@@ -224,7 +224,7 @@ class TestScraperService:
 # ----------------------------------------------------------------
 
 class TestParallelScraping:
-    """Testy paralelnéno scrape_all a odolnosti voči chybám."""
+    """Testy paraleln├⌐no scrape_all a odolnosti vo─ìi chyb├ím."""
 
     def test_scrape_all_returns_list(self, fixture_html):
         import services.scraper_service as ss
@@ -232,7 +232,7 @@ class TestParallelScraping:
             assert isinstance(scrape_all(), list)
 
     def test_scrape_all_parallel_all_sources_called(self, fixture_html):
-        """Všetky aktívne zdroje sa zavolajú (paralelne)."""
+        """V┼íetky akt├¡vne zdroje sa zavolaj├║ (paralelne)."""
         called = set()
         import services.scraper_service as ss
 
@@ -250,7 +250,7 @@ class TestParallelScraping:
         assert "nehnutelnosti_sk" in called
 
     def test_scrape_all_one_source_exception_others_continue(self, fixture_html):
-        """Výnimka v jednom zdroji nepreruší ostatné."""
+        """V├╜nimka v jednom zdroji nepreru┼í├¡ ostatn├⌐."""
         import services.scraper_service as ss
 
         def selective_scrape(src, criteria=None):
@@ -266,7 +266,7 @@ class TestParallelScraping:
         assert isinstance(result, list) and len(result) >= 1
 
     def test_scrape_all_deduplicates_across_sources(self):
-        """Dedup funguje aj keď viacero zdrojov vráti rovnaké URL."""
+        """Dedup funguje aj ke─Å viacero zdrojov vr├íti rovnak├⌐ URL."""
         import services.scraper_service as ss
         dup = BaseScraper._make_parcel(url="https://example.com/dup", title="Dup",
                                        price_eur=1000, area_sqm=500)
@@ -290,7 +290,7 @@ class TestFetchHtmlRetry:
         return s
 
     def test_fetch_html_success_no_retry(self):
-        """Úspešný request — žiadny retry (requests.get volaný 1×)."""
+        """├Üspe┼ín├╜ request ΓÇö ┼╛iadny retry (requests.get volan├╜ 1├ù)."""
         s = self._make_scraper()
         mock_resp = type("R", (), {
             "text": "<html>ok</html>",
@@ -302,7 +302,7 @@ class TestFetchHtmlRetry:
         assert mock_get.call_count == 1
 
     def test_fetch_html_retry_on_connection_error(self):
-        """ConnectionError → retry → úspech (2 volania requests.get)."""
+        """ConnectionError ΓåÆ retry ΓåÆ ├║spech (2 volania requests.get)."""
         from requests.exceptions import ConnectionError as ReqConnErr
         s = self._make_scraper()
         mock_resp = type("R", (), {
@@ -324,7 +324,7 @@ class TestFetchHtmlRetry:
         assert call_count["n"] == 2
 
     def test_fetch_html_retry_fails_raises(self):
-        """ConnectionError pri retry aj → výnimka sa propaguje."""
+        """ConnectionError pri retry aj ΓåÆ v├╜nimka sa propaguje."""
         from requests.exceptions import ConnectionError as ReqConnErr
         s = self._make_scraper()
         with patch("requests.get", side_effect=ReqConnErr("stale")):
@@ -333,7 +333,7 @@ class TestFetchHtmlRetry:
                     s.fetch_html("https://example.com/fail")
 
     def test_fetch_html_http_error_no_retry(self):
-        """HTTP 404 → len raise_for_status, žiadny retry."""
+        """HTTP 404 ΓåÆ len raise_for_status, ┼╛iadny retry."""
         import requests as req_lib
         s = self._make_scraper()
         mock_resp = req_lib.models.Response()
@@ -353,3 +353,64 @@ class TestFetchHtmlRetry:
     def test_scrape_one_unknown_source_raises(self):
         with pytest.raises(KeyError):
             _scrape_one("neexistujuci_zdroj_xyz")
+
+# ----------------------------------------------------------------
+# F2 - Testy diagnostiky stavu zdrojov (per_source_status)
+# ----------------------------------------------------------------
+
+from services.scraper_service import (
+    _reset_progress, _update_progress, get_scrape_progress,
+)
+
+
+class TestF2SourceDiagnostics:
+    def setup_method(self):
+        _reset_progress(["src_a", "src_b", "src_c"])
+
+    def test_reset_running(self):
+        p = get_scrape_progress()
+        assert p["per_source_status"]["src_a"]["status"] == "running"
+        assert p["per_source_status"]["src_a"]["count"] is None
+
+    def test_ok_with_parcels(self):
+        _update_progress("src_a", 42, 1.0, status="ok")
+        p = get_scrape_progress()
+        assert p["per_source_status"]["src_a"]["status"] == "ok"
+        assert p["per_source"]["src_a"] == 42
+
+    def test_ok_zero_becomes_empty(self):
+        _update_progress("src_a", 0, 1.0, status="ok")
+        assert get_scrape_progress()["per_source_status"]["src_a"]["status"] == "empty"
+
+    def test_error_status(self):
+        _update_progress("src_a", 0, 2.0, status="error", error_msg="HTTP 503")
+        p = get_scrape_progress()
+        assert p["per_source_status"]["src_a"]["status"] == "error"
+        assert "503" in p["per_source_status"]["src_a"]["error"]
+
+    def test_timeout_status(self):
+        _update_progress("src_a", 0, 2.0, status="timeout")
+        assert get_scrape_progress()["per_source_status"]["src_a"]["status"] == "timeout"
+
+    def test_failed_sources_list(self):
+        _update_progress("src_a", 0, 1.0, status="error")
+        _update_progress("src_b", 0, 1.0, status="timeout")
+        _update_progress("src_c", 10, 1.0, status="ok")
+        p = get_scrape_progress()
+        assert "src_a" in p["failed_sources"]
+        assert "src_b" in p["failed_sources"]
+        assert "src_c" not in p["failed_sources"]
+
+    def test_empty_not_failed(self):
+        _update_progress("src_a", 0, 1.0, status="ok")
+        assert "src_a" not in get_scrape_progress()["failed_sources"]
+
+    def test_backward_compat_number(self):
+        _update_progress("src_a", 77, 1.0, status="ok")
+        assert get_scrape_progress()["per_source"]["src_a"] == 77
+
+    def test_total_parcels(self):
+        _update_progress("src_a", 10, 1.0, status="ok")
+        _update_progress("src_b", 0,  1.0, status="error")
+        _update_progress("src_c", 5,  1.0, status="ok")
+        assert get_scrape_progress()["total_parcels"] == 15

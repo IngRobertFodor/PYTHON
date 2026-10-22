@@ -1,19 +1,19 @@
 # Implementacny plan - Land Research Invest
 
-> **Living dokument** - aktualizuje sa po kazdom krokovani (checkboxy).
-> Posledna aktualizacia: pozri git commit alebo datum zmeny suboru.
+> **Living dokument** — aktualizuje sa po každom bloku zmien.
+> Posledná aktualizácia: pozri git commit alebo dátum zmeny súboru.
 
 ---
 
 ## Stav projektu
 
-| Oblast | Stav |
+| Oblasť | Stav |
 |--------|------|
-| Backend sluzby (GIS, scoring, report, pipeline, notifier, API) | HOTOVO |
+| Backend služby (GIS, scoring, report, pipeline, notifier, API) | HOTOVO |
 | Frontend (mapa, karty, modal, demo) | HOTOVO |
 | Scraper kostra (BaseScraper, registry, scrape_all) | HOTOVO |
-| nehnutelnosti_sk parser | HOTOVO |
-| Testy | **1199, 0 zlyh** |
+| Testy | **1463+, 0 zlyhaní** |
+
 | J1: overpass_service - classify_access / classify_position / is_gem_candidate | HOTOVO - +35 testov |
 | J1: criteria.yaml - access_classification sekcia (full_m, partial_m, core/edge prahy) | HOTOVO |
 | J1: frontend - Infra stlpec, skvost/priama/okraj badgese + filter | HOTOVO |
@@ -294,6 +294,100 @@
 **Poznamka:** Pipeline funguje aj bez LLM. LLM prida inteligentne rozhodovanie.
 
 - [~] C1: `backend/services/llm_agent_service.py` (SKIP - pipeline funguje bez LLM)
+
+---
+
+## Vlna A — Detekcia mispricingu (B1–B4)
+
+| Blok | Obsah | Stav |
+|------|-------|------|
+| B1 | Motivovaný predajca: DB história cien (`first_seen`, `price_history`), signály `DLHO_V_PONUKE` / `CENA_KLESA` / `HORICE`, vlajočky ⏳🏷️🔥 v tabuľke + modal | HOTOVO — +25 testov |
+| B2 | Dražby: `vyvolavacia_cena_eur` / `znalecka_hodnota_eur` / `drazba_kolo`, signály `DRAZBA_POD_ZNALECKOU` / `DRAZBA_OPAKOVANA`, vlajočka 🔨 | HOTOVO — +24 testov |
+| B3 | Peer comparison: `peer_analysis_service.py`, signál `LACNEJSI_AKO_OKOLIE` + príležitosť/háčik krížová kontrola, vlajočka 📊 | HOTOVO — +31 testov |
+| B4 | Investičný index 0–100 + textové zdôvodnenie: `opportunity_service.py`, badge v tabuľke, default sort, sekcia v modali, váhy v `criteria.yaml` (sekcia `opportunity`) | HOTOVO — +24 testov |
+
+---
+
+## Hardening — Bezpečnosť a robustnosť (H1–H5)
+
+| Blok | Obsah | Stav |
+|------|-------|------|
+| H1 | `app.py`: `debug=False` default, `host=127.0.0.1` (nie 0.0.0.0), CORS len localhost (nie `*`) | HOTOVO |
+| H2 | DB perzistencia B1–B4 polí: 11 nových stĺpcov v SQLite, migrácia, `save_run` ukladá signály+index, `load_last_run` vracia späť; oprava `score-selected` (prenáša B1–B4 polia do nového Parcel) | HOTOVO — +7 testov |
+| H3 | SSRF hardening `fetch-url`: `_detect_portal()` cez `urlparse` + presný hostname allowlist (nie substring) | HOTOVO — +12 testov |
+| H4 | Tiché `except: pass` nahradené `print(f"[...] failed: {exc}")` | HOTOVO |
+| H5 | Váhy investičného indexu (`mispricing_weights`, `risk_penalties`) presunuté do `criteria.yaml` sekcia `opportunity` | HOTOVO |
+
+---
+
+## UX opravy (F1–F5)
+
+| Blok | Obsah | Stav |
+|------|-------|------|
+| F1 | Oprava preklep „Pripravávam" → „Pripravujem" | HOTOVO |
+| F2 | Diagnostika zdrojov: `per_source_status` (ok/error/timeout/empty), farebné chipy v progrese (✅⚪❌⏱️), súhrnná lišta pri zlyhaní | HOTOVO |
+| F3 | Rozšírené error hlášky: 429, 502/503, SSL, nepodporovaný portál, prázdny prieskum s radou; `fetch-url` napojený na `humanError()` | HOTOVO |
+| F4 | Tooltipy: Spustiť prieskum, Skórovať vybrané, Index, Skóre, filter tlačidlá (Dražby/Inzeráty/SPF, Posl.beh, Skvosty, Sledované), hlavičky tabuľky | HOTOVO |
+| F5 | Dokumentácia: PLAN_IMPLEMENTACIA.md aktualizovaný (test count, Vlna A, Hardening, UX, tabuľka signálov) | HOTOVO |
+
+---
+
+## Investičné signály — tabuľka kódov
+
+> Kódy signálov sú zámerne ASCII (bez diakritiky) — sú identifikátory v kóde.
+> Používateľské texty (nazov/dovod) majú diakritiku správne.
+
+### Prelim signály (0 HTTP, dostupné ihneď po scrape)
+
+| Kód | Typ | Popis |
+|-----|-----|-------|
+| `BLIZKO_BA` | PRÍLEŽITOSŤ | Pozemok do 25 km od Bratislavy — vyššia hodnota |
+| `PRILIS_DALEKO` | RIZIKO | Pozemok ďalej ako 82 km od BA — mimo záujmovej zóny |
+| `CENA_PODOZRIVA` | RIZIKO | Podozrivo nízka €/m² — možná parsovacia chyba |
+| `DRAZBA_PODHODNOTENA` | PRÍLEŽITOSŤ | Dražba — bývajú pod trhovou hodnotou (slabý fallback signál) |
+
+### B1 — Motivovaný predajca
+
+| Kód | Typ | Popis |
+|-----|-----|-------|
+| `DLHO_V_PONUKE` | PRÍLEŽITOSŤ | Inzerát visí dlhšie ako 120 dní — motivovaný predajca |
+| `CENA_KLESA` | PRÍLEŽITOSŤ | Cena klesla o ≥5 % — predajca prichádza k realite |
+| `HORICE` | PRÍLEŽITOSŤ | **Kombinácia: dlho v ponuke (≥180 dní) + cena klesla** — najsilnejší nákupný signál, silne motivovaný predajca, výrazný priestor na vyjednávanie |
+
+### B2 — Dražby
+
+| Kód | Typ | Popis |
+|-----|-----|-------|
+| `DRAZBA_POD_ZNALECKOU` | PRÍLEŽITOSŤ | Vyvolávacia cena ≥20 % pod znaleckou/odhadovou hodnotou (dostupné zo SKE detailu) |
+| `DRAZBA_OPAKOVANA` | PRÍLEŽITOSŤ | Opakovaná dražba (kolo 2+) — predchádzajúce kolo prebehlo bez záujemcov |
+
+### B3 — Peer comparison
+
+| Kód | Typ | Popis |
+|-----|-----|-------|
+| `LACNEJSI_AKO_OKOLIE` PRÍLEŽITOSŤ | PRÍLEŽITOSŤ | Pozemok ≥40 % lacnejší než medián obce (≥4 pozemky v obci); pri varovných signáloch = RIZIKO (háčik) |
+| `LACNEJSI_AKO_OKOLIE` RIZIKO | RIZIKO | Rovnaká anomália, ale sprevádzaná varovnými signálmi (záplava, chránené...) — preveriť prečo je tak lacný |
+
+### GIS signály (po plnom GIS scoringu)
+
+| Kód | Typ | Popis |
+|-----|-----|-------|
+| `PREKLASIFIKACIA` | PRÍLEŽITOSŤ | Poľnohosp. pôda na okraji obce s prístupom + nízka bonita BPEJ — kandidát na preklasifikáciu na stavebný |
+| `LACNE_VYNATIE` | PRÍLEŽITOSŤ | BPEJ trieda ≥7 — lacné vyňatie z PPF (nízke odvody) |
+| `DRAHE_VYNATIE` | RIZIKO | BPEJ trieda 1–4 — vysoko chránená pôda, drahé vyňatie |
+| `PODHODNOTENE` | PRÍLEŽITOSŤ | Cena výrazne pod regionálnym priemerom (GIS price analysis) |
+| `ZAPLAVA` | RIZIKO | Pozemok leží v záplavovej zóne Q100 |
+| `CHRANENE_UZEMIE` | RIZIKO | Natura 2000, CHKO, NPR, Národný park |
+
+### Env premenné (nové od Hardening H1)
+
+| Premenná | Default | Popis |
+|----------|---------|-------|
+| `FLASK_DEBUG` | `False` | Zapnúť Werkzeug debugger (len pri vývoji!) |
+| `HOST` | `127.0.0.1` | Sieťové rozhranie servera (nastaviť na `0.0.0.0` pre sieťový prístup) |
+| `CORS_ORIGINS` | `http://localhost:5001,http://127.0.0.1:5001` | Povolené CORS origins (čiarkami oddelené) |
+| `PORT` | `5001` | Port Flask servera |
+
 - [~] C2: `tests/test_llm_agent_service.py` (SKIP)
 - [~] C3: Aktualizacia dokumentacie (SKIP)
 

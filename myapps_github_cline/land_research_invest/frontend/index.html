@@ -8,7 +8,7 @@
   <!-- Leaflet CSS (lokálne – žiadne CDN, žiadny tracking prevention) -->
   <link rel="stylesheet" href="/static/lib/leaflet/leaflet.css" />
   <!-- App CSS -->
-  <link rel="stylesheet" href="/static/css/style.css?v=31">
+  <link rel="stylesheet" href="/static/css/style.css?v=32">
 </head>
 <body>
 
@@ -28,7 +28,8 @@
     <div class="form-section research-section">
       <h2>&#128269; Spusti&#357; prieskum</h2>
       <p class="research-hint">Stiahne pozemky zo v&#353;etk&#253;ch zdrojov a ohodnotí ich automaticky.</p>
-      <button id="btn-research" class="btn btn-research">&#9654;&#9654; Spusti&#357; prieskum</button>
+      <button id="btn-research" class="btn btn-research"
+              title="Spustí prieskum: stiahne pozemky zo všetkých aktívnych zdrojov, ohodnotí ich predbežným skóre a vypočíta Investičný index. Môže trvať niekoľko minút.">&#9654;&#9654; Spusti&#357; prieskum</button>
 
       <!-- PROGRESS BAR (skryt&#253; kym nebezi) -->
       <div id="research-progress" class="research-progress hidden">
@@ -41,6 +42,8 @@
         </div>
         <div id="progress-sources" class="progress-sources"></div>
       </div>
+      <!-- F2: Súhrnná lišta o nedostupných zdrojoch -->
+      <div id="scrape-warn-banner" class="scrape-warn-banner hidden"></div>
     </div>
     <details class="form-section">
       <summary>&#128269; Analyzovať 1 pozemok</summary>
@@ -109,20 +112,26 @@
         </label>
         <!-- P3a: Skupinový filter zdrojov -->
         <div class="filter-type-group">
-          <button class="filter-type-btn btn-sm" data-ftype="drazby"   onclick="toggleTypeFilter(this)">&#128296; Dra&#382;by</button>
-          <button class="filter-type-btn btn-sm" data-ftype="inzeraty" onclick="toggleTypeFilter(this)">&#127991; Inzer&#225;ty</button>
-          <button class="filter-type-btn btn-sm" data-ftype="spf"      onclick="toggleTypeFilter(this)">&#127963; SPF</button>
+          <button class="filter-type-btn btn-sm" data-ftype="drazby"   onclick="toggleTypeFilter(this)"
+                  title="Zobraziť len dražby (exekučné a dobrovoľné dražby nehnuteľností)">&#128296; Dra&#382;by</button>
+          <button class="filter-type-btn btn-sm" data-ftype="inzeraty" onclick="toggleTypeFilter(this)"
+                  title="Zobraziť len inzeráty z realitných portálov (nehnutelnosti.sk, topreality.sk, reality.sk)">&#127991; Inzer&#225;ty</button>
+          <button class="filter-type-btn btn-sm" data-ftype="spf"      onclick="toggleTypeFilter(this)"
+                  title="Zobraziť len ponuky SPF (Slovenský pozemkový fond — štátne poľnohospodárske pozemky)">&#127963; SPF</button>
         </div>
         <!-- P3b: Latest run dedup -->
-        <label class="filter-label" style="display:flex;align-items:center;gap:4px;cursor:pointer">
+        <label class="filter-label" style="display:flex;align-items:center;gap:4px;cursor:pointer"
+               title="Zobraziť len pozemky z posledného prieskumu (skryje staršie behy)">
           <input type="checkbox" id="filter-latest-run" checked onchange="applyFilter()"> &#x1F550; Posl. beh
         </label>
-        <button id="btn-filter-apply" class="btn btn-sm">Filtrovať</button>
-        <button id="btn-filter-reset" class="btn btn-sm btn-outline">Reset</button>
-        <label class="filter-label" style="display:flex;align-items:center;gap:4px;cursor:pointer">
+        <button id="btn-filter-apply" class="btn btn-sm" title="Aplikovať nastavený filter">Filtrovať</button>
+        <button id="btn-filter-reset" class="btn btn-sm btn-outline" title="Resetovať všetky filtre a zobraziť všetky pozemky">Reset</button>
+        <label class="filter-label" style="display:flex;align-items:center;gap:4px;cursor:pointer"
+               title="Skvost = pozemok na okraji obce s prímym prístupom — ideálny kandidát na preklasifikáciu z poľnohospodárskeho na stavebný">
           <input type="checkbox" id="filter-gem"> 🏆 Len skvosty
         </label>
-        <label class="filter-label" style="display:flex;align-items:center;gap:4px;cursor:pointer">
+        <label class="filter-label" style="display:flex;align-items:center;gap:4px;cursor:pointer"
+               title="Zobraziť len pozemky označené hviezdičkou (tvoj sledovaný zoznam)">
           <input type="checkbox" id="filter-watchlist"> ⭐ Sledované
         </label>
         <span id="filter-count" class="filter-count"></span>
@@ -139,16 +148,16 @@
             <tr>
               <th><input type="checkbox" id="chk-all" title="Vybrať všetky"></th>
               <th>#</th>
-              <th>⭐</th>
-              <th data-sort="investment_index" class="sortable sort-desc" onclick="_setSortCol('investment_index')" title="Triediť podľa Investičného indexu (B4)">🏆 Index &#8597;</th>
-              <th data-sort="preliminary_score" class="sortable" onclick="_setSortCol('preliminary_score')" title="Triediť podľa skóre">Skóre &#8597;</th>
-              <th>Zdroj</th>
-              <th>Lokalita</th>
+              <th title="Označiť/odznačiť pre sledovanie">⭐</th>
+              <th data-sort="investment_index" class="sortable sort-desc" onclick="_setSortCol('investment_index')" title="Investičný index 0–100: kombinácia potenciálneho zisku z preklasifikácie, mispricingových signálov (dlho v ponuke, pokles ceny, dražba pod znaleckou, lacnejší než okolie) a kvality dát. Čím vyšší, tým zaujímavejší.">🏆 Index &#8597;</th>
+              <th data-sort="preliminary_score" class="sortable" onclick="_setSortCol('preliminary_score')" title="Predbežné skóre vhodnosti (0–100) podľa vzdialenosti od BA, ceny, výmery. Bez GIS analýzy — rýchle, ale menej presné.">Skóre &#8597;</th>
+              <th title="Zdroj inzerátu (portál alebo dražba)">Zdroj</th>
+              <th title="Textová adresa z inzerátu">Lokalita</th>
               <th data-sort="price_eur" class="sortable" onclick="_setSortCol('price_eur')" title="Triediť podľa ceny">Cena EUR &#8597;</th>
               <th data-sort="area_sqm" class="sortable" onclick="_setSortCol('area_sqm')" title="Triediť podľa výmery">m² &#8597;</th>
-              <th data-sort="price_per_sqm" class="sortable" onclick="_setSortCol('price_per_sqm')" title="Triediť podľa EUR/m²">EUR/m² &#8597;</th>
-              <th>Infra</th>
-              <th>Odkaz</th>
+              <th data-sort="price_per_sqm" class="sortable" onclick="_setSortCol('price_per_sqm')" title="Cena za m² — triediť podľa EUR/m²">EUR/m² &#8597;</th>
+              <th title="Infra klasifikácia (dostupná po GIS analýze): 🏆 Skvost = okraj+prístup; 🔌 Priama/Čiastočná = dostupnosť cesty; 🏘️ Okraj/Stred/Mimo = poloha v obci">Infra</th>
+              <th title="Odkaz na inzerát alebo PDF dražby">Odkaz</th>
             </tr>
           </thead>
           <tbody id="results-tbody"></tbody>
@@ -157,7 +166,8 @@
 
       <!-- Skóruj vybrané -->
       <div class="score-bar">
-        <button id="btn-score-selected" class="btn btn-score" disabled>
+        <button id="btn-score-selected" class="btn btn-score" disabled
+                title="Spustí plnú GIS analýzu pre označené pozemky: záplavy, BPEJ pôda, chránené územia, dostupnosť... Trvá dlhšie, ale dá presné výsledky.">
           &#9733; Skórovať vybrané (0)
         </button>
         <div id="score-progress-wrap" class="hidden">
@@ -272,11 +282,11 @@
 <script src="/static/lib/leaflet/leaflet.js"></script>
 
 <!-- App JS -->
-<script src="/static/js/config.js?v=31"></script>
-<script src="/static/js/api.js?v=31"></script>
-<script src="/static/js/demo.js?v=31"></script>
-<script src="/static/js/map.js?v=31"></script>
-<script src="/static/js/app.js?v=31"></script>
+<script src="/static/js/config.js?v=32"></script>
+<script src="/static/js/api.js?v=32"></script>
+<script src="/static/js/demo.js?v=32"></script>
+<script src="/static/js/map.js?v=32"></script>
+<script src="/static/js/app.js?v=32"></script>
 
 </body>
 </html>

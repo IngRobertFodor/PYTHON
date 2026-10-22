@@ -56,9 +56,12 @@ _progress = {
     "percent":   0,       # done/total * 100 (0-100)
     "sources":   [],      # zoznam vsetkych zdrojov
     "per_source": {},     # {zdroj: pocet_pozemkov alebo None ak este bezi}
+    # F2: rozšírená diagnostika stavu zdroja (spätne kompatibilné — per_source ostáva)
+    "per_source_status": {},  # {zdroj: {"status": ok|error|timeout|empty, "count": N, "error": str}}
     "elapsed_s": 0.0,
     "finished":  False,
     "total_parcels": 0,
+    "failed_sources": [],    # F2: zoznam zdrojov ktoré zlyhali (pre súhrnnú lištu v UI)
 }
 
 
@@ -78,19 +81,29 @@ def get_scrape_progress():
 def _reset_progress(sources):
     """Resetuje progress pred novym behom scrape_all()."""
     with _progress_lock:
-        _progress["running"]      = True
-        _progress["total"]        = len(sources)
-        _progress["done"]         = 0
-        _progress["percent"]      = 0
-        _progress["sources"]      = list(sources)
-        _progress["per_source"]   = {s: None for s in sources}  # None = este bezi
-        _progress["elapsed_s"]    = 0.0
-        _progress["finished"]     = False
-        _progress["total_parcels"] = 0
+        _progress["running"]           = True
+        _progress["total"]             = len(sources)
+        _progress["done"]              = 0
+        _progress["percent"]           = 0
+        _progress["sources"]           = list(sources)
+        _progress["per_source"]        = {s: None for s in sources}  # None = este bezi
+        _progress["per_source_status"] = {s: {"status": "running", "count": None, "error": ""} for s in sources}
+        _progress["elapsed_s"]         = 0.0
+        _progress["finished"]          = False
+        _progress["total_parcels"]     = 0
+        _progress["failed_sources"]    = []
 
 
-def _update_progress(src, count, elapsed_s):
-    """Aktualizuje progress po dokonceni jedneho zdroja."""
+def _update_progress(src, count, elapsed_s, status="ok", error_msg=""):
+    """Aktualizuje progress po dokonceni jedneho zdroja.
+
+    Args:
+        src:       nazov zdroja
+        count:     pocet najdenych pozemkov
+        elapsed_s: cas od zaciatku behu
+        status:    "ok" | "error" | "timeout" | "empty"
+        error_msg: strucny popis chyby (len pri status=error/timeout)
+    """
     with _progress_lock:
         _progress["per_source"][src] = count
         _progress["done"]     += 1
@@ -98,6 +111,17 @@ def _update_progress(src, count, elapsed_s):
         _progress["percent"]   = round(100 * _progress["done"] / total) if total else 0
         _progress["elapsed_s"] = elapsed_s
         _progress["total_parcels"] += count
+        # F2: rozšírená diagnostika
+        effective_status = status
+        if effective_status == "ok" and count == 0:
+            effective_status = "empty"
+        _progress["per_source_status"][src] = {
+            "status": effective_status,
+            "count":  count,
+            "error":  error_msg,
+        }
+        if effective_status in ("error", "timeout"):
+            _progress["failed_sources"].append(src)
 
 
 def _finish_progress(elapsed_s):
@@ -176,18 +200,25 @@ def scrape_all(criteria=None):
                     parcels = future.result(timeout=SCRAPER_TIMEOUT_SEC)
                     print(f"[scraper_service] {src}: {len(parcels)} pozemkov")
                     all_parcels.extend(parcels)
-                    _update_progress(src, len(parcels), elapsed_now)
+                    _update_progress(src, len(parcels), elapsed_now, status="ok")
                 except FuturesTimeoutError:
                     print(f"[scraper_service] {src}: TIMEOUT po {SCRAPER_TIMEOUT_SEC}s — preskakujem")
-                    _update_progress(src, 0, elapsed_now)
+                    _update_progress(src, 0, elapsed_now,
+                                     status="timeout",
+                                     error_msg=f"Timeout po {SCRAPER_TIMEOUT_SEC}s")
                 except Exception as exc:
-                    print(f"[scraper_service] {src} CHYBA: {exc}")
-                    _update_progress(src, 0, elapsed_now)
+                    err_short = str(exc)[:120]
+                    print(f"[scraper_service] {src} CHYBA: {err_short}")
+                    _update_progress(src, 0, elapsed_now,
+                                     status="error",
+                                     error_msg=err_short)
         except TimeoutError:
             pending = [s for f,s in future_to_src.items() if not f.done()]
             for src in pending:
                 print(f"[scraper_service] {src}: GLOBALNY TIMEOUT — preskakujem")
-                _update_progress(src, 0, time.monotonic() - t_start)
+                _update_progress(src, 0, time.monotonic() - t_start,
+                                 status="timeout",
+                                 error_msg="Globálny timeout — zdroj nedobehol")
 
     elapsed = time.monotonic() - t_start
     result = _deduplicate(all_parcels)
