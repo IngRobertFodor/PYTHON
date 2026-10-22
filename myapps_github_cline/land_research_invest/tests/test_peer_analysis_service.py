@@ -145,6 +145,52 @@ class TestApplyPeerSignals:
         parcels = _lehnice(extra_ppsm=20.0)
         apply_peer_signals(parcels)
         lacny = next(p for p in parcels if p["price_per_sqm"] < 30)
+        assert "peer_median_ppsm" in lacny and lacny["peer_median_ppsm"] > 0
+
+
+class TestZeroAreaGuard:
+    """Ochrana pred delením nulou a skreslením peer analýzy pri area_sqm=0."""
+
+    def test_zero_area_vylucena_z_poolu(self):
+        """Parcela s area_sqm=0 nesmie vstúpiť do peer pool — inak by skreslila medián."""
+        parcels = [_p("Gabcikovo", 3500, 0)] + [_p("Gabcikovo", 25000, 500) for _ in range(4)]
+        stats = compute_obec_stats(parcels)
+        # Ak by 0 m² vstúpila s ppsm=0, medián by bol 0 — to nesmie nastať
+        if "gabcikovo" in stats:
+            assert stats["gabcikovo"].median_ppsm > 0
+
+    def test_zero_area_nedostane_peer_signal(self):
+        """Parcela s area_sqm=0 nedostane signál LACNEJSI_AKO_OKOLIE."""
+        parcels = [_p("Gabcikovo", 3500, 0)] + [_p("Gabcikovo", 25000, 500) for _ in range(5)]
+        apply_peer_signals(parcels)
+        zero_p = next(p for p in parcels if p["area_sqm"] == 0)
+        assert not any(s["kod"] == "LACNEJSI_AKO_OKOLIE" for s in zero_p["signals"])
+
+    def test_mala_vymera_vylucena(self):
+        """Parcela s area_sqm=1 (podiel) nesmie skresliť peer pool."""
+        parcels = [_p("Modra", 600, 1)] + [_p("Modra", 20000, 500) for _ in range(4)]
+        stats = compute_obec_stats(parcels)
+        if "modra" in stats:
+            # Medián musí byť cca 40 €/m², nie 600 (z 600/1=600 €/m²)
+            assert stats["modra"].median_ppsm < 100
+
+    def test_nulova_vymera_peer_signal_je_none(self):
+        """peer_signal() pri area_sqm=0 vráti None (nedelí nulou)."""
+        from services.peer_analysis_service import peer_signal, ObecStats
+        stats = {"senec": ObecStats(median_ppsm=50.0, count=5, min_ppsm=30.0, max_ppsm=80.0)}
+        p = {"location_text": "Senec", "price_eur": 500, "area_sqm": 0, "price_per_sqm": 0, "signals": []}
+        assert peer_signal(p, stats) is None
+
+    def test_lacnejsi_o_100_pri_zero_area_nemoze_nastat(self):
+        """Parcela s area_sqm=0 nedostane peer signál vôbec — teda '100 %' sa neobjaví pri null výmere."""
+        parcels = [_p("Nitra", 100, 0)] + [_p("Nitra", 20000, 500) for _ in range(5)]
+        apply_peer_signals(parcels)
+        zero_p = next(p for p in parcels if p["area_sqm"] == 0)
+        assert not any(s["kod"] == "LACNEJSI_AKO_OKOLIE" for s in zero_p["signals"])
+
+        parcels = _lehnice(extra_ppsm=20.0)
+        apply_peer_signals(parcels)
+        lacny = next(p for p in parcels if p["price_per_sqm"] < 30)
         assert lacny.get("peer_median_ppsm", 0) > 0
         assert lacny.get("peer_count", 0) >= 5
 

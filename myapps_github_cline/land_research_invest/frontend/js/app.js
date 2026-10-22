@@ -1209,7 +1209,7 @@ function applyFilter() {
     if (typeFilter === "inzeraty" && !_INZERAT_SOURCES_UI.includes(p.source_portal)) return false;
     if (typeFilter === "spf"      && p.source_portal !== "spf") return false;
     if (p.price_eur > 0 && p.price_eur > cena) return false;
-    if (p.area_sqm  > 0 && p.area_sqm  < vym)  return false;
+    if (vym > 0 && (p.area_sqm || 0) < vym)  return false;
     if ((p.preliminary_score || 0) < skore) return false;
     if (gemOnly) {
       const ov = p.results && p.results.overpass_service && p.results.overpass_service.data;

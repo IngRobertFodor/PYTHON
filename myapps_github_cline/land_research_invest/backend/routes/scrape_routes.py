@@ -21,9 +21,9 @@ from services.storage_service  import (
     save_run, patch_parcel as db_patch,
     load_last_run, list_runs, load_run,
 )
-from services.signals          import history_signals, drazba_signals
+from services.signals          import history_signals, drazba_signals, preliminary_signals, merge_signals
 from services.peer_analysis_service import apply_peer_signals
-from services.opportunity_service   import apply_opportunity
+from services.opportunity_service   import apply_opportunity, investment_index as _calc_index, explain as _calc_explain
 from services.diff_service        import compute_diff
 from services.uzemny_plan_service import build_up_links, normalize_obec, warm_cache
 from models.parcel import Parcel
@@ -32,17 +32,44 @@ scrape_bp = Blueprint("scrape", __name__)
 
 
 def _enrich_from_db(items: list) -> list:
-    """Obnoví B1–B4 signály na dátach načítaných z DB (pri štarte / po reštarte).
+    """Obnoví prelim + B1–B4 signály na dátach načítaných z DB (pri štarte / po reštarte).
 
-    Signály sú teraz uložené v DB (signals_json), ale peer comparison a
-    investment_index sú tiež uložené — takže pri load sú dostupné automaticky.
-    Táto funkcia doplní history_signals ak chýbajú (staré DB záznamy pred H2).
+    - Prelim signály (PODIEL, BLIZKO_BA, CENA_PODOZRIVA, DRAZBA_PODHODNOTENA) sa
+      ukladajú do DB od tejto verzie, ale staré záznamy ich nemajú → backfill.
+    - history_signals (B1) a drazba_signals (B2) sa tiež dopĺňajú ak chýbajú.
+    - Po doplnení signálov sa prepočíta investment_index + investment_summary.
     """
+    _PRELIM_KODY = {
+        "PODIEL_ALEBO_CHYBNE_DATA", "BLIZKO_BA", "PRILIS_DALEKO",
+        "CENA_PODOZRIVA", "DRAZBA_PODHODNOTENA",
+    }
+    _HISTORY_KODY = {"DLHO_V_PONUKE", "HORICE", "CENA_KLESA"}
+    _DRAZBA_KODY  = {"DRAZBA_POD_ZNALECKOU", "DRAZBA_OPAKOVANA"}
+
     for d in items:
-        # listing_age_days + price_drop_pct sú vypočítané v _load_run_rows
-        # history_signals: ak signál ešte neexistuje (stará DB), pridaj ho
         existing_kody = {s.get("kod") for s in (d.get("signals") or [])}
-        if "DLHO_V_PONUKE" not in existing_kody and "HORICE" not in existing_kody:
+        changed = False
+
+        # --- Prelim signály (PODIEL a spol.) ---
+        if not (_PRELIM_KODY & existing_kody):
+            try:
+                tmp = Parcel(
+                    price_eur      = float(d.get("price_eur",      0) or 0),
+                    area_sqm       = float(d.get("area_sqm",       0) or 0),
+                    source_portal  = d.get("source_portal",  ""),
+                    location_text  = d.get("location_text",  ""),
+                    price_per_sqm  = float(d.get("price_per_sqm",  0) or 0),
+                )
+                for sig in preliminary_signals(tmp):
+                    if sig["kod"] not in existing_kody:
+                        d.setdefault("signals", []).append(sig)
+                        existing_kody.add(sig["kod"])
+                        changed = True
+            except Exception as exc:
+                print(f"[scrape_routes._enrich] preliminary_signals: {exc}")
+
+        # --- B1: história cien ---
+        if not (_HISTORY_KODY & existing_kody):
             try:
                 tmp = Parcel(
                     listing_age_days = d.get("listing_age_days", 0),
@@ -53,8 +80,37 @@ def _enrich_from_db(items: list) -> list:
                     if sig["kod"] not in existing_kody:
                         d.setdefault("signals", []).append(sig)
                         existing_kody.add(sig["kod"])
+                        changed = True
             except Exception as exc:
                 print(f"[scrape_routes._enrich] history_signals: {exc}")
+
+        # --- B2: dražobné signály ---
+        if not (_DRAZBA_KODY & existing_kody):
+            try:
+                tmp = Parcel(
+                    vyvolavacia_cena_eur = float(d.get("vyvolavacia_cena_eur", 0) or 0),
+                    znalecka_hodnota_eur = float(d.get("znalecka_hodnota_eur", 0) or 0),
+                    drazba_kolo          = int(d.get("drazba_kolo", 0) or 0),
+                    source_portal        = d.get("source_portal", ""),
+                )
+                for sig in drazba_signals(tmp):
+                    if sig["kod"] not in existing_kody:
+                        d.setdefault("signals", []).append(sig)
+                        existing_kody.add(sig["kod"])
+                        changed = True
+            except Exception as exc:
+                print(f"[scrape_routes._enrich] drazba_signals: {exc}")
+
+        # --- Recount investment_index ak sa niečo zmenilo ---
+        if changed:
+            try:
+                new_idx = _calc_index(d)
+                d["investment_index"]   = new_idx
+                from services.opportunity_service import _EXPLAIN_MIN_INDEX
+                d["investment_summary"] = _calc_explain(d) if new_idx >= _EXPLAIN_MIN_INDEX else _calc_explain(d)
+            except Exception as exc:
+                print(f"[scrape_routes._enrich] recount index: {exc}")
+
     return items
 
 # --- Scraping ---
@@ -129,6 +185,11 @@ def scrape_start():
             for p in parcels:
                 try:
                     preliminary_score(p)
+                    # Prelim signály (PODIEL, BLIZKO_BA, CENA_PODOZRIVA, ...)
+                    for sig in preliminary_signals(p):
+                        existing = {s["kod"] for s in p.signals}
+                        if sig["kod"] not in existing:
+                            p.signals.append(sig)
                 except Exception:
                     pass
                 analyzed.append(p.to_dict())

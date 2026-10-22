@@ -271,6 +271,63 @@ class TestScoreProgressEndpoint:
 
 
 
+class TestEnrichFromDb:
+    """_enrich_from_db() doplňuje prelim + B1–B2 signály a prepočíta index."""
+
+    def _bare(self, price=3500.0, area=1.0, source="ske_drazobne_vyhlasky",
+              loc="Pohranice", signals=None):
+        """Minimálny dict aký prichádza z load_last_run() bez prelim signálov."""
+        return {
+            "url": f"https://ske.sk/{price}", "source_portal": source,
+            "price_eur": price, "area_sqm": area, "price_per_sqm": price/area if area > 0 else 0,
+            "location_text": loc, "signals": list(signals or []),
+            "listing_age_days": 0, "price_drop_pct": 0.0, "price_history": [],
+            "vyvolavacia_cena_eur": 0.0, "znalecka_hodnota_eur": 0.0, "drazba_kolo": 0,
+            "investment_index": 98, "investment_summary": "",
+            "prelim_confidence": 1.0, "prelim_missing": [], "prelim_breakdown": {},
+            "rezoning_profit_eur": 0.0,
+        }
+
+    def test_podiel_signal_prida(self):
+        """Stará DB parcela (1 m²) musí dostať PODIEL_ALEBO_CHYBNE_DATA po enrich."""
+        from routes.scrape_routes import _enrich_from_db
+        items = [self._bare(price=3500, area=1)]
+        _enrich_from_db(items)
+        kody = {s["kod"] for s in items[0]["signals"]}
+        assert "PODIEL_ALEBO_CHYBNE_DATA" in kody
+
+    def test_index_capnuty_po_enrich(self):
+        """Po doplnení PODIEL signálu musí byť index ≤ 30 (bol 98)."""
+        from routes.scrape_routes import _enrich_from_db
+        items = [self._bare(price=3500, area=1)]
+        assert items[0]["investment_index"] == 98  # pred
+        _enrich_from_db(items)
+        assert items[0]["investment_index"] <= 30   # po
+
+    def test_normalna_parcela_bez_podiel(self):
+        """Bežná parcela (800 m²) nesmie dostať PODIEL signál."""
+        from routes.scrape_routes import _enrich_from_db
+        items = [self._bare(price=20000, area=800, source="nehnutelnosti_sk")]
+        _enrich_from_db(items)
+        kody = {s["kod"] for s in items[0]["signals"]}
+        assert "PODIEL_ALEBO_CHYBNE_DATA" not in kody
+
+    def test_uz_ma_prelim_signal_preskoci(self):
+        """Ak parcela už má BLIZKO_BA (prelim signál), nevygeneruje duplikát."""
+        from routes.scrape_routes import _enrich_from_db
+        existing = {"kod": "BLIZKO_BA", "typ": "PRILEZITOST",
+                    "nazov": "Blízko BA", "dovod": "5 km", "dovera": 0.9}
+        items = [self._bare(price=20000, area=800, signals=[existing])]
+        _enrich_from_db(items)
+        blizko = [s for s in items[0]["signals"] if s["kod"] == "BLIZKO_BA"]
+        assert len(blizko) == 1   # žiadny duplikát
+
+    def test_prazdny_zoznam(self):
+        from routes.scrape_routes import _enrich_from_db
+        assert _enrich_from_db([]) == []
+
+
+
 # ----------------------------------------------------------------
 # TestRunsEndpoint + TestDiffEndpoint (K2)
 # ----------------------------------------------------------------

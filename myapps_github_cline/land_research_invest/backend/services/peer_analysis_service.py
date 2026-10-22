@@ -52,6 +52,8 @@ def compute_obec_stats(parcels: list[dict]) -> dict[str, ObecStats]:
             continue
         price = float(p.get("price_eur", 0) or 0)
         area  = float(p.get("area_sqm",  0) or 0)
+        if area <= 0:          # skip pozemky bez výmery (podiely, chybné dáta)
+            continue
         ppsm  = float(p.get("price_per_sqm", 0) or 0)
         if ppsm <= 0 and price > 0 and area > 0:
             ppsm = price / area
@@ -86,6 +88,8 @@ def peer_signal(parcel: dict, obec_stats: dict[str, ObecStats]) -> dict | None:
     stats = obec_stats[slug]
     price = float(parcel.get("price_eur", 0) or 0)
     area  = float(parcel.get("area_sqm",  0) or 0)
+    if area <= 0:              # skip — nemá zmysel robiť peer analýzu bez výmery
+        return None
     ppsm  = float(parcel.get("price_per_sqm", 0) or 0)
     if ppsm <= 0 and price > 0 and area > 0:
         ppsm = price / area
