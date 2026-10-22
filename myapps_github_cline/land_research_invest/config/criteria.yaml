@@ -6,12 +6,12 @@ criteria:
     automation: AUTO
   price:
     min_eur: 0
-    max_eur: 200000
+    max_eur: 8000
     max_price_per_sqm_eur: 300
     automation: AUTO
   parcel:
     min_area_sqm: 300
-    max_area_sqm: 800
+    max_area_sqm: 1000
     min_width_m: 15
     min_length_m: 20
     preferred_shape: rectangular
@@ -356,44 +356,45 @@ signals:
   drazba_max_eur: 200000
   preklasifikacia_min_bpej_class: 5
   lacne_vynatie_min_bpej_class: 7
-  podhodnotene_max_ratio: 0.30
-  # B1 — história cien a motivovaný predajca
-  ponuka_dlho_days: 120       # inzerát starší ako N dní → DLHO_V_PONUKE
-  pokles_min_pct: 5.0         # pokles ceny o N % → CENA_KLESA
-  horice_dlho_days: 180       # dlho + pokles → HORICE (kombinácia)
-  # B2 — dražby
-  drazba_min_zlava_pct: 20.0  # min. % zľavy pod znaleckou → DRAZBA_POD_ZNALECKOU
-  # B3 — peer comparison
-  peer_min_count: 4           # min. pozemkov v obci pre porovnanie
-  peer_lacny_ratio: 0.6       # pod 60 % mediánu obce = výrazne lacný
+  podhodnotene_max_ratio: 0.3
+  ponuka_dlho_days: 120
+  pokles_min_pct: 5.0
+  horice_dlho_days: 180
+  drazba_min_zlava_pct: 20.0
+  peer_min_count: 4
+  peer_lacny_ratio: 0.6
+  # Sanity check pre spoluvlastnícke podiely a chybné dáta
+  podiel_max_area_sqm: 100        # výmera < 100 m² → pravdepodobne podiel
+  podiel_max_price_eur: 500       # cena < 500 € AND malá výmera → podiel
+  podiel_max_area_small_sqm: 50   # "malá výmera" prah pri cenovom trigri
 rezoning:
-  # Orientačné ceny stavebných pozemkov EUR/m2 podľa vzdialenosti od BA
-  # POZOR: regionálny priemer, nie konkrétna obec (±30-50 % odchylka!)
   stavebne_ceny_podla_km:
-    - {max_km: 15,  eur_per_m2: 180}   # BA okolie (Senec, Bernolakovo, Sv. Jur)
-    - {max_km: 30,  eur_per_m2: 120}   # 15-30 km (Trnava smer, Malacky, Pezinok)
-    - {max_km: 50,  eur_per_m2: 75}    # 30-50 km (Galanta, Sala, Hlohovec)
-    - {max_km: 85,  eur_per_m2: 45}    # 50-85 km (Nitra region)
-    - {max_km: 999, eur_per_m2: 30}    # >85 km
+  - max_km: 15
+    eur_per_m2: 180
+  - max_km: 30
+    eur_per_m2: 120
+  - max_km: 50
+    eur_per_m2: 75
+  - max_km: 85
+    eur_per_m2: 45
+  - max_km: 999
+    eur_per_m2: 30
   zasietovanie_eur_per_m:
     elektrina: 100
     cesta: 120
 opportunity:
-  # Váhy mispricingových signálov pre Investičný index (B4)
-  # Upraviteľné podľa vlastných preferencií — väčšie číslo = väčší vplyv na index
   mispricing_weights:
-    HORICE:               1.00   # kombinácia dlho + pokles = max signál
-    DRAZBA_POD_ZNALECKOU: 0.90   # dražba pod znaleckou hodnotou
-    LACNEJSI_AKO_OKOLIE:  0.75   # lacnejší ako okolie (peer comparison)
-    CENA_KLESA:           0.60   # klesajúca cena
-    DLHO_V_PONUKE:        0.50   # dlho v ponuke
-    DRAZBA_OPAKOVANA:     0.45   # opakovaná dražba
-    DRAZBA_PODHODNOTENA:  0.30   # slabý fallback dražobný signál
-  # Penalizácie za rizikové signály (body odpočítané od indexu)
+    HORICE: 1.0
+    DRAZBA_POD_ZNALECKOU: 0.9
+    LACNEJSI_AKO_OKOLIE: 0.75
+    CENA_KLESA: 0.6
+    DLHO_V_PONUKE: 0.5
+    DRAZBA_OPAKOVANA: 0.45
+    DRAZBA_PODHODNOTENA: 0.3
   risk_penalties:
-    ZAPLAVA:         20          # záplavová zóna
-    CHRANENE_UZEMIE: 15          # chránené/obmedzené územie
-    DRAHE_VYNATIE:   12          # drahé vyňatie z PPF
-    PRILIS_DALEKO:   10          # príliš ďaleko od BA
-    CENA_PODOZRIVA:   8          # podozrivo nízka cena (parsovacia chyba?)
-
+    ZAPLAVA: 20
+    CHRANENE_UZEMIE: 15
+    DRAHE_VYNATIE: 12
+    PRILIS_DALEKO: 10
+    CENA_PODOZRIVA: 8
+    PODIEL_ALEBO_CHYBNE_DATA: 25

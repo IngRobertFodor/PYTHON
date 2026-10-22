@@ -396,8 +396,8 @@ class TestPrelimScoringP1SuspiciousPrice:
         # Bratislava Ruzinov za 0.14 EUR/m2 - parsovacia chyba
         p1 = self._p(source='reality_sk', price=100.0, area=733.0, ppsm=0.14)
         s_suspicious = preliminary_score(p1).preliminary_score
-        # Normal parcel (same portal, realistic price)
-        p2 = self._p(source='reality_sk', price=10000.0, area=700.0, ppsm=14.28)
+        # Normal parcel (same portal, realistic price well within max_eur)
+        p2 = self._p(source='reality_sk', price=4000.0, area=700.0, ppsm=5.71)
         s_normal = preliminary_score(p2).preliminary_score
         assert s_suspicious < s_normal
 

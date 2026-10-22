@@ -66,6 +66,19 @@ def preliminary_signals(parcel: "Parcel") -> list[dict]:
     ppsm   = parcel.price_per_sqm or (price / area if price > 0 and area > 0 else 0.0)
     source = parcel.source_portal
 
+    # PODIEL_ALEBO_CHYBNE_DATA — sanity check (musí byť prvý)
+    # Dražby często predávajú spoluvlastnícky podiel (napr. 1/8 z parcely);
+    # SKE scraper občas parsuje m² zle → nezmyselný Investičný index.
+    _podiel_max_area = float(cfg.get("podiel_max_area_sqm", 100))
+    _podiel_max_price = float(cfg.get("podiel_max_price_eur", 500))
+    _podiel_small_area = float(cfg.get("podiel_max_area_small_sqm", 50))
+    if (0 < area < _podiel_max_area) or (0 < price < _podiel_max_price and 0 < area < _podiel_small_area):
+        result.append(_s("PODIEL_ALEBO_CHYBNE_DATA", "RIZIKO",
+            "Pravdepodobne podiel alebo chybné dáta",
+            f"Výmera {area:.0f} m² za {price:,.0f} € — "
+            f"možný spoluvlastnícky podiel alebo parsovacia chyba scraperom",
+            0.85))
+
     # BLIZKO_BA / PRILIS_DALEKO
     try:
         from services.scoring_service import _estimate_distance_km
@@ -349,8 +362,6 @@ def gis_signals(parcel: "Parcel") -> list[dict]:
     if hits:
         result.append(_s("CHRANENE_UZEMIE", "RIZIKO",
             "Chránené / obmedzené územie", ", ".join(hits), 0.9))
-
-    return result
 
     return result
 

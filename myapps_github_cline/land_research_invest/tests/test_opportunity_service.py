@@ -106,6 +106,39 @@ class TestExplain:
         assert "Preveriť" in explain(p) or "preverit" in explain(p).lower()
 
     def test_vracia_string(self):
+        assert isinstance(explain(_p()), str)
+
+
+class TestPodielCap:
+
+    def _podiel_sig(self):
+        return {"kod": "PODIEL_ALEBO_CHYBNE_DATA", "typ": "RIZIKO",
+                "nazov": "Pravdepodobne podiel", "dovod": "1 m² za 382 €", "dovera": 0.85}
+
+    def test_cap_na_30(self):
+        """Aj s veľkým rezoning profitom nesmie index presiahnuť 30."""
+        p = _p(profit=500_000, signals=[self._podiel_sig()])
+        assert investment_index(p) <= 30
+
+    def test_cap_neovplyvni_normalnu_parcelu(self):
+        """Bez PODIEL signálu cap neplatí."""
+        p = _p(profit=500_000, signals=[_sig("HORICE")])
+        assert investment_index(p) > 30
+
+    def test_explain_obsahuje_varovanie(self):
+        """explain() pri PODIEL signáli začína výstrahou."""
+        p = _p(area=1.0, price=382.0, signals=[self._podiel_sig()])
+        p["investment_index"] = 15
+        r = explain(p)
+        assert "podiel" in r.lower() or "⚠" in r
+
+    def test_explain_podiel_pri_nizkom_indexe(self):
+        """explain() vráti výstrahu aj keď index < _EXPLAIN_MIN_INDEX (výnimka pre PODIEL)."""
+        p = _p(area=1.0, price=382.0, signals=[self._podiel_sig()])
+        p["investment_index"] = 5
+        r = explain(p)
+        assert r != ""  # výstraha sa zobrazí vždy, nie len pri idx >= 30
+
         p = _p(profit=50000, signals=[_sig("HORICE")]); p["investment_index"] = 70
         assert isinstance(explain(p), str)
 

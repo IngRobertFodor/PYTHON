@@ -388,6 +388,12 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   background: #fdf2e9; color: #6e2f0f;
   border: 1px solid #e08050;
 }
+/* ⚠️ PODIEL_ALEBO_CHYBNE_DATA */
+.flag-podiel {
+  background: #fefce8; color: #7a5c00;
+  border: 1px solid #f0c040;
+  font-weight: 700;
+}
 
 /* B4 — Investičný index badge */
 .inv-badge {

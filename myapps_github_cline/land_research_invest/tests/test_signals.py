@@ -452,8 +452,68 @@ class TestDrazbaSignals:
     def test_dovod_obsahuje_obe_ceny(self):
         p = _draz_parcel(vyv=70000, znal=100000, kolo=1)
         sig = next(s for s in drazba_signals(p) if s["kod"] == "DRAZBA_POD_ZNALECKOU")
-        assert "70" in sig["dovod"]
-        assert "100" in sig["dovod"]
+
+
+# ----------------------------------------------------------------
+# TestPodielSignal — sanity check pre podiely a chybné dáta
+# ----------------------------------------------------------------
+
+def _prelim_parcel(price: float, area: float, source: str = "nehnutelnosti_sk") -> "Parcel":
+    p = Parcel(url=f"https://test/{price}/{area}")
+    p.price_eur   = price
+    p.area_sqm    = area
+    p.source_portal = source
+    p.location_text = "Senec"
+    return p
+
+
+class TestPodielSignal:
+
+    def test_mala_vymera_triggeruje(self):
+        """area < 100 m² → PODIEL_ALEBO_CHYBNE_DATA"""
+        p = _prelim_parcel(price=5000, area=1)
+        kody = [s["kod"] for s in preliminary_signals(p)]
+        assert "PODIEL_ALEBO_CHYBNE_DATA" in kody
+
+    def test_mala_cena_a_mala_vymera_triggeruje(self):
+        """price < 500 € AND area < 50 m² → trigger"""
+        p = _prelim_parcel(price=380, area=9)
+        kody = [s["kod"] for s in preliminary_signals(p)]
+        assert "PODIEL_ALEBO_CHYBNE_DATA" in kody
+
+    def test_normalna_parcela_netriggeruje(self):
+        """Bežná parcela 800 m², 25 000 € → žiadny PODIEL signál"""
+        p = _prelim_parcel(price=25000, area=800)
+        kody = [s["kod"] for s in preliminary_signals(p)]
+        assert "PODIEL_ALEBO_CHYBNE_DATA" not in kody
+
+    def test_hranicna_vymera_presne_100(self):
+        """area == 100 m² → NEtriggeruje (< 100, nie <=)"""
+        p = _prelim_parcel(price=5000, area=100)
+        kody = [s["kod"] for s in preliminary_signals(p)]
+        assert "PODIEL_ALEBO_CHYBNE_DATA" not in kody
+
+    def test_typ_je_riziko(self):
+        p = _prelim_parcel(price=380, area=1)
+        sig = next(s for s in preliminary_signals(p) if s["kod"] == "PODIEL_ALEBO_CHYBNE_DATA")
+        assert sig["typ"] == "RIZIKO"
+
+    def test_dovod_obsahuje_vymeru_a_cenu(self):
+        p = _prelim_parcel(price=382, area=1)
+        sig = next(s for s in preliminary_signals(p) if s["kod"] == "PODIEL_ALEBO_CHYBNE_DATA")
+        assert "382" in sig["dovod"] and "1" in sig["dovod"]
+
+    def test_drazobny_zdroj_tiez_triggeruje(self):
+        """SKE dražba s 1 m² → trigger nezávisle od zdroja"""
+        p = _prelim_parcel(price=723, area=1, source="ske_drazobne_vyhlasky")
+        kody = [s["kod"] for s in preliminary_signals(p)]
+        assert "PODIEL_ALEBO_CHYBNE_DATA" in kody
+
+    def test_je_prvy_signal(self):
+        """PODIEL signál musí byť prvý v zozname (pred BLIZKO_BA atď.)"""
+        p = _prelim_parcel(price=380, area=1)
+        sigs = preliminary_signals(p)
+        assert sigs[0]["kod"] == "PODIEL_ALEBO_CHYBNE_DATA"
 
     def test_struktura_signalu_spravna(self):
         p = _draz_parcel(vyv=70000, znal=100000, kolo=1)

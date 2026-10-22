@@ -19,11 +19,12 @@ _DEFAULT_MISPRICING_WEIGHTS = {
 }
 
 _DEFAULT_RISK_PENALTIES = {
-    "ZAPLAVA":         20,
-    "CHRANENE_UZEMIE": 15,
-    "DRAHE_VYNATIE":   12,
-    "PRILIS_DALEKO":   10,
-    "CENA_PODOZRIVA":   8,
+    "ZAPLAVA":                    20,
+    "CHRANENE_UZEMIE":            15,
+    "DRAHE_VYNATIE":              12,
+    "PRILIS_DALEKO":              10,
+    "CENA_PODOZRIVA":              8,
+    "PODIEL_ALEBO_CHYBNE_DATA":   25,   # cap — ignorovateľné len pri explicitnom filtrovaní
 }
 
 _EXPLAIN_MIN_INDEX = 30
@@ -88,20 +89,34 @@ def investment_index(parcel: dict) -> int:
             penalty += p * float(sig.get("dovera") or 0.5)
     penalty = min(25.0, penalty)
 
-    return max(0, min(100, round(rezoning_pts + misprint_pts + confidence_pts - penalty)))
+    raw = max(0, min(100, round(rezoning_pts + misprint_pts + confidence_pts - penalty)))
+
+    # Hard cap pri podozrivých dátach (podiel, chybná výmera)
+    if any(s.get("kod") == "PODIEL_ALEBO_CHYBNE_DATA" for s in sigs):
+        return min(raw, 30)
+
+    return raw
 
 
 def explain(parcel: dict) -> str:
     """Stručné textové zdôvodnenie (2–4 vety) prečo je pozemok zaujímavý."""
+    sigs    = parcel.get("signals") or []
+    sig_map = {s["kod"]: s for s in sigs}
+
+    # Výstraha pre podiel / chybné dáta — zobrazí sa vždy, aj pri nízkom indexe
+    if "PODIEL_ALEBO_CHYBNE_DATA" in sig_map:
+        area  = float(parcel.get("area_sqm")  or 0)
+        price = float(parcel.get("price_eur") or 0)
+        return (
+            f"⚠️ Pravdepodobne spoluvlastnícky podiel ({area:.0f} m²"
+            f" za {price:,.0f} €) — ocenenie nie je spoľahlivé."
+        )
+
     idx = parcel.get("investment_index") or investment_index(parcel)
     if idx < _EXPLAIN_MIN_INDEX:
         return ""
 
-    sigs     = parcel.get("signals") or []
-    sig_map  = {s["kod"]: s for s in sigs}
-    parts    = []
-
-    # Základ: lokácia + parametre
+    parts = []
     loc   = parcel.get("location_text") or ""
     area  = float(parcel.get("area_sqm")  or 0)
     price = float(parcel.get("price_eur") or 0)

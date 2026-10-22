@@ -1047,7 +1047,7 @@ function renderResultsTable(items) {
     const sigs     = p.signals || [];
     const FLAG_KODY = new Set(["HORICE", "DLHO_V_PONUKE", "CENA_KLESA",
                                 "DRAZBA_POD_ZNALECKOU", "DRAZBA_OPAKOVANA",
-                                "LACNEJSI_AKO_OKOLIE"]);
+                                "LACNEJSI_AKO_OKOLIE", "PODIEL_ALEBO_CHYBNE_DATA"]);
     const oppSigs  = sigs.filter(s => s.typ === "PRILEZITOST" && !FLAG_KODY.has(s.kod));
     const riskSigs = sigs.filter(s => s.typ === "RIZIKO");
     const sigHtml  = [
@@ -1064,8 +1064,11 @@ function renderResultsTable(items) {
     const drazSig = sigs.find(s => s.kod === "DRAZBA_POD_ZNALECKOU");
     const opakSig = !drazSig && sigs.find(s => s.kod === "DRAZBA_OPAKOVANA");
     // B3 — Peer comparison vlajočka
-    const peerSig = sigs.find(s => s.kod === "LACNEJSI_AKO_OKOLIE");
+    const peerSig   = sigs.find(s => s.kod === "LACNEJSI_AKO_OKOLIE");
+    // Sanity — podiel / chybné dáta
+    const podielSig = sigs.find(s => s.kod === "PODIEL_ALEBO_CHYBNE_DATA");
     const flagHtml = [
+      podielSig ? `<span class="flag-badge flag-podiel" title="${podielSig.dovod}">⚠️ PODIEL?</span>` : "",
       hotSig  ? `<span class="flag-badge flag-hot"   title="${hotSig.dovod}">🔥 ${hotSig.nazov.replace("🔥 ","")}</span>` : "",
       ageSig  ? `<span class="flag-badge flag-age"   title="${ageSig.dovod}">${ageSig.nazov}</span>` : "",
       dropSig ? `<span class="flag-badge flag-drop"  title="${dropSig.dovod}">${dropSig.nazov}</span>` : "",
