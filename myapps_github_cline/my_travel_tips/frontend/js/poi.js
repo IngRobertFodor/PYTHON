@@ -37,7 +37,14 @@ const POIModule = {
     },
 
     renderCard(poi, number, category, weatherData) {
-        const name = currentLang === 'sk' && poi.name_sk ? poi.name_sk : poi.name;
+        // display_name: backend-resolved best name (Latin transliteration if needed)
+        // Fallback chain: display_name → name_sk (if SK lang) → name_en → name
+        let name;
+        if (currentLang === 'sk') {
+            name = poi.name_sk || poi.display_name || poi.name_en || poi.name;
+        } else {
+            name = poi.display_name || poi.name_en || poi.name;
+        }
         const description = poi.description || '';
         const isOutdoor = poi.is_outdoor;
         

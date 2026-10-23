@@ -3,6 +3,7 @@ Unit Tests - Geocoding Service
 ===============================
 Tests geocoding, reverse geocoding, and travel radius calculation.
 Uses mocked HTTP responses for fast, reliable tests.
+FIX v2.1: Added tests for _sort_geocode_results and _latin_display.
 """
 
 import pytest
@@ -13,6 +14,8 @@ from services.geocoding_service import (
     calculate_travel_radius,
     _extract_region,
     _detect_region_type,
+    _sort_geocode_results,
+    _latin_display,
 )
 
 
@@ -270,3 +273,108 @@ class TestHelperFunctions:
         """No city/village/town should return default."""
         address = {'country': 'Slovakia'}
         assert _detect_region_type(address, 48.15, 17.11) == 'default'
+
+
+class TestSortGeocodeResults:
+    """Tests for _sort_geocode_results – city-level first ranking fix."""
+
+    def test_city_beats_street_with_same_importance(self):
+        """A city-type result should rank above a street/node at equal importance."""
+        street = {'type': 'street', 'importance': 0.5, 'display_name': 'Some Street, Athens'}
+        city = {'type': 'city', 'importance': 0.5, 'display_name': 'Athens, Greece'}
+        result = _sort_geocode_results([street, city])
+        assert result[0] == city
+
+    def test_city_beats_suburb_with_lower_importance(self):
+        """City with lower importance should still beat a suburb."""
+        suburb = {'type': 'suburb', 'importance': 0.9, 'display_name': 'Suburb, Athens'}
+        city = {'type': 'city', 'importance': 0.5, 'display_name': 'Athens, Greece'}
+        result = _sort_geocode_results([suburb, city])
+        assert result[0] == city
+
+    def test_higher_importance_city_wins(self):
+        """Between two cities, the one with higher importance comes first."""
+        city_a = {'type': 'city', 'importance': 0.9, 'display_name': 'Athens, Greece'}
+        city_b = {'type': 'city', 'importance': 0.5, 'display_name': 'Athens, Georgia, USA'}
+        result = _sort_geocode_results([city_b, city_a])
+        assert result[0] == city_a
+
+    def test_administrative_type_is_city_level(self):
+        """Administrative type should also be prioritised."""
+        node = {'type': 'node', 'importance': 0.8, 'display_name': 'Node'}
+        admin = {'type': 'administrative', 'importance': 0.4, 'display_name': 'Admin Area'}
+        result = _sort_geocode_results([node, admin])
+        assert result[0] == admin
+
+    def test_empty_list_returns_empty(self):
+        """Empty list should return empty list."""
+        assert _sort_geocode_results([]) == []
+
+    def test_single_item_returned(self):
+        """Single item list should return that item."""
+        item = {'type': 'city', 'importance': 0.7, 'display_name': 'Athens'}
+        result = _sort_geocode_results([item])
+        assert result == [item]
+
+    def test_geocode_response_includes_display_name(self):
+        """geocode_place response should include display_name field."""
+        mock_data = [{
+            'display_name': 'Athens, Greece',
+            'lat': '37.9755', 'lon': '23.7348',
+            'type': 'city', 'category': 'place',
+            'importance': 0.85,
+            'address': {
+                'city': 'Athens', 'country': 'Greece',
+                'country_code': 'gr', 'state': 'Attica'
+            }
+        }]
+        with patch('services.geocoding_service.requests.get') as mock_get:
+            mock_resp = MagicMock()
+            mock_resp.status_code = 200
+            mock_resp.json.return_value = mock_data
+            mock_resp.raise_for_status = MagicMock()
+            mock_get.return_value = mock_resp
+
+            result = geocode_place('Athens', 'en')
+
+        assert 'results' in result
+        assert len(result['results']) == 1
+        assert 'display_name' in result['results'][0]
+
+
+class TestLatinDisplay:
+    """Tests for _latin_display – geocoding display name normalisation."""
+
+    def test_latin_text_unchanged(self):
+        """Latin text should not be modified."""
+        assert _latin_display('Bratislava, Slovakia') == 'Bratislava, Slovakia'
+
+    def test_empty_string_unchanged(self):
+        """Empty string stays empty."""
+        assert _latin_display('') == ''
+
+    def test_none_handled_gracefully(self):
+        """None should be returned as-is (falsy guard)."""
+        assert _latin_display(None) is None
+
+    def test_greek_city_gets_transliteration(self):
+        """Greek city name should get transliterated prefix."""
+        result = _latin_display('Αθήνα, Ελλάδα')
+        try:
+            from unidecode import unidecode
+            assert '(' in result, f"Expected parenthesis for transliteration, got: {result}"
+            latin_part = result.split('(')[0].strip()
+            for ch in latin_part:
+                if ch.isalpha():
+                    assert ord(ch) <= 127, f"Non-Latin char in transliteration: {ch}"
+        except ImportError:
+            pass  # without unidecode graceful fallback is ok
+
+    def test_cyrillic_gets_transliteration(self):
+        """Cyrillic name should get transliterated prefix."""
+        result = _latin_display('Москва, Россия')
+        try:
+            from unidecode import unidecode
+            assert '(' in result
+        except ImportError:
+            pass

@@ -116,7 +116,7 @@ class TestGetLinkConfig:
     def test_historic_config(self):
         config = _get_link_config('historic')
         assert 'tripadvisor' in config
-        assert 'wikivoyage' in config
+        assert 'atlas_obscura' in config  # historic uses atlas_obscura instead of wikivoyage
 
     def test_unknown_type_falls_back(self):
         config = _get_link_config('unknown_xyz')

@@ -3,20 +3,69 @@ Geocoding Service
 =================
 Uses Nominatim (OpenStreetMap) for geocoding and OSRM for travel time calculations.
 Both are free and require no API keys.
+FIX v2.1: Results sorted by importance; cities/towns prioritised over streets/nodes.
+          Latin display_name added for non-Latin place names.
 """
 
 import requests
 import math
 
+try:
+    from unidecode import unidecode as _unidecode
+    _UNIDECODE_AVAILABLE = True
+except ImportError:
+    _UNIDECODE_AVAILABLE = False
+
 NOMINATIM_BASE = "https://nominatim.openstreetmap.org"
 OSRM_BASE = "http://router.project-osrm.org"
 USER_AGENT = "FodorTravelTIPs/1.0"
+
+# Place types considered as "city-level" – these get a relevance bonus when ranking
+_CITY_TYPES = {'city', 'town', 'village', 'municipality', 'administrative',
+               'state', 'country', 'island', 'region', 'county'}
+
+
+def _latin_display(text):
+    """Return a Latin-readable version of a place name.
+    If the name already uses only Latin/ASCII letters (including diacritics like
+    ý, š, č up to Unicode 591) it is returned unchanged.
+    Otherwise a transliteration is appended in parentheses.
+    """
+    if not text:
+        return text
+    for ch in text:
+        if ch.isalpha():
+            cp = ord(ch)
+            # Latin Basic + Latin-1 Supplement + Latin Extended-A/B (covers all EU diacritics)
+            if cp > 591:
+                if _UNIDECODE_AVAILABLE:
+                    latin = _unidecode(text).strip()
+                    if latin and latin != text:
+                        return f'{latin} ({text})'
+                return text
+    return text
+
+
+def _sort_geocode_results(items):
+    """
+    Sort Nominatim results so the most relevant result comes first.
+    Ranking logic:
+      1. City-level types (city, town, administrative…) score +100
+      2. Nominatim importance score (0..1) → ×50 added
+    This prevents a small street / node from beating a whole city.
+    """
+    def rank(item):
+        type_score = 100 if item.get('type', '') in _CITY_TYPES else 0
+        importance = float(item.get('importance', 0)) * 50
+        return type_score + importance
+
+    return sorted(items, key=rank, reverse=True)
 
 
 def geocode_place(query, lang='en'):
     """
     Convert place name to coordinates using Nominatim.
-    Returns list of matching places.
+    Returns list of matching places sorted by relevance (city-level first).
     """
     headers = {'User-Agent': USER_AGENT}
     params = {
@@ -37,10 +86,15 @@ def geocode_place(query, lang='en'):
         response.raise_for_status()
         data = response.json()
 
+        # Sort by relevance before processing
+        data = _sort_geocode_results(data)
+
         results = []
         for item in data:
+            raw_name = item.get('display_name', '')
             results.append({
-                'name': item.get('display_name', ''),
+                'name': raw_name,
+                'display_name': _latin_display(raw_name),
                 'lat': float(item.get('lat', 0)),
                 'lon': float(item.get('lon', 0)),
                 'type': item.get('type', ''),

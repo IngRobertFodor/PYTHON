@@ -36,7 +36,7 @@ def search_pois():
         custom_tags = [t.strip() for t in tags_str.split(',') if t.strip()]
 
     # Get POIs from Overpass API
-    pois = get_pois(lat, lon, radius_km, custom_tags)
+    pois = get_pois(lat, lon, radius_km, custom_tags, lang)
     mainstream = pois.get('mainstream', [])[:10]
     alternative = pois.get('alternative', [])[:10]
 

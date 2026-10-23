@@ -139,6 +139,7 @@ const App = {
             const response = await fetch(`/api/geocoding/search?${params}`);
             const data = await response.json();
             if (data.results && data.results.length > 0) {
+                // results are already sorted by relevance (city-level first) by backend
                 this.selectLocation(data.results[0]);
             }
         } catch (err) {
@@ -153,12 +154,16 @@ const App = {
             const data = await response.json();
             const container = document.getElementById('search-suggestions');
             if (data.results && data.results.length > 0) {
-                container.innerHTML = data.results.map(place => `
-                    <div class="suggestion-item" data-lat="${place.lat}" data-lon="${place.lon}" data-name="${place.name}" data-region="${place.region}">
-                        <div class="suggestion-name">${place.name.split(',')[0]}</div>
+                container.innerHTML = data.results.map(place => {
+                    // Use display_name (Latin-readable) for the suggestion label
+                    const labelName = place.display_name || place.name;
+                    const shortName = labelName.split(',')[0];
+                    return `
+                    <div class="suggestion-item" data-lat="${place.lat}" data-lon="${place.lon}" data-name="${labelName}" data-region="${place.region}">
+                        <div class="suggestion-name">${shortName}</div>
                         <div class="suggestion-details">${place.country} ${place.region ? '- ' + place.region : ''}</div>
-                    </div>
-                `).join('');
+                    </div>`;
+                }).join('');
                 container.querySelectorAll('.suggestion-item').forEach(item => {
                     item.addEventListener('click', () => {
                         this.selectLocation({
