@@ -317,6 +317,21 @@ class TestEnrichFromDb:
         from routes.scrape_routes import _enrich_from_db
         existing = {"kod": "BLIZKO_BA", "typ": "PRILEZITOST",
                     "nazov": "Blízko BA", "dovod": "5 km", "dovera": 0.9}
+
+    def test_index_vzdy_preratany(self):
+        """Index sa prepočíta aj pre záznamy ktoré už majú signály (changed=False)."""
+        from routes.scrape_routes import _enrich_from_db
+        # Parcela s existujúcim DRAZBA_PODHODNOTENA signálom ale index=0
+        existing_sig = {"kod": "DRAZBA_PODHODNOTENA", "typ": "PRILEZITOST",
+                        "nazov": "Dražba", "dovod": "test", "dovera": 0.6}
+        item = self._bare(price=6500, area=428, signals=[existing_sig])
+        item["investment_index"] = 0   # starý DB záznam
+        _enrich_from_db([item])
+        # Index musí byť > 0 po enrich (confidence + DRAZBA_PODHODNOTENA)
+        assert item["investment_index"] > 0
+
+    def test_prazdny_zoznam(self):
+
         items = [self._bare(price=20000, area=800, signals=[existing])]
         _enrich_from_db(items)
         blizko = [s for s in items[0]["signals"] if s["kod"] == "BLIZKO_BA"]

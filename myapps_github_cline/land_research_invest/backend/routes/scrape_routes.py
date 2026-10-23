@@ -101,15 +101,23 @@ def _enrich_from_db(items: list) -> list:
             except Exception as exc:
                 print(f"[scrape_routes._enrich] drazba_signals: {exc}")
 
-        # --- Recount investment_index ak sa niečo zmenilo ---
-        if changed:
-            try:
-                new_idx = _calc_index(d)
-                d["investment_index"]   = new_idx
-                from services.opportunity_service import _EXPLAIN_MIN_INDEX
-                d["investment_summary"] = _calc_explain(d) if new_idx >= _EXPLAIN_MIN_INDEX else _calc_explain(d)
-            except Exception as exc:
-                print(f"[scrape_routes._enrich] recount index: {exc}")
+        # --- Vždy prepočítať investment_index (nielen pri changed) ---
+        # Záznamy z DB môžu mať index=0 (staré záznamy pred B4) alebo
+        # zastaraný index (signály sa zmenili). Prepočítavame vždy.
+        try:
+            new_idx = _calc_index(d)
+            d["investment_index"]   = new_idx
+            d["investment_summary"] = _calc_explain(d)
+        except Exception as exc:
+            print(f"[scrape_routes._enrich] recount index: {exc}")
+
+    # --- Peer comparison + opportunity pre celú sadu naraz ---
+    # (peer štatistiky sú presnejšie keď sa počítajú zo všetkých položiek)
+    try:
+        apply_peer_signals(items)
+        apply_opportunity(items)
+    except Exception as exc:
+        print(f"[scrape_routes._enrich] peer/opportunity: {exc}")
 
     return items
 

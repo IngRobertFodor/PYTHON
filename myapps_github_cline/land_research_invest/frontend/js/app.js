@@ -1081,20 +1081,19 @@ function renderResultsTable(items) {
     const confTxt = conf < 1.0
       ? `<span class="conf-badge" title="Istota ${(conf*100).toFixed(0)}% — chýba: ${(p.prelim_missing||[]).join(', ')}">${(conf*100).toFixed(0)}%</span>`
       : "";
-    // B4 — Investičný index badge
+    // B4 — Investičný index badge (vždy zobrazený, aj keď 0)
     const invIdx  = p.investment_index || 0;
-    const invCls  = invIdx >= 70 ? "inv-high" : invIdx >= 40 ? "inv-mid" : "inv-low";
+    const invCls  = invIdx >= 70 ? "inv-high" : invIdx >= 40 ? "inv-mid" : invIdx > 0 ? "inv-low" : "inv-zero";
     const invTip  = p.investment_summary
       ? `title="${p.investment_summary.replace(/"/g,"'")}"`
-      : `title="Investičný index ${invIdx}"`;
-    const invBadge = invIdx > 0
-      ? `<span class="inv-badge ${invCls}" ${invTip}>${invIdx}</span>`
-      : "";
+      : `title="Investičný index ${invIdx} — ešte nehodnotené alebo nedostatok dát"`;
+    const invBadge = `<span class="inv-badge ${invCls}" ${invTip}>${invIdx > 0 ? invIdx : "—"}</span>`;
     tr.innerHTML = `
       <td><input type="checkbox" class="row-chk" data-url="${p.url || ""}"></td>
       <td class="tbl-num">${idx + 1}</td>
       <td><button class="star-btn${starred ? " active" : ""}" data-url="${p.url || ""}" title="Sledovať">${starred ? "★" : "☆"}</button></td>
-      <td>${invBadge}<span class="prelim-badge" style="background:${col}">${score}</span>${confTxt}${sigHtml}${flagHtml}</td>
+      <td class="tbl-idx">${invBadge}</td>
+      <td class="tbl-score"><span class="prelim-badge" style="background:${col}">${score}</span>${confTxt}${sigHtml}${flagHtml}</td>
       <td class="tbl-src">${(p.source_portal||"").replace(/_/g," ")}</td>
       <td class="tbl-loc">${p.location_text||"—"}</td>
       <td class="tbl-price">${p.price_eur>0?p.price_eur.toLocaleString("sk-SK"):"—"}</td>

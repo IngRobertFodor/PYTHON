@@ -405,7 +405,12 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 }
 .inv-high   { background: #1a7a3c; }  /* 70–100: silná príležitosť */
 .inv-mid    { background: #2a6496; }  /* 40–69: stredná */
-.inv-low    { background: #888;    }  /* 0–39: slabá */
+.inv-low    { background: #888;    }  /* 1–39: slabá */
+.inv-zero   { background: #ccc; color: #666; }  /* 0: nehodnotené */
+
+/* Index a Skóre — samostatné stĺpce */
+.tbl-idx   { white-space: nowrap; text-align: center; }
+.tbl-score { white-space: nowrap; }
 
 /* Skvost / dostupnost / poloha badgese (J1) */
 .gem-badge {
