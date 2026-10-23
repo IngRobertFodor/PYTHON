@@ -3,6 +3,7 @@ POI Routes - Endpoints for Points of Interest discovery.
 Uses Overpass API (OpenStreetMap) for POI data.
 IMPROVEMENT: Parallel Wikipedia enrichment (10x faster).
 DIAG v2.2: Returns _meta diagnostics in response body.
+v2.4: In-memory TTL cache + /cache/clear endpoint.
 """
 import time
 from flask import Blueprint, jsonify, request
@@ -10,6 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from services.overpass_service import get_pois
 from services.wikipedia_service import enrich_poi_with_wikipedia
 from services.links_service import generate_links
+from services.cache_service import poi_cache, make_poi_cache_key
 
 poi_bp = Blueprint('poi', __name__)
 
@@ -39,6 +41,19 @@ def search_pois():
     if tags_str:
         custom_tags = [t.strip() for t in tags_str.split(',') if t.strip()]
 
+    # ── Cache lookup ──────────────────────────────────────────────────────────
+    cache_key = make_poi_cache_key(lat, lon, radius_km, custom_tags, lang)
+    cached = poi_cache.get(cache_key)
+    if cached is not None:
+        print(f"[CACHE] ✓ HIT | key=({round(lat,2)},{round(lon,2)},{int(radius_km)}) | "
+              f"cache size={poi_cache.stats()['valid']}")
+        response = dict(cached)
+        response['_meta'] = dict(response.get('_meta', {}))
+        response['_meta']['from_cache'] = True
+        return jsonify(response)
+    print(f"[CACHE] ✗ MISS | fetching from Overpass...")
+    # ─────────────────────────────────────────────────────────────────────────
+
     # Get POIs from Overpass API
     t0 = time.time()
     pois = get_pois(lat, lon, radius_km, custom_tags, lang)
@@ -51,6 +66,7 @@ def search_pois():
     meta['lat'] = lat
     meta['lon'] = lon
     meta['tags_received'] = len(custom_tags) if custom_tags else 0
+    meta['from_cache'] = False
 
     print(f"[ROUTE] Overpass done in {overpass_time_ms}ms | mainstream={len(mainstream)} alternative={len(alternative)}")
 
@@ -81,13 +97,20 @@ def search_pois():
     mainstream_enriched = enriched[:len(mainstream)]
     alternative_enriched = enriched[len(mainstream):]
 
-    return jsonify({
+    response_data = {
         'mainstream': mainstream_enriched,
         'alternative': alternative_enriched,
         'center': {'lat': lat, 'lon': lon},
         'radius_km': radius_km,
         '_meta': meta
-    })
+    }
+
+    # Store in cache only when we got actual results
+    if mainstream_enriched or alternative_enriched:
+        poi_cache.set(cache_key, response_data)
+        print(f"[CACHE] Stored | cache size now={poi_cache.stats()['valid']}")
+
+    return jsonify(response_data)
 
 
 def _enrich_parallel(pois, lang, max_workers=8):
@@ -111,3 +134,18 @@ def _enrich_parallel(pois, lang, max_workers=8):
         results = list(executor.map(enrich_one, pois))
 
     return results
+
+
+@poi_bp.route('/cache/clear', methods=['POST'])
+def clear_cache():
+    """Clear the in-memory POI cache. Useful during development/testing."""
+    stats_before = poi_cache.stats()
+    poi_cache.clear()
+    print(f"[CACHE] Cleared (had {stats_before['valid']} valid entries)")
+    return jsonify({'status': 'cleared', 'entries_removed': stats_before['valid']})
+
+
+@poi_bp.route('/cache/stats', methods=['GET'])
+def cache_stats():
+    """Return current cache statistics."""
+    return jsonify(poi_cache.stats())

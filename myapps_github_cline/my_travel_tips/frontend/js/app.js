@@ -310,7 +310,12 @@ const App = {
             const response = await fetch(`/api/poi/search?${params}`, { signal: controller.signal });
             const data = await response.json();
             const dt = Math.round(performance.now() - t0);
-            console.log(`[explore] Response in ${dt}ms:`, data._meta || '(no meta)');
+            const fromCache = data._meta?.from_cache;
+            if (fromCache) {
+                console.log(`[explore] ⚡ Cache HIT in ${dt}ms`, data._meta);
+            } else {
+                console.log(`[explore] Response in ${dt}ms:`, data._meta || '(no meta)');
+            }
 
             if (data.error) {
                 alert(t('error_search'));

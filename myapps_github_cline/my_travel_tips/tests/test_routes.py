@@ -182,6 +182,64 @@ class TestPOIRoutes:
         assert data['radius_km'] == 25
 
 
+class TestPOICache:
+    """Tests for the in-memory POI cache integration."""
+
+    def test_cache_clear_endpoint(self, client):
+        """POST /api/poi/cache/clear should return 200 with cleared status."""
+        response = client.post('/api/poi/cache/clear')
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data['status'] == 'cleared'
+        assert 'entries_removed' in data
+
+    def test_cache_stats_endpoint(self, client):
+        """GET /api/poi/cache/stats should return size and valid count."""
+        response = client.get('/api/poi/cache/stats')
+        assert response.status_code == 200
+        data = response.get_json()
+        assert 'size' in data
+        assert 'valid' in data
+
+    @patch('routes.poi.get_pois')
+    @patch('routes.poi.enrich_poi_with_wikipedia')
+    @patch('routes.poi.generate_links')
+    def test_second_request_returns_from_cache(self, mock_links, mock_wiki, mock_pois, client):
+        """Second identical request should be served from cache (get_pois not called twice)."""
+        from services.cache_service import poi_cache
+        poi_cache.clear()  # ensure clean state
+
+        sample_poi = {
+            'name': 'Acropolis', 'display_name': 'Acropolis of Athens',
+            'name_en': 'Acropolis of Athens', 'name_sk': '', 'lat': 37.97,
+            'lon': 23.73, 'distance_km': 0.5, 'type': 'historic',
+            'score': 80, 'category': 'mainstream', 'wikipedia': '',
+            'wikidata': '', 'website': '', 'description': '', 'opening_hours': '',
+            'tags': {}, 'is_outdoor': False, 'links': []
+        }
+        mock_pois.return_value = {'mainstream': [sample_poi], 'alternative': []}
+        mock_wiki.side_effect = lambda poi, lang: poi
+        mock_links.return_value = []
+
+        url = '/api/poi/search?lat=37.97&lon=23.73&radius_km=25&lang=sk&tags=historic%3Dcastle'
+
+        # First request – should call get_pois
+        r1 = client.get(url)
+        assert r1.status_code == 200
+        assert mock_pois.call_count == 1
+
+        # Second identical request – should return from cache, NOT call get_pois again
+        r2 = client.get(url)
+        assert r2.status_code == 200
+        assert mock_pois.call_count == 1  # still 1, not 2!
+
+        data2 = r2.get_json()
+        assert data2['_meta']['from_cache'] is True
+
+        poi_cache.clear()  # cleanup
+
+
+
 class TestStaticFiles:
     """Tests for static file serving."""
 

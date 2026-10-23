@@ -504,3 +504,77 @@ class TestBatchedQuery:
         assert 'mainstream' in result
         assert 'alternative' in result
 
+
+
+class TestCheckOverpassSlots:
+    """Tests for _check_overpass_slots – fair-use slot checking."""
+
+    @patch('services.overpass_service.requests.get')
+    def test_parses_available_slots(self, mock_get):
+        """Should parse 'N slots available' from status page."""
+        from services.overpass_service import _check_overpass_slots
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.text = "Connected as: anonymous\nCurrent time: ...\n2 slots available now."
+        mock_get.return_value = mock_resp
+        slots, wait = _check_overpass_slots("https://overpass-api.de/api/interpreter")
+        assert slots == 2
+        assert wait == 0
+
+    @patch('services.overpass_service.requests.get')
+    def test_parses_wait_seconds(self, mock_get):
+        """Should parse wait time when no slots available."""
+        from services.overpass_service import _check_overpass_slots
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.text = "Slot available after: 2026-10-23T15:30:00Z, in 45 seconds."
+        mock_get.return_value = mock_resp
+        slots, wait = _check_overpass_slots("https://overpass-api.de/api/interpreter")
+        assert slots == 0
+        assert wait == 45
+
+    @patch('services.overpass_service.requests.get')
+    def test_returns_minus1_on_failure(self, mock_get):
+        """Should return (-1, 0) when status check itself fails."""
+        import requests as req_lib
+        from services.overpass_service import _check_overpass_slots
+        mock_get.side_effect = req_lib.RequestException("network error")
+        slots, wait = _check_overpass_slots("https://overpass-api.de/api/interpreter")
+        assert slots == -1
+        assert wait == 0
+
+    @patch('services.overpass_service.requests.get')
+    def test_returns_minus1_on_non_200(self, mock_get):
+        """Non-200 status response returns (-1, 0)."""
+        from services.overpass_service import _check_overpass_slots
+        mock_resp = MagicMock()
+        mock_resp.status_code = 503
+        mock_get.return_value = mock_resp
+        slots, wait = _check_overpass_slots("https://overpass-api.de/api/interpreter")
+        assert slots == -1
+        assert wait == 0
+
+
+class TestBatchedQuerySequential:
+    """Verify that _query_overpass_batched is now sequential (not parallel)."""
+
+    @patch('services.overpass_service._query_overpass')
+    def test_sequential_order(self, mock_query):
+        """Batches should be called sequentially – call_count grows one by one."""
+        call_counts = []
+
+        def track_calls(*args, **kwargs):
+            call_counts.append(mock_query.call_count)
+            return []
+
+        mock_query.side_effect = track_calls
+        tags = [f'historic=type{i}' for i in range(25)]  # 3 batches
+        config = {'timeout': 30, 'maxsize': 10485760}
+
+        with patch('services.overpass_service.time.sleep'):  # skip the 1.5s delay
+            _query_overpass_batched(48.15, 17.11, 25000, tags, config, batch_size=12)
+
+        assert mock_query.call_count == 3
+        # Sequential: call_counts should be [1, 2, 3] (each increments by 1)
+        assert call_counts == [1, 2, 3]
+

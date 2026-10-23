@@ -1,7 +1,11 @@
 """Overpass API Service v2.0 - POI discovery with improved scoring,
 parallel queries, auto-expand radius, and better deduplication.
 FIX v2.1: display_name with non-Latin transliteration (Greek, Cyrillic, etc.)
+FIX v2.2: POST instead of GET, out tags center, verbose diagnostics, _meta.
+FIX v2.3: _query_overpass_batched splits large tag lists.
+FIX v2.4: Sequential batching + Overpass status check + in-memory cache.
 """
+import re
 import requests
 import math
 import time
@@ -115,44 +119,41 @@ POI_TYPE_WEIGHTS = {
 
 def _query_overpass_batched(lat, lon, radius_m, tags, config, batch_size=12):
     """
-    Split tags into batches of batch_size and query Overpass PARALLELLY.
-    This is the key fix for large tag lists (50+ tags) which would time out
-    as a single query. Each batch is ~300-500 chars and completes in 5-25s.
-    Results are deduplicated by OSM type+id.
-    max_workers=3 keeps us within Overpass fair-use rate limits.
+    Split tags into sequential batches with fair-use delay between each.
+    This is the key fix for large tag lists (50+ tags):
+    - Parallel batching caused 502 cooldowns on overpass-api.de
+    - Sequential batching with 1.5s delay respects fair-use and avoids 502s
+    - Each batch is ~300-500 chars → Overpass completes in 5-35s
+    - Results deduplicated by OSM type+id
     """
     if not tags:
         return []
 
-    # Build batches – group by key first for slightly more efficient Overpass queries
     batches = [tags[i:i + batch_size] for i in range(0, len(tags), batch_size)]
     n_batches = len(batches)
-    print(f"[OVERPASS] Batching {len(tags)} tags into {n_batches} batches of ~{batch_size}")
+    print(f"[OVERPASS] Batching {len(tags)} tags into {n_batches} sequential batches of ~{batch_size}")
 
     all_elements = []
-    seen_ids = set()  # deduplicate by OSM type+id
+    seen_ids = set()
+    ok_batches = 0
 
-    with ThreadPoolExecutor(max_workers=3) as ex:
-        future_to_batch = {
-            ex.submit(_query_overpass, lat, lon, radius_m, batch, config): i
-            for i, batch in enumerate(batches)
-        }
-        ok_batches = 0
-        for f in as_completed(future_to_batch):
-            batch_idx = future_to_batch[f]
-            try:
-                elems = f.result()
-                new_elems = 0
-                for e in elems:
-                    key = f"{e.get('type')}/{e.get('id')}"
-                    if key not in seen_ids:
-                        seen_ids.add(key)
-                        all_elements.append(e)
-                        new_elems += 1
-                print(f"[OVERPASS] batch {batch_idx + 1}/{n_batches} → {len(elems)} elems ({new_elems} new after dedup)")
-                ok_batches += 1
-            except Exception as e:
-                print(f"[OVERPASS] batch {batch_idx + 1}/{n_batches} failed: {e}")
+    for i, batch in enumerate(batches):
+        # Fair-use delay between batches – prevents 502 cooldown from overpass-api.de
+        if i > 0:
+            time.sleep(1.5)
+        try:
+            elems = _query_overpass(lat, lon, radius_m, batch, config)
+            new_elems = 0
+            for e in elems:
+                key = f"{e.get('type')}/{e.get('id')}"
+                if key not in seen_ids:
+                    seen_ids.add(key)
+                    all_elements.append(e)
+                    new_elems += 1
+            print(f"[OVERPASS] batch {i + 1}/{n_batches} → {len(elems)} elems ({new_elems} new after dedup)")
+            ok_batches += 1
+        except Exception as e:
+            print(f"[OVERPASS] batch {i + 1}/{n_batches} failed: {e}")
 
     print(f"[OVERPASS] Batched total: {len(all_elements)} unique elements | {ok_batches}/{n_batches} batches OK")
     return all_elements
@@ -291,9 +292,38 @@ def _get_query_config(radius_km):
     return {'timeout': 90, 'maxsize': 104857600}
 
 
+def _check_overpass_slots(url, timeout=5):
+    """
+    Query the Overpass /api/status endpoint to check available query slots.
+    Returns (slots_available, wait_seconds):
+      - (N, 0)   = N slots free → safe to query
+      - (0, N)   = 0 slots, wait N seconds
+      - (-1, 0)  = status check failed → assume we can try anyway
+    Only used for overpass-api.de which has a strict 2-slot fair-use limit.
+    """
+    try:
+        status_url = url.replace('/interpreter', '/status')
+        r = requests.get(status_url, headers={'User-Agent': USER_AGENT}, timeout=timeout)
+        if r.status_code != 200:
+            return (-1, 0)
+        text = r.text
+        # Pattern: "2 slots available now" or "1 slot available now"
+        m_slots = re.search(r'(\d+)\s+slots?\s+available', text)
+        slots = int(m_slots.group(1)) if m_slots else 0
+        # Pattern: "Slot available after: ..., in 45 seconds."
+        m_wait = re.search(r'in\s+(\d+)\s+seconds?', text)
+        wait = int(m_wait.group(1)) if m_wait else 0
+        print(f"[OVERPASS] Status {url.split('/')[2]}: {slots} slots, wait {wait}s")
+        return (slots, wait)
+    except Exception as e:
+        print(f"[OVERPASS] Status check failed for {url.split('/')[2]}: {e}")
+        return (-1, 0)
+
+
 def _query_overpass(lat, lon, radius_m, tags, config):
     """Send Overpass query using POST (more reliable than GET for long queries).
     Tries each server in OVERPASS_SERVERS with exponential backoff on rate-limit.
+    For overpass-api.de, checks /api/status first to respect fair-use slots.
     IMPORTANT: Do NOT send 'Accept: application/json' – overpass-api.de returns 406.
     """
     if not tags:
@@ -306,6 +336,18 @@ def _query_overpass(lat, lon, radius_m, tags, config):
 
     for attempt, url in enumerate(OVERPASS_SERVERS):
         server = url.split('/')[2]
+
+        # For overpass-api.de: check fair-use slots before sending query
+        if 'overpass-api.de' in url:
+            slots, wait_s = _check_overpass_slots(url)
+            if slots == 0 and wait_s > 0:
+                if wait_s <= 90:
+                    print(f"[OVERPASS] {server} busy – waiting {wait_s}s for slot...")
+                    time.sleep(wait_s + 1)
+                else:
+                    print(f"[OVERPASS] {server} cooldown too long ({wait_s}s) – skipping to next server")
+                    continue
+
         try:
             t0 = time.time()
             r = requests.post(url, data={'data': query}, headers=headers, timeout=timeout)
