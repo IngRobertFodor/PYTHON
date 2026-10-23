@@ -274,9 +274,10 @@ const App = {
         const loading = document.getElementById('loading-overlay');
         loading.classList.remove('hidden');
 
-        // AbortController – cancel fetch after 120s to prevent infinite spinner
+        // AbortController – cancel fetch after 180s to prevent infinite spinner
+        // (batching means backend typically finishes in 30-60s, but worst case ~150s)
         const controller = new AbortController();
-        const fetchTimeout = setTimeout(() => controller.abort(), 120000);
+        const fetchTimeout = setTimeout(() => controller.abort(), 180000);
 
         try {
             this.travelDate = document.getElementById('travel-date').value;
@@ -329,10 +330,10 @@ const App = {
 
         } catch (err) {
             if (err.name === 'AbortError') {
-                console.error('[explore] Fetch aborted after 120s timeout');
+                console.error('[explore] Fetch aborted after 180s timeout');
                 alert(currentLang === 'sk'
-                    ? 'Hľadanie trvalo príliš dlho (>120s). Overpass API je momentálne preťažené. Skúste znova.'
-                    : 'Search timed out (>120s). Overpass API is overloaded. Please try again.');
+                    ? 'Hľadanie trvalo príliš dlho (>3 min). Overpass API je momentálne preťažené. Skúste znova neskôr.'
+                    : 'Search timed out (>3 min). Overpass API is overloaded. Please try again later.');
             } else {
                 console.error('[explore] Explore error:', err);
                 alert(t('error_search'));

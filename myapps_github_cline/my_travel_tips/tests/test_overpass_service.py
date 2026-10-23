@@ -10,7 +10,7 @@ from unittest.mock import patch, MagicMock
 from services.overpass_service import (
     get_pois, _get_query_config, _build_query, _process_pois,
     _determine_type as _determine_poi_type, _calculate_score, _is_outdoor, _haversine,
-    _query_overpass, MAINSTREAM_TAGS, ALTERNATIVE_TAGS,
+    _query_overpass, _query_overpass_batched, MAINSTREAM_TAGS, ALTERNATIVE_TAGS,
     _best_display_name, _is_latin,
 )
 
@@ -401,3 +401,106 @@ class TestBestDisplayName:
         assert len(result) == 1
         assert 'display_name' in result[0]
         assert result[0]['display_name'] == 'Acropolis of Athens'
+
+
+class TestBatchedQuery:
+    """Tests for _query_overpass_batched – the core fix for large tag lists."""
+
+    @patch('services.overpass_service._query_overpass')
+    def test_single_batch_for_small_tag_list(self, mock_query):
+        """12 or fewer tags → exactly 1 batch → _query_overpass called once."""
+        mock_query.return_value = [
+            {'type': 'node', 'id': 1, 'lat': 48.15, 'lon': 17.11,
+             'tags': {'name': 'Castle', 'historic': 'castle'}}
+        ]
+        tags = ['historic=castle', 'tourism=museum', 'tourism=gallery']
+        config = {'timeout': 30, 'maxsize': 10485760}
+
+        result = _query_overpass_batched(48.15, 17.11, 25000, tags, config, batch_size=12)
+
+        assert mock_query.call_count == 1
+        assert len(result) == 1
+
+    @patch('services.overpass_service._query_overpass')
+    def test_splits_large_tag_list_into_batches(self, mock_query):
+        """50 tags with batch_size=12 → ceil(50/12)=5 batches → _query_overpass called 5 times."""
+        mock_query.return_value = []
+        tags = [f'tourism=type{i}' for i in range(50)]
+        config = {'timeout': 30, 'maxsize': 10485760}
+
+        _query_overpass_batched(48.15, 17.11, 25000, tags, config, batch_size=12)
+
+        assert mock_query.call_count == 5  # ceil(50/12) = 5 batches
+
+    @patch('services.overpass_service._query_overpass')
+    def test_deduplicates_by_osm_type_and_id(self, mock_query):
+        """Same OSM element returned by two batches → appears only once in result."""
+        duplicate_elem = {'type': 'node', 'id': 999, 'lat': 48.15, 'lon': 17.11,
+                          'tags': {'name': 'Duplicate POI', 'tourism': 'museum'}}
+        mock_query.return_value = [duplicate_elem]
+        tags = ['tourism=museum', 'historic=castle',
+                'natural=peak', 'tourism=gallery',
+                'leisure=park', 'tourism=attraction',
+                'natural=beach', 'historic=ruins',
+                'amenity=theatre', 'tourism=zoo',
+                'historic=monument', 'amenity=monastery',
+                'tourism=viewpoint']  # 13 tags → 2 batches
+        config = {'timeout': 30, 'maxsize': 10485760}
+
+        result = _query_overpass_batched(48.15, 17.11, 25000, tags, config, batch_size=12)
+
+        # Both batches return the same element → only 1 in result after dedup
+        assert len(result) == 1
+        assert result[0]['id'] == 999
+
+    @patch('services.overpass_service._query_overpass')
+    def test_handles_partial_batch_failure(self, mock_query):
+        """If some batches fail but others succeed, returns elements from successful batches."""
+        import requests as req_lib
+        good_elem = {'type': 'node', 'id': 1, 'lat': 48.15, 'lon': 17.11,
+                     'tags': {'name': 'Good POI', 'historic': 'castle'}}
+
+        def side_effect(*args, **kwargs):
+            # Alternate: first call succeeds, second fails, third succeeds
+            call_n = mock_query.call_count
+            if call_n % 2 == 1:
+                return [good_elem]
+            raise req_lib.exceptions.Timeout("simulated timeout")
+
+        mock_query.side_effect = side_effect
+        tags = [f'historic=type{i}' for i in range(25)]  # 25 tags → 3 batches (12+12+1)
+        config = {'timeout': 30, 'maxsize': 10485760}
+
+        result = _query_overpass_batched(48.15, 17.11, 25000, tags, config, batch_size=12)
+
+        # At least some elements returned even with partial failures
+        assert len(result) >= 1
+
+    @patch('services.overpass_service._query_overpass')
+    def test_empty_tags_returns_empty(self, mock_query):
+        """Empty tag list → no _query_overpass call → empty result."""
+        config = {'timeout': 30, 'maxsize': 10485760}
+
+        result = _query_overpass_batched(48.15, 17.11, 25000, [], config)
+
+        assert result == []
+        mock_query.assert_not_called()
+
+    @patch('services.overpass_service._query_overpass')
+    def test_get_pois_custom_uses_batched_query(self, mock_query):
+        """get_pois with 15+ custom_tags calls _query_overpass multiple times (batching)."""
+        mock_query.return_value = [
+            {'type': 'node', 'id': i, 'lat': 48.14 + i * 0.001, 'lon': 17.10,
+             'tags': {'name': f'POI {i}', 'historic': 'castle'}}
+            for i in range(5)
+        ]
+        # 15 tags → 2 batches (12 + 3)
+        custom_tags = [f'historic=type{i}' for i in range(15)]
+
+        result = get_pois(48.15, 17.11, 25, custom_tags=custom_tags)
+
+        # With batching, _query_overpass should be called more than once
+        assert mock_query.call_count >= 2
+        assert 'mainstream' in result
+        assert 'alternative' in result
+

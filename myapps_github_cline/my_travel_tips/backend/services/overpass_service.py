@@ -113,6 +113,51 @@ POI_TYPE_WEIGHTS = {
 }
 
 
+def _query_overpass_batched(lat, lon, radius_m, tags, config, batch_size=12):
+    """
+    Split tags into batches of batch_size and query Overpass PARALLELLY.
+    This is the key fix for large tag lists (50+ tags) which would time out
+    as a single query. Each batch is ~300-500 chars and completes in 5-25s.
+    Results are deduplicated by OSM type+id.
+    max_workers=3 keeps us within Overpass fair-use rate limits.
+    """
+    if not tags:
+        return []
+
+    # Build batches – group by key first for slightly more efficient Overpass queries
+    batches = [tags[i:i + batch_size] for i in range(0, len(tags), batch_size)]
+    n_batches = len(batches)
+    print(f"[OVERPASS] Batching {len(tags)} tags into {n_batches} batches of ~{batch_size}")
+
+    all_elements = []
+    seen_ids = set()  # deduplicate by OSM type+id
+
+    with ThreadPoolExecutor(max_workers=3) as ex:
+        future_to_batch = {
+            ex.submit(_query_overpass, lat, lon, radius_m, batch, config): i
+            for i, batch in enumerate(batches)
+        }
+        ok_batches = 0
+        for f in as_completed(future_to_batch):
+            batch_idx = future_to_batch[f]
+            try:
+                elems = f.result()
+                new_elems = 0
+                for e in elems:
+                    key = f"{e.get('type')}/{e.get('id')}"
+                    if key not in seen_ids:
+                        seen_ids.add(key)
+                        all_elements.append(e)
+                        new_elems += 1
+                print(f"[OVERPASS] batch {batch_idx + 1}/{n_batches} → {len(elems)} elems ({new_elems} new after dedup)")
+                ok_batches += 1
+            except Exception as e:
+                print(f"[OVERPASS] batch {batch_idx + 1}/{n_batches} failed: {e}")
+
+    print(f"[OVERPASS] Batched total: {len(all_elements)} unique elements | {ok_batches}/{n_batches} batches OK")
+    return all_elements
+
+
 def get_pois(lat, lon, radius_km, custom_tags=None, lang='en'):
     """Get POIs from Overpass API. Auto-expands radius if not enough results."""
     radius_m = int(radius_km * 1000)
@@ -131,7 +176,9 @@ def _get_pois_custom(lat, lon, radius_m, radius_km, config, custom_tags, lang='e
     with ThreadPoolExecutor(max_workers=2) as ex:
         futures = []
         if poi_tags:
-            futures.append(ex.submit(_query_overpass, lat, lon, radius_m, poi_tags, config))
+            # KEY FIX: use batched queries instead of single giant query
+            # For 50 tags → 5 batches of 10 sent in parallel → each ~5-25s
+            futures.append(ex.submit(_query_overpass_batched, lat, lon, radius_m, poi_tags, config))
         if route_tags:
             futures.append(ex.submit(_query_overpass_routes, lat, lon, radius_m, route_tags, config))
         for f in as_completed(futures):

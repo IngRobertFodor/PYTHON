@@ -2,10 +2,10 @@
  MY TRAVEL TIPS - TEST RESULTS
 ==================================================
 
-#4 | 2026-10-23 14:30 | 256 PASSED / 0 FAILED / 256 TOTAL | ALL PASSED
+#5 | 2026-10-23 15:10 | 262 PASSED / 0 FAILED / 262 TOTAL | ALL PASSED
 --------------------------------------------------
-  [DIAG v2.2 changes: verbose logs, _meta in API response, warning msg, AbortController]
-  [All 256 tests pass unchanged - diagnostics are non-invasive]
+  [v2.3 Batching fix: _query_overpass_batched + frontend 180s timeout]
+  [TEST 22d] Overpass - batched query         - PASSED (6)  [NEW v2.3]
 ==================================================
   platform: win32 | Python 3.14.7 | pytest 8.1.1
 ==================================================
