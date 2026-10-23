@@ -449,7 +449,7 @@ Potom AI: precita fixture, extrahuje strukturu, napise presny parser.
 | **Q2** | Pipeline fix: preliminary_signals() v _run() + enrich peer/opportunity | ✅ HOTOVO | +6 |
 | **Q3** | UI fix: Index a Skóre separátne <td> + inv-zero badge | ✅ HOTOVO | - |
 | **Q4** | Location fix: nehnutelnosti slug >3 znaky + topreality zátvorkový guard + backfill | ✅ HOTOVO | +18 |
-| **TODO** | Obchodný vestník location scraper — 69% prázdnych (vyžaduje PDF sample analýzu) | ⏳ BACKLOG | - |
-| **TOTAL** | | | **1536** |
+| **Q5** | OV parser: 3 formáty (vertical/flow/specifikacia) + 4 PDF testy + 2 helper testy | ✅ HOTOVO | +10 |
+| **TOTAL** | | | **1546** |
 
 

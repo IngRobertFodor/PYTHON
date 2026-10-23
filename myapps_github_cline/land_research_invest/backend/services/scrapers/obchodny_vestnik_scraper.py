@@ -67,6 +67,18 @@ _OBEC_RE = re.compile(
     r"Obec\s*:?\s*([A-Z\u00c0-\u017e][a-z\u00c0-\u017e][^\n,;:]{1,35}?)(?:\s+Katastr|\s+LV|\s+Okres|\s*$)",
     re.IGNORECASE,
 )
+# Nové regexy pre moderné OV PDF formuláre (2 formáty)
+# Formát B: Nové Formular PDF-y — sekcia 'Nehnuteľnosť' + label 'Obec:'
+_VERTICAL_OBEC_RE = re.compile(
+    r"Nehnute[ľl]nos[ťt].{0,1500}?\bObec:\s*\n?\s*"
+    r"([A-Z\u00C0-\u017E][\w\s\-\u00C0-\u017E]{2,40}?)\s*(?:\n|$|\s{3,})",
+    re.DOTALL,
+)
+# Formát A: Staré OV dobrovoľné dražby — 'v obci X, katastrálne územie' v súvislom texte
+_FLOW_OBEC_RE = re.compile(
+    r"obci\s+([A-Z\u00C0-\u017E][\w\s\-\u00C0-\u017E]{2,40}?)(?:,|\s+kataster)",
+    re.IGNORECASE | re.DOTALL,
+)
 # Drazobnik - "Obchodne meno" sekcia pred adresou
 _DRAZOBNIK_RE = re.compile(
     r"Obchodn[e\u00e9]\s+meno[^:]*:\s*([A-Z\u00c0-\u017e][^\n]{3,60}?)(?:\s+I\.|$)",
@@ -374,24 +386,41 @@ def extract_lv(text):
     return m.group(1) if m else ""
 
 
-def extract_location_ov(text):
+def _try_vertical_form(text: str) -> str:
+    """Formát B: nové Formular PDF-y s sekciou 'Nehnuteľnosť' + label 'Obec:'.
+    Príklad: Formular-4784749, Formular-4784909, Formular-4781856.
     """
-    Extrahuje lokalitu (katastralne uzemie / obec) zo sekcie Zakladna specifikacia.
-    Format: '... 1672 Okres Obec KatastralneUzemie KatastralneUzemie Pozemky ...'
-    Vracia retazec alebo ''.
+    m = _VERTICAL_OBEC_RE.search(text)
+    if m:
+        val = m.group(1).strip()
+        if _is_valid_location(val):
+            return val
+    return ""
 
-    F3: validacia - vracia len hodnoty ktore vyzraju ako obec (nie '-', 'por.' atd.)
+
+def _try_flow_text(text: str) -> str:
+    """Formát A: staré OV dobrovoľné dražby — 'v obci X, katastrálne územie'.
+    pypdf vkladá \\n medzi slová viacslovných obcí → normalizujeme whitespace.
+    Príklad: obchodny_vestnik_drazba.pdf.
     """
+    m = _FLOW_OBEC_RE.search(text)
+    if m:
+        val = " ".join(m.group(1).split()).strip()  # normalizácia whitespace
+        if _is_valid_location(val):
+            return val
+    return ""
+
+
+def _try_specifikacia(text: str) -> str:
+    """Formát C: starý 'Specifikácia' format (fallback pre archívne PDF-y)."""
     i = text.find("pecifik")
     block = text[i:i+500] if i >= 0 else text[:600]
 
-    # Format: LV Okres Obec KU KU (4 slova za cislom LV)
     m = re.search(r"(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+Pozemky", block)
     if m:
         val = m.group(5).strip()
         if _is_valid_location(val):
             return val
-        # Fallback na obec (skupina 3)
         val3 = m.group(3).strip()
         if _is_valid_location(val3):
             return val3
@@ -414,6 +443,23 @@ def extract_location_ov(text):
         if _is_valid_location(val):
             return val
 
+    return ""
+
+
+def extract_location_ov(text: str) -> str:
+    """Robustný parser lokality z OV PDF-ov — 3 formáty v poradí od najšpecifickejšieho.
+
+    Formáty:
+      B (Vertical form)  — nové Formular PDF-y s sekciou 'Nehnuteľnosť' + label 'Obec:'
+      A (Flow text)      — staré OV dobrovoľné dražby s textom 'v obci X, katastrálne'
+      C (Specifikácia)   — najstarší formát, fallback (Zakladna specifikacia sekcia)
+
+    F3: validácia — vracia len hodnoty ktoré vyzerajú ako obec (nie '-', 'por.' atď.)
+    """
+    for extractor in (_try_vertical_form, _try_flow_text, _try_specifikacia):
+        loc = extractor(text)
+        if loc:
+            return loc
     return ""
 
 

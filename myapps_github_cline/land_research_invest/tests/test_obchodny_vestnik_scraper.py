@@ -141,15 +141,69 @@ class TestExtractLv:
 # ----------------------------------------------------------------
 
 class TestExtractLocationOv:
-    def test_location_from_fixture(self, fixture_text):
-        loc = extract_location_ov(fixture_text)
-        assert isinstance(loc, str)
+    """Reálna extrakcia obce z OV PDF fixtures — 4 rozdielne reálne dokumenty."""
 
-    def test_returns_string(self, fixture_text):
-        assert isinstance(extract_location_ov(fixture_text), str)
+    @pytest.mark.parametrize("pdf_name,expected_obec", [
+        ("obchodny_vestnik_drazba.pdf", "Nová Baňa"),   # Formát A: flow text
+        ("Formular-4784749.pdf",        "Podhorany"),   # Formát B: vertical form
+        ("Formular-4784909.pdf",        "Hankovce"),    # Formát B: vertical form
+        ("Formular-4781856.pdf",        "Terchová"),    # Formát B: vertical form
+    ])
+    def test_obec_z_pdf(self, pdf_name, expected_obec):
+        import pypdf
+        pdf_path = pathlib.Path(__file__).parent / "fixtures" / pdf_name
+        reader = pypdf.PdfReader(str(pdf_path))
+        text = " ".join(pg.extract_text() or "" for pg in reader.pages)
+        assert extract_location_ov(text) == expected_obec
 
     def test_returns_empty_for_no_location(self):
-        assert extract_location_ov("ziadna lokalita") == ""
+        assert extract_location_ov("ziadna lokalita tu nie je") == ""
+
+    def test_handles_empty_string(self):
+        assert extract_location_ov("") == ""
+
+    def test_strips_whitespace(self):
+        """Viacslovné obce — normalizácia whitespace."""
+        text = "nehnuteľnosti nachádzajúce sa v obci\n Nová\n  Baňa,\n katastrálne územie"
+        assert extract_location_ov(text) == "Nová Baňa"
+
+
+class TestTryVerticalForm:
+    """Unit testy pre _try_vertical_form() — Formát B (nové Formular PDF-y)."""
+    from services.scrapers.obchodny_vestnik_scraper import _try_vertical_form as _fn
+
+    def _fn(self, text):
+        from services.scrapers.obchodny_vestnik_scraper import _try_vertical_form
+        return _try_vertical_form(text)
+
+    def test_najde_obec_v_nehnutelnost_sekcii(self):
+        text = "Nehnuteľnosť\n Kataster:\n Číslo LV:\n 526\n Obec:\n Podhorany\n Podhorany\n\n Kraj:\n Prešovský"
+        assert self._fn(text) == "Podhorany"
+
+    def test_bez_sekcie_vrati_prazdne(self):
+        assert self._fn("Obec:\n Senec") == ""
+
+    def test_prazdny_text(self):
+        assert self._fn("") == ""
+
+
+class TestTryFlowText:
+    """Unit testy pre _try_flow_text() — Formát A (staré OV dobrovoľné dražby)."""
+
+    def _fn(self, text):
+        from services.scrapers.obchodny_vestnik_scraper import _try_flow_text
+        return _try_flow_text(text)
+
+    def test_najde_obec_v_texte(self):
+        text = "nehnuteľnosti nachádzajúce sa v okrese Žarnovica, obci Nová Baňa, katastrálne územie Nová Baňa"
+        assert self._fn(text) == "Nová Baňa"
+
+    def test_bez_klucoveho_slova_vrati_prazdne(self):
+        assert self._fn("Žarnovica, Nová Baňa, katastrálne územie") == ""
+
+    def test_normalizacia_whitespace(self):
+        text = "v obci\n  Nová\n  Baňa, katastrálne územie"
+        assert self._fn(text) == "Nová Baňa"
 
 
 # ----------------------------------------------------------------

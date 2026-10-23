@@ -1,0 +1,6 @@
+{
+  "obchodny_vestnik_drazba.pdf": {"obec": "Nová Baňa",  "okres": "Žarnovica", "format": "A_flow"},
+  "Formular-4784749.pdf":        {"obec": "Podhorany",   "okres": "Kežmarok",  "format": "B_vertical"},
+  "Formular-4784909.pdf":        {"obec": "Hankovce",    "okres": "Bardejov",  "format": "B_vertical"},
+  "Formular-4781856.pdf":        {"obec": "Terchová",    "okres": "Žilina",    "format": "B_vertical"}
+}
