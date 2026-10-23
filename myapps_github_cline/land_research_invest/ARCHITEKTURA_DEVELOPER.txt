@@ -219,7 +219,11 @@ Pre vyvojarov a AI agentov.
   |   +-- routes/ health_routes.py, config_routes.py, parcel_routes.py, monitor_routes.py
   |   +-- services/                        (* = este naimplementovane)
   |   |   +-- pipeline_service.py          ORCHESTRATOR toku
-  |   |   +-- scoring_service.py           vazene skore 0-100
+  |   |   +-- scoring_service.py           vazene skore 0-100 + preliminary_score
+  |   |   +-- signals.py                   investicne signaly (prelim/history/gis/drazba)
+  |   |   +-- opportunity_service.py       investment_index (0-100) + explain
+  |   |   +-- peer_analysis_service.py     LACNEJSI_AKO_OKOLIE peer comparison
+  |   |   +-- rezoning_service.py          odhad zisku z preklasifikacie
   |   |   +-- report_service.py            investicny report
   |   |   +-- cadastral_service.py         LV checklist + evaluate
   |   |   +-- distance_service.py          vzdialenost od BA
@@ -231,15 +235,19 @@ Pre vyvojarov a AI agentov.
   |   |   +-- zbgis_service.py             geometria parcely
   |   |   +-- geocoding_service.py         adresa -> GPS
   |   |   +-- price_analysis_service.py    cenova analyza
+  |   |   +-- storage_service.py           SQLite perzistencia
+  |   |   +-- diff_service.py              porovnanie behov
+  |   |   +-- uzemny_plan_service.py       UP asistent
+  |   |   +-- backup_service.py            zaloha/obnova DB (gzip SQL dump)
+  |   |   +-- sk_places.py                GeoNames SK (~8300 obci)
   |   |   +-- scraper_service.py           orchestrator scraperov
-  |   |   +-- scrapers/
-  |   |       +-- base_scraper.py, nehnutelnosti_scraper.py
-  |   |           (topreality, obchodny_vestnik... TODO)
-  |   |   +-- scraper_service.py            + scrapers/ (viz vyssie)
   |   |   +-- notifier_service.py          Telegram / email notifikacie
   |   |   +-- monitor_service.py           APScheduler periodicky scan
-  |   |   +-- monitor_service            -- HOTOVO
-    llm_agent_service          (LangChain + Gemini) -- volitelne.py           (*) APScheduler
+  |   |   +-- scrapers/
+  |   |       +-- base_scraper.py, nehnutelnosti_scraper.py
+  |   |           topreality_scraper.py, reality_sk_scraper.py
+  |   |           obchodny_vestnik_scraper.py, ske_scraper.py
+  |   |           notarske_drazby_scraper.py, spf_scraper.py
   |   +-- models/ parcel.py, result.py
   +-- frontend/
   |   +-- index.html, css/style.css
@@ -259,10 +267,10 @@ KONVENCIA FIXTURES (tests/fixtures/):
     obchodny_vestnik_drazba.pdf
     spf_listing.html          (buduci)
     drazby_net_drazba.html    (buduci)
-+-- tests/  763 testov, 0 zlyhani
-  |   +-- test_pipeline_service.py  (34)
-  |   +-- test_report_service.py    (68)
-  |   +-- test_cadastral_service.py (47)
++-- tests/  1546 testov, 0 zlyhani
+  |   +-- test_pipeline_service.py
+  |   +-- test_report_service.py
+  |   +-- test_cadastral_service.py
   |   +-- test_scoring_service.py
   |   +-- test_distance_service.py
   |   +-- test_flood_service.py
@@ -273,15 +281,23 @@ KONVENCIA FIXTURES (tests/fixtures/):
   |   +-- test_zbgis_service.py
   |   +-- test_geocoding_service.py
   |   +-- test_price_analysis_service.py
-  |   +-- test_notifier_service.py  (40)
-  |   +-- test_app.py              (42)
-  |   +-- test_scraper_service.py  (36)
-  |   +-- test_nehnutelnosti_scraper.py  (22)
-  |   +-- test_topreality_scraper.py  (45)
-  |   +-- test_obchodny_vestnik_scraper.py  (44)
-  |   +-- test_scraper_service.py  (17 base+registry)
-  |   +-- test_monitor_service.py  (26)
-  |   +-- test_config_validator.py  (32)
+  |   +-- test_notifier_service.py
+  |   +-- test_app.py
+  |   +-- test_scraper_service.py
+  |   +-- test_nehnutelnosti_scraper.py
+  |   +-- test_topreality_scraper.py
+  |   +-- test_obchodny_vestnik_scraper.py
+  |   +-- test_monitor_service.py
+  |   +-- test_config_validator.py
+  |   +-- test_signals.py
+  |   +-- test_rezoning_service.py
+  |   +-- test_peer_analysis_service.py
+  |   +-- test_opportunity_service.py
+  |   +-- test_storage_service.py
+  |   +-- test_scrape_routes.py
+  |   +-- test_backup_service.py
+  |   +-- test_url_fetch_service.py
+  |   +-- (+ dalsie servisne a scraperove testy)
   +-- README_TYMTO_ZACAT.txt
   +-- AKO_SPUSTIT_POUZIVATEL.txt
   +-- NASTAVENIA_POUZIVATEL.txt
@@ -293,7 +309,7 @@ VYSVETLIVKY_POUZIVATEL.txt  -- legenda stavov, farieb, GIS chyb
 9. IMPLEMENTOVANE SLUZBY (aktualny stav)
 ==============================================================
 
-  Hotove (offline-testovatelne, 1179 testov):
+  Hotove (offline-testovatelne, 1546 testov):
     pipeline_service    -- orchestrator, analyze_parcel()
     scoring_service     -- score_parcel() + preliminary_score() (0 HTTP)
     report_service      -- generate_report(), format_text_report()
@@ -308,22 +324,31 @@ VYSVETLIVKY_POUZIVATEL.txt  -- legenda stavov, farieb, GIS chyb
     geocoding_service   -- Nominatim adresa -> GPS
     price_analysis_service -- EUR/m2 vs. regional avg
     notifier_service    -- Telegram / email notifikacie
-    app.py + routes/    -- Flask REST API (10 endpointov)
-    scrape_routes       -- /api/scrape/* (5 endpointov, dvojfazovy scoring)
+    app.py + routes/    -- Flask REST API (scrape, backup, health, config, parcels)
+    scrape_routes       -- /api/scrape/* (dvojfazovy scoring, diff, UP links)
     frontend/           -- HTML+CSS+JS UI (tabulka+filter+mapa, Leaflet)
-    scraper_service     -- 7 zdrojov paralelne, dedup, progress, pre-scoring
+    scraper_service     -- zdrojov paralelne, dedup, progress, pre-scoring
     scrapers/base       -- BaseScraper kontrakt (plugin architektura)
     monitor_service     -- APScheduler scan + Flask /api/monitor endpoints
-    topreality_scraper  -- JSON-LD detail parser (128 pozemkov nazivo)
-    reality_sk_scraper  -- div.offer CSS parser (809 pozemkov nazivo)
-    nehnutelnosti_scraper -- JSON-LD parser (1317 pozemkov nazivo)
-    spf_scraper         -- PDF parser + filter 70km + dedup (2212 nazivo)
-    ske_scraper         -- SKE exekutorske drazby (112 nazivo)
-    notarske_drazby_scraper -- notar.sk PDF drazby (48 nazivo)
-    obchodny_vestnik_scraper -- justice.gov.sk PDF drazby (20 nazivo)
+    topreality_scraper  -- JSON-LD detail parser
+    reality_sk_scraper  -- div.offer CSS parser
+    nehnutelnosti_scraper -- JSON-LD parser (slug fix: min 4 znaky)
+    spf_scraper         -- PDF parser + filter 70km + dedup
+    ske_scraper         -- SKE exekutorske drazby
+    notarske_drazby_scraper -- notar.sk PDF drazby
+    obchodny_vestnik_scraper -- justice.gov.sk PDF drazby
+                              3 formaty: vertical(Nehnutelnost)/flow(obci X)/specifikacia
     storage_service     -- SQLite perzistencia behov (save_run/load_last_run)
     diff_service        -- porovnanie behov (nove/zlacneli/zmizli/still_here)
     uzemny_plan_service -- UP asistent (gisplan.sk + fallback + checklist)
+    signals.py          -- prelim_signals + history_signals + drazba_signals
+                          + gis_signals + merge_signals (pozri sekciu 12)
+    peer_analysis_service -- LACNEJSI_AKO_OKOLIE peer comparison v ramci obce
+    opportunity_service -- investment_index (0-100) + explain() + apply_opportunity()
+    rezoning_service    -- estimate_rezoning_profit() (zisk z preklasifikacie)
+    sk_places.py        -- GeoNames SK register (~8300 obci) pre vzdialenost offline
+    backup_service      -- gzipped SQL dump + merge import + rotacia historii
+    backup_routes       -- /api/backup/* (status/export/import/history)
 
   Zostava implementovat (TODO):
     llm_agent_service   -- LangChain + Gemini [PLANOVANE - C faza]
@@ -431,10 +456,31 @@ VYSVETLIVKY_POUZIVATEL.txt  -- legenda stavov, farieb, GIS chyb
       DRAHE_VYNATIE:   is_agricultural + bpej <= 4 (odvody >= 3 EUR/m2)
 
     Prelim signaly (signals.py preliminary_signals, 0 HTTP):
-      BLIZKO_BA:           odhad km z sk_places < 25 km
-      PRILIS_DALEKO:       odhad km z sk_places > 82 km
-      CENA_PODOZRIVA:      inzerat + ppsm < 1.5 EUR/m2
-      DRAZBA_PODHODNOTENA: drazobny zdroj + cena v rozsahu
+      BLIZKO_BA:                odhad km z sk_places < 25 km
+      PRILIS_DALEKO:            odhad km z sk_places > 82 km
+      CENA_PODOZRIVA:           inzerat + ppsm < 1.5 EUR/m2
+      DRAZBA_PODHODNOTENA:      drazobny zdroj + cena v rozsahu
+      PODIEL_ALEBO_CHYBNE_DATA: area_sqm < 100 ALEBO (price < 500 + area < 50)
+                                  -> cap investment_index na max 30
+
+    Historicke signaly (signals.py history_signals, z DB po save_run):
+      DLHO_V_PONUKE:      inzerat > 120 dni v ponuke
+      CENA_KLESA:         pokles ceny >= 5% od prvej hodnoty
+      HORICE:             DLHO_V_PONUKE + CENA_KLESA + age >= 180 dni
+
+    Drazobne signaly (signals.py drazba_signals, B2):
+      DRAZBA_POD_ZNALECKOU: vyvolavacia >= 20% pod znaleckou
+      DRAZBA_OPAKOVANA:     kolo >= 2 (predchadzajuce prebehlo bez zaujemcov)
+
+    Peer comparison (peer_analysis_service.py, B3):
+      LACNEJSI_AKO_OKOLIE: ppsm < 60% medianu obce (min. 4 pozemky v obci)
+                            typ: PRILEZITOST (bez hazikov) alebo RIZIKO (so)
+
+    Investicny index (opportunity_service.py, B4):
+      investment_index() = rezoning_pts + misprint_pts + confidence_pts - penalty
+      Vahy v criteria.yaml sekcia opportunity: mispricing_weights, risk_penalties
+      Prah PODIEL: ak PODIEL_ALEBO_CHYBNE_DATA -> max 30
+      explain() -> textove zdovodnenie (2-4 vety), aj pri PODIEL vzdy vrati varovanie
 
   VRSTVA 2: Kvantifikacia zisku (IMPLEMENTOVANA v rezoning_service.py)
     estimate_rezoning_profit(parcel) -> parcel (in-place):

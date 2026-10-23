@@ -52,6 +52,15 @@ Dve fázy skórovania
     Chýbajúci údaj: komponent sa vynechá (váha = 0) — skóre sa nezníži.
     Namiesto toho sa zobrazí "istota" (napr. 70 %) a zoznam "čo chýba".
     Verdikt NEDOSTATOK_DAT = skóre nie je spoľahlivé (< 50 % váhy dostupných).
+    Investičné signály:
+      prelim (okamzite):  BLIZKO_BA, DRAZBA_PODHODNOTENA (prilezitoste)
+                          CENA_PODOZRIVA, PRILIS_DALEKO,
+                          PODIEL_ALEBO_CHYBNE_DATA (rizika)
+      historicke (z DB):  HORICE, DLHO_V_PONUKE, CENA_KLESA
+                          DRAZBA_POD_ZNALECKOU, DRAZBA_OPAKOVANA
+                          LACNEJSI_AKO_OKOLIE (peer comparison)
+    Zobrazuju sa v tabulke ako farebne chipy vedla Skore.
+
     Investičné signály: 🟢 príležitosť (BLIZKO_BA, DRAZBA_PODHODNOTENA)
                         🔴 riziko (CENA_PODOZRIVA, PRILIS_DALEKO)
     Zobrazuje sa v tabuľke prieskumu (farebný odznak Skóre + signály).
@@ -70,6 +79,26 @@ Stavy GIS komponentov v rozpade skóre
   [missing]  Nepodarilo sa zistiť GPS súradnice — komponent nezapočítaný.
   [skip]     Komponent je vypnutý v nastaveniach (criteria.yaml).
   Aj keď niektoré komponenty skončia [error], analýza vždy dobehne.
+
+
+Investicny index 0-100
+----------------------
+  Okrem Skore (0-100) ziskava kazdy pozemok aj Investicny index (0-100).
+  Index je hlavna metrika pre zoradenie tabulky a kombinuje:
+    - Potencial preklasifikacie (0-35 b.)  — odhadovany zisk z pole -> stavebny
+    - Mispricingove signaly     (0-35 b.)  — HORICE, DRAZBA_POD_ZNALECKOU, ...
+    - Kvalita dat               (0-15 b.)  — kolko udajov sa podarilo zistit
+    - Rizikove penalizacie      (max -25 b.) — ZAPLAVA, PODIEL, ...
+
+  Zobrazuje sa ako badge v stlpci "Index":
+    zeleny 70-100 = silna prilezitost
+    modry  40-69  = stredna
+    sedy    1-39  = slaba
+    pomlcka  0    = nehodnotene
+
+  Ak je parcela pravdepodobne spoluvlastnicky podiel (vymera < 100 m²),
+  index je automaticky capnuty na max. 30 (signal PODIEL_ALEBO_CHYBNE_DATA).
+
 
 Red flags v modali
 ------------------
@@ -219,6 +248,19 @@ Krok 5 — Export
 
 
 ==============================================================
+==============================================================
+8b. AUTOMATICKA ZALOHA HISTORII
+==============================================================
+
+  Po kazdom uspesnom prieskume aplikacia automaticky zaloha DB:
+    data/backups/parcels_latest.sql.gz  -- najnovsie (odporucame commitnut)
+    data/backups/history/               -- rotovany archiv (lokalne, max 20)
+
+  Prenos na novy PC: Nastavenia -> Zaloha historii -> Obnovit zo suboru.
+  Stiahnucie aktualne zaloshy: Nastavenia -> Exportovat.
+
+==============================================================
+
 9. KAM DALEJ
 ==============================================================
 
@@ -256,7 +298,7 @@ Krok 5 — Export
 11. SPUSTENIE TESTOV
 ==============================================================
 
-  python -m pytest tests/ -q       (1216 testov, ~35 sekund)
+  python -m pytest tests/ -q       (1546 testov, ~55 sekund)
   python -m pytest tests/ -v       (detailny vystup)
 
 

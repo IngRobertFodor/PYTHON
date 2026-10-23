@@ -76,10 +76,23 @@ Rýchle predbežné skóre — FIXNÉ VÁHY (nemení sa v YAML)
   Verdikt NEDOSTATOK_DAT ak dostupných váh < 50 %.
 
   Investičné signály (prelim):
-    🟢 BLIZKO_BA          — menej ako 25 km od BA
-    🟢 DRAZBA_PODHODNOTENA — dražba s cenou v rozsahu
-    🔴 CENA_PODOZRIVA      — podozrivo nízka €/m² z inzerátu
-    🔴 PRILIS_DALEKO       — viac ako 82 km od BA
+    🟢 BLIZKO_BA               — menej ako 25 km od BA
+    🟢 DRAZBA_PODHODNOTENA      — dražba s cenou v rozsahu
+    🔴 CENA_PODOZRIVA           — podozrivo nízka €/m² z inzerátu
+    🔴 PRILIS_DALEKO            — viac ako 82 km od BA
+    🔴 PODIEL_ALEBO_CHYBNE_DATA — výmera < 100 m² alebo cena < 500 €
+                                   pri malej ploche (spoluvlastnícky podiel
+                                   alebo parsovacia chyba scrapora)
+
+  Signály histórie cien a dražieb (zobrazujú sa po scrape z DB):
+    🔥 HORICE               — dlho v ponuke (≥ 180 dní) + cena klesla
+                               (kombinácia = silne motivovaný predajca)
+    🟢 DLHO_V_PONUKE        — inzerát v ponuke > 120 dní
+    🟢 CENA_KLESA           — pokles ceny ≥ 5 % od prvého výskytu
+    🟢 DRAZBA_POD_ZNALECKOU — vyvolávacia ≥ 20 % pod znaleckou hodnotou
+    🟢 DRAZBA_OPAKOVANA     — opakovaná dražba (kolo 2+, viac tlaku na cenu)
+    📊 LACNEJSI_AKO_OKOLIE  — cena < 60 % mediánu iných pozemkov v tej
+                               istej obci (peer comparison)
 
   Po plnom GIS scoringu ďalšie signály (v modali):
     🟢 PREKLASIFIKACIA     — orná pôda, OKRAJ dediny, prístup + BPEJ ≥ 5
@@ -182,6 +195,67 @@ POZOR: ±30-50 % odchylka. Nie finančný ani právny poradca!
   >> max_protection_class: 9  len pôda bez odvodov
 
 
+
+==============================================================
+4c. INVESTIČNÝ INDEX 0-100  (opportunity)
+==============================================================
+
+Každý pozemok dostane Investičný index 0-100, ktorý kombinuje
+štyri zložky do jedného čísla:
+
+  Potenciál preklasifikácie   0-35 b.   logaritmický rast so ziskom:
+                                          10k€→10b, 50k€→24b, 300k€→35b
+  Mispricingové signály       0-35 b.   váhované: HORICE(1.0) >
+                                          DRAZBA_POD_ZNALECKOU(0.9) >
+                                          LACNEJSI_AKO_OKOLIE(0.75) > ...
+  Kvalita dát (istota)        0-15 b.   prelim_confidence × 15
+  Rizikové penalizácie        max 25 b.  ZAPLAVA(-20), CHRANENE(-15),
+                                          DRAHE_VYNATIE(-12), PODIEL(-25)
+
+Zobrazuje sa ako farebný badge v tabuľke (stĺpec Index):
+  zeleny   70-100   silná príležitosť
+  modry    40-69    stredná príležitosť
+  sedy      1-39    slabá (alebo podiel)
+  pomlcka     0     nehodnotené / nedostatok dát
+
+Ak parcela má signál PODIEL_ALEBO_CHYBNE_DATA, index je
+cap-nutý na maximálne 30 bez ohľadu na ostatné signály.
+
+Nastavenie váh v config/criteria.yaml -> sekcia opportunity:
+  >> znizit vahu peer comparison:
+     opportunity:
+       mispricing_weights:
+         LACNEJSI_AKO_OKOLIE: 0.4
+
+  >> vypnut penalizaciu za vzdialenost:
+     opportunity:
+       risk_penalties:
+         PRILIS_DALEKO: 0
+
+
+==============================================================
+4d. ZÁLOHA HISTÓRIE PRIESKUMOV
+==============================================================
+
+Aplikácia automaticky zálohuje DB po každom úspešnom prieskume:
+
+  data/backups/parcels_latest.sql.gz   -- najnovsie zaloha
+                                          (odporucame commitnut do GitHub)
+  data/backups/history/                -- rotovany archiv, poslednych 20
+                                          (lokalne, NEcommituj - rastie rychlo)
+
+Obnovenie histórie cien na novom PC:
+  1. Tu: git add data/backups/parcels_latest.sql.gz -> commit -> push
+  2. Novy PC: git pull -> spustit aplikaciu
+  3. Otvorit UI -> Nastavenia -> Zaloha historii
+  4. Kliknut "Obnovit zo suboru" -> vybrat parcels_latest.sql.gz
+  5. DB sa zluci -- ziadne duplicity, historia cien zachovana
+
+Manuálny export/import: Nastavenia -> Zaloha historii -> tlacidla
+v UI. Maximum 50 MB na import (ochrana pred chybnymi subormi).
+
+
+
 ==============================================================
 CASTE CHYBY
 ==============================================================
@@ -197,13 +271,16 @@ CASTE CHYBY
 ==============================================================
 RYCHLY PREHLAD
 ==============================================================
-  Lacnejšie:       criteria -> price -> max_eur
-  Bližšie k BA:    criteria -> location -> max_distance_km
-  Väčšie:          criteria -> parcel -> min_area_sqm
-  Váhy GIS:        scoring -> weights  (súčet = 1.0)
-  Filter prahov:   scoring -> thresholds -> strong_buy
-  Vypnúť zdroj:    sources -> NAZOV -> enabled: false
-  Vypnúť kontrolu: features -> use_XXX: false
+  Lacnejšie:        criteria -> price -> max_eur
+  Bližšie k BA:     criteria -> location -> max_distance_km
+  Väčšie:           criteria -> parcel -> min_area_sqm
+  Váhy GIS:         scoring -> weights  (súčet = 1.0)
+  Filter prahov:    scoring -> thresholds -> strong_buy
+  Signál HORICE:    signals -> horice_dlho_days (dni, default 180)
+  Index váhy:       opportunity -> mispricing_weights
+  Index penalty:    opportunity -> risk_penalties
+  Vypnúť zdroj:     sources -> NAZOV -> enabled: false
+  Vypnúť kontrolu:  features -> use_XXX: false
 
 
 Autor: Robert Fodor | 2026
