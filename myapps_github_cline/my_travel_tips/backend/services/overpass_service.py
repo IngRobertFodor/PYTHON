@@ -125,6 +125,8 @@ def get_pois(lat, lon, radius_km, custom_tags=None, lang='en'):
 def _get_pois_custom(lat, lon, radius_m, radius_km, config, custom_tags, lang='en'):
     route_tags = [t for t in custom_tags if t.startswith('route=')]
     poi_tags = [t for t in custom_tags if not t.startswith('route=')]
+    print(f"[POI] custom_tags mode | poi_tags={len(poi_tags)} | route_tags={len(route_tags)} | radius={radius_km}km")
+    all_raw = []
     all_pois = []
     with ThreadPoolExecutor(max_workers=2) as ex:
         futures = []
@@ -134,9 +136,14 @@ def _get_pois_custom(lat, lon, radius_m, radius_km, config, custom_tags, lang='e
             futures.append(ex.submit(_query_overpass_routes, lat, lon, radius_m, route_tags, config))
         for f in as_completed(futures):
             try:
-                all_pois.extend(_process_pois(f.result(), lat, lon, 'mainstream', radius_km, lang))
+                raw = f.result()
+                all_raw.extend(raw)
+                processed = _process_pois(raw, lat, lon, 'mainstream', radius_km, lang)
+                all_pois.extend(processed)
+                print(f"[POI] batch result: {len(raw)} raw → {len(processed)} after filter")
             except Exception as e:
-                print(f"Query error: {e}")
+                print(f"[POI] Query error: {e}")
+    print(f"[POI] total before sort: {len(all_pois)} pois from {len(all_raw)} raw elements")
     all_pois.sort(key=lambda x: x.get('score', 0), reverse=True)
     mainstream = all_pois[:10]
     for p in mainstream:
@@ -144,10 +151,21 @@ def _get_pois_custom(lat, lon, radius_m, radius_km, config, custom_tags, lang='e
     alternative = all_pois[10:20]
     for p in alternative:
         p['category'] = 'alternative'
-    return {'mainstream': mainstream, 'alternative': alternative}
+    print(f"[POI] final: mainstream={len(mainstream)}, alternative={len(alternative)}")
+    return {
+        'mainstream': mainstream,
+        'alternative': alternative,
+        '_meta': {
+            'mode': 'custom',
+            'raw_elements': len(all_raw),
+            'after_filter': len(all_pois),
+            'custom_tags_count': len(custom_tags),
+        }
+    }
 
 
 def _get_pois_default(lat, lon, radius_m, radius_km, config, lang='en'):
+    print(f"[POI] default mode | radius={radius_km}km")
     m_raw, a_raw = [], []
     with ThreadPoolExecutor(max_workers=2) as ex:
         fm = ex.submit(_query_overpass, lat, lon, radius_m, MAINSTREAM_TAGS, config)
@@ -160,8 +178,10 @@ def _get_pois_default(lat, lon, radius_m, radius_km, config, lang='en'):
             a_raw = fa.result()
         except Exception:
             pass
+    print(f"[POI] raw: mainstream={len(m_raw)}, alternative={len(a_raw)}")
     mainstream = _process_pois(m_raw, lat, lon, 'mainstream', radius_km, lang)
     alternative = _process_pois(a_raw, lat, lon, 'alternative', radius_km, lang)
+    print(f"[POI] after filter: mainstream={len(mainstream)}, alternative={len(alternative)}")
     m_keys = {_dedup_key(p) for p in mainstream}
     alternative = [p for p in alternative if _dedup_key(p) not in m_keys]
     mainstream.sort(key=lambda x: x.get('score', 0), reverse=True)
@@ -172,7 +192,16 @@ def _get_pois_default(lat, lon, radius_m, radius_km, config, lang='en'):
         mainstream = _auto_expand(mainstream, lat, lon, radius_km, 'mainstream', MAINSTREAM_TAGS, lang)
     if len(alternative) < 5 and radius_km < 150:
         alternative = _auto_expand(alternative, lat, lon, radius_km, 'alternative', ALTERNATIVE_TAGS, lang)
-    return {'mainstream': mainstream[:10], 'alternative': alternative[:10]}
+    print(f"[POI] final: mainstream={len(mainstream[:10])}, alternative={len(alternative[:10])}")
+    return {
+        'mainstream': mainstream[:10],
+        'alternative': alternative[:10],
+        '_meta': {
+            'mode': 'default',
+            'raw_elements': len(m_raw) + len(a_raw),
+            'after_filter': len(mainstream) + len(alternative),
+        }
+    }
 
 
 def _auto_expand(lst, lat, lon, radius_km, cat, tags, lang='en'):
@@ -223,41 +252,44 @@ def _query_overpass(lat, lon, radius_m, tags, config):
     if not tags:
         return []
     query = _build_query(lat, lon, radius_m, tags, config)
-    # No Accept header – Overpass API does not want 'application/json' Accept value
     headers = {'User-Agent': USER_AGENT}
     timeout = config.get('timeout', 30) + 10
 
+    print(f"[OVERPASS] POST | tags={len(tags)} | radius={radius_m}m | query={len(query)} chars | timeout={timeout}s")
+
     for attempt, url in enumerate(OVERPASS_SERVERS):
+        server = url.split('/')[2]
         try:
-            # Use POST – more reliable than GET for long queries
+            t0 = time.time()
             r = requests.post(url, data={'data': query}, headers=headers, timeout=timeout)
+            dt = round(time.time() - t0, 1)
             if r.status_code == 200:
                 try:
                     elems = r.json().get('elements', [])
-                    print(f"Overpass OK: {len(elems)} elems from {url.split('/')[2]}")
+                    print(f"[OVERPASS] ✓ {server} → {len(elems)} elements in {dt}s")
                     return elems
                 except Exception as json_err:
-                    print(f"Overpass JSON parse error from {url.split('/')[2]}: {json_err}")
+                    print(f"[OVERPASS] ✗ {server} → JSON parse error in {dt}s: {json_err}")
                     continue
             elif r.status_code == 429:
-                wait = 2 ** attempt  # exponential backoff: 1s, 2s, 4s
-                print(f"Overpass 429 rate-limit from {url.split('/')[2]}, waiting {wait}s...")
+                wait = 2 ** attempt
+                print(f"[OVERPASS] 429 rate-limit from {server} ({dt}s), waiting {wait}s...")
                 time.sleep(wait)
                 continue
             elif r.status_code in (504, 502, 503):
-                print(f"Overpass server error {r.status_code} from {url.split('/')[2]}, trying next...")
+                print(f"[OVERPASS] {r.status_code} from {server} ({dt}s), trying next...")
                 continue
             else:
-                print(f"Overpass unexpected status {r.status_code} from {url.split('/')[2]}")
+                print(f"[OVERPASS] HTTP {r.status_code} from {server} ({dt}s)")
                 continue
         except requests.exceptions.Timeout:
-            print(f"Overpass timeout from {url.split('/')[2]}")
+            print(f"[OVERPASS] ✗ {server} → TIMEOUT after {timeout}s")
             continue
         except Exception as e:
-            print(f"Overpass error from {url.split('/')[2]}: {e}")
+            print(f"[OVERPASS] ✗ {server} → ERROR: {type(e).__name__}: {str(e)[:120]}")
             continue
 
-    print("Overpass: all servers failed, returning empty list")
+    print("[OVERPASS] ✗ All servers failed – returning empty list")
     return []
 
 

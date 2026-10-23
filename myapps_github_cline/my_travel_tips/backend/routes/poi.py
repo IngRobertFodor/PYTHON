@@ -2,7 +2,9 @@
 POI Routes - Endpoints for Points of Interest discovery.
 Uses Overpass API (OpenStreetMap) for POI data.
 IMPROVEMENT: Parallel Wikipedia enrichment (10x faster).
+DIAG v2.2: Returns _meta diagnostics in response body.
 """
+import time
 from flask import Blueprint, jsonify, request
 from concurrent.futures import ThreadPoolExecutor
 from services.overpass_service import get_pois
@@ -17,7 +19,7 @@ def search_pois():
     """
     Search for POIs within a radius of given coordinates.
     Query params: lat, lon, radius_km, lang, tags
-    Returns: mainstream (10) + alternative (10) POIs with links
+    Returns: mainstream (10) + alternative (10) POIs with links + _meta diagnostics
     """
     lat = request.args.get('lat', type=float)
     lon = request.args.get('lon', type=float)
@@ -30,15 +32,46 @@ def search_pois():
     if radius_km <= 0 or radius_km > 200:
         return jsonify({'error': 'Radius must be between 1 and 200 km'}), 400
 
+    print(f"[ROUTE] /api/poi/search | lat={lat} lon={lon} radius={radius_km}km lang={lang} tags={tags_str[:80]}")
+
     # Parse tags filter from frontend checkboxes
     custom_tags = None
     if tags_str:
         custom_tags = [t.strip() for t in tags_str.split(',') if t.strip()]
 
     # Get POIs from Overpass API
+    t0 = time.time()
     pois = get_pois(lat, lon, radius_km, custom_tags, lang)
+    overpass_time_ms = int((time.time() - t0) * 1000)
+
     mainstream = pois.get('mainstream', [])[:10]
     alternative = pois.get('alternative', [])[:10]
+    meta = pois.get('_meta', {})
+    meta['overpass_time_ms'] = overpass_time_ms
+    meta['lat'] = lat
+    meta['lon'] = lon
+    meta['tags_received'] = len(custom_tags) if custom_tags else 0
+
+    print(f"[ROUTE] Overpass done in {overpass_time_ms}ms | mainstream={len(mainstream)} alternative={len(alternative)}")
+
+    # Build warning message when no results
+    warning = None
+    if not mainstream and not alternative:
+        raw = meta.get('raw_elements', 0)
+        if raw == 0:
+            warning = ("Overpass API nevrátilo žiadne dáta (server bol pravdepodobne preťažený). "
+                       "Skúste znova o chvíľu, alebo zväčšite okruh hľadania."
+                       if lang == 'sk' else
+                       "Overpass API returned no data (server may be overloaded). "
+                       "Please try again in a moment, or increase the search radius.")
+        else:
+            warning = (f"Overpass vrátil {raw} elementov, ale žiadne nevyhovelo filtrám. "
+                       "Skúste iné kategórie alebo väčší okruh."
+                       if lang == 'sk' else
+                       f"Overpass returned {raw} elements, but none passed the filters. "
+                       "Try different categories or a larger radius.")
+        print(f"[ROUTE] WARNING: {warning}")
+    meta['warning'] = warning
 
     # Enrich ALL POIs in parallel (Wikipedia + links) - much faster than sequential
     all_pois = mainstream + alternative
@@ -52,7 +85,8 @@ def search_pois():
         'mainstream': mainstream_enriched,
         'alternative': alternative_enriched,
         'center': {'lat': lat, 'lon': lon},
-        'radius_km': radius_km
+        'radius_km': radius_km,
+        '_meta': meta
     })
 
 

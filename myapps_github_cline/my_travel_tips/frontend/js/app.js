@@ -274,6 +274,10 @@ const App = {
         const loading = document.getElementById('loading-overlay');
         loading.classList.remove('hidden');
 
+        // AbortController – cancel fetch after 120s to prevent infinite spinner
+        const controller = new AbortController();
+        const fetchTimeout = setTimeout(() => controller.abort(), 120000);
+
         try {
             this.travelDate = document.getElementById('travel-date').value;
 
@@ -300,20 +304,41 @@ const App = {
                 date: this.travelDate,
                 tags: selectedTags.join(',')
             });
-            const response = await fetch(`/api/poi/search?${params}`);
+            console.log('[explore] Fetching POIs:', `/api/poi/search?${params.toString().substring(0,120)}...`);
+            const t0 = performance.now();
+            const response = await fetch(`/api/poi/search?${params}`, { signal: controller.signal });
             const data = await response.json();
+            const dt = Math.round(performance.now() - t0);
+            console.log(`[explore] Response in ${dt}ms:`, data._meta || '(no meta)');
 
             if (data.error) {
                 alert(t('error_search'));
                 return;
             }
 
+            // Show Overpass warning if present (e.g. server overloaded, no results)
+            if (data._meta && data._meta.warning) {
+                console.warn('[explore] Overpass warning:', data._meta.warning);
+                // Show in loading text briefly, then as alert after render
+                const loadingText = document.querySelector('#loading-overlay p');
+                if (loadingText) loadingText.textContent = data._meta.warning;
+                setTimeout(() => alert(data._meta.warning), 100);
+            }
+
             POIModule.renderResults(data, this.weatherData);
 
         } catch (err) {
-            console.error('Explore error:', err);
-            alert(t('error_search'));
+            if (err.name === 'AbortError') {
+                console.error('[explore] Fetch aborted after 120s timeout');
+                alert(currentLang === 'sk'
+                    ? 'Hľadanie trvalo príliš dlho (>120s). Overpass API je momentálne preťažené. Skúste znova.'
+                    : 'Search timed out (>120s). Overpass API is overloaded. Please try again.');
+            } else {
+                console.error('[explore] Explore error:', err);
+                alert(t('error_search'));
+            }
         } finally {
+            clearTimeout(fetchTimeout);
             loading.classList.add('hidden');
         }
     }

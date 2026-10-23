@@ -2,8 +2,15 @@
  MY TRAVEL TIPS - TEST RESULTS
 ==================================================
 
-#3 | 2026-10-23 13:45 | 256 PASSED / 0 FAILED / 256 TOTAL | ALL PASSED
+#4 | 2026-10-23 14:30 | 256 PASSED / 0 FAILED / 256 TOTAL | ALL PASSED
 --------------------------------------------------
+  [DIAG v2.2 changes: verbose logs, _meta in API response, warning msg, AbortController]
+  [All 256 tests pass unchanged - diagnostics are non-invasive]
+==================================================
+  platform: win32 | Python 3.14.7 | pytest 8.1.1
+==================================================
+
+
   [TEST 01] Frontend - HTML struktura       - PASSED (12)
   [TEST 02] Frontend - CSS subory           - PASSED (8)
   [TEST 03] Frontend - JS subory            - PASSED (12)
