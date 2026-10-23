@@ -202,6 +202,42 @@ class TestExtractLocationFromBreadcrumb:
 
 
 # ----------------------------------------------------------------
+# TestExtractLocationFromEstate — validácia obsahu zátvorky
+# ----------------------------------------------------------------
+
+class TestExtractLocationFromEstate:
+    """_extract_location_from_estate() nesmie vrátiť výmeru ani cenu ako lokalitu."""
+
+    def _loc(self, txt):
+        from services.scrapers.topreality_scraper import _extract_location_from_estate
+        return _extract_location_from_estate(txt)
+
+    def test_m2_v_zatvorke_vynechane(self):
+        assert self._loc("Pozemok (1 067 m² pripravených na okamžitú výstavbu)") == ""
+
+    def test_eur_m2_v_zatvorke_vynechane(self):
+        assert self._loc("Pozemok (217€/m²)") == ""
+
+    def test_eur_m2_variant2(self):
+        assert self._loc("Stavebný pozemok (98€/m2)") == ""
+
+    def test_rimska_cislica_bratislava_ok(self):
+        assert self._loc("Pozemok (Bratislava III)") == "Bratislava III"
+
+    def test_obec_ok(self):
+        assert self._loc("Pozemok (Senec)") == "Senec"
+
+    def test_prazdna_zatvorka_vynechana(self):
+        assert self._loc("Pozemok ()") == ""
+
+    def test_cislo_bez_jednotky_vynechane(self):
+        # Len číslice — žiadna obec
+        assert self._loc("Pozemok (12345)") == ""
+
+    def test_bez_zatvorky_prazdne(self):
+        assert self._loc("Pozemok Senec na predaj") == ""
+
+# ----------------------------------------------------------------
 # TestListingToParcel
 # ----------------------------------------------------------------
 

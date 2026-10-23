@@ -144,9 +144,20 @@ def _extract_price_from_estate(div, txt):
 
 
 def _extract_location_from_estate(txt):
-    """Lokalita zo zatvorky '(Bratislava III)' v texte inzeratu."""
+    """Lokalita zo zatvorky '(Bratislava III)' v texte inzeratu.
+    Validácia: obsah nesmie byť výmera (m²) alebo cena (€/m²) — len obec/mesto.
+    """
     m = re.search(r'\(([^)]{3,50})\)', txt)
-    return m.group(1).strip() if m else ""
+    if not m:
+        return ""
+    val = m.group(1).strip()
+    # Vyradiť ak obsahuje výmeru alebo cenu — nie lokalitu
+    if re.search(r'm[²2]|€|EUR\b|kg|\bm2\b', val, re.IGNORECASE):
+        return ""
+    # Musí mať aspoň 3 písmená (rímske čísla + obec = OK, samotné číslo = nie)
+    if sum(1 for c in val if c.isalpha()) < 3:
+        return ""
+    return val
 
 
 

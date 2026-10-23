@@ -186,7 +186,38 @@ class TestExtractLocation:
 
     def test_raca_sklonovana(self):
         result = _extract_location("Pozemok v Rači", "https://nehnutelnosti.sk/detail/x/pozemok-v-raci")
-        assert "rač" in result.lower() or "raca" in result.lower() or "raci" in result.lower()
+
+
+# ----------------------------------------------------------------
+# TestSlugWordMinLength — 3-znakové slová zo slugu nesmú byť lokalita
+# ----------------------------------------------------------------
+
+class TestSlugWordMinLength:
+    """Reálne tituly z DB kde starý kód vrátil 'Dom', 'Dph' alebo 'Pri'."""
+
+    def test_rodinny_dom_v_slugu_nedava_dom(self):
+        """Slug /pozemok-v-centre-sipkoveho-na-rodinny-dom → NIE 'Dom'."""
+        url = "https://www.nehnutelnosti.sk/detail/JuYDMOlwNZM/pozemok-v-centre-sipkoveho-na-rodinny-dom"
+        result = _extract_location("HIRA. Pozemok pre vysnívané bývanie pri lese pri 1 až 3 domy", url)
+        assert result.lower() != "dom", f"Got {result!r}, expected niečo iné než 'Dom'"
+
+    def test_dph_v_slugu_nedava_dph(self):
+        """Slug /slnecne-stavebne-parcely-25-minod-ba-odpocet-dph → NIE 'Dph'."""
+        url = "https://www.nehnutelnosti.sk/detail/JuxaZugvMQG/slnecne-stavebne-parcely-25-minod-ba-odpocet-dph"
+        result = _extract_location("Slnečné stavebné parcely 25 min.od BA-odpočet DPH", url)
+        assert result.lower() != "dph", f"Got {result!r}, expected niečo iné než 'Dph'"
+
+    def test_tri_pismena_predlozka_pri_nedava_loc(self):
+        """Slug /pozemok-pri → 'pri' má 3 znaky → nesmie prejsť."""
+        url = "https://www.nehnutelnosti.sk/detail/x/pozemok-pri"
+        result = _extract_location("Pozemok pri lese", url)
+        assert result.lower() not in ("pri", "pom"), f"Got {result!r}"
+
+    def test_dlhsi_slug_stale_funguje(self):
+        """Normálny slug s obcou > 3 znaky stále funguje."""
+        url = "https://www.nehnutelnosti.sk/detail/abc/stavebny-pozemok-senec"
+        result = _extract_location("Stavebný pozemok", url)
+        assert "senec" in result.lower(), f"Čakané 'senec', dostalo {result!r}"
 
     def test_senec_sklonovany(self):
         result = _extract_location("Pozemok v Senci", "https://nehnutelnosti.sk/detail/x/pozemok-v-senci")

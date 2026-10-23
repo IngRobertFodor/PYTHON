@@ -1095,7 +1095,7 @@ function renderResultsTable(items) {
       <td class="tbl-idx">${invBadge}</td>
       <td class="tbl-score"><span class="prelim-badge" style="background:${col}">${score}</span>${confTxt}${sigHtml}${flagHtml}</td>
       <td class="tbl-src">${(p.source_portal||"").replace(/_/g," ")}</td>
-      <td class="tbl-loc">${p.location_text||"—"}</td>
+      <td class="tbl-loc" title="${p.location_text || 'Lokalita neurčená — pozri detail'}">${p.location_text||"—"}</td>
       <td class="tbl-price">${p.price_eur>0?p.price_eur.toLocaleString("sk-SK"):"—"}</td>
       <td>${p.area_sqm>0?p.area_sqm.toLocaleString("sk-SK"):"—"}</td>
       <td>${ppsm}</td>

@@ -445,5 +445,11 @@ Potom AI: precita fixture, extrahuje strukturu, napise presny parser.
 | **UX F1–F5** | Preklepy, diagnostika zdrojov, error hlášky, tooltipy, docs | ✅ HOTOVO | +9 |
 | **P1** | IDE import warnings (pyrightconfig + .vscode/settings.json) | ✅ HOTOVO | - |
 | **P2** | Záloha histórie (backup_service, backup_routes, UI, auto-backup) | ✅ HOTOVO | +23 |
-| **TOTAL** | | | **1495** |
+| **Q1** | Sanity fix: PODIEL signál + cap Indexu pri area<100m² | ✅ HOTOVO | +12 |
+| **Q2** | Pipeline fix: preliminary_signals() v _run() + enrich peer/opportunity | ✅ HOTOVO | +6 |
+| **Q3** | UI fix: Index a Skóre separátne <td> + inv-zero badge | ✅ HOTOVO | - |
+| **Q4** | Location fix: nehnutelnosti slug >3 znaky + topreality zátvorkový guard + backfill | ✅ HOTOVO | +18 |
+| **TODO** | Obchodný vestník location scraper — 69% prázdnych (vyžaduje PDF sample analýzu) | ⏳ BACKLOG | - |
+| **TOTAL** | | | **1536** |
+
 

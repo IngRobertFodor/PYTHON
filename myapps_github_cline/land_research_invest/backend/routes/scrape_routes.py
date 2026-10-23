@@ -111,6 +111,28 @@ def _enrich_from_db(items: list) -> list:
         except Exception as exc:
             print(f"[scrape_routes._enrich] recount index: {exc}")
 
+    # --- Backfill location_text — opraví zlé 3-znakové útržky v DB ---
+    # nehnutelnosti_sk: znovu spustiť _extract_location(title, url)
+    # topreality_sk: vyčistiť keď je to m²/€ text z karty
+    import re as _re
+    for d in items:
+        sp  = d.get("source_portal", "")
+        loc = d.get("location_text", "") or ""
+        try:
+            if sp == "nehnutelnosti_sk":
+                # Opraviť 3-znakové útržky ("Dom", "Dph", "Pri" ...)
+                # Reuse existujúcej logiky — dá správnu obec alebo ""
+                if len(loc) <= 3 or _re.search(r'm[²2]|€/m', loc, _re.IGNORECASE):
+                    from services.scrapers.nehnutelnosti_scraper import _extract_location
+                    new_loc = _extract_location(d.get("title", ""), d.get("url", ""))
+                    d["location_text"] = new_loc  # "" je lepšie ako "Dom"
+            elif sp == "topreality_sk":
+                # Vyčistiť keď je v location_text výmera alebo cena
+                if _re.search(r'm[²2]|€/m|\bm2\b|\bEUR\b', loc, _re.IGNORECASE):
+                    d["location_text"] = ""
+        except Exception as exc:
+            print(f"[scrape_routes._enrich] location_backfill: {exc}")
+
     # --- Peer comparison + opportunity pre celú sadu naraz ---
     # (peer štatistiky sú presnejšie keď sa počítajú zo všetkých položiek)
     try:

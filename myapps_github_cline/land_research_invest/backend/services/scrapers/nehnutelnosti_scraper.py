@@ -411,7 +411,10 @@ def _extract_location(title: str, url: str) -> str:
 
     # --- Uroven 3: slug words (posledna zachrana pre neznamy slug) ---
     if slug:
-        parts = [p for p in slug.split("-") if len(p) > 2 and p.isalpha()]
+        # Minimum 4 znaky — 3-znakové slová sú buď predložky ("pri", "nad")
+        # alebo útržky zo slov ("dom" z "rodinny-dom", "dph" z "dph-odpocet").
+        # Žiadna slovenská obec nemá názov kratší ako 4 znaky.
+        parts = [p for p in slug.split("-") if len(p) > 3 and p.isalpha()]
         # Zahodime skomolene pady - slova ktore konca na typicky lokativny/genitivny
         # sufix (-i, -e, -y ak nie su v obci liste) a su dlhsie nez 6 znakov
         for word in reversed(parts):

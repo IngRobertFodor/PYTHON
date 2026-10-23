@@ -330,6 +330,74 @@ class TestEnrichFromDb:
         # Index musí byť > 0 po enrich (confidence + DRAZBA_PODHODNOTENA)
         assert item["investment_index"] > 0
 
+
+class TestEnrichLocationBackfill:
+    """_enrich_from_db() opraví 3-znakové útržky a m²/€ texty v location_text."""
+
+    def _bare_nehnutelnosti(self, loc, title="Stavebný pozemok v obci Senec", url="https://www.nehnutelnosti.sk/detail/abc/stavebny-pozemok-senec"):
+        return {
+            "url": url, "source_portal": "nehnutelnosti_sk", "title": title,
+            "price_eur": 20000.0, "area_sqm": 700.0, "price_per_sqm": 28.5,
+            "location_text": loc, "signals": [],
+            "listing_age_days": 0, "price_drop_pct": 0.0, "price_history": [],
+            "vyvolavacia_cena_eur": 0.0, "znalecka_hodnota_eur": 0.0, "drazba_kolo": 0,
+            "investment_index": 0, "investment_summary": "",
+            "prelim_confidence": 1.0, "prelim_missing": [], "prelim_breakdown": {},
+            "rezoning_profit_eur": 0.0,
+        }
+
+    def _bare_topreality(self, loc):
+        return {
+            "url": "https://topreality.sk/1", "source_portal": "topreality_sk",
+            "title": "Pozemok", "price_eur": 15000.0, "area_sqm": 600.0,
+            "price_per_sqm": 25.0, "location_text": loc, "signals": [],
+            "listing_age_days": 0, "price_drop_pct": 0.0, "price_history": [],
+            "vyvolavacia_cena_eur": 0.0, "znalecka_hodnota_eur": 0.0, "drazba_kolo": 0,
+            "investment_index": 0, "investment_summary": "",
+            "prelim_confidence": 1.0, "prelim_missing": [], "prelim_breakdown": {},
+            "rezoning_profit_eur": 0.0,
+        }
+
+    def test_dom_utrzok_opraveny(self):
+        """DB záznam s location_text='Dom' → po enrich sa opraví (prázdne alebo lepšia obec)."""
+        from routes.scrape_routes import _enrich_from_db
+        item = self._bare_nehnutelnosti("Dom")
+        _enrich_from_db([item])
+        assert item["location_text"] != "Dom", f"location_text zostalo 'Dom'"
+
+    def test_dph_utrzok_opraveny(self):
+        from routes.scrape_routes import _enrich_from_db
+        item = self._bare_nehnutelnosti("Dph")
+        _enrich_from_db([item])
+        assert item["location_text"] != "Dph"
+
+    def test_senec_nezmeni(self):
+        """Správna lokalita 'Senec' sa nesmie zmeniť."""
+        from routes.scrape_routes import _enrich_from_db
+        item = self._bare_nehnutelnosti("Senec")
+        _enrich_from_db([item])
+        assert "senec" in item["location_text"].lower()
+
+    def test_topreality_m2_vymazane(self):
+        """topreality location_text s m² sa vymaže na prázdne."""
+        from routes.scrape_routes import _enrich_from_db
+        item = self._bare_topreality("1 067 m² pripravených")
+        _enrich_from_db([item])
+        assert item["location_text"] == ""
+
+    def test_topreality_eur_m2_vymazane(self):
+        from routes.scrape_routes import _enrich_from_db
+        item = self._bare_topreality("217€/m²")
+        _enrich_from_db([item])
+        assert item["location_text"] == ""
+
+    def test_topreality_spravna_loc_nezmeni(self):
+        from routes.scrape_routes import _enrich_from_db
+        item = self._bare_topreality("Lehnice")
+        _enrich_from_db([item])
+        assert item["location_text"] == "Lehnice"
+
+
     def test_prazdny_zoznam(self):
 
         items = [self._bare(price=20000, area=800, signals=[existing])]
