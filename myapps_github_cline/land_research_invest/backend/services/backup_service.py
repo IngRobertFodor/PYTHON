@@ -213,7 +213,9 @@ def _validate_gz_sql(gz_bytes: bytes) -> None:
     if len(gz_bytes) < 2 or gz_bytes[:2] != b"\x1f\x8b":
         raise ValueError("Neplatný formát — očakáva sa gzip súbor (.sql.gz).")
     try:
-        start = gzip.decompress(gz_bytes[:512]).decode("utf-8", errors="ignore")
+        # Decompressujeme celý gzip stream a berieme prvých 512 znakov výstupu.
+        # gz_bytes[:512] by nebol valídny gzip (gzip nie je streamovateľný po častiach).
+        start = gzip.decompress(gz_bytes).decode("utf-8", errors="ignore")[:512]
     except Exception as exc:
         raise ValueError(f"Súbor nie je platný gzip: {exc}") from exc
     if "BEGIN TRANSACTION" not in start and "CREATE TABLE" not in start:

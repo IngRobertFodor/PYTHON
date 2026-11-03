@@ -14,6 +14,15 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 - **Audit P1:** `except Exception: pass` (bez logu) v `signals.py` → doplnený `logger.debug`
 - **Všetky 1546 testov prechádza** po zmenách
 
+## 2026-11 — P2: Route testy + bugfix backup validácie
+
+- **P2 route testy** — pridané do `tests/test_app.py` (žiadne nové súbory):
+  - `TestConfigRoutes` (15 testov): `GET /api/config/`, `GET /api/config/validate`, `POST /api/config/limits` — všetky kombinácie OK/4xx, whitelist, type-check, round-trip so zálohou configu
+  - `TestBackupRoutes` (14 testov): `GET /api/backup/status`, `GET /api/backup/history`, `GET /api/backup/export`, `POST /api/backup/import` — vrátane gzip validácie, roundtrip export→import, rate-limit 429
+  - `TestFetchUrlEndpoint` (7 testov): `POST /api/parcels/fetch-url` — missing URL 400, nepodporovaný portál 400, sieťová chyba 502, parser exception 500, úspešný parse 200
+- **Bugfix P0 — `backup_service._validate_gz_sql`**: `gzip.decompress(gz_bytes[:512])` → `gzip.decompress(gz_bytes)[:512]` — truncated gzip stream spôsoboval `ValueError` pri každom importe reálnej zálohy (funkcia nikdy nepracovala správne pre súbory > ~512 B komprimovaného obsahu)
+- **Celkový počet testov: 1572** (+26), všetky zelené
+
 
 - **Q1:** Signál `PODIEL_ALEBO_CHYBNE_DATA` + cap Investment indexu na max 30 pri area < 100 m²
 - **Q2:** `preliminary_signals()` volané v `_run()`; `_enrich_from_db` vždy prepočíta index + peer/opportunity
