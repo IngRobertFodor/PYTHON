@@ -7,11 +7,13 @@ Cista logika - bez externe API, 100% offline a testovatelna.
 Vahy a prahy sa citaju z config/criteria.yaml.
 """
 
+import logging
 from models.result import ServiceResult
 from models.parcel import Parcel
 from config_loader import get_scoring
 
 SERVICE_NAME = "scoring_service"
+logger = logging.getLogger(__name__)
 
 WEIGHT_TO_SOURCE = {
     "price":           "price_analysis_service",
@@ -37,7 +39,7 @@ def score_parcel(parcel: Parcel) -> Parcel:
         from services.signals import gis_signals as _gs, merge_signals as _ms
         parcel.signals = _ms(parcel.signals or [], _gs(parcel))
     except Exception as exc:
-        print(f"[scoring_service] gis_signals failed: {exc}")
+        logger.warning("[scoring_service] gis_signals failed: %s", exc)
     # Kvantifikácia zisku z preklasifikácie (ak je poľnohosp. pôda)
     try:
         zbgis_d = (parcel.get_result("zbgis_service") or type("R", (), {"data": {}})()).data
@@ -56,7 +58,7 @@ def score_parcel(parcel: Parcel) -> Parcel:
                             f"(hodnota {value:,.0f} € − náklady {cost:,.0f} €)"
                         )
     except Exception as exc:
-        print(f"[scoring_service] rezoning failed: {exc}")
+        logger.warning("[scoring_service] rezoning failed: %s", exc)
     return parcel
 
 

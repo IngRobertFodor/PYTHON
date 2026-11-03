@@ -219,6 +219,7 @@ Váhy konfigurovateľné: criteria.yaml → sekcia opportunity
 | GET | /api/backup/history | rotované zálohy |
 | POST | /api/analyze | GIS analýza jednej parcely |
 | POST | /api/parcels/analyze-batch | GIS analýza dávky |
+| POST | /api/parcels/fetch-url | parsovanie detailu pozemku z URL (autofill) |
 
 ---
 

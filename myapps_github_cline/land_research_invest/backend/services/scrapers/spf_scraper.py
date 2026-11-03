@@ -29,6 +29,7 @@ Pouzitie:
 
 import re
 import io
+import logging
 import unicodedata
 import pypdf
 from bs4 import BeautifulSoup
@@ -37,6 +38,7 @@ from services.scrapers.base_scraper import BaseScraper
 from config_loader import get_sources
 
 SOURCE_NAME = "spf"
+logger = logging.getLogger(__name__)
 BASE_URL    = "https://pozfond.sk"
 # Aktivna listing stranka (ked su pozemky vyhlasene)
 LISTING_URL = "https://pozfond.sk/zoznam-pozemkov-na-prenajom/"
@@ -144,7 +146,7 @@ class SpfScraper(BaseScraper):
             except _RETRYABLE as exc:
                 if attempt < MAX_RETRIES:
                     delay = delays[attempt]
-                    print(f"[{self.SOURCE_NAME}] sietovy vypadok pri {url}: {exc} — retry za {delay}s")
+                    logger.warning("[%s] sietovy vypadok pri %s: %s — retry za %ss", self.SOURCE_NAME, url, exc, delay)
                     import time as _time
                     _time.sleep(delay)
                 else:
@@ -181,15 +183,15 @@ class SpfScraper(BaseScraper):
                     archiv_link = BASE_URL + href
                     break
             if archiv_link:
-                print(f"[{self.SOURCE_NAME}] Aktivne pozemky nenajdene, pouzivam archiv: {archiv_link}")
+                logger.info("[%s] Aktivne pozemky nenajdene, pouzivam archiv: %s", self.SOURCE_NAME, archiv_link)
                 try:
                     archiv_html = self.fetch_html(archiv_link)
                     index = parse_index(archiv_html)
                 except Exception as exc:
-                    print(f"[{self.SOURCE_NAME}] Archiv chyba: {exc}")
+                    logger.warning("[%s] Archiv chyba: %s", self.SOURCE_NAME, exc)
 
         if not index:
-            print(f"[{self.SOURCE_NAME}] Ziadne PDF linky nenajdene na SPF stranke")
+            logger.info("[%s] Ziadne PDF linky nenajdene na SPF stranke", self.SOURCE_NAME)
             return []
 
         # Filter okresov: len relevantne pre investiciu (do ~70km od BA)
@@ -198,17 +200,17 @@ class SpfScraper(BaseScraper):
         if cfg.get("filter_okresy_70km", True):
             before = len(index)
             index = [e for e in index if _normalize_okres(e.get("okres", "")) in OKRESY_BA_70KM]
-            print(f"[{self.SOURCE_NAME}] Filter 70km od BA: {len(index)}/{before} PDF (okresy: {sorted({_normalize_okres(e['okres']) for e in index})})")
+            logger.info("[%s] Filter 70km od BA: %s/%s PDF (okresy: %s)", self.SOURCE_NAME, len(index), before, sorted({_normalize_okres(e['okres']) for e in index}))
 
         if not index:
-            print(f"[{self.SOURCE_NAME}] Ziadne PDF v relevantnych okresoch (filter_okresy_70km)")
+            logger.info("[%s] Ziadne PDF v relevantnych okresoch (filter_okresy_70km)", self.SOURCE_NAME)
             return []
 
         # Limit max_pdf: ochrana pred tisíckami PDF (napr. 557 po filtri = 55min)
         # Konfigurovatelne cez criteria.yaml: spf.max_pdf: 30 (false = bez limitu)
         max_pdf = cfg.get("max_pdf", 30)
         if max_pdf and len(index) > max_pdf:
-            print(f"[{self.SOURCE_NAME}] max_pdf limit: {max_pdf}/{len(index)} PDF (zmen v criteria.yaml pre viac)")
+            logger.info("[%s] max_pdf limit: %s/%s PDF (zmen v criteria.yaml pre viac)", self.SOURCE_NAME, max_pdf, len(index))
             index = index[:max_pdf]
 
         parcels = []
@@ -218,7 +220,7 @@ class SpfScraper(BaseScraper):
                 new = parse_pdf_pozemky(pdf_bytes, entry["okres"], entry["obec"], entry["pdf_url"])
                 parcels.extend(new)
             except Exception as exc:
-                print(f"[{self.SOURCE_NAME}] PDF chyba {entry.get('pdf_url','')}: {exc}")
+                logger.warning("[%s] PDF chyba %s: %s", self.SOURCE_NAME, entry.get('pdf_url',''), exc)
         return parcels
 
     def scrape_pdf(self, pdf_source, okres="", obec=""):
@@ -230,7 +232,7 @@ class SpfScraper(BaseScraper):
         try:
             return parse_pdf_pozemky(pdf_source, okres, obec)
         except Exception as exc:
-            print(f"[{self.SOURCE_NAME}] scrape_pdf error: {exc}")
+            logger.warning("[%s] scrape_pdf error: %s", self.SOURCE_NAME, exc)
             return []
 
 

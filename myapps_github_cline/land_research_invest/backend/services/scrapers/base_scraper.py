@@ -9,6 +9,7 @@ Konvencia nazvania:
         topreality_sk      -> topreality_scraper.py
 """
 
+import logging
 import time
 import requests
 from requests.exceptions import (
@@ -19,6 +20,8 @@ from requests.exceptions import (
 )
 from models.parcel import Parcel
 from config_loader import get_sources
+
+logger = logging.getLogger(__name__)
 
 RETRY_DELAY = 3.0   # sekundy pred retry pri sietovom vypadku (1. retry)
 RETRY_DELAY2 = 6.0  # sekundy pred 2. retry (exponencialny backoff)
@@ -78,7 +81,7 @@ class BaseScraper:
             except _RETRYABLE as exc:
                 if attempt < MAX_RETRIES:
                     delay = delays[attempt]
-                    print(f"[{self.SOURCE_NAME}] sietovy vypadok pri {url}: {exc} — retry za {delay}s")
+                    logger.warning("[%s] sietovy vypadok pri %s: %s — retry za %ss", self.SOURCE_NAME, url, exc, delay)
                     time.sleep(delay)
                 else:
                     raise
@@ -109,7 +112,7 @@ class BaseScraper:
                 parcels = self.parse_listings(html)
                 results.extend(parcels)
             except Exception as exc:
-                print(f"[{self.SOURCE_NAME}] chyba pri {url}: {exc}")
+                logger.warning("[%s] chyba pri %s: %s", self.SOURCE_NAME, url, exc)
         return results
 
     def scrape_all_pages(self, base_url, page_param="page", max_safety=50):
@@ -127,7 +130,7 @@ class BaseScraper:
                 html    = self.fetch_html(url)
                 parcels = self.parse_listings(html)
             except Exception as exc:
-                print(f"[{self.SOURCE_NAME}] strana {page} chyba: {exc}")
+                logger.warning("[%s] strana %s chyba: %s", self.SOURCE_NAME, page, exc)
                 break
             new = [p for p in parcels if p.url and p.url not in seen]
             if not new:

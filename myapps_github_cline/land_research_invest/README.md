@@ -217,6 +217,7 @@ POST /api/backup/import
 GET  /api/backup/history
 POST /api/analyze
 POST /api/parcels/analyze-batch
+POST /api/parcels/fetch-url    (autofill z URL inzerátu)
 ```
 
 ---

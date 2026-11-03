@@ -26,11 +26,13 @@ Kluce extrakcie:
 
 import re
 import io
+import logging
 import pypdf
 
 from services.scrapers.base_scraper import BaseScraper
 
 SOURCE_NAME = "obchodny_vestnik"
+logger = logging.getLogger(__name__)
 BASE_URL    = "https://www.justice.gov.sk/PortalApp/ObchodnyVestnik"
 
 # --- Regex vzory ---
@@ -134,7 +136,7 @@ class ObchodnyVestnikScraper(BaseScraper):
         try:
             vs_data = self._fetch_viewstate()
         except Exception as exc:
-            print(f"[{self.SOURCE_NAME}] VIEWSTATE chyba: {exc}")
+            logger.warning("[%s] VIEWSTATE chyba: %s", self.SOURCE_NAME, exc)
             return
 
         for drazba_typ in self._DRAZBA_TYPES:
@@ -142,7 +144,7 @@ class ObchodnyVestnikScraper(BaseScraper):
                 try:
                     html = self._fetch_listing_post(vs_data, drazba_typ, page)
                 except Exception as exc:
-                    print(f"[{self.SOURCE_NAME}] listing {drazba_typ} str.{page} chyba: {exc}")
+                    logger.warning("[%s] listing %s str.%s chyba: %s", self.SOURCE_NAME, drazba_typ, page, exc)
                     break
                 form_urls = self._parse_listing_html(html)
                 new_urls  = [u for u in form_urls if u not in seen_ids]
@@ -154,7 +156,7 @@ class ObchodnyVestnikScraper(BaseScraper):
                     try:
                         page_parcels.extend(self._process_formular(fu))
                     except Exception as exc:
-                        print(f"[{self.SOURCE_NAME}] formular chyba: {exc}")
+                        logger.warning("[%s] formular chyba: %s", self.SOURCE_NAME, exc)
                 yield page_parcels
 
     def _fetch_viewstate(self):
@@ -244,7 +246,7 @@ class ObchodnyVestnikScraper(BaseScraper):
             if pdf_bytes and pdf_bytes[:4] == b"%PDF":
                 return self.scrape_pdf(pdf_bytes, formular_url)
         except Exception:
-            pass
+            pass  # fallback na HTML
         # Fallback: HTML stranka s PDF linkom
         try:
             html    = self.fetch_html(formular_url)
@@ -254,7 +256,7 @@ class ObchodnyVestnikScraper(BaseScraper):
             pdf_bytes = self.fetch_pdf_bytes(pdf_url)
             return self.scrape_pdf(pdf_bytes, pdf_url)
         except Exception as exc:
-            print(f"[{self.SOURCE_NAME}] formular fallback chyba: {exc}")
+            logger.warning("[%s] formular fallback chyba: %s", self.SOURCE_NAME, exc)
             return []
 
     def _extract_pdf_url_from_detail(self, html):
@@ -295,7 +297,7 @@ class ObchodnyVestnikScraper(BaseScraper):
             parcel = pdf_to_parcel(text, url)
             return [] if parcel is None else [parcel]
         except Exception as exc:
-            print(f"[{self.SOURCE_NAME}] scrape_pdf error: {exc}")
+            logger.warning("[%s] scrape_pdf error: %s", self.SOURCE_NAME, exc)
             return []
 
 

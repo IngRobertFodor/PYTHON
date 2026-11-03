@@ -4,7 +4,16 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 
 ---
 
-## 2026-10 — Q-fixes a OV parser
+## 2026-11 — Audit + logging refaktoring
+
+- **Audit P1:** Nahradené všetky `print()` v produkčných Python súboroch za `logging` (štandardná knižnica)
+  - Dotknuté súbory: `base_scraper`, `scraper_service`, `scoring_service`, `scrape_routes`, `nehnutelnosti_scraper`, `topreality_scraper`, `notarske_drazby_scraper`, `ske_scraper`, `spf_scraper`, `obchodny_vestnik_scraper`, `url_fetch_service`, `signals`
+  - `logger = logging.getLogger(__name__)` v každom module — správna hierarchia logov
+  - Úroveň: `WARNING` pre recoverable chyby, `INFO` pre diagnostiku, `DEBUG` pre parsing detaily
+  - Výsledok: `print()` ostali len v `data/analyza_scoring.py` a `data/build_obce_sk.py` (diagnostické skripty, nie serverový kód)
+- **Audit P1:** `except Exception: pass` (bez logu) v `signals.py` → doplnený `logger.debug`
+- **Všetky 1546 testov prechádza** po zmenách
+
 
 - **Q1:** Signál `PODIEL_ALEBO_CHYBNE_DATA` + cap Investment indexu na max 30 pri area < 100 m²
 - **Q2:** `preliminary_signals()` volané v `_run()`; `_enrich_from_db` vždy prepočíta index + peer/opportunity

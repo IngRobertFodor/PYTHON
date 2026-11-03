@@ -9,10 +9,12 @@ Listing parsing (primarne):
   - Data (cena, vymera, lokalita) su priamo v HTML listingu bez detailov
 """
 import re, json
+import logging
 from bs4 import BeautifulSoup
 from services.scrapers.base_scraper import BaseScraper
 
 SOURCE_NAME = "topreality_sk"
+logger = logging.getLogger(__name__)
 BASE_DOMAIN  = "https://www.topreality.sk"
 
 # Aktualne funkcionalne URL (overene 10/9/2026, stare /pozemky/kraj/ davali 404)
@@ -68,7 +70,7 @@ class TopRealityScraper(BaseScraper):
             parcel = listing_to_parcel(blocks, html)
             return [] if parcel is None else [parcel]
         except Exception as exc:
-            print(f"[{self.SOURCE_NAME}] parse err: {exc}")
+            logger.debug("[%s] parse err: %s", self.SOURCE_NAME, exc)
             return []
 
 

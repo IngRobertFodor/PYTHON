@@ -4,7 +4,7 @@ Spoji vsetky GIS sluzby do jedneho toku.
 Zoberie Parcel, prebehne ho cez kazdu sluzbu podla feature flagov
 a vrati ho s vyplnenym results{}, final_score a recommendation.
 
-Tok (podla ARCHITEKTURA_DEVELOPER.txt sekcia 3):
+Tok (podla ARCHITEKTURA.md sekcia 3):
   1. ensure_coordinates  -- geocoding ak chybaju lat/lon
   2. run_gis_services    -- 8 GIS sluzieb paralelne (feature flagy)
   3. score_parcel        -- vazene skore 0-100

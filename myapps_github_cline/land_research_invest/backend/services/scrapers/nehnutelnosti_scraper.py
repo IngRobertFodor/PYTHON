@@ -19,10 +19,12 @@ Kluce v item:
 
 import re
 import json
+import logging
 import unicodedata
 from services.scrapers.base_scraper import BaseScraper
 
 SOURCE_NAME = "nehnutelnosti_sk"
+logger = logging.getLogger(__name__)
 BASE_DOMAIN = "https://www.nehnutelnosti.sk"
 
 # URL pre vyhladavanie pozemkov na predaj (IBV/rodinne domy)
@@ -73,7 +75,7 @@ class NehnutelnostiScraper(BaseScraper):
         try:
             jsonld = extract_jsonld(html)
         except Exception as exc:
-            print(f"[{self.SOURCE_NAME}] JSON-LD extract failed: {exc}")
+            logger.warning("[%s] JSON-LD extract failed: %s", self.SOURCE_NAME, exc)
             return []
 
         items = extract_items_from_graph(jsonld)
@@ -84,7 +86,7 @@ class NehnutelnostiScraper(BaseScraper):
                 if p is not None:
                     parcels.append(p)
             except Exception as exc:
-                print(f"[{self.SOURCE_NAME}] item parse error: {exc}")
+                logger.debug("[%s] item parse error: %s", self.SOURCE_NAME, exc)
         return parcels
 
 
@@ -402,9 +404,7 @@ def _extract_location(title: str, url: str) -> str:
             if res and res[0].lower() != "slovensko":
                 return res[0]
     except Exception:
-        pass
-
-    # --- Uroven 2: zatvorka v nazve ---
+        logger.debug("[nehnutelnosti] _extract_location sk_places lookup zlyhalo: title=%r", title[:40] if title else "")
     m = re.search(r'\(([^)]{3,40})\)\s*$', title)
     if m:
         return m.group(1).strip()

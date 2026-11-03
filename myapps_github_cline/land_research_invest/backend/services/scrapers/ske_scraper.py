@@ -19,9 +19,11 @@ Detail: https://ske.sk/drazobna-vyhlaska-detail/?ov_podanie_id=NNNNN
 """
 
 import re
+import logging
 from services.scrapers.base_scraper import BaseScraper
 
 SOURCE_NAME  = "ske_drazobne_vyhlasky"
+logger = logging.getLogger(__name__)
 BASE_DOMAIN  = "https://www.ske.sk"
 LISTING_URL  = "https://www.ske.sk/drazobne-vyhlasky/"
 
@@ -76,7 +78,7 @@ class SkeScraper(BaseScraper):
             try:
                 html = self.fetch_html(url)
             except Exception as exc:
-                print(f"[{self.SOURCE_NAME}] strana {page} chyba: {exc}")
+                logger.warning("[%s] strana %s chyba: %s", self.SOURCE_NAME, page, exc)
                 break
             entries = self._parse_listing_html(html)
             new = [e for e in entries if e["ov_id"] not in seen]
@@ -92,7 +94,7 @@ class SkeScraper(BaseScraper):
                     if p:
                         results.append(p)
                 except Exception as exc:
-                    print(f"[{self.SOURCE_NAME}] detail {entry['ov_id']} chyba: {exc}")
+                    logger.warning("[%s] detail %s chyba: %s", self.SOURCE_NAME, entry['ov_id'], exc)
         return results
 
     def parse_listings(self, html):

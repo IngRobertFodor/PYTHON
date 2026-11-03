@@ -21,9 +21,11 @@ Obmedzenie stranok: max_pages (z configu, default 3) -> ~40 najnovsich drazieb
 """
 
 import re
+import logging
 from services.scrapers.base_scraper import BaseScraper
 
 SOURCE_NAME  = "notarske_drazby"
+logger = logging.getLogger(__name__)
 BASE_DOMAIN  = "https://www.notar.sk"
 LISTING_BASE = "https://www.notar.sk/drazby/"
 SEARCH_PARAMS = (
@@ -89,7 +91,7 @@ class NotarskeDrazbyaScraper(BaseScraper):
             try:
                 html = self.fetch_html(url)
             except Exception as exc:
-                print(f"[{self.SOURCE_NAME}] listing strana {page} chyba: {exc}")
+                logger.warning("[%s] listing strana %s chyba: %s", self.SOURCE_NAME, page, exc)
                 break
             entries = self._parse_listing_html(html)
             new = [e for e in entries if e["act_id"] not in seen_ids]
@@ -105,7 +107,7 @@ class NotarskeDrazbyaScraper(BaseScraper):
                     if p:
                         page_parcels.append(p)
                 except Exception as exc:
-                    print(f"[{self.SOURCE_NAME}] detail {entry['act_id'][:8]} chyba: {exc}")
+                    logger.warning("[%s] detail %s chyba: %s", self.SOURCE_NAME, entry['act_id'][:8], exc)
             yield page_parcels
 
     def parse_listings(self, html):

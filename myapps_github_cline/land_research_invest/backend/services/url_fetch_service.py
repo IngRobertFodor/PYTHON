@@ -1,6 +1,9 @@
 """url_fetch_service — stiahne a vyparsuje detail pozemku z URL."""
 import re
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def _normalize_price(raw: str) -> float:
@@ -124,7 +127,7 @@ def _parse_nehnutelnosti(html: str, url: str) -> dict:
             if not desc:  desc  = str(listing_node.get("description",""))[:500]
         if title and not loc: loc = _extract_location(title, url)
     except Exception as exc:
-        print(f"[url_fetch] nehnutelnosti JSON-LD parse warning: {exc}")
+        logger.debug("[url_fetch] nehnutelnosti JSON-LD parse warning: %s", exc)
     if not title: title = _extract_og_title(html)
     if not loc:
         from services.scrapers.nehnutelnosti_scraper import _extract_location as _el

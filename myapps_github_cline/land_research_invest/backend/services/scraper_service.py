@@ -25,6 +25,7 @@ Progress:
   get_scrape_progress() vracia aktualny stav pre API / frontend.
 """
 
+import logging
 import time
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as FuturesTimeoutError
@@ -39,6 +40,7 @@ from services.scrapers.reality_sk_scraper import RealitySkScraper
 from services.scrapers.ske_scraper import SkeScraper
 
 SERVICE_NAME = "scraper_service"
+logger = logging.getLogger(__name__)
 
 # Per-zdroj timeout: ak jeden zdroj trvá dlhšie, nepocká sa naňho donekonecna.
 # 2700s = 45 min (dostatok aj pre zdroje s 50 stranami + rate-limitom 10/min)
@@ -198,24 +200,24 @@ def scrape_all(criteria=None):
                 elapsed_now = time.monotonic() - t_start
                 try:
                     parcels = future.result(timeout=SCRAPER_TIMEOUT_SEC)
-                    print(f"[scraper_service] {src}: {len(parcels)} pozemkov")
+                    logger.info("[scraper_service] %s: %s pozemkov", src, len(parcels))
                     all_parcels.extend(parcels)
                     _update_progress(src, len(parcels), elapsed_now, status="ok")
                 except FuturesTimeoutError:
-                    print(f"[scraper_service] {src}: TIMEOUT po {SCRAPER_TIMEOUT_SEC}s — preskakujem")
+                    logger.warning("[scraper_service] %s: TIMEOUT po %ss — preskakujem", src, SCRAPER_TIMEOUT_SEC)
                     _update_progress(src, 0, elapsed_now,
                                      status="timeout",
                                      error_msg=f"Timeout po {SCRAPER_TIMEOUT_SEC}s")
                 except Exception as exc:
                     err_short = str(exc)[:120]
-                    print(f"[scraper_service] {src} CHYBA: {err_short}")
+                    logger.error("[scraper_service] %s CHYBA: %s", src, err_short)
                     _update_progress(src, 0, elapsed_now,
                                      status="error",
                                      error_msg=err_short)
         except TimeoutError:
             pending = [s for f,s in future_to_src.items() if not f.done()]
             for src in pending:
-                print(f"[scraper_service] {src}: GLOBALNY TIMEOUT — preskakujem")
+                logger.warning("[scraper_service] %s: GLOBALNY TIMEOUT — preskakujem", src)
                 _update_progress(src, 0, time.monotonic() - t_start,
                                  status="timeout",
                                  error_msg="Globálny timeout — zdroj nedobehol")
@@ -223,7 +225,7 @@ def scrape_all(criteria=None):
     elapsed = time.monotonic() - t_start
     result = _deduplicate(all_parcels)
     _finish_progress(elapsed)
-    print(f"[scraper_service] Hotovo: {len(result)} unikatnych pozemkov za {elapsed:.0f}s")
+    logger.info("[scraper_service] Hotovo: %s unikatnych pozemkov za %ss", len(result), round(elapsed))
     return result
 
 
@@ -253,7 +255,7 @@ def scrape_source(source_name, criteria=None):
 
 def _scrape_one(source_name, criteria=None):
     """Spusti jeden scraper — volane z ThreadPoolExecutor."""
-    print(f"[scraper_service] Scrapujem: {source_name}")
+    logger.info("[scraper_service] Scrapujem: %s", source_name)
     scraper = SCRAPER_REGISTRY[source_name]()
     return scraper.scrape(criteria)
 

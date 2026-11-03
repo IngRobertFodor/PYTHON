@@ -15,10 +15,13 @@ Prahy sa čítajú z config/criteria.yaml sekcia signals (s fallback defaults).
 """
 
 from __future__ import annotations
+import logging
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from models.parcel import Parcel
+
+logger = logging.getLogger(__name__)
 
 _DRAZOBNE_SOURCES = {"ske_drazobne_vyhlasky", "notarske_drazby", "obchodny_vestnik"}
 _INZERAT_SOURCES  = {"nehnutelnosti_sk", "topreality_sk", "reality_sk"}
@@ -96,9 +99,7 @@ def preliminary_signals(parcel: "Parcel") -> list[dict]:
                     "Príliš ďaleko od BA",
                     f"{km:.0f} km od BA (max {daleko:.0f} km)", 0.7))
     except Exception:
-        pass
-
-    # CENA_PODOZRIVA
+        logger.debug("[signals] _estimate_distance_km zlyhalo pre '%s'", parcel.location_text)
     podozriva = float(cfg["cena_podozriva_ppsm"])
     if source in _INZERAT_SOURCES and 0 < ppsm < podozriva:
         result.append(_s("CENA_PODOZRIVA", "RIZIKO",

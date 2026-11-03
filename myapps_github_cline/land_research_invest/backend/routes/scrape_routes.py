@@ -11,6 +11,7 @@ GET  /api/scrape/up-links        -> UP asistent pre danu lokalitu (?location=<te
 GET  /api/scrape/up-coverage     -> pokrytie gisplan.sk pre obce z behu (z cache)
 """
 
+import logging
 import threading
 from flask import Blueprint, jsonify, request
 
@@ -29,6 +30,7 @@ from services.uzemny_plan_service import build_up_links, normalize_obec, warm_ca
 from models.parcel import Parcel
 
 scrape_bp = Blueprint("scrape", __name__)
+logger = logging.getLogger(__name__)
 
 
 def _enrich_from_db(items: list) -> list:
@@ -66,7 +68,7 @@ def _enrich_from_db(items: list) -> list:
                         existing_kody.add(sig["kod"])
                         changed = True
             except Exception as exc:
-                print(f"[scrape_routes._enrich] preliminary_signals: {exc}")
+                logger.warning("[scrape_routes._enrich] preliminary_signals: %s", exc)
 
         # --- B1: história cien ---
         if not (_HISTORY_KODY & existing_kody):
@@ -82,7 +84,7 @@ def _enrich_from_db(items: list) -> list:
                         existing_kody.add(sig["kod"])
                         changed = True
             except Exception as exc:
-                print(f"[scrape_routes._enrich] history_signals: {exc}")
+                logger.warning("[scrape_routes._enrich] history_signals: %s", exc)
 
         # --- B2: dražobné signály ---
         if not (_DRAZBA_KODY & existing_kody):
@@ -99,7 +101,7 @@ def _enrich_from_db(items: list) -> list:
                         existing_kody.add(sig["kod"])
                         changed = True
             except Exception as exc:
-                print(f"[scrape_routes._enrich] drazba_signals: {exc}")
+                logger.warning("[scrape_routes._enrich] drazba_signals: %s", exc)
 
         # --- Vždy prepočítať investment_index (nielen pri changed) ---
         # Záznamy z DB môžu mať index=0 (staré záznamy pred B4) alebo
@@ -109,7 +111,7 @@ def _enrich_from_db(items: list) -> list:
             d["investment_index"]   = new_idx
             d["investment_summary"] = _calc_explain(d)
         except Exception as exc:
-            print(f"[scrape_routes._enrich] recount index: {exc}")
+            logger.warning("[scrape_routes._enrich] recount index: %s", exc)
 
     # --- Backfill location_text — opraví zlé 3-znakové útržky v DB ---
     # nehnutelnosti_sk: znovu spustiť _extract_location(title, url)
@@ -131,7 +133,7 @@ def _enrich_from_db(items: list) -> list:
                 if _re.search(r'm[²2]|€/m|\bm2\b|\bEUR\b', loc, _re.IGNORECASE):
                     d["location_text"] = ""
         except Exception as exc:
-            print(f"[scrape_routes._enrich] location_backfill: {exc}")
+            logger.warning("[scrape_routes._enrich] location_backfill: %s", exc)
 
     # --- Peer comparison + opportunity pre celú sadu naraz ---
     # (peer štatistiky sú presnejšie keď sa počítajú zo všetkých položiek)
@@ -139,7 +141,7 @@ def _enrich_from_db(items: list) -> list:
         apply_peer_signals(items)
         apply_opportunity(items)
     except Exception as exc:
-        print(f"[scrape_routes._enrich] peer/opportunity: {exc}")
+        logger.warning("[scrape_routes._enrich] peer/opportunity: %s", exc)
 
     return items
 
