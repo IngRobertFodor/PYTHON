@@ -30,7 +30,8 @@ Pre vývojárov a AI agentov.
 
 ```
 +----------------------------------------------------------+
-|  AI ORCHESTRATOR  (llm_agent_service) [PLÁNOVANÉ]        |
+|  AI ORCHESTRATOR  (llm_agent_service)                    |
+|  google-genai SDK, 9 toolov, model fallback              |
 +------------------+---------------------------------------+
                    | volá nástroje (@tool)
      +-------------+----------+---------------+
@@ -98,6 +99,7 @@ a spustí `apply_peer_signals()` + `apply_opportunity()` — fixuje stale index=
 | `diff_service.py` | nové/zlacneli/zmizli/still_here |
 | `uzemny_plan_service.py` | UP asistent (gisplan.sk + fallback + checklist) |
 | `backup_service.py` | gzipped SQL dump + merge import + rotácia (max 20) |
+| `llm_agent_service.py` | AI orchestrátor — 9 toolov, Gemini, model fallback, hybrid model list |
 | `sk_places.py` | GeoNames SK (~8300 obcí) — vzdialenosť offline |
 | `scraper_service.py` | orchestrátor scraperov (paralelne, dedup, progress) |
 | `notifier_service.py` | Telegram / email notifikácie |
@@ -220,6 +222,13 @@ Váhy konfigurovateľné: criteria.yaml → sekcia opportunity
 | POST | /api/analyze | GIS analýza jednej parcely |
 | POST | /api/parcels/analyze-batch | GIS analýza dávky |
 | POST | /api/parcels/fetch-url | parsovanie detailu pozemku z URL (autofill) |
+| POST | /api/agent/ask | AI chat — otázka v SK → odpoveď v SK |
+| GET  | /api/agent/status | dostupnosť AI + aktuálny model |
+| GET  | /api/agent/health | detailný stav modelov (primary/fallback/active) |
+| GET  | /api/agent/available-models | hybrid zoznam dostupných Gemini modelov |
+| POST | /api/agent/select-model | override modelu pre session |
+| POST | /api/agent/clear-model | vymaže model override |
+| GET  | /api/agent/exports/\<file\> | stiahne CSV export z `export_csv_filtered` |
 
 ---
 
@@ -252,7 +261,7 @@ Váhy konfigurovateľné: criteria.yaml → sekcia opportunity
 ## 11. Testovanie
 
 ```bash
-python -m pytest tests/ -q              # 1572 testov, ~95 s
+python -m pytest tests/ -q              # 1621 testov, ~105 s
 python -m pytest tests/ -v --tb=short
 python -m pytest tests/test_signals.py tests/test_opportunity_service.py -v
 python -m pytest tests/test_backup_service.py -v

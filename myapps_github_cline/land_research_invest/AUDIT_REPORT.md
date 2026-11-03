@@ -1,6 +1,7 @@
 # Audit Report — 2026-11-03
 
 > Pracovný dokument. Po review a commite zmazať.
+> **Stav 2026-11-03:** P0/P1 opravené, P2 testy hotové, C1 AI backend hotový.
 
 ---
 

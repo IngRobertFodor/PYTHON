@@ -25,6 +25,10 @@ def create_app(test_config=None):
 
     app.config["JSON_SORT_KEYS"] = False
     app.config["TESTING"]        = False
+    # SECRET_KEY je potrebný pre Flask session (používa ho agent_routes pre model override).
+    # Generuje sa z prostredia alebo náhodne pri každom štarte (session sa po reštarte stratí — OK).
+    import secrets as _sec
+    app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY") or _sec.token_hex(32)
     if test_config:
         app.config.update(test_config)
 
@@ -43,6 +47,7 @@ def create_app(test_config=None):
     from routes.monitor_routes import monitor_bp
     from routes.scrape_routes import scrape_bp
     from routes.backup_routes import backup_bp
+    from routes.agent_routes import agent_bp
 
     app.register_blueprint(health_bp, url_prefix="/api")
     app.register_blueprint(config_bp, url_prefix="/api/config")
@@ -50,6 +55,7 @@ def create_app(test_config=None):
     app.register_blueprint(monitor_bp, url_prefix="/api/monitor")
     app.register_blueprint(scrape_bp,  url_prefix="/api/scrape")
     app.register_blueprint(backup_bp,  url_prefix="/api/backup")
+    app.register_blueprint(agent_bp,   url_prefix="/api/agent")
 
 
     # Monitor start (ak use_monitoring=true)

@@ -23,6 +23,28 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 - **Bugfix P0 — `backup_service._validate_gz_sql`**: `gzip.decompress(gz_bytes[:512])` → `gzip.decompress(gz_bytes)[:512]` — truncated gzip stream spôsoboval `ValueError` pri každom importe reálnej zálohy (funkcia nikdy nepracovala správne pre súbory > ~512 B komprimovaného obsahu)
 - **Celkový počet testov: 1572** (+26), všetky zelené
 
+## 2026-11 — Vlna C1: AI Orchestrator (backend)
+
+- **`backend/services/llm_agent_service.py`** — AI agent cez Google Gemini (google-genai SDK)
+  - 9 toolov: `get_parcels`, `get_run_summary`, `analyze_parcel_gis`, `get_peer_statistics`,
+    `get_up_coverage`, `explain_investment`, `get_diff`, `get_backup_status`, `export_csv_filtered`
+  - Model management: primárny `gemini-3.5-flash` + záložný `gemini-3.1-flash-lite`; override cez `.env LLM_MODEL`
+  - Automatický fallback pri deprecated/quota/network chybách
+  - Hybrid model discovery: Google API `models.list()` (3s timeout) → hardcoded fallback zoznam
+  - Health check s 24h cache; exports cleanup (súbory staršie ako 24h)
+- **`backend/routes/agent_routes.py`** — REST endpoints:
+  - `POST /api/agent/ask` — hlavný chat (max 500 znakov)
+  - `GET  /api/agent/status` — dostupnosť + aktuálny model
+  - `GET  /api/agent/health` — detailný stav modelov (primary / fallback / active)
+  - `GET  /api/agent/available-models` — hybrid zoznam
+  - `POST /api/agent/select-model` — override modelu (uloží do Flask session)
+  - `POST /api/agent/clear-model` — vymaže override
+  - `GET  /api/agent/exports/<file>` — stiahne CSV export (path traversal guard)
+- **`backend/app.py`** — registrácia `agent_bp` + `SECRET_KEY` pre Flask session
+- **`tests/test_llm_agent_service.py`** — 49 testov, 100% mocked LLM (žiadne reálne volania)
+- **Reálny test**: `gemini-3.5-flash` úspešne odpovedá v SK + tool-calling funguje (`get_run_summary`)
+- **Celkový počet testov: 1621** (+49), všetky zelené
+
 
 - **Q1:** Signál `PODIEL_ALEBO_CHYBNE_DATA` + cap Investment indexu na max 30 pri area < 100 m²
 - **Q2:** `preliminary_signals()` volané v `_run()`; `_enrich_from_db` vždy prepočíta index + peer/opportunity

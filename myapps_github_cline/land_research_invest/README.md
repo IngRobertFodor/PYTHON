@@ -225,7 +225,7 @@ POST /api/parcels/fetch-url    (autofill z URL inzerátu)
 ## 9. Testy
 
 ```bash
-python -m pytest tests/ -q        # 1572 testov, ~95 sekúnd
+python -m pytest tests/ -q        # 1621 testov, ~105 sekúnd
 python -m pytest tests/ -v        # detailný výstup
 ```
 
