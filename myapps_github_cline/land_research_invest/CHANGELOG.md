@@ -48,8 +48,8 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 ## 2026-11 — Vlna C2: AI Orchestrator UI (chat panel)
 
 - **`frontend/js/ai_agent.js`** — vanilla JS trieda `AIAgent` (floating chat panel)
-  - Toggle tlačidlo `💬 AI asistent` vpravo dole (fixed, zbalený pri štarte)
-  - Resizable panel: drag za ľavý-horný roh (min 300×400, max 800×90vh)
+  - Toggle tlačidlo `💬 AI asistent` **vpravo hore** pod headerom (`top: 62px; right: 20px`)
+  - Resizable panel: drag za **pravý-dolný roh** (min 300×400, max 800×90vh)
   - Prompt chips (5 predvolených otázok) — klik = automatické odoslanie
   - Chat bubliny (user / AI / error) s jednoduchým markdown-light renderingom (bold, code, lists)
   - Tool call chips pod AI odpoveďou — zobrazí aký tool bol volaný
@@ -64,6 +64,14 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 - **`frontend/index.html`** — pridaný `<div id="ai-agent-root">` + CSS + JS linky
 - **`tests/test_app.py`** — +3 testy: HTML obsahuje AI placeholder, CSS link, JS link
 - **Celkový počet testov: 1624** (+3), všetky zelené
+
+## 2026-11 — UI opravy po reálnom teste
+
+- **AI toggle pozícia**: presunutý z pravého dolného rohu (`bottom: 20px`) do pravého horného rohu
+  (`top: 62px`) — eliminuje prekrývanie s legendou mapy
+- **AI modal picker scroll**: `#ai-model-modal-box` dostal `max-height: 85vh` + `display: flex; flex-direction: column`;
+  zoznam modelov (`.ai-model-modal-body`) má `overflow-y: auto; flex: 1` — header a footer sú vždy
+  viditeľné, dlhý zoznam modelov od Google API scrolluje vnútri
 
 
 - **Q1:** Signál `PODIEL_ALEBO_CHYBNE_DATA` + cap Investment indexu na max 30 pri area < 100 m²

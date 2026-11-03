@@ -190,9 +190,12 @@ Manuálny export/import: UI → Nastavenia → Záloha histórie.
 | Prieskum nenašiel výsledky | Portály dočasne nedostupné, skúste o 15 min |
 | GIS služba timeout | Skúste neskôr; analýza prebehne aj bez nej (skóre 50) |
 | Port 5001 obsadený | Zmeniť `PORT` v `.env` |
-| Chcete AI (Gemini) | Vytvoriť `.env` s `GOOGLE_API_KEY=...` |
+| Chcete AI (Gemini) | Vytvoriť `.env` s `GOOGLE_API_KEY=...` — pozri sekciu 10 |
 | Chybný YAML po zmene | `python -c "import yaml; yaml.safe_load(open('config/criteria.yaml'))"` |
 | Signály chýbajú | Budujú sa postupne — spustite prieskum aspoň 2× |
+| AI tlačidlo sivé | Chýba `GOOGLE_API_KEY` v `.env` |
+| AI vracia "preťažená" | Free tier limit (15 req/min) — počkaj 1 minútu |
+| AI model zrušený | Klikni ⚙️ v AI paneli → vyber nový model |
 
 ---
 
@@ -218,13 +221,20 @@ GET  /api/backup/history
 POST /api/analyze
 POST /api/parcels/analyze-batch
 POST /api/parcels/fetch-url    (autofill z URL inzerátu)
+POST /api/agent/ask            (AI chat — otázka v SK)
+GET  /api/agent/status
+GET  /api/agent/health
+GET  /api/agent/available-models
+POST /api/agent/select-model
+POST /api/agent/clear-model
+GET  /api/agent/exports/<file>
 ```
 
 ---
 
 ## 10. AI asistent (Gemini)
 
-Appka má voliteľného AI asistenta v pravom dolnom rohu — tlačidlo **💬 AI asistent**.
+Appka má voliteľného AI asistenta — tlačidlo **💬 AI asistent** v pravom hornom rohu (pod hlavičkou).
 
 ### Zapnutie
 

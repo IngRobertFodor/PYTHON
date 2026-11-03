@@ -240,7 +240,9 @@ Váhy konfigurovateľné: criteria.yaml → sekcia opportunity
 | `HOST` | `127.0.0.1` | `0.0.0.0` pre sieťový prístup |
 | `PORT` | `5001` | Port Flask servera |
 | `CORS_ORIGINS` | `http://localhost:5001,...` | Povolené CORS origins |
-| `GOOGLE_API_KEY` | — | Gemini AI (voliteľné) |
+| `GOOGLE_API_KEY` | — | Gemini AI — povinné pre AI asistenta |
+| `LLM_MODEL` | `gemini-3.5-flash` | Primárny Gemini model (voliteľné) |
+| `LLM_FALLBACK_MODEL` | `gemini-3.1-flash-lite` | Záložný model pri chybe primárneho (voliteľné) |
 
 ---
 
@@ -255,13 +257,17 @@ Váhy konfigurovateľné: criteria.yaml → sekcia opportunity
 | OV parser nerozpozná PDF | Log — 3 extraktory: `_try_vertical_form`, `_try_flow_text`, `_try_specifikacia` |
 | Záloha neuložila | Skontrolovať práva na `data/backups/` |
 | Chybný YAML | `python -c "import yaml; yaml.safe_load(open('config/criteria.yaml'))"` |
+| AI tlačidlo je sivé | Chýba `GOOGLE_API_KEY` v `.env` — pozri README sekcia 10 |
+| AI vracia "preťažená" | Free tier rate-limit (15 req/min) — počkaj 1 minútu |
+| AI vracia "model zrušený" | Klikni ⚙️ v AI chat paneli → vyber nový model zo zoznamu |
+| AI odpovedá po anglicky | System prompt vynucuje SK — skús otázku preformulovať po slovensky |
 
 ---
 
 ## 11. Testovanie
 
 ```bash
-python -m pytest tests/ -q              # 1621 testov, ~105 s
+python -m pytest tests/ -q              # 1624 testov, ~110 s
 python -m pytest tests/ -v --tb=short
 python -m pytest tests/test_signals.py tests/test_opportunity_service.py -v
 python -m pytest tests/test_backup_service.py -v

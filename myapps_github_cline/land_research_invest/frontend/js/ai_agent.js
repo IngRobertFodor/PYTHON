@@ -337,8 +337,8 @@ const AIAgent = (() => {
 
   function _onResizeMove(e) {
     if (!_resizing) return;
-    const dw = _rsx - e.clientX;
-    const dh = _rsy - e.clientY;
+    const dw = e.clientX - _rsx;
+    const dh = e.clientY - _rsy;
     const newW = Math.max(300, Math.min(800, _rsw + dw));
     const newH = Math.max(400, Math.min(window.innerHeight * 0.9, _rsh + dh));
     $panel.style.width  = newW + "px";
