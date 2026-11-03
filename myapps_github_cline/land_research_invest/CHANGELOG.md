@@ -69,6 +69,9 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 
 - **AI toggle pozícia**: presunutý z pravého dolného rohu (`bottom: 20px`) do pravého horného rohu
   (`top: 62px`) — eliminuje prekrývanie s legendou mapy
+- **AI toggle zarovnanie**: toggle presunutý priamo do `<header>` ako flex item — zarovnaný
+  vertikálne s názvom appky, biele priesvitné pozadie (rgba) na modrom header pozadí, žiadne
+  magic `top:` čísla
 - **AI modal picker scroll**: `#ai-model-modal-box` dostal `max-height: 85vh` + `display: flex; flex-direction: column`;
   zoznam modelov (`.ai-model-modal-body`) má `overflow-y: auto; flex: 1` — header a footer sú vždy
   viditeľné, dlhý zoznam modelov od Google API scrolluje vnútri
