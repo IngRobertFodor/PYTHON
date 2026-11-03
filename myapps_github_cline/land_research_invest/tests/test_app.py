@@ -341,6 +341,21 @@ class TestFrontendServing:
         r = client.get("/")
         assert "text/html" in r.content_type
 
+    def test_root_has_ai_agent_root(self, client):
+        """index.html musí obsahovať placeholder pre AI widget."""
+        r = client.get("/")
+        assert b'id="ai-agent-root"' in r.data
+
+    def test_root_has_ai_agent_css(self, client):
+        """index.html musí načítavať ai_agent.css."""
+        r = client.get("/")
+        assert b"ai_agent.css" in r.data
+
+    def test_root_has_ai_agent_js(self, client):
+        """index.html musí načítavať ai_agent.js."""
+        r = client.get("/")
+        assert b"ai_agent.js" in r.data
+
 
 # ----------------------------------------------------------------
 # TestConfigRoutes  —  GET /api/config/  GET /api/config/validate

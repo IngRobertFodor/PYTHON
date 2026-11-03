@@ -222,10 +222,44 @@ POST /api/parcels/fetch-url    (autofill z URL inzerátu)
 
 ---
 
+## 10. AI asistent (Gemini)
+
+Appka má voliteľného AI asistenta v pravom dolnom rohu — tlačidlo **💬 AI asistent**.
+
+### Zapnutie
+
+1. Získaj API kľúč zadarmo: **https://aistudio.google.com/apikey**
+2. Otvor súbor `.env` v koreňovom adresári projektu
+3. Vlož kľúč:
+   ```
+   GOOGLE_API_KEY=AIza...tvoj_kluc...
+   ```
+4. Reštartuj appku
+
+### Čo AI vie zodpovedať
+
+- *"Súhrn posledného behu"* — koľko pozemkov z akých zdrojov
+- *"Dražby pod znaleckou cenou"* — dražobné pozemky s najlepšími signálmi
+- *"Nájdi 5 pozemkov do 25 km od BA s indexom nad 70"*
+- *"Peer analýza obce Senec"* — medián €/m², počet, min/max
+- *"Spusti GIS analýzu pre [URL pozemku]"*
+- *"Daj mi CSV pozemkov z okresu Pezinok"* — vygeneruje stiahnuteľný CSV
+
+### Model
+
+Automaticky používa `gemini-3.5-flash` so záložným `gemini-3.1-flash-lite`.
+Ak model prestane fungovať, appka zobrazí žltý banner a ponúkne výber nového modelu (⚙️).
+
+### Bez AI
+
+Ak `GOOGLE_API_KEY` nie je nastavený, tlačidlo je sivé. Appka funguje úplne rovnako bez AI.
+
+---
+
 ## 9. Testy
 
 ```bash
-python -m pytest tests/ -q        # 1621 testov, ~105 sekúnd
+python -m pytest tests/ -q        # 1624 testov, ~295 sekúnd
 python -m pytest tests/ -v        # detailný výstup
 ```
 

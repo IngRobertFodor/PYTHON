@@ -45,6 +45,26 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 - **Reálny test**: `gemini-3.5-flash` úspešne odpovedá v SK + tool-calling funguje (`get_run_summary`)
 - **Celkový počet testov: 1621** (+49), všetky zelené
 
+## 2026-11 — Vlna C2: AI Orchestrator UI (chat panel)
+
+- **`frontend/js/ai_agent.js`** — vanilla JS trieda `AIAgent` (floating chat panel)
+  - Toggle tlačidlo `💬 AI asistent` vpravo dole (fixed, zbalený pri štarte)
+  - Resizable panel: drag za ľavý-horný roh (min 300×400, max 800×90vh)
+  - Prompt chips (5 predvolených otázok) — klik = automatické odoslanie
+  - Chat bubliny (user / AI / error) s jednoduchým markdown-light renderingom (bold, code, lists)
+  - Tool call chips pod AI odpoveďou — zobrazí aký tool bol volaný
+  - Loading animácia (3 bodky) počas čakania na odpoveď
+  - Warning banner keď primárny model nefunguje + ⚙️ model picker modal
+  - Model picker: `GET /api/agent/available-models` → rádio buttons → `POST /api/agent/select-model`
+  - Chat história v `localStorage` (posledných 30 správ, per session)
+  - Model override v `localStorage` (perzistuje medzi F5)
+  - Plne responzívny: pod 640px = fullscreen panel
+  - `Esc` zavrie panel; `Enter` odošle (Shift+Enter = nový riadok)
+- **`frontend/css/ai_agent.css`** — izolovaný CSS (nezasahuje do existujúcich štýlov)
+- **`frontend/index.html`** — pridaný `<div id="ai-agent-root">` + CSS + JS linky
+- **`tests/test_app.py`** — +3 testy: HTML obsahuje AI placeholder, CSS link, JS link
+- **Celkový počet testov: 1624** (+3), všetky zelené
+
 
 - **Q1:** Signál `PODIEL_ALEBO_CHYBNE_DATA` + cap Investment indexu na max 30 pri area < 100 m²
 - **Q2:** `preliminary_signals()` volané v `_run()`; `_enrich_from_db` vždy prepočíta index + peer/opportunity
