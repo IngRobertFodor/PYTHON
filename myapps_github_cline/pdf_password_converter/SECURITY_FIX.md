@@ -1,6 +1,24 @@
 ﻿# Security Fix: pypdf Vulnerabilities
 
-## Latest Fix (Oct 2026)
+## Latest Fix (Nov 2026)
+
+- Package: pypdf
+- Severity: HIGH
+- CVEs: CVE-2026-115580, CVE-2026-115585, CVE-2026-115572
+- Affected versions: pypdf < 6.21.2
+- Fixed in: pypdf >= 6.21.2
+
+### Fix Applied
+
+File: requirements.txt
+Before: pypdf~=6.18.1
+After:  pypdf~=6.21.2  (>=6.21.2, <6.22.0 -- allows patch updates within 6.21.x)
+
+Source: GitHub Security Alert digest, week of Oct 27 - Nov 3, 2026
+
+---
+
+## Previous Fix (Oct 2026)
 
 - Package: pypdf
 - Severity: HIGH
@@ -74,23 +92,27 @@ A malicious PDF as input could trigger the infinite loop in encrypt_pdf().
 ## Current Version Status
 
 File: requirements.txt
-Current: pypdf~=6.18.1  (>=6.18.1, <6.19.0)
+Current: pypdf~=6.21.2  (>=6.21.2, <6.22.0)
 
-Using the pessimistic constraint ~=6.18.1 ensures:
-1. All known CVEs (CVE-2026-102997, CVE-2026-102998, CVE-2026-102996,
-   CVE-2026-102995, CVE-2026-102993) are patched -- all fixed in >= 6.18.1
-2. All prior CVEs (CVE-2026-71852, CVE-2026-71870) remain patched
-3. Version is well above the DoS patch threshold (5.1.0)
-4. Patch-level updates within 6.18.x are allowed automatically
-5. No accidental downgrade below 6.18.1 is possible
+Using the pessimistic constraint ~=6.21.2 ensures:
+1. All known CVEs (CVE-2026-115580, CVE-2026-115585, CVE-2026-115572)
+   are patched -- all fixed in >= 6.21.2
+2. All prior CVEs (CVE-2026-102997, CVE-2026-102998, CVE-2026-102996,
+   CVE-2026-102995, CVE-2026-102993) remain patched
+3. All prior CVEs (CVE-2026-71852, CVE-2026-71870) remain patched
+4. Version is well above the DoS patch threshold (5.1.0)
+5. Patch-level updates within 6.21.x are allowed automatically
+6. No accidental downgrade below 6.21.2 is possible
 
 ## Verification
 
 Run: pip show pypdf
-Expected: Version: 6.18.x  (any 6.18.x release, e.g. 6.18.1 or higher)
+Expected: Version: 6.21.x  (any 6.21.x release >= 6.21.2, e.g. 6.21.4)
 
 ## References
 
+- GitHub Security Alert digest: week of Oct 27 - Nov 3, 2026
+- CVEs: CVE-2026-115580, CVE-2026-115585, CVE-2026-115572
 - GitHub Security Alert digest: week of Oct 7-Oct 14, 2026
 - CVEs: CVE-2026-102997, CVE-2026-102998, CVE-2026-102996, CVE-2026-102995, CVE-2026-102993
 - GitHub Security Advisory: CVE-2026-71852, CVE-2026-71870
