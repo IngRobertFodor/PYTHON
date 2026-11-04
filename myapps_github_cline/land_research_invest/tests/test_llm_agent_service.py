@@ -64,14 +64,24 @@ class TestClassifyError:
     def test_deprecated(self):
         assert self.fn(Exception("no longer available")) == "deprecated"
 
-    def test_quota(self):
+    def test_quota_429(self):
         assert self.fn(Exception("resource_exhausted 429")) == "quota"
+
+    def test_quota_503(self):
+        # S: 503 UNAVAILABLE = Google rate limit = quota (nie network!)
+        assert self.fn(Exception("503 UNAVAILABLE service overloaded")) == "quota"
+
+    def test_quota_unavailable(self):
+        assert self.fn(Exception("unavailable model")) == "quota"
 
     def test_not_found(self):
         assert self.fn(Exception("not_found 404")) == "not_found"
 
     def test_network(self):
         assert self.fn(Exception("connection timeout")) == "network"
+
+    def test_network_dns(self):
+        assert self.fn(Exception("name resolution failed")) == "network"
 
     def test_unknown(self):
         assert self.fn(Exception("some random error")) == "unknown"
@@ -118,17 +128,18 @@ class TestToolGetParcels:
 
     def test_min_index_filter(self):
         p = [_make_parcel(index=80), _make_parcel(url="u2", index=40)]
-        assert len(self._run(p, min_index=70)) == 1
+        r = self._run(p, min_index=70)
+        assert len(r) == 1 and r[0]["index"] == 80  # T2: kľúč "index"
 
     def test_obec_filter(self):
         p = [_make_parcel(location="Senec"), _make_parcel(url="u2", location="Modra")]
         r = self._run(p, obec_substring="senec")
-        assert len(r) == 1 and "Senec" in r[0]["location_text"]
+        assert len(r) == 1 and "Senec" in r[0]["loc"]  # T2: kľúč "loc"
 
     def test_source_type_drazby(self):
         p = [_make_parcel(source="notarske_drazby"), _make_parcel(url="u2", source="nehnutelnosti_sk")]
         r = self._run(p, source_type="drazby")
-        assert len(r) == 1 and r[0]["source_portal"] == "notarske_drazby"
+        assert len(r) == 1 and r[0]["src"] == "notarske_drazby"  # T2: kľúč "src"
 
     def test_has_signal_filter(self):
         p1 = _make_parcel(signals=[{"kod": "HORICE"}, {"kod": "BLIZKO_BA"}])
@@ -138,7 +149,7 @@ class TestToolGetParcels:
     def test_sorted_by_index_desc(self):
         p = [_make_parcel(index=50), _make_parcel(url="u2", index=90), _make_parcel(url="u3", index=70)]
         r = self._run(p)
-        idx = [x["investment_index"] for x in r]
+        idx = [x["index"] for x in r]  # T2: kľúč "index"
         assert idx == sorted(idx, reverse=True)
 
     def test_limit(self):
@@ -150,8 +161,8 @@ class TestToolGetParcels:
 
     def test_result_keys(self):
         r = self._run([_make_parcel()])
-        assert all(k in r[0] for k in ["url", "location_text", "price_eur",
-                                        "investment_index", "source_portal", "signals"])
+        # T2: nové kratšie kľúče
+        assert all(k in r[0] for k in ["url", "loc", "price", "area", "index", "src", "sigs"])
 
 
 # ---------------------------------------------------------------------------
@@ -368,4 +379,119 @@ class TestAgentRoutes:
     def test_blueprint_in_app(self, client):
         from app import create_app
         assert "agent" in create_app({"TESTING": True, "SECRET_KEY": "x"}).blueprints
+
+
+# ---------------------------------------------------------------------------
+# Security tests
+# ---------------------------------------------------------------------------
+
+class TestSecurity:
+    """S1: model whitelist, S4: rate limit, S2: realpath guard."""
+
+    def test_rate_limit_ok_under_limit(self):
+        """Prvých 10 volaní z rovnakej IP prechádza."""
+        from routes.agent_routes import _rate_limit_ok, _rl_buckets
+        ip = "test_ip_ok"
+        _rl_buckets.pop(ip, None)
+        for _ in range(10):
+            assert _rate_limit_ok(ip) is True
+
+    def test_rate_limit_blocks_over_limit(self):
+        """11. volanie z rovnakej IP je blokované."""
+        from routes.agent_routes import _rate_limit_ok, _rl_buckets
+        ip = "test_ip_block"
+        _rl_buckets.pop(ip, None)
+        for _ in range(10):
+            _rate_limit_ok(ip)
+        assert _rate_limit_ok(ip) is False
+
+    def test_rate_limit_endpoint_429(self, client, monkeypatch):
+        """API vracia 429 keď je rate limit prekročený."""
+        from routes import agent_routes
+        monkeypatch.setattr(agent_routes, "_rate_limit_ok", lambda ip: False)
+        import services.llm_agent_service as svc
+        monkeypatch.setattr(svc, "is_available", lambda: False)
+        r = client.post("/api/agent/ask", json={"question": "test"})
+        assert r.status_code == 429
+
+    def test_select_model_unknown_rejected(self, client, monkeypatch):
+        """S1: neznámy model je odmietnutý (whitelist)."""
+        import services.llm_agent_service as svc
+        monkeypatch.setattr(svc, "is_available", lambda: True)
+        monkeypatch.setattr(svc, "list_available_models", lambda: {
+            "models": [{"id": "gemini-3.5-flash"}, {"id": "gemini-3.1-flash-lite"}]
+        })
+        r = client.post("/api/agent/select-model",
+                        json={"model": "evil-model-drain-quota"})
+        assert r.status_code == 400
+        assert "whitelist" in r.get_json().get("error", "").lower() or \
+               "zozname" in r.get_json().get("error", "").lower()
+
+    def test_select_model_known_allowed(self, client, monkeypatch):
+        """S1: model zo zoznamu prechádza whitelist."""
+        import services.llm_agent_service as svc
+        monkeypatch.setattr(svc, "is_available", lambda: True)
+        monkeypatch.setattr(svc, "list_available_models", lambda: {
+            "models": [{"id": "gemini-3.5-flash", "label": "G"}]
+        })
+        monkeypatch.setattr(svc, "check_model_health", lambda m: {"status": "ok", "message_sk": ""})
+        r = client.post("/api/agent/select-model",
+                        json={"model": "gemini-3.5-flash"})
+        assert r.status_code == 200
+
+
+# ---------------------------------------------------------------------------
+# Token efficiency tests
+# ---------------------------------------------------------------------------
+
+class TestTokenEfficiency:
+    """T2: limit default, T3: cache."""
+
+    def test_default_limit_is_10(self):
+        """T2: default limit zmenený z 20 na 10."""
+        import inspect
+        from services import llm_agent_service as svc
+        sig = inspect.signature(svc._tool_get_parcels)
+        assert sig.parameters["limit"].default == 10
+
+    def test_ask_cache_hit(self, monkeypatch):
+        """T3: identická otázka = cached odpoveď, žiadne Gemini volanie."""
+        from services import llm_agent_service as svc
+        import time as _time
+        monkeypatch.setenv("GOOGLE_API_KEY", "fake")
+        monkeypatch.setattr(svc, "_load_env", lambda: None)
+
+        fake_result = {"ok": True, "answer": "cached!", "tool_calls": [], "model_used": "g", "error_type": None}
+        key = svc._ask_cache_key("test otazka", svc.DEFAULT_MODEL)
+        svc._ask_cache_set(key, fake_result)
+
+        call_count = [0]
+        original_run = svc._run_agent
+        def mock_run(q, m):
+            call_count[0] += 1
+            return fake_result
+        monkeypatch.setattr(svc, "_run_agent", mock_run)
+
+        result = svc.ask("test otazka")
+        assert result.get("cached") is True
+        assert call_count[0] == 0  # _run_agent sa nevolal
+
+    def test_ask_cache_miss_calls_run_agent(self, monkeypatch):
+        """T3: nová otázka = _run_agent sa zavolá."""
+        from services import llm_agent_service as svc
+        monkeypatch.setenv("GOOGLE_API_KEY", "fake")
+        monkeypatch.setattr(svc, "_load_env", lambda: None)
+        # Vyčisti cache
+        with svc._ask_cache_lock:
+            svc._ask_cache.clear()
+
+        fake_result = {"ok": True, "answer": "fresh", "tool_calls": [], "model_used": "g", "error_type": None}
+        call_count = [0]
+        def mock_run(q, m):
+            call_count[0] += 1
+            return fake_result
+        monkeypatch.setattr(svc, "_run_agent", mock_run)
+
+        svc.ask("unikatna otazka 12345")
+        assert call_count[0] == 1
 

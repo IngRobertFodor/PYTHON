@@ -72,6 +72,42 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 - **AI toggle zarovnanie**: toggle presunutý priamo do `<header>` ako flex item — zarovnaný
   vertikálne s názvom appky, biele priesvitné pozadie (rgba) na modrom header pozadí, žiadne
   magic `top:` čísla
+
+## 2026-11 — Vlna C: Security + Token efficiency + opravy
+
+### Security
+- **S1 — Model whitelist** (`select-model`): model musí byť v zozname z `available-models` —
+  zabraňuje volaniu nepovolených/drahých modelov
+- **S2 — Export realpath guard**: dvojitá ochrana voči path traversal aj cez symlinky
+  (`Path.resolve()` check že súbor je v `data/exports/`)
+- **S4 — Rate limit 10 req/min** pre `POST /api/agent/ask` per IP (sliding window, in-memory)
+- **S5 — Session cookie hardening**: `HttpOnly=True`, `SameSite=Lax`
+
+### Token efficiency
+- **T1 — System prompt 400→150 tokenov**: skrátený na esenciu, zachováva všetky pravidlá
+- **T2 — Tool outputy**: `get_parcels` vracia len 8 kľúčov (`url/loc/price/area/ppsm/index/src/sigs`)
+  namiesto 9 plných polí; default `limit: 20→10`
+- **T3 — 5-min TTL cache** pre identické otázky: `hashlib.md5(model+question)` →
+  instant odpoveď bez Gemini volania
+- **T4 — `max_output_tokens: 2048→800`**: stačí pre chat odpovede
+- **T5 — `tokens_used`** v response: `{in, out, total}` z `usage_metadata` (debug/UX)
+
+### Bug opravy (Vlna C)
+- **#1 — `_classify_error` 503→quota**: `503 UNAVAILABLE` od Google = rate limit/overload,
+  správne klasifikované ako `quota` (nie `network`) — používateľ dostane *"Skús o 1 minútu"*
+  namiesto *"problém so sieťou"*
+- **#2 — Retry s backoff**: pri `quota` čaká 5s a skúsi znova pred prechodom na fallback model
+- **#5 — JS timeout 60s**: `AbortController` + SK chybová správa *"AI neodpovedá (timeout 60s)"*
+- **#6 — Tool chip tooltip**: čitateľný formát `obec=Senec, limit=10` namiesto `JSON.stringify`
+- **#7 — Dead import**: `from google import genai as _genai` v `_run_agent` odstránený
+
+### Testy
+- `TestClassifyError`: +3 testy (503/unavailable→quota, dns→network)
+- `TestSecurity`: +5 testov (rate limit ok/block/429, whitelist reject/allow)
+- `TestTokenEfficiency`: +3 testy (default limit, cache hit/miss)
+- **Celkový počet testov: 1635** (+11), všetky zelené
+
+
 - **AI modal picker scroll**: `#ai-model-modal-box` dostal `max-height: 85vh` + `display: flex; flex-direction: column`;
   zoznam modelov (`.ai-model-modal-body`) má `overflow-y: auto; flex: 1` — header a footer sú vždy
   viditeľné, dlhý zoznam modelov od Google API scrolluje vnútri

@@ -213,12 +213,18 @@ const AIAgent = (() => {
     _loading = true; $sendBtn.disabled = true;
     const loadId = _addLoading();
 
+    // #5: 60s timeout — ak Gemini neodpovie, zobraz SK chybu
+    const controller = new AbortController();
+    const timeoutId  = setTimeout(() => controller.abort(), 60000);
+
     fetch("/api/agent/ask", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question: q }),
+      signal: controller.signal,
     })
       .then(r => r.json())
       .then(data => {
+        clearTimeout(timeoutId);
         _removeLoading(loadId); _loading = false; $sendBtn.disabled = false;
         if (data.ok) {
           _addBubble("ai", data.answer, data.tool_calls || []);
@@ -228,9 +234,13 @@ const AIAgent = (() => {
         }
         _saveHistory(); _scrollToBottom();
       })
-      .catch(() => {
+      .catch(err => {
+        clearTimeout(timeoutId);
         _removeLoading(loadId); _loading = false; $sendBtn.disabled = false;
-        _addBubble("error", "Nedá sa pripojiť na server."); _scrollToBottom();
+        const msg = err.name === "AbortError"
+          ? "AI neodpovedá (timeout 60s). Skús neskôr."
+          : "Nedá sa pripojiť na server.";
+        _addBubble("error", msg); _scrollToBottom();
       });
   }
 
@@ -254,9 +264,14 @@ const AIAgent = (() => {
     if (item.role === "ai" && item.toolCalls && item.toolCalls.length) {
       const chips = document.createElement("div");
       chips.className = "ai-tool-chips";
-      chips.innerHTML = item.toolCalls.map(tc =>
-        `<span class="ai-tool-chip" title="${_esc(JSON.stringify(tc.args||{}))}">🔧 ${_esc(tc.name)}</span>`
-      ).join("");
+      chips.innerHTML = item.toolCalls.map(tc => {
+        // #6: čitateľný tooltip miesto JSON (napr. "obec=Senec, limit=10")
+        const argsText = Object.entries(tc.args || {})
+          .map(([k, v]) => `${k}=${v}`)
+          .join(", ");
+        const tooltip = argsText || "bez argumentov";
+        return `<span class="ai-tool-chip" title="${_esc(tooltip)}">🔧 ${_esc(tc.name)}</span>`;
+      }).join("");
       $messages.appendChild(chips);
     }
   }

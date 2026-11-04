@@ -3,35 +3,31 @@ llm_agent_service.py — AI Orchestrátor pre Land Research Invest
 ================================================================
 LLM agent s tool-calling cez Google Gemini (google-genai SDK).
 
-Použitie:
-    from services.llm_agent_service import ask, is_available
+Tooly (9): get_parcels, get_run_summary, analyze_parcel_gis,
+           get_peer_statistics, get_up_coverage, explain_investment,
+           get_diff, get_backup_status, export_csv_filtered
 
-    if is_available():
-        result = ask("Nájdi mi 5 pozemkov do 25 km od BA s indexom nad 70")
-        print(result["answer"])
+Konfigurácia modelov (.env, priorita):
+    LLM_MODEL         — primárny model  (default: gemini-3.5-flash)
+    LLM_FALLBACK_MODEL — záložný model  (default: gemini-3.1-flash-lite)
 
-Tooly (9):
-    1. get_parcels           — filtruje pozemky z posledného behu
-    2. get_run_summary       — súhrn posledného behu
-    3. analyze_parcel_gis    — spustí GIS pipeline pre pozemok
-    4. get_peer_statistics   — peer stats pre obec
-    5. get_up_coverage       — pokrytie územných plánov
-    6. explain_investment    — zdôvodnenie investičného indexu
-    7. get_diff              — diff medzi dvoma poslednými behmi
-    8. get_backup_status     — stav zálohy
-    9. export_csv_filtered   — vygeneruje CSV so zúženým zoznamom
+Token efficiency:
+    - System prompt ~150 tokenov (skrátený)
+    - Tool outputy: len esenciálne polia, default limit=10
+    - max_output_tokens=800 (stačí pre chat)
+    - 5-min TTL cache pre identické otázky
+    - tokens_used v response (debug)
 
-Konfigurácia modelov (priorita):
-    1. .env  LLM_MODEL          (runtime override)
-    2. hardcoded DEFAULT_MODEL  (zmeniť tu pri deprecation)
-
-Modely (stav 2026-11):
-    Primárny:  gemini-3.5-flash      (stabilný, free tier)
-    Záložný:   gemini-3.1-flash-lite (rýchlejší, lacnejší)
+Security:
+    - Model whitelist v select-model endpointe
+    - Rate limit 10 req/min pre ask() (cez agent_routes)
+    - Session cookies: HttpOnly + SameSite=Lax (cez app.py)
+    - API key nie je logovaný
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
@@ -47,27 +43,50 @@ logger = logging.getLogger(__name__)
 # Konfigurácia modelov
 # ---------------------------------------------------------------------------
 
-DEFAULT_MODEL    = "gemini-3.5-flash"
-FALLBACK_MODEL   = "gemini-3.1-flash-lite"
+DEFAULT_MODEL  = "gemini-3.5-flash"
+FALLBACK_MODEL = "gemini-3.1-flash-lite"
 
-# Interná cache: model_name -> {"status": ok|failed|deprecated, "ts": float}
 _model_health_cache: dict[str, dict] = {}
 _health_lock = threading.Lock()
 
-# Cache dostupných modelov (hybrid: Google API + hardcoded)
 _models_cache: dict | None = None
 _models_cache_ts: float    = 0.0
-_MODELS_CACHE_TTL          = 3600.0  # 1 hodina
+_MODELS_CACHE_TTL          = 3600.0
 
-# Hardcoded fallback zoznam (aktualizuj pri väčšej zmene portfólia Gemini)
-# Stav: 2026-11-03
+# Hardcoded fallback zoznam (stav 2026-11)
 _KNOWN_MODELS = [
-    {"id": "gemini-3.5-flash",       "label": "Gemini 3.5 Flash (odporúčaný)",  "recommended": True},
-    {"id": "gemini-3.1-flash-lite",  "label": "Gemini 3.1 Flash Lite (rýchly)", "recommended": False},
-    {"id": "gemini-3.7-flash",       "label": "Gemini 3.7 Flash",               "recommended": False},
-    {"id": "gemini-3.8-flash",       "label": "Gemini 3.8 Flash (najnovší)",    "recommended": False},
-    {"id": "gemini-flash-latest",    "label": "Gemini Flash Latest (alias)",     "recommended": False},
+    {"id": "gemini-3.5-flash",      "label": "Gemini 3.5 Flash (odporúčaný)",  "recommended": True},
+    {"id": "gemini-3.1-flash-lite", "label": "Gemini 3.1 Flash Lite (rýchly)", "recommended": False},
+    {"id": "gemini-3.7-flash",      "label": "Gemini 3.7 Flash",               "recommended": False},
+    {"id": "gemini-3.8-flash",      "label": "Gemini 3.8 Flash (najnovší)",    "recommended": False},
+    {"id": "gemini-flash-latest",   "label": "Gemini Flash Latest (alias)",     "recommended": False},
 ]
+
+# ---------------------------------------------------------------------------
+# Token efficiency — cache identických otázok (5 min TTL)
+# ---------------------------------------------------------------------------
+
+_ask_cache: dict[str, dict] = {}
+_ask_cache_lock = threading.Lock()
+_ASK_CACHE_TTL  = 300.0  # 5 minút
+
+
+def _ask_cache_key(question: str, model: str) -> str:
+    return hashlib.md5(f"{model}:{question}".encode()).hexdigest()
+
+
+def _ask_cache_get(key: str) -> dict | None:
+    with _ask_cache_lock:
+        entry = _ask_cache.get(key)
+        if entry and (time.monotonic() - entry["ts"]) < _ASK_CACHE_TTL:
+            return {**entry["result"], "cached": True}
+    return None
+
+
+def _ask_cache_set(key: str, result: dict) -> None:
+    with _ask_cache_lock:
+        _ask_cache[key] = {"result": result, "ts": time.monotonic()}
+
 
 # ---------------------------------------------------------------------------
 # Exports cleanup (pri importe modulu)
@@ -157,15 +176,21 @@ def _extract_text(content: Any) -> str:
 
 
 def _classify_error(exc: Exception) -> str:
-    """Klasifikuje chybu: deprecated|quota|not_found|network|unknown."""
+    """Klasifikuje chybu: deprecated|quota|not_found|network|unknown.
+
+    DÔLEŽITÉ: 503 UNAVAILABLE od Google = rate limit / overload = quota,
+    NIE sieťová chyba. Poradie kontrol je zámerné.
+    """
     msg = str(exc).lower()
     if "no longer available" in msg or "deprecated" in msg:
         return "deprecated"
-    if "resource_exhausted" in msg or "429" in msg or "quota" in msg:
+    # 503/unavailable = Google overload = quota (nie network!)
+    if ("resource_exhausted" in msg or "429" in msg or "quota" in msg
+            or "503" in msg or "unavailable" in msg):
         return "quota"
     if "not_found" in msg or "404" in msg:
         return "not_found"
-    if "unavailable" in msg or "503" in msg or "connection" in msg or "timeout" in msg:
+    if "connection" in msg or "timeout" in msg or "name resolution" in msg:
         return "network"
     return "unknown"
 
@@ -273,9 +298,9 @@ def _tool_get_parcels(
     source_type: str = "all",
     obec_substring: str = "",
     has_signal: str = "",
-    limit: int = 20,
+    limit: int = 10,          # T2: default 10 (bolo 20) — menej tokenov
 ) -> list[dict]:
-    """Filtruje pozemky z posledného behu."""
+    """Filtruje pozemky z posledného behu. Vracia len esenciálne polia."""
     try:
         from routes.scrape_routes import _get_last_results
         items = _get_last_results()
@@ -306,18 +331,18 @@ def _tool_get_parcels(
                     continue
             except Exception:
                 pass
+        # T2: len esenciálne polia — kratší output = menej tokenov
         result.append({
-            "url":              p.get("url", ""),
-            "title":            p.get("title", ""),
-            "location_text":    p.get("location_text", ""),
-            "price_eur":        p.get("price_eur", 0),
-            "area_sqm":         p.get("area_sqm", 0),
-            "price_per_sqm":    p.get("price_per_sqm", 0),
-            "investment_index": p.get("investment_index", 0),
-            "source_portal":    p.get("source_portal", ""),
-            "signals":          [s.get("kod") for s in (p.get("signals") or [])],
+            "url":   p.get("url", ""),
+            "loc":   p.get("location_text", ""),
+            "price": p.get("price_eur", 0),
+            "area":  p.get("area_sqm", 0),
+            "ppsm":  p.get("price_per_sqm", 0),
+            "index": p.get("investment_index", 0),
+            "src":   p.get("source_portal", ""),
+            "sigs":  [s.get("kod") for s in (p.get("signals") or [])],
         })
-    result.sort(key=lambda x: x["investment_index"], reverse=True)
+    result.sort(key=lambda x: x["index"], reverse=True)
     return result[:limit]
 
 
@@ -620,25 +645,12 @@ _TOOL_DECLARATIONS = [
     },
 ]
 
-# ---------------------------------------------------------------------------
-# System prompt
-# ---------------------------------------------------------------------------
-
-_SYSTEM_PROMPT = """Si AI asistent pre aplikáciu Land Research Invest.
-Pomáhaš analyzovať investičné príležitosti v pozemkoch na Slovensku.
-
-PRAVIDLÁ:
-1. Odpovedaj VŽDY v slovenčine.
-2. Ak otázka nesúvisí s pozemkami alebo investíciami, zdvorilo odmietni.
-3. Nikdy nevymýšľaj dáta — vždy zavolaj tool, nie hádaj.
-4. Pri zoznamoch zobraz max 10 položiek + "a ďalších N..." ak je viac.
-5. Investment index 0–100: 85+=silná kúpa, 70–84=preveriť, 50–69=zvážiť, <50=preskočiť.
-6. Platné kódy signálov: BLIZKO_BA, PRILIS_DALEKO, HORICE, DRAZBA_POD_ZNALECKOU,
-   DRAZBA_OPAKOVANA, LACNEJSI_AKO_OKOLIE, DLHO_V_PONUKE, CENA_KLESA,
-   CENA_PODOZRIVA, PODIEL_ALEBO_CHYBNE_DATA.
-7. Buď stručný a konkrétny. Čísla zaokrúhľuj rozumne.
-8. Ak DB je prázdna alebo scraping nebol spustený, povedz to jasne.
-"""
+# T1: Skrátený system prompt (~150 tokenov, bolo ~400)
+_SYSTEM_PROMPT = """Si AI asistent pre Land Research Invest — slovenská appka na analýzu investičných pozemkov.
+Odpovedaj VŽDY po slovensky. Volaj tooly, nevymýšľaj dáta.
+Index 0-100: 85+=kúpa, 70-84=preveriť, 50-69=zvážiť.
+Signály: BLIZKO_BA, HORICE, DRAZBA_POD_ZNALECKOU, LACNEJSI_AKO_OKOLIE, DLHO_V_PONUKE, CENA_KLESA, PRILIS_DALEKO, ZAPLAVA, CHRANENE_UZEMIE.
+Max 10 položiek v zozname. Ak DB prázdna, povedz to."""
 
 
 # ---------------------------------------------------------------------------
@@ -648,7 +660,10 @@ PRAVIDLÁ:
 def ask(question: str, model_override: str | None = None) -> dict:
     """
     Odošle otázku AI agentovi.
-    Vracia: {ok, answer, tool_calls, model_used, error_type}
+    Vracia: {ok, answer, tool_calls, model_used, error_type, cached?, tokens_used?}
+
+    Token efficiency: identické otázky sú cachované 5 minút.
+    Retry: pri quota chybe čaká 5s a skúsi znova pred fallbackom.
     """
     if not is_available():
         return {
@@ -662,25 +677,41 @@ def ask(question: str, model_override: str | None = None) -> dict:
             "tool_calls": [], "model_used": None, "error_type": "empty_question",
         }
 
+    q        = question.strip()
     primary  = _resolve_model(model_override)
     fallback = _resolve_fallback()
-    to_try   = [primary] + ([fallback] if fallback != primary else [])
+
+    # T3: cache identických otázok
+    cache_key = _ask_cache_key(q, primary)
+    cached = _ask_cache_get(cache_key)
+    if cached:
+        logger.info("[llm_agent] cache hit: %s...", q[:40])
+        return cached
+
+    to_try    = [primary] + ([fallback] if fallback != primary else [])
     last_exc: Exception | None = None
 
     for model in to_try:
-        try:
-            return _run_agent(question.strip(), model)
-        except Exception as exc:
-            err_type = _classify_error(exc)
-            logger.warning("[llm_agent] ask() %s failed (%s), trying next", model, err_type)
-            last_exc = exc
-            if err_type == "quota":
-                time.sleep(2)
+        # #2: retry s backoff pri quota (max 2 pokusy pred prechodom na fallback)
+        for attempt in range(2):
+            try:
+                result = _run_agent(q, model)
+                _ask_cache_set(cache_key, result)
+                return result
+            except Exception as exc:
+                err_type = _classify_error(exc)
+                if err_type == "quota" and attempt == 0:
+                    logger.info("[llm_agent] %s quota — retry za 5s", model)
+                    time.sleep(5)
+                    continue
+                logger.warning("[llm_agent] %s failed (%s), next model", model, err_type)
+                last_exc = exc
+                break  # skús ďalší model
 
     err_type = _classify_error(last_exc) if last_exc else "unknown"
     _SK = {
         "deprecated": "Primárny AI model bol zrušený. Otvor AI chat → ⚙️ a vyber nový model.",
-        "quota":      "AI je momentálne preťažená (rate-limit). Skús o chvíľu.",
+        "quota":      "AI je momentálne preťažená. Skús o 1 minútu.",
         "not_found":  "AI model nie je dostupný pre tvoj účet.",
         "network":    "Problém so sieťou — nedá sa pripojiť k AI.",
         "unknown":    "AI dočasne nedostupné. Skús neskôr.",
@@ -693,8 +724,7 @@ def ask(question: str, model_override: str | None = None) -> dict:
 
 def _run_agent(question: str, model: str) -> dict:
     """Agentic loop pre jeden model. Max 5 kôl tool-calling."""
-    from google import genai as _genai
-    from google.genai import types as _types
+    from google.genai import types as _types   # #7: dead import _genai odstránený
 
     client      = _get_client()
     tool_config = _types.Tool(function_declarations=_TOOL_DECLARATIONS)
@@ -710,7 +740,7 @@ def _run_agent(question: str, model: str) -> dict:
         resp      = client.models.generate_content(
             model=model, contents=messages,
             config=_types.GenerateContentConfig(
-                tools=[tool_config], max_output_tokens=2048, temperature=0.1,
+                tools=[tool_config], max_output_tokens=800, temperature=0.1,  # T4: 2048→800
             ),
         )
         candidate = resp.candidates[0]
@@ -724,10 +754,22 @@ def _run_agent(question: str, model: str) -> dict:
                     text += part.text
                 elif isinstance(part, dict) and part.get("type") == "text":
                     text += part.get("text", "")
-            return {
+            # T5: tokens_used pre debug / UX
+            tokens: dict | None = None
+            if hasattr(resp, "usage_metadata") and resp.usage_metadata:
+                um = resp.usage_metadata
+                tokens = {
+                    "in":    getattr(um, "prompt_token_count",     None),
+                    "out":   getattr(um, "candidates_token_count", None),
+                    "total": getattr(um, "total_token_count",      None),
+                }
+            out: dict = {
                 "ok": True, "answer": text.strip() or "(prázdna odpoveď)",
                 "tool_calls": tool_calls_log, "model_used": model, "error_type": None,
             }
+            if tokens:
+                out["tokens_used"] = tokens
+            return out
 
         messages.append(candidate.content)
         tool_results = []

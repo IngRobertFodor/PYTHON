@@ -25,10 +25,13 @@ def create_app(test_config=None):
 
     app.config["JSON_SORT_KEYS"] = False
     app.config["TESTING"]        = False
-    # SECRET_KEY je potrebný pre Flask session (používa ho agent_routes pre model override).
-    # Generuje sa z prostredia alebo náhodne pri každom štarte (session sa po reštarte stratí — OK).
+    # SECRET_KEY pre Flask session (agent_routes — model override).
     import secrets as _sec
     app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY") or _sec.token_hex(32)
+    # S5: Session cookie hardening
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["SESSION_COOKIE_SECURE"]   = False  # False = localhost HTTP (nie HTTPS)
     if test_config:
         app.config.update(test_config)
 
