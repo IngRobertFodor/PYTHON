@@ -267,7 +267,7 @@ Váhy konfigurovateľné: criteria.yaml → sekcia opportunity
 ## 11. Testovanie
 
 ```bash
-python -m pytest tests/ -q              # 1635 testov, ~110 s
+python -m pytest tests/ -q              # 1637 testov, ~110 s
 python -m pytest tests/ -v --tb=short
 python -m pytest tests/test_signals.py tests/test_opportunity_service.py -v
 python -m pytest tests/test_backup_service.py -v

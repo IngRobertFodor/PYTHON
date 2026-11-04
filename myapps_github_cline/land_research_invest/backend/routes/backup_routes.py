@@ -7,11 +7,10 @@ POST /api/backup/import   -> upload .sql.gz, merge do DB
 GET  /api/backup/history  -> zoznam archívnych záloh
 """
 
-from flask import Blueprint, jsonify, request, Response, send_file
+from flask import Blueprint, jsonify, request, send_file
 from services.backup_service import (
     backup_status, list_history,
     export_db, import_db,
-    _LATEST_FILE,
 )
 
 backup_bp = Blueprint("backup", __name__)

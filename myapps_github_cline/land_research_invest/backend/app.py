@@ -10,7 +10,7 @@ Spustenie:
 
 import os
 import pathlib
-from flask import Flask, send_from_directory, request, Response
+from flask import Flask, request, Response
 from flask_cors import CORS
 
 
@@ -26,12 +26,27 @@ def create_app(test_config=None):
     app.config["JSON_SORT_KEYS"] = False
     app.config["TESTING"]        = False
     # SECRET_KEY pre Flask session (agent_routes — model override).
+    # P0-1: persistent key — načítame zo súboru, pri chýbaní vygenerujeme raz.
+    # Bez toho by každý reštart invalidoval session (používateľ stratí model override).
     import secrets as _sec
-    app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY") or _sec.token_hex(32)
+    _sk_file = pathlib.Path(__file__).parent.parent / "data" / ".secret_key"
+    _sk = os.environ.get("FLASK_SECRET_KEY")
+    if not _sk:
+        try:
+            if _sk_file.exists():
+                _sk = _sk_file.read_text().strip()
+            if not _sk:
+                _sk = _sec.token_hex(32)
+                _sk_file.parent.mkdir(exist_ok=True)
+                _sk_file.write_text(_sk)
+                _sk_file.chmod(0o600)
+        except OSError:
+            _sk = _sec.token_hex(32)  # fallback ak zapis zlyhá (napr. read-only FS)
+    app.config["SECRET_KEY"] = _sk
     # S5: Session cookie hardening
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-    app.config["SESSION_COOKIE_SECURE"]   = False  # False = localhost HTTP (nie HTTPS)
+    app.config["SESSION_COOKIE_SECURE"]   = False  # False = localhost HTTP
     if test_config:
         app.config.update(test_config)
 

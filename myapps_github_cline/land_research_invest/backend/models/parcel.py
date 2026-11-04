@@ -6,7 +6,6 @@ Jedna instancia = jeden kandidatsky pozemok.
 """
 
 from dataclasses import dataclass, field
-from typing import Any
 from models.result import ServiceResult
 
 

@@ -18,7 +18,7 @@ Archeologicke zony (KPU) su MANUAL - ziadne verejne API.
 
 import requests
 from models.result import ServiceResult
-from config_loader import is_feature_enabled, get_criteria_section, get_endpoints
+from config_loader import is_feature_enabled, get_endpoints
 
 SERVICE_NAME = "protected_service"
 TIMEOUT = 8   # kratky timeout - pri blokujucich serveroch rychly fallback

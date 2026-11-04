@@ -47,6 +47,9 @@ data/backups/history/
 # Config záloha (generuje sa automaticky pri uložení cez UI)
 config/criteria.yaml.bak
 
+# Flask session key (generuje sa pri prvom štarte, nemeníme medzi inštaláciami)
+data/.secret_key
+
 # Analyza výstupov (lokálne testovacie dáta, nepatria do repo)
 _analyza/
 

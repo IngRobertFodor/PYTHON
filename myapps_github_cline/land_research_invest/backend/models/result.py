@@ -7,7 +7,6 @@ pracuju s nimi uniformne bez ohladu na zdroj.
 """
 
 from dataclasses import dataclass, field
-from typing import Any
 
 
 @dataclass

@@ -181,13 +181,13 @@ def scrape_all(criteria=None):
     skipped = [src for src in green if src not in SCRAPER_REGISTRY]
 
     for src in skipped:
-        print(f"[scraper_service] {src}: parser TODO - preskacujem")
+        logger.info("[scraper_service] %s: parser nie je registrovaný — preskakujem", src)
 
     all_parcels = []
     t_start = time.monotonic()
 
     _reset_progress(active)
-    print(f"[scraper_service] Paralelne spustam {len(active)} zdrojov: {active}")
+    logger.info("[scraper_service] Paralelne spúšťam %d zdrojov: %s", len(active), active)
 
     with ThreadPoolExecutor(max_workers=len(active) or 1) as executor:
         future_to_src = {

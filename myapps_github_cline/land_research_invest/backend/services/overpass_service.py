@@ -4,7 +4,7 @@ Sluzba infrastruktury (Overpass)  J1: building -> classify_access/position/is_ge
 import requests
 import math
 from models.result import ServiceResult
-from config_loader import is_feature_enabled, get_criteria_section, get_endpoints
+from config_loader import is_feature_enabled, get_criteria_section
 
 SERVICE_NAME = "overpass_service"
 TIMEOUT = 8

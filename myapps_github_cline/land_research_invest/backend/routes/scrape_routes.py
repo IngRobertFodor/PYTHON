@@ -22,7 +22,7 @@ from services.storage_service  import (
     save_run, patch_parcel as db_patch,
     load_last_run, list_runs, load_run,
 )
-from services.signals          import history_signals, drazba_signals, preliminary_signals, merge_signals
+from services.signals          import history_signals, drazba_signals, preliminary_signals
 from services.peer_analysis_service import apply_peer_signals
 from services.opportunity_service   import apply_opportunity, investment_index as _calc_index, explain as _calc_explain
 from services.diff_service        import compute_diff
@@ -222,8 +222,9 @@ def scrape_start():
                         existing = {s["kod"] for s in p.signals}
                         if sig["kod"] not in existing:
                             p.signals.append(sig)
-                except Exception:
-                    pass
+                except Exception as exc:
+                    logger.warning("[scrape._run] preliminary_score failed url=%s: %s",
+                                   getattr(p, "url", "?")[:60], exc)
                 analyzed.append(p.to_dict())
             analyzed.sort(key=lambda d: d.get("preliminary_score", 0), reverse=True)
             # Uloz do SQLite len ak mame realne vysledky (nie prazdny beh)

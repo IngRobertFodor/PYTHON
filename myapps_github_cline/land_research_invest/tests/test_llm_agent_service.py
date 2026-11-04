@@ -495,3 +495,34 @@ class TestTokenEfficiency:
         svc.ask("unikatna otazka 12345")
         assert call_count[0] == 1
 
+
+    def test_csv_has_correct_columns(self, tmp_path, monkeypatch):
+        """P1-4 regression: CSV export musí obsahovať správne stĺpce (nie staré mená)."""
+        from services import llm_agent_service as svc
+        monkeypatch.setattr(svc, "_EXPORTS_DIR", tmp_path)
+        with patch("routes.scrape_routes._get_last_results",
+                   return_value=[_make_parcel(url="https://t.sk/1")]):
+            r = svc._tool_export_csv_filtered()
+        assert r["ok"] is True
+        csv_path = tmp_path / r["filename"]
+        assert csv_path.exists()
+        content = csv_path.read_text(encoding="utf-8-sig")
+        # Stĺpce musia zodpovedať T2 skráteným kľúčom
+        header_line = content.splitlines()[0]
+        assert "loc" in header_line
+        assert "price" in header_line
+        assert "index" in header_line
+        # Nesmú byť staré dlhé názvy (regression z vlny C)
+        assert "location_text" not in header_line
+        assert "investment_index" not in header_line
+        assert "source_portal" not in header_line
+        # Dátový riadok musí existovať
+        assert len(content.splitlines()) >= 2
+
+    def test_max_agent_rounds_constant(self):
+        """P2-3: MAX_AGENT_ROUNDS je konštanta, nie magic number."""
+        from services import llm_agent_service as svc
+        assert hasattr(svc, "MAX_AGENT_ROUNDS")
+        assert isinstance(svc.MAX_AGENT_ROUNDS, int)
+        assert svc.MAX_AGENT_ROUNDS >= 3
+

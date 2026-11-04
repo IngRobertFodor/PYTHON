@@ -6,7 +6,6 @@ POST /api/monitor/scan    -> manualny trigger jedneho skenu
 
 from flask import Blueprint, jsonify
 from services.monitor_service import run_scan, get_status
-from config_loader import is_feature_enabled
 
 monitor_bp = Blueprint("monitor", __name__)
 

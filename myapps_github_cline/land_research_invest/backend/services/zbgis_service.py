@@ -18,7 +18,6 @@ Poznamka k endpointom:
   Geometria je v S-JTSK (EPSG:5514), konverzia cez pyproj.
 """
 
-import math
 import requests
 from models.result import ServiceResult
 from config_loader import is_feature_enabled, get_criteria_section, get_endpoints

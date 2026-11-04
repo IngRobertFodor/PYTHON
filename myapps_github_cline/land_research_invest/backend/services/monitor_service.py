@@ -13,7 +13,7 @@ Odolnost: vynimka pri 1 pozemku nezastavi cely scan.
 
 import time
 import threading
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 
 try:

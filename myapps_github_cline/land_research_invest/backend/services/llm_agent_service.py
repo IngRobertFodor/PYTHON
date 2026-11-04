@@ -46,6 +46,12 @@ logger = logging.getLogger(__name__)
 DEFAULT_MODEL  = "gemini-3.5-flash"
 FALLBACK_MODEL = "gemini-3.1-flash-lite"
 
+# Agentic loop — max kôl tool-calling pred ukončením (zabraňuje nekonečnej slučke)
+MAX_AGENT_ROUNDS = 5
+
+# Sentinel pre "bez limitu vzdialenosti" v _tool_get_parcels
+_NO_DISTANCE_LIMIT = 999
+
 _model_health_cache: dict[str, dict] = {}
 _health_lock = threading.Lock()
 
@@ -323,7 +329,7 @@ def _tool_get_parcels(
             sigs = {s.get("kod") for s in (p.get("signals") or [])}
             if has_signal.upper() not in sigs:
                 continue
-        if max_distance_km < 999:
+        if max_distance_km < _NO_DISTANCE_LIMIT:
             try:
                 from services.scoring_service import _estimate_distance_km
                 km = _estimate_distance_km(p.get("location_text", ""))
@@ -533,12 +539,12 @@ def _tool_export_csv_filtered(
         filename = f"export_{ts}.csv"
         output   = io.StringIO()
         writer   = csv.DictWriter(output, fieldnames=[
-            "location_text", "price_eur", "area_sqm", "price_per_sqm",
-            "investment_index", "source_portal", "signals", "url",
+            # T2: nové kratšie kľúče z _tool_get_parcels (url/loc/price/area/ppsm/index/src/sigs)
+            "loc", "price", "area", "ppsm", "index", "src", "sigs", "url",
         ], extrasaction="ignore")
         writer.writeheader()
         for p in parcels:
-            writer.writerow({**p, "signals": ", ".join(p.get("signals", []))})
+            writer.writerow({**p, "sigs": ", ".join(p.get("sigs", []))})
         (_EXPORTS_DIR / filename).write_text(output.getvalue(), encoding="utf-8-sig")
         return {
             "ok": True, "count": len(parcels), "filename": filename,
@@ -736,7 +742,7 @@ def _run_agent(question: str, model: str) -> dict:
     ]
     tool_calls_log: list[dict] = []
 
-    for _round in range(5):
+    for _round in range(MAX_AGENT_ROUNDS):
         resp      = client.models.generate_content(
             model=model, contents=messages,
             config=_types.GenerateContentConfig(

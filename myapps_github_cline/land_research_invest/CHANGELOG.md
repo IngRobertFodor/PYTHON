@@ -107,6 +107,39 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 - `TestTokenEfficiency`: +3 testy (default limit, cache hit/miss)
 - **Celkový počet testov: 1635** (+11), všetky zelené
 
+## 2026-11 — Vlna C.1: Pyright cleanup + polish + regression fix
+
+### Pyright "Problems" — unused imports vyčistené (VS Code žlté warningy)
+- `app.py` — `send_from_directory`
+- `models/result.py` — `Any`
+- `routes/backup_routes.py` — `Response`, `_LATEST_FILE`
+- `routes/monitor_routes.py` — `is_feature_enabled`
+- `routes/scrape_routes.py` — `merge_signals`
+- `services/monitor_service.py` — `field`
+- `services/overpass_service.py` — `get_endpoints`
+- `services/protected_service.py` — `get_criteria_section`
+- `services/zbgis_service.py` — `math`
+- `services/scraper_service.py` — `print` → `logger` (posledné 2 ostávajúce print-y)
+
+### P0: Kritické opravy
+- **P0-1 — Persistent SECRET_KEY**: generuje sa raz do `data/.secret_key` (gitignored) —
+  každý reštart appky prestane invalidovať Flask session (model override sa zachová)
+- **P0-2 — `except: pass` → `logger.warning`** v `scrape_routes._run()` —
+  tichá degradácia pri preliminary_score sa teraz loguje
+
+### P1: Regression fix
+- **P1-4 — CSV export broken fieldnames**: `_tool_export_csv_filtered` používal staré
+  dlhé kľúče (`location_text`, `investment_index`, ...) namiesto T2 krátkych (`loc`, `index`, ...) —
+  CSV bol prázdny (len header). Opravené + test overujúci obsah stĺpcov
+
+### P2: Polish
+- **P2-3 — `MAX_AGENT_ROUNDS = 5`**: magic number v `_run_agent` nahradený konštantou
+- **`_NO_DISTANCE_LIMIT = 999`**: sentinel pre "bez limitu vzdialenosti"
+
+### Testy
+- +2 testy: CSV správne stĺpce, MAX_AGENT_ROUNDS existuje
+- **Celkový počet testov: 1637** (+2), všetky zelené
+
 
 - **AI modal picker scroll**: `#ai-model-modal-box` dostal `max-height: 85vh` + `display: flex; flex-direction: column`;
   zoznam modelov (`.ai-model-modal-body`) má `overflow-y: auto; flex: 1` — header a footer sú vždy
