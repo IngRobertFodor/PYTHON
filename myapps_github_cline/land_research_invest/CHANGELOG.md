@@ -4,6 +4,19 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 
 ---
 
+## 2026-11 — UX polish po reálnom teste (Fáza 5)
+
+- **Legenda v mape rozšírená**: nová sekcia **🏆 Investičný index (0–100)** nad GIS skóre + horný hint box
+  vysvetľujúci rozdiel *Index = investičný potenciál* vs *Skóre = fyzická kvalita pozemku*
+- **Tooltipy v hlavičke tabuľky prepísané** (`<th>` title) — kratšie, s rozlíšením čo meria Index a čo Skóre;
+  pri Skóre pridaný návod ako sa z Prelim stane Plné GIS
+- **Zjednotené farby pre 70–84 (PREVERIŤ)**: `#1565c0` modrá → `#c8a000` žltá všade
+  (`_scoreColor`, `_recStyle`, `_prelimMapColor`) — teraz legenda, mapa, tabuľkové body a modal badge
+  ukazujú tú istú farbu
+- **README sekcia 3 "Skóre a farby"**: pridané vysvetlenie rozdielu Index vs Skóre tabuľkou na vrchu,
+  PREVERIŤ farba opravená z *modrá* na *žltá* (realita)
+- **Verzie static súborov zvýšené** (`v=37→38`, `v=1→2`) — prehliadač sa vyhne cache
+
 ## 2026-11 — Audit + logging refaktoring
 
 - **Audit P1:** Nahradené všetky `print()` v produkčných Python súboroch za `logging` (štandardná knižnica)

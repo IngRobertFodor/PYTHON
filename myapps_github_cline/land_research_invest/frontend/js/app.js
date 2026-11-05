@@ -396,15 +396,15 @@ const _COMP_META = {
 
 function _scoreColor(s) {
   if (s == null) return "#aaa";
-  if (s >= 85) return "#2e7d32";
-  if (s >= 70) return "#1565c0";
-  if (s >= 50) return "#e65100";
-  return "#a02020";
+  if (s >= 85) return "#2d7a2d";   // tmavá zelená — SILNÁ KÚPA
+  if (s >= 70) return "#c8a000";   // žltá — PREVERIŤ (zjednotené s legendou + mapou)
+  if (s >= 50) return "#c85a00";   // oranžová — ZVÁŽIŤ
+  return "#a02020";                 // vínová — PRESKOČIŤ
 }
 
 function _recStyle(rec) {
-  return { "STRONG BUY": ["#2e7d32","#fff"], "INVESTIGATE": ["#1565c0","#fff"],
-           "CONSIDER":   ["#e65100","#fff"], "SKIP":        ["#a02020","#fff"] }[rec] || ["#888","#fff"];
+  return { "STRONG BUY": ["#2d7a2d","#fff"], "INVESTIGATE": ["#c8a000","#fff"],
+           "CONSIDER":   ["#c85a00","#fff"], "SKIP":        ["#a02020","#fff"] }[rec] || ["#888","#fff"];
 }
 
 function _buildModalHtml(parcel) {
@@ -1172,10 +1172,10 @@ function renderPrelimMap(items) {
 }
 
 function _prelimMapColor(score) {
-  // Tlmene farby pre pre-scored markery (bez GIS)
-  if (score >= 85) return { bg:"#4caf7d", text:"#fff", border:"#2e7d32" };
-  if (score >= 70) return { bg:"#5b8fc9", text:"#fff", border:"#1565c0" };
-  if (score >= 50) return { bg:"#f0a060", text:"#fff", border:"#e65100" };
+  // Tlmene farby pre pre-scored markery (bez GIS) — zladené s hlavnými farbami (REC_COLORS)
+  if (score >= 85) return { bg:"#4caf7d", text:"#fff", border:"#2d7a2d" };
+  if (score >= 70) return { bg:"#e8c84a", text:"#fff", border:"#c8a000" };
+  if (score >= 50) return { bg:"#f0a060", text:"#fff", border:"#c85a00" };
   return             { bg:"#bdbdbd", text:"#fff", border:"#757575" };
 }
 

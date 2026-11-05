@@ -166,6 +166,14 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   font-size: .75rem;
 }
 .legend h3 { font-size: .78rem; margin-bottom: 6px; color: #333; }
+.legend-hint {
+  font-size: .72rem; color: #555;
+  background: #f0f4f8; border: 1px solid #dde4ec;
+  border-radius: 6px; padding: 5px 8px;
+  margin: 4px 0 2px; cursor: help;
+  line-height: 1.4;
+}
+.legend-hint b { color: #1a3a5c; }
 .legend-item { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
 .legend-dot {
   width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;

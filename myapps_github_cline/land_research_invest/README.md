@@ -48,20 +48,29 @@ Po spustení:
 
 ## 3. Skóre a farby
 
-### GIS skóre (0–100)
+Aplikácia má **dva stĺpce s číslami**, každý meria niečo iné:
+
+| Stĺpec | Čo meria | Kedy sa počíta |
+|---|---|---|
+| **🏆 Index** (investičný) | *Investičná PRÍLEŽITOSŤ* — podhodnotenosť, rezoning potenciál, dražba pod znaleckou | ihneď po prieskume |
+| **Skóre** (GIS) | *Fyzická KVALITA pozemku* — cena/výmera/vzdialenosť (Prelim) alebo záplavy/terén/bonita (Plné GIS) | Prelim ihneď, Plné na vyžiadanie |
+
+Jednoducho: **Index** = „oplatí sa pozrieť?“, **Skóre** = „aký je to pozemok?“
+
+### GIS skóre (0–100) — farebné pásma
 
 | Rozsah | Verdikt | Farba |
 |---|---|---|
 | 85–100 | SILNÁ KÚPA | zelená |
-| 70–84 | PREVERIŤ | modrá |
+| 70–84 | PREVERIŤ | žltá |
 | 50–69 | ZVÁŽIŤ | oranžová |
-| 0–49 | PRESKOČIŤ | červená |
+| 0–49 | PRESKOČIŤ | vínová |
 
 **Dve fázy:**
-- **Predbežné skóre** — ihneď po prieskume, 0 sieťových požiadaviek. Váhy: cena 30% | výmera 25% | EUR/m² 20% | vzdialenosť 10% | typ zdroja 10%. Chýbajúci údaj: váha 0, skóre sa nezníži.
-- **Plné GIS skóre** — spustíte ručne pre vybrané pozemky (~20 s/pozemok). Váhy v `config/criteria.yaml → scoring → weights`.
+- **Predbežné skóre** — ihneď po prieskume, 0 sieťových požiadaviek. Váhy: cena 30% | výmera 25% | EUR/m² 20% | vzdialenosť 10% | typ zdroja 10%. Chýbajúci údaj: váha 0, skóre sa nezníži. V mape stlmené (menšie) farby.
+- **Plné GIS skóre** — spustíte ručne pre vybrané pozemky (~20 s/pozemok). Váhy v `config/criteria.yaml → scoring → weights`. V mape sýte farby.
 
-### Investičný index (0–100)
+### Investičný index (0–100) — zložky
 
 | Zložka | Max b. |
 |---|---|

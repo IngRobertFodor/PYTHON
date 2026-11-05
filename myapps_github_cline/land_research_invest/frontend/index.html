@@ -8,9 +8,9 @@
   <!-- Leaflet CSS (lokálne – žiadne CDN, žiadny tracking prevention) -->
   <link rel="stylesheet" href="/static/lib/leaflet/leaflet.css" />
   <!-- App CSS -->
-  <link rel="stylesheet" href="/static/css/style.css?v=37">
+  <link rel="stylesheet" href="/static/css/style.css?v=38">
   <!-- AI Asistent CSS -->
-  <link rel="stylesheet" href="/static/css/ai_agent.css?v=1">
+  <link rel="stylesheet" href="/static/css/ai_agent.css?v=2">
 </head>
 <body>
 
@@ -152,8 +152,8 @@
               <th><input type="checkbox" id="chk-all" title="Vybrať všetky"></th>
               <th>#</th>
               <th title="Označiť/odznačiť pre sledovanie">⭐</th>
-              <th data-sort="investment_index" class="sortable sort-desc" onclick="_setSortCol('investment_index')" title="Investičný index 0–100: kombinácia potenciálneho zisku z preklasifikácie, mispricingových signálov (dlho v ponuke, pokles ceny, dražba pod znaleckou, lacnejší než okolie) a kvality dát. Čím vyšší, tým zaujímavejší.">🏆 Index &#8597;</th>
-              <th data-sort="preliminary_score" class="sortable" onclick="_setSortCol('preliminary_score')" title="Predbežné skóre vhodnosti (0–100) podľa vzdialenosti od BA, ceny, výmery. Bez GIS analýzy — rýchle, ale menej presné.">Skóre &#8597;</th>
+              <th data-sort="investment_index" class="sortable sort-desc" onclick="_setSortCol('investment_index')" title="🏆 Investičný index (0–100) = ako atraktívna je investičná PRÍLEŽITOSŤ.&#10;Zohľadňuje: potenciál preklasifikácie na stavebný pozemok, podhodnotenosť (dlho v ponuke, pokles ceny, dražba pod znaleckou cenou, lacnejší než okolie) a kvalitu dát.&#10;Čím vyšší, tým zaujímavejšia príležitosť.">🏆 Index &#8597;</th>
+              <th data-sort="preliminary_score" class="sortable" onclick="_setSortCol('preliminary_score')" title="Skóre (0–100) = fyzická KVALITA pozemku.&#10;Prelim: cena / výmera / vzdialenosť od Bratislavy (bez GIS).&#10;Po kliknutí „Skórovať vybrané“ sa Skóre zmení na plné GIS skóre (záplavy, terén, bonita pôdy, infraštruktúra).">Skóre &#8597;</th>
               <th title="Zdroj inzerátu (portál alebo dražba)">Zdroj</th>
               <th title="Textová adresa z inzerátu">Lokalita</th>
               <th data-sort="price_eur" class="sortable" onclick="_setSortCol('price_eur')" title="Triediť podľa ceny">Cena EUR &#8597;</th>
@@ -254,22 +254,48 @@
     <!-- LEGENDA -->
     <div class="legend">
       <h3>Legenda</h3>
-      <div style="font-size:.68rem;color:#999;margin-bottom:4px">GIS skóre (plné)</div>
+
+      <!-- Vysvetlenie rozdielu Index vs Skóre -->
+      <div class="legend-hint"
+           title="V tabuľke máš dva stĺpce — každý meria niečo iné:&#10;🏆 Index = investičná príležitosť (podhodnotenosť, preklasifikácia na stavebný pozemok, dražba pod znaleckou cenou)&#10;Skóre = fyzická kvalita pozemku (cena/výmera/vzdialenosť + GIS po skórovaní)">
+        <b>🏆 Index</b> = investičný potenciál &middot;
+        <b>Skóre</b> = fyzická kvalita
+      </div>
+
+      <div style="font-size:.68rem;color:#999;margin-bottom:4px;margin-top:8px">🏆 Investičný index (0–100)</div>
       <div class="legend-item">
         <div class="legend-dot" style="background:#2d7a2d"></div>
-        <span>SILNA KUPA (85-100)</span>
+        <span>Silná príležitosť (70+)</span>
       </div>
       <div class="legend-item">
         <div class="legend-dot" style="background:#c8a000"></div>
-        <span>PREVERIT (70-84)</span>
+        <span>Zaujímavý (50–69)</span>
       </div>
       <div class="legend-item">
         <div class="legend-dot" style="background:#c85a00"></div>
-        <span>ZVAZIT (50-69)</span>
+        <span>Priemerný (30–49)</span>
       </div>
       <div class="legend-item">
         <div class="legend-dot" style="background:#a02020"></div>
-        <span>PRESKOCIT (0-49)</span>
+        <span>Slabý / podiel (&lt;30)</span>
+      </div>
+
+      <div style="font-size:.68rem;color:#999;margin:8px 0 4px">GIS skóre (plné, po skórovaní)</div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#2d7a2d"></div>
+        <span>SILNÁ KÚPA (85–100)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#c8a000"></div>
+        <span>PREVERIŤ (70–84)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#c85a00"></div>
+        <span>ZVÁŽIŤ (50–69)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#a02020"></div>
+        <span>PRESKOČIŤ (0–49)</span>
       </div>
       <div style="font-size:.68rem;color:#999;margin:6px 0 4px">Prelim skóre (bez GIS, tlmené)</div>
       <div class="legend-item">
@@ -277,7 +303,7 @@
         <span>Prelim &#8805;85</span>
       </div>
       <div class="legend-item">
-        <div class="legend-dot" style="background:#5b8fc9;opacity:.75"></div>
+        <div class="legend-dot" style="background:#e8c84a;opacity:.75"></div>
         <span>Prelim 70–84</span>
       </div>
       <div class="legend-item">
@@ -310,13 +336,13 @@
 <script src="/static/lib/leaflet/leaflet.js"></script>
 
 <!-- App JS -->
-<script src="/static/js/config.js?v=37"></script>
-<script src="/static/js/api.js?v=37"></script>
-<script src="/static/js/demo.js?v=37"></script>
-<script src="/static/js/map.js?v=37"></script>
-<script src="/static/js/app.js?v=37"></script>
+<script src="/static/js/config.js?v=38"></script>
+<script src="/static/js/api.js?v=38"></script>
+<script src="/static/js/demo.js?v=38"></script>
+<script src="/static/js/map.js?v=38"></script>
+<script src="/static/js/app.js?v=38"></script>
 <!-- AI Asistent JS -->
-<script src="/static/js/ai_agent.js?v=1"></script>
+<script src="/static/js/ai_agent.js?v=2"></script>
 
 </body>
 </html>
