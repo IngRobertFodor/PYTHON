@@ -32,7 +32,6 @@ import services.report_service        as _report
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from models.result  import ServiceResult
-from models.parcel  import Parcel
 from config_loader  import is_feature_enabled
 
 SERVICE_NAME = "pipeline_service"

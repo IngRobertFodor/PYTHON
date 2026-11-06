@@ -22,7 +22,6 @@ from services.scrapers.topreality_scraper import (
     extract_location_from_breadcrumb,
     listing_to_parcel,
     SOURCE_NAME,
-    SEARCH_URLS,
 )
 from services.scraper_service import SCRAPER_REGISTRY
 from models.parcel import Parcel

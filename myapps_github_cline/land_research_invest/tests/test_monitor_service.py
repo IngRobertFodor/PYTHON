@@ -5,13 +5,11 @@ Testuje ScanResult, run_scan, start/stop, get_status a monitor routes.
 """
 
 import pytest
-import time
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from models.parcel import Parcel
 from models.result import ServiceResult
 from services.monitor_service import (
     ScanResult, run_scan, get_status, start, stop,
-    APSCHEDULER_AVAILABLE,
 )
 from app import create_app
 

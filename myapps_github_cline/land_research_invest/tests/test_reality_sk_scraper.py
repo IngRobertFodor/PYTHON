@@ -16,8 +16,6 @@ from services.scrapers.reality_sk_scraper import (
     parse_listing_page,
     extract_price,
     extract_area,
-    extract_location,
-    SOURCE_NAME,
     SEARCH_URLS,
 )
 from services.scraper_service import SCRAPER_REGISTRY

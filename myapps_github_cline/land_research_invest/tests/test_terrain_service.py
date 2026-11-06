@@ -5,11 +5,10 @@ Testuje analyzu terenu: sklon, orientacia, vyska, zosuvy, radon.
 HTTP requesty su mockované - 100% offline.
 """
 
-import pytest
 from unittest.mock import patch, MagicMock
+import pytest
 from services.terrain_service import (
-    check, get_elevation, get_slope_and_aspect,
-    is_landslide_zone, get_radon_risk,
+    check,
     _calculate_score, _parse_elevation_response,
     _parse_feature_response, _parse_radon_response,
     _deg_to_aspect,

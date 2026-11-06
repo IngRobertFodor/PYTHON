@@ -6,7 +6,7 @@ scoring, cadastral checklist a report.
 """
 
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from models.parcel  import Parcel
 from models.result  import ServiceResult
 from services.pipeline_service import (

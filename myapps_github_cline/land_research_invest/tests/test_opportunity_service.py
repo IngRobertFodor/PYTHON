@@ -6,7 +6,6 @@ Testuje investment_index(), explain(), apply_opportunity().
 """
 import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent / "backend"))
-import pytest
 from services.opportunity_service import (
     investment_index, explain, apply_opportunity, _EXPLAIN_MIN_INDEX,
 )

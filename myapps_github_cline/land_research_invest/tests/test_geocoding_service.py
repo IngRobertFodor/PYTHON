@@ -153,7 +153,7 @@ class TestCheckFunction:
 # F1/F2: _clean_address + _best_candidate + geocode_quality (R1)
 # ----------------------------------------------------------------
 
-from services.geocoding_service import _clean_address, _best_candidate, _dist_km
+from services.geocoding_service import _clean_address, _best_candidate
 
 
 class TestCleanAddress:

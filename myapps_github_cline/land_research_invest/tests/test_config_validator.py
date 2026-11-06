@@ -6,7 +6,6 @@ a ze platny config preide bez chyb.
 100% offline - pracuje s dict, nie so suborom.
 """
 
-import pytest
 import copy
 from config_validator import validate_config
 

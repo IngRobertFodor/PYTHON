@@ -6,7 +6,6 @@ ServiceResult.data z každej GIS služby (overene zo zdrojoveho kodu sluzieb).
 100% offline, nula HTTP.
 """
 
-import pytest
 from models.parcel import Parcel
 from models.result import ServiceResult
 from services.signals import gis_signals, preliminary_signals, merge_signals, history_signals, drazba_signals

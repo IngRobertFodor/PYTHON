@@ -4,10 +4,8 @@ Testuje vsetky endpointy cez Flask test_client.
 100% offline - pipeline_service je mocknuty.
 """
 
-import json
 import pytest
-from unittest.mock import patch, MagicMock
-from models.parcel import Parcel
+from unittest.mock import patch
 from models.result import ServiceResult
 from app import create_app
 

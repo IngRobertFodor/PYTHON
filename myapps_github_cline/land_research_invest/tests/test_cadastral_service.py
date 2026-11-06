@@ -6,7 +6,6 @@ Cista logika - 100% offline, ziadne HTTP requesty.
 """
 
 import pytest
-from unittest.mock import patch
 from services.cadastral_service import (
     check, evaluate_lv_data, generate_checklist, _calculate_score,
 )

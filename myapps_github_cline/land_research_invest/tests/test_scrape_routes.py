@@ -4,10 +4,10 @@
 """
 
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from app import create_app
-from services.scraper_service import _progress, _progress_lock, _reset_progress, _finish_progress
+from services.scraper_service import _progress, _progress_lock
 from routes.scrape_routes import _set_last_results, _get_last_results
 
 
@@ -135,8 +135,6 @@ class TestScrapeResultsEndpoint:
 # ----------------------------------------------------------------
 # TestScoreSelectedEndpoint
 # ----------------------------------------------------------------
-
-from routes.scrape_routes import _get_score_progress
 
 class TestScoreSelectedEndpoint:
     def setup_method(self):

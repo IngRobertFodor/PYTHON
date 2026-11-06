@@ -1,10 +1,9 @@
 import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent / "backend"))
-import pytest
 from unittest.mock import patch, MagicMock
 from services.uzemny_plan_service import (
     normalize_obec, build_up_links, get_checklist,
-    is_gisplan_available, _gisplan_cache, _cache_lock,
+    is_gisplan_available, _cache_lock,
 )
 
 

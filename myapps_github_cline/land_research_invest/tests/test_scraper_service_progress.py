@@ -5,10 +5,7 @@ Testuje: _reset_progress, _update_progress, _finish_progress,
 100% offline - bez sieťových volaní.
 """
 
-import pytest
 import threading
-from unittest.mock import patch, MagicMock
-
 from services.scraper_service import (
     get_scrape_progress,
     _reset_progress,

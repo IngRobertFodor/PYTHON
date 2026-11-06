@@ -3,14 +3,14 @@ test_backup_service.py — testy pre backup_service (P2)
 ======================================================
 Round-trip: export → import, merge logika, rotácia, validácia.
 """
-import sys, pathlib, tempfile, gzip, json, sqlite3
+import sys, pathlib, gzip, json, sqlite3
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent / "backend"))
 
 import pytest
 from unittest.mock import patch
 from services.backup_service import (
     export_db, import_db,
-    backup_status, list_history,
+    backup_status,
     _rotate_history, _merge_price_history, _earliest,
     _validate_gz_sql, _parse_json_list,
 )

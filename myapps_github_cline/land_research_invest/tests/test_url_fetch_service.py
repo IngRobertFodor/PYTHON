@@ -1,5 +1,4 @@
 import os, json, pytest
-from unittest.mock import patch
 from app import create_app
 FIXTURES = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
 def _fix(f):

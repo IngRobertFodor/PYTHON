@@ -17,6 +17,17 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 - +5 testov v `TestEnrichCoordsOffline` (mix s/bez GPS, neznáma obec, batch)
 - **Celkový počet testov: 1642** (+5)
 
+## 2026-11 — Pyright cleanup: 0 unused importov
+
+- VS Code Problems panel bol znečistený **41 warningami** typu `reportUnusedImport`.
+- Vyčistené v **18 súboroch**: 2 backend (`pipeline_service.py`, `scoring_service.py`)
+  a 16 test-ov. Odstránené importy ktoré sa nikde nepoužívali
+  (`json`, `MagicMock`, `tempfile`, `_dist_km`, `SEARCH_URLS`, ...).
+- Zachované: `SOURCE_NAME` v `test_topreality_scraper.py` (používa sa na riadku 253),
+  `pytest` v `test_terrain_service.py` (používa sa pre `pytest.approx` na riadku 171).
+- Testy: 1642 zelených (bez zmien v počte).
+- VS Code Problems: **0 warningov** v Pyright basic mode.
+
 ## 2026-11 — Modernizácia farebnej palety
 
 - **Prechod zo starých tlmených farieb na moderný Tailwind-inspired palette** (`emerald/amber/orange/red`-500):

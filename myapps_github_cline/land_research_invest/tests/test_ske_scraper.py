@@ -26,7 +26,6 @@ from services.scrapers.ske_scraper import (
     extract_detail_vlastnik,
     extract_detail_ov_cislo,
     extract_detail_parcely_list,
-    SOURCE_NAME,
 )
 from services.scraper_service import SCRAPER_REGISTRY
 from models.parcel import Parcel

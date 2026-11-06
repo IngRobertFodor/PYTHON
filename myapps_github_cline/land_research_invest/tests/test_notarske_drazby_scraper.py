@@ -12,14 +12,12 @@ FIXTURE = pathlib.Path(__file__).parent / "fixtures" / "notarske_drazby_listing.
 
 from services.scrapers.notarske_drazby_scraper import (
     NotarskeDrazbyaScraper,
-    extract_detail_title,
     extract_detail_location,
     extract_detail_price,
     extract_detail_area,
     extract_detail_datum,
     extract_detail_navrhovatel,
     extract_pdf_url,
-    SOURCE_NAME,
     BASE_DOMAIN,
     LISTING_BASE,
     SEARCH_PARAMS,

@@ -8,7 +8,6 @@ Vahy a prahy sa citaju z config/criteria.yaml.
 """
 
 import logging
-from models.result import ServiceResult
 from models.parcel import Parcel
 from config_loader import get_scoring
 

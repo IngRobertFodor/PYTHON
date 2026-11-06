@@ -1,6 +1,5 @@
 import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent / "backend"))
-import pytest
 from unittest.mock import patch
 from services.overpass_service import (
     classify_access, classify_position, is_gem_candidate,

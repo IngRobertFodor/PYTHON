@@ -5,7 +5,6 @@ Testuje kontrolu Q100 zaplavoveho uzemia.
 HTTP requesty na SHMU WMS su mockované - 100% offline.
 """
 
-import pytest
 from unittest.mock import patch, MagicMock
 from services.flood_service import check, _parse_flood_response
 from models.result import ServiceResult
