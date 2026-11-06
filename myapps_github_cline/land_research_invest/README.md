@@ -278,7 +278,7 @@ Ak `GOOGLE_API_KEY` nie je nastavený, tlačidlo je sivé. Appka funguje úplne 
 ## 9. Testy
 
 ```bash
-python -m pytest tests/ -q        # 1637 testov, ~110 sekúnd
+python -m pytest tests/ -q        # 1642 testov, ~125 sekúnd
 python -m pytest tests/ -v        # detailný výstup
 ```
 

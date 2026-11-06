@@ -135,6 +135,29 @@ def _enrich_from_db(items: list) -> list:
         except Exception as exc:
             logger.warning("[scrape_routes._enrich] location_backfill: %s", exc)
 
+    # --- F5-A: Offline GPS enrich (pre staršie DB záznamy bez súradníc) ---
+    # Nové scrape beh už GPS doplní (scraper_service._enrich_coords_offline),
+    # ale v DB môžu byť staré pozemky z predošlých behov bez lat/lon.
+    try:
+        from services import sk_places
+        gps_added = 0
+        for d in items:
+            if d.get("lat") and d.get("lon"):
+                continue
+            loc = d.get("location_text") or ""
+            if not loc:
+                continue
+            place = sk_places.find_place(loc)
+            if place:
+                _, lat, lon = place
+                d["lat"] = lat
+                d["lon"] = lon
+                gps_added += 1
+        if gps_added:
+            logger.info("[scrape_routes._enrich] GPS doplnené pre %d pozemkov (obec-level)", gps_added)
+    except Exception as exc:
+        logger.warning("[scrape_routes._enrich] GPS backfill: %s", exc)
+
     # --- Peer comparison + opportunity pre celú sadu naraz ---
     # (peer štatistiky sú presnejšie keď sa počítajú zo všetkých položiek)
     try:

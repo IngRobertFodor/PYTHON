@@ -224,9 +224,40 @@ def scrape_all(criteria=None):
 
     elapsed = time.monotonic() - t_start
     result = _deduplicate(all_parcels)
+    _enrich_coords_offline(result)   # F5-A: doplní GPS z sk_places (obec-level, 0 HTTP)
     _finish_progress(elapsed)
     logger.info("[scraper_service] Hotovo: %s unikatnych pozemkov za %ss", len(result), round(elapsed))
     return result
+
+
+def _enrich_coords_offline(parcels):
+    """
+    F5-A: Doplní GPS súradnice z sk_places (offline, obec-level ~2-5 km presnosť).
+
+    Pozemky z inzerátov / SPF majú lat=0/lon=0 po scrape. Mapa by bola prázdna
+    dokým používateľ nespustí plný GIS scoring. Toto doplní obec-level GPS
+    pre všetkých, mapa sa naplní ihneď. Presnejšie GPS (ulica) sa doplní
+    neskôr v pipeline cez Nominatim (geocoding_service).
+
+    Mutuje parcely in-place. 0 HTTP volaní, čas ~0.5s pre 5000 pozemkov.
+    """
+    try:
+        from services import sk_places
+    except Exception as exc:
+        logger.warning("[scraper_service] sk_places import zlyhal, mapa ostane prázdna: %s", exc)
+        return
+
+    enriched = 0
+    for p in parcels:
+        if (p.lat and p.lon) or not p.location_text:
+            continue
+        place = sk_places.find_place(p.location_text)
+        if place:
+            _, lat, lon = place
+            p.lat = lat
+            p.lon = lon
+            enriched += 1
+    logger.info("[scraper_service] Offline GPS doplnené pre %d/%d pozemkov", enriched, len(parcels))
 
 
 def scrape_source(source_name, criteria=None):

@@ -4,6 +4,19 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 
 ---
 
+## 2026-11 — Fáza 5 reálny test: F5-A oprava mapy
+
+- **Problém:** Po scrape 4734 pozemkov mala mapa **0 bodov**. Nominatim geokódovanie
+  beží až počas plného GIS scoringu (ručne, max 10-20 pozemkov), preto 99% ostávalo bez GPS.
+- **Oprava:** Nová funkcia `_enrich_coords_offline()` v `scraper_service.py` — po scrape
+  dopĺňa GPS z offline databázy `sk_places` (GeoNames ~8300 slovenských obcí, 0 HTTP).
+  Pokrytie: **94.8%** (4488/4734 pozemkov dostane obec-level GPS ~2-5 km presnosť).
+- **Retro-aplikácia:** `scrape_routes._enrich_from_db()` dopĺňa GPS aj pre staršie DB
+  záznamy — mapa funguje okamžite aj bez nového scrape behu.
+- Presnejšie GPS (ulica) zostáva v Nominatim cez `geocoding_service` pri GIS scoringu.
+- +5 testov v `TestEnrichCoordsOffline` (mix s/bez GPS, neznáma obec, batch)
+- **Celkový počet testov: 1642** (+5)
+
 ## 2026-11 — Modernizácia farebnej palety
 
 - **Prechod zo starých tlmených farieb na moderný Tailwind-inspired palette** (`emerald/amber/orange/red`-500):

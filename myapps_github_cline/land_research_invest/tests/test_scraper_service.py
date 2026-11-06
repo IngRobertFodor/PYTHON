@@ -414,3 +414,53 @@ class TestF2SourceDiagnostics:
         _update_progress("src_b", 0,  1.0, status="error")
         _update_progress("src_c", 5,  1.0, status="ok")
         assert get_scrape_progress()["total_parcels"] == 15
+
+
+# ----------------------------------------------------------------
+# F5-A: TestEnrichCoordsOffline — doplnenie GPS z sk_places
+# ----------------------------------------------------------------
+
+class TestEnrichCoordsOffline:
+    """F5-A: po scrape sa doplnia GPS z offline sk_places (obec-level)."""
+
+    def test_adds_coords_when_missing(self):
+        from services.scraper_service import _enrich_coords_offline
+        p = Parcel(url="u1", location_text="Senec, Slovakia", lat=0.0, lon=0.0)
+        _enrich_coords_offline([p])
+        assert p.lat > 0 and p.lon > 0
+
+    def test_preserves_existing_coords(self):
+        """Ak pozemok už má GPS (napr. z Nominatim), nemaže ich."""
+        from services.scraper_service import _enrich_coords_offline
+        p = Parcel(url="u1", location_text="Senec", lat=48.5, lon=17.5)
+        _enrich_coords_offline([p])
+        assert p.lat == 48.5 and p.lon == 17.5
+
+    def test_skip_without_location(self):
+        from services.scraper_service import _enrich_coords_offline
+        p = Parcel(url="u1", location_text="", lat=0.0, lon=0.0)
+        _enrich_coords_offline([p])
+        assert p.lat == 0.0 and p.lon == 0.0
+
+    def test_unknown_location_stays_zero(self):
+        """Neznáma obec zostane bez GPS (sk_places vráti None)."""
+        from services.scraper_service import _enrich_coords_offline
+        p = Parcel(url="u1", location_text="XYZ_neexistuje_123", lat=0.0, lon=0.0)
+        _enrich_coords_offline([p])
+        assert p.lat == 0.0 and p.lon == 0.0
+
+    def test_batch_mixed(self):
+        """Mix: s GPS, bez GPS s obcou, bez GPS bez obce."""
+        from services.scraper_service import _enrich_coords_offline
+        parcels = [
+            Parcel(url="u1", location_text="Senec",   lat=0.0,  lon=0.0),
+            Parcel(url="u2", location_text="Modra",   lat=48.3, lon=17.3),  # už má
+            Parcel(url="u3", location_text="",         lat=0.0,  lon=0.0),
+            Parcel(url="u4", location_text="Pezinok", lat=0.0,  lon=0.0),
+        ]
+        _enrich_coords_offline(parcels)
+        assert parcels[0].lat > 0   # Senec doplnený
+        assert parcels[1].lat == 48.3   # Modra zachovaná
+        assert parcels[2].lat == 0.0    # bez obce
+        assert parcels[3].lat > 0   # Pezinok doplnený
+
