@@ -26,8 +26,8 @@ function addParcelMarker(parcel, report, onClickCb) {
   const isUncertain = geoQ === "uncertain";
   const isFar       = geoQ === "far";
   const geoWarn     = isUncertain
-    ? "<br><span style='font-size:.72rem;color:#c85a00'>⚠️ Neistá poloha — nemusí byť presná</span>"
-    : (isFar ? "<br><span style='font-size:.72rem;color:#e09000'>⚠️ Ďaleká lokalita (>120 km)</span>" : "");
+    ? "<br><span style='font-size:.72rem;color:#d97706'>⚠️ Neistá poloha — nemusí byť presná</span>"
+    : (isFar ? "<br><span style='font-size:.72rem;color:#d97706'>⚠️ Ďaleká lokalita (>120 km)</span>" : "");
 
   const rec   = parcel.recommendation || "N/A";
   const col   = recColor(rec);

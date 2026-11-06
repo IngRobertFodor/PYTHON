@@ -109,14 +109,14 @@ btn, .btn {
 btn:hover, .btn:hover { opacity: .88; }
 btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .btn-primary { background: #1a3a5c; color: #fff; }
-.btn-demo    { background: #2d7a2d; color: #fff; }
+.btn-demo    { background: #10b981; color: #fff; }
 
 .status {
   font-size: .8rem; margin-top: 8px; padding: 6px 10px;
   border-radius: 5px; min-height: 28px;
 }
-.status.ok    { background: #e6f4e6; color: #2d7a2d; }
-.status.error { background: #fdecea; color: #a02020; }
+.status.ok    { background: #d1fae5; color: #065f46; }   /* emerald-100 / emerald-800 */
+.status.error { background: #fee2e2; color: #991b1b; }   /* red-100 / red-800 */
 .status.info  { background: #e8f0fe; color: #1a3a5c; }
 
 /* KARTY VYSLEDKOV */
@@ -148,9 +148,9 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 
 .card-flags { list-style: none; font-size: .75rem; margin-top: 4px; }
 .card-flags li { padding: 1px 0; }
-.flag-err  { color: #a02020; }
-.flag-warn { color: #a07800; }
-.flag-ok   { color: #2d7a2d; font-size: .75rem; }
+.flag-err  { color: #ef4444; }     /* red-500 */
+.flag-warn { color: #d97706; }     /* amber-600 */
+.flag-ok   { color: #10b981; font-size: .75rem; }    /* emerald-500 */
 .no-results { color: #999; font-size: .85rem; padding: 12px 0; }
 
 /* MAPA */
@@ -470,7 +470,7 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   flex-direction: column; gap: 8px;
 }
 .btn-score {
-  background: #2e7d32; color: #fff;
+  background: #10b981; color: #fff;
   border: none; border-radius: 6px;
   padding: 8px 14px; font-size: .88rem;
   font-weight: 700; cursor: pointer;
@@ -570,8 +570,8 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   border: none; cursor: pointer;
 }
 .up-btn:hover { background: #24548a; }
-.up-btn-primary { background: #2e7d32; font-size: .82rem; padding: 8px 16px; }
-.up-btn-primary:hover { background: #388e3c; }
+.up-btn-primary { background: #10b981; font-size: .82rem; padding: 8px 16px; }
+.up-btn-primary:hover { background: #059669; }
 
 .up-links-row {
   display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0;

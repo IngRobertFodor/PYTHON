@@ -61,10 +61,10 @@ Jednoducho: **Index** = „oplatí sa pozrieť?“, **Skóre** = „aký je to p
 
 | Rozsah | Verdikt | Farba |
 |---|---|---|
-| 85–100 | SILNÁ KÚPA | zelená |
-| 70–84 | PREVERIŤ | žltá |
-| 50–69 | ZVÁŽIŤ | oranžová |
-| 0–49 | PRESKOČIŤ | vínová |
+| 85–100 | SILNÁ KÚPA | emerald (svieža zelená) |
+| 70–84 | PREVERIŤ | amber (jantárová) |
+| 50–69 | ZVÁŽIŤ | orange (živá oranžová) |
+| 0–49 | PRESKOČIŤ | red (čistá červená) |
 
 **Dve fázy:**
 - **Predbežné skóre** — ihneď po prieskume, 0 sieťových požiadaviek. Váhy: cena 30% | výmera 25% | EUR/m² 20% | vzdialenosť 10% | typ zdroja 10%. Chýbajúci údaj: váha 0, skóre sa nezníži. V mape stlmené (menšie) farby.

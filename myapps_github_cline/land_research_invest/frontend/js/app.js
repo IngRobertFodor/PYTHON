@@ -395,16 +395,16 @@ const _COMP_META = {
 };
 
 function _scoreColor(s) {
-  if (s == null) return "#aaa";
-  if (s >= 85) return "#2d7a2d";   // tmavá zelená — SILNÁ KÚPA
-  if (s >= 70) return "#c8a000";   // žltá — PREVERIŤ (zjednotené s legendou + mapou)
-  if (s >= 50) return "#c85a00";   // oranžová — ZVÁŽIŤ
-  return "#a02020";                 // vínová — PRESKOČIŤ
+  if (s == null) return "#94a3b8";                // slate-400
+  if (s >= 85) return "#10b981";                  // emerald-500 — SILNÁ KÚPA
+  if (s >= 70) return "#f59e0b";                  // amber-500 — PREVERIŤ
+  if (s >= 50) return "#f97316";                  // orange-500 — ZVÁŽIŤ
+  return "#ef4444";                                // red-500 — PRESKOČIŤ
 }
 
 function _recStyle(rec) {
-  return { "STRONG BUY": ["#2d7a2d","#fff"], "INVESTIGATE": ["#c8a000","#fff"],
-           "CONSIDER":   ["#c85a00","#fff"], "SKIP":        ["#a02020","#fff"] }[rec] || ["#888","#fff"];
+  return { "STRONG BUY": ["#10b981","#fff"], "INVESTIGATE": ["#f59e0b","#fff"],
+           "CONSIDER":   ["#f97316","#fff"], "SKIP":        ["#ef4444","#fff"] }[rec] || ["#64748b","#fff"];
 }
 
 function _buildModalHtml(parcel) {
@@ -1172,11 +1172,11 @@ function renderPrelimMap(items) {
 }
 
 function _prelimMapColor(score) {
-  // Tlmene farby pre pre-scored markery (bez GIS) — zladené s hlavnými farbami (REC_COLORS)
-  if (score >= 85) return { bg:"#4caf7d", text:"#fff", border:"#2d7a2d" };
-  if (score >= 70) return { bg:"#e8c84a", text:"#fff", border:"#c8a000" };
-  if (score >= 50) return { bg:"#f0a060", text:"#fff", border:"#c85a00" };
-  return             { bg:"#bdbdbd", text:"#fff", border:"#757575" };
+  // Tlmene farby pre pre-scored markery (bez GIS) — svetlejšie pastely zladené s moderným palette
+  if (score >= 85) return { bg:"#6ee7b7", text:"#064e3b", border:"#10b981" };  // emerald-300
+  if (score >= 70) return { bg:"#fcd34d", text:"#78350f", border:"#f59e0b" };  // amber-300
+  if (score >= 50) return { bg:"#fdba74", text:"#7c2d12", border:"#f97316" };  // orange-300
+  return             { bg:"#cbd5e1", text:"#475569", border:"#64748b" };        // slate-300
 }
 
 // P3b: Dedup — zobraz len najnovsí run_id pre kazdu URL

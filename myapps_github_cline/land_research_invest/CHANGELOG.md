@@ -4,6 +4,20 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 
 ---
 
+## 2026-11 — Modernizácia farebnej palety
+
+- **Prechod zo starých tlmených farieb na moderný Tailwind-inspired palette** (`emerald/amber/orange/red`-500):
+  - SILNÁ KÚPA: `#2d7a2d` → `#10b981` (emerald, svieža zelená)
+  - PREVERIŤ: `#c8a000` → `#f59e0b` (amber, jantárová)
+  - ZVÁŽIŤ: `#c85a00` → `#f97316` (orange, živá)
+  - PRESKOČIŤ: `#a02020` → `#ef4444` (red, čistá)
+- **Prelim stlmené verzie** zjemnené na pastely (emerald-300 / amber-300 / orange-300 / slate-300)
+  s tmavým textom pre dobrý kontrast
+- **Status badges + flags + buttons** v `style.css` tiež modernizované (emerald + red paleta)
+- **Geolokácia warning** v `map.js` zjednotený na amber-600
+- README sekcia 3 — tabuľka farieb aktualizovaná
+- Verzie static súborov `v=38→39` (vynútenie cache invalidation)
+
 ## 2026-11 — UX polish po reálnom teste (Fáza 5)
 
 - **Legenda v mape rozšírená**: nová sekcia **🏆 Investičný index (0–100)** nad GIS skóre + horný hint box
