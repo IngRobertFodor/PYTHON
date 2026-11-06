@@ -260,6 +260,16 @@ for i in range(5):        # 0, 1, 2, 3, 4
 
 for i in range(2, 10, 2): # start, stop, step -> 2, 4, 6, 8
     print(i)
+
+for i in range(5, 0, -1): # negative step counts down -> 5, 4, 3, 2, 1
+    print(i)
+```
+
+`'+' * i` repeats a string, so a countdown can print a shape:
+```python
+for i in range(5, 0, -1):
+    print("+" * i)
+# +++++ / ++++ / +++ / ++ / +
 ```
 
 **`enumerate()`** – get both index and value:
@@ -301,7 +311,58 @@ for i in range(5):
 
 > 💡 `break` = "stop, exit the loop". `continue` = "skip this one, but keep going".
 
-**List/dict/set comprehensions** are a compact way to build collections using a loop in one line — you'll see this exact pattern (`for x in range(5)`) again in the [Lists](#lists) chapter.
+### Nested loops
+
+**Theory:** A loop inside another loop. The inner loop runs **completely** for every single step of the outer loop. If the outer loop runs **M** times and the inner **N** times, the inner body runs **M × N** times in total.
+
+**1. Basic idea – multiplication table:**
+```python
+for i in range(1, 4):          # outer: i = 1, 2, 3
+    for j in range(1, 4):      # inner: j = 1, 2, 3 for EACH i
+        print(f"{i} x {j} = {i * j}")
+    print("---")
+# 1 x 1 = 1 / 1 x 2 = 2 / 1 x 3 = 3 / --- / 2 x 1 = 2 / ... / 3 x 3 = 9 / ---
+```
+
+**2. One loop per position – combinations** (3 loops → 3-letter combinations):
+```python
+letters = "ABC"
+for a in letters:
+    for b in letters:
+        for c in letters:
+            print(a + b + c)
+# AAA, AAB, AAC, ABA, ... CCC  (3 × 3 × 3 = 27 lines)
+```
+
+**3. Pairs, both directions** (`!=` avoids pairing a player with themselves):
+```python
+players = ["Alice", "Bob", "Charlie"]
+for p1 in players:
+    for p2 in players:
+        if p1 != p2:
+            print(f"{p1} vs {p2}")
+# Alice vs Bob, Alice vs Charlie, Bob vs Alice, Bob vs Charlie, Charlie vs Alice, Charlie vs Bob
+```
+
+**4. Each pair only once** (inner loop starts after the outer index, so no duplicates and the original order is kept):
+```python
+players = ["Charlie", "Alice", "Dylan", "Bob"]
+for i in range(len(players)):
+    for j in range(i + 1, len(players)):
+        print(f"{players[i]} vs {players[j]}")
+# Charlie vs Alice, Charlie vs Dylan, Charlie vs Bob, Alice vs Dylan, Alice vs Bob, Dylan vs Bob
+```
+
+**5. Inner loop depends on the outer one – triangle:**
+```python
+for i in range(1, 5):
+    for j in range(i):         # inner runs i times
+        print("+", end="")
+    print()                    # new line after each row
+# + / ++ / +++ / ++++
+```
+
+**List/set/dict comprehensions** are a compact way to build collections using a loop in one line — you'll see this exact pattern (`for x in range(5)`) again in the [Lists](#lists) chapter.
 
 ---
 
@@ -529,4 +590,4 @@ for key, value in person.items():
 - [ ] Exceptions (try/except)
 - [ ] Classes / OOP
 - [ ] Modules and imports
-- [ ] Dict/set comprehensions
+- [ ] Set/dict comprehensions
