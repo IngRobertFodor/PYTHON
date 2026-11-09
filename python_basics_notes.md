@@ -439,6 +439,30 @@ squares = [x**2 for x in range(5)]
 print(squares)   # [0, 1, 4, 9, 16]
 ```
 
+### Nested lists
+
+**Theory:** A list can contain other lists. Use one index per level: first the outer list, then the inner one.
+
+```python
+strings = [['hello', 'there'], ['how', 'are', 'you']]
+print(strings[1][0])   # how   – outer index 1 -> ['how', 'are', 'you'], inner index 0 -> 'how'
+print(strings[0])      # ['hello', 'there']
+print(len(strings))    # 2     – number of inner lists
+```
+
+Inner lists can have different lengths and can be changed like any list:
+```python
+strings[0][1] = "world"
+print(strings)         # [['hello', 'world'], ['how', 'are', 'you']]
+```
+
+Looping over a nested list uses a [nested loop](#nested-loops):
+```python
+for inner in strings:
+    for word in inner:
+        print(word)    # hello / world / how / are / you
+```
+
 ### Membership operator: `in`
 
 **Theory:** Checks if a value exists inside a collection (list, tuple, set, dict, string). Returns `True` / `False`. Opposite: `not in`.
