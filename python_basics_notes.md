@@ -13,6 +13,7 @@
 6. [Tuples](#tuples)
 7. [Sets](#sets)
 8. [Dictionaries](#dictionaries)
+9. [Functions](#functions)
 ---
 
 ## Basics
@@ -609,8 +610,35 @@ for key, value in person.items():
 
 ---
 
+## Functions
+
+**Theory:** A reusable block of code with a name. Define it once with `def`, run it as many times as you want by calling it. Values passed in are **parameters** (in the definition) / **arguments** (in the call). The body must be indented.
+
+```python
+def greet(name):
+    print(f"Hello {name}!")
+
+greet("Alice")   # Hello Alice!
+greet("Bob")     # Hello Bob!
+```
+
+**Multiple parameters:**
+```python
+def print_many(thing, n):
+    for _ in range(n):    # _ = throwaway variable (we don't need the counter)
+        print(thing)
+
+print_many("Hello", 3)
+# Hello
+# Hello
+# Hello
+```
+
+> 💡 Defining a function does nothing by itself – the code runs only when you **call** it.
+
+---
+
 ## 🔜 To add later
-- [ ] Functions
 - [ ] Exceptions (try/except)
 - [ ] Classes / OOP
 - [ ] Modules and imports
