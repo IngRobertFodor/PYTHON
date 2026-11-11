@@ -157,6 +157,28 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .map-panel { grid-row: 1 / -1; position: relative; }
 #map { width: 100%; height: 100%; min-height: 300px; }
 
+/* Mini-legenda signálov nad tabuľkou (#K vysvetlenie 🟢🔴) */
+.sig-hint {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px;
+  margin: 6px 0 4px; padding: 4px 8px;
+  background: #f8fafd; border: 1px solid #e0e8f4; border-radius: 6px;
+  font-size: .68rem; color: #555;
+}
+.sig-hint-chip {
+  display: inline-block; padding: 1px 6px;
+  background: #fff; border: 1px solid #dde4ec; border-radius: 10px;
+  white-space: nowrap;
+}
+.sig-hint-note { margin-left: auto; color: #888; font-style: italic; }
+
+/* Inline panel pre Analyzovať/Demo výstup (náhrada za legacy .results-section) */
+.results-panel-inline {
+  margin-top: 10px;
+}
+.results-panel-inline:empty {
+  display: none;
+}
+
 /* LEGENDA */
 .legend {
   position: absolute; bottom: 24px; right: 10px; z-index: 999;
@@ -338,7 +360,10 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .results-table tbody tr:hover { background: #f0f6ff; }
 .results-table td { padding: 5px 8px; vertical-align: middle; }
 .tbl-num  { color: #999; font-size: .70rem; }
-.tbl-src  { color: #555; font-size: .70rem; white-space: nowrap; }
+.tbl-src  {
+  color: #555; font-size: .70rem; white-space: nowrap;
+  max-width: 90px; overflow: hidden; text-overflow: ellipsis;
+}
 .tbl-loc  { max-width: 120px; overflow: hidden;
             text-overflow: ellipsis; white-space: nowrap; }
 .tbl-price { font-weight: 600; white-space: nowrap; }
@@ -352,6 +377,9 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   font-weight: 700; font-size: .74rem;
   white-space: nowrap;
 }
+/* Rozlíšenie: prelim pastel (odhad) vs final sýte (overené po GIS) */
+.badge-prelim { border: 1px dashed rgba(0,0,0,0.25); font-weight: 600; }
+.badge-final  { border: 1px solid rgba(0,0,0,0.15); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
 
 /* Signálové odznaky v tabuľke */
 .sig-badge {
@@ -432,10 +460,12 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   color: #fff; white-space: nowrap; cursor: default;
   vertical-align: middle;
 }
-.inv-high   { background: #1a7a3c; }  /* 70–100: silná príležitosť */
-.inv-mid    { background: #2a6496; }  /* 40–69: stredná */
-.inv-low    { background: #888;    }  /* 1–39: slabá */
-.inv-zero   { background: #ccc; color: #666; }  /* 0: nehodnotené */
+/* Zjednotené s _scoreColor() + legendou: 70+ emerald, 50-69 amber, 30-49 orange, <30 red */
+.inv-high   { background: #10b981; }                 /* 70-100: silná príležitosť */
+.inv-mid    { background: #f59e0b; color: #78350f; } /* 50-69:  zaujímavý — tmavší text pre kontrast */
+.inv-low    { background: #f97316; color: #fff; }    /* 30-49: priemerný */
+.inv-dim    { background: #ef4444; }                  /* 1-29:   slabý */
+.inv-zero   { background: #cbd5e1; color: #475569; }  /* 0: nehodnotené */
 
 /* Index a Skóre — samostatné stĺpce */
 .tbl-idx   { white-space: nowrap; text-align: center; }
@@ -481,7 +511,7 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .diff-new    { background: #d4edda; color: #155724; border-color: #28a745; }
 .diff-gone   { background: #f8d7da; color: #721c24; border-color: #dc3545; }
 .diff-cheap  { background: #fff3cd; color: #7a4f00; border-color: #f0b429; }
-.diff-same   { background: #f0f0f0; color: #555;    border-color: #bbb; }
+.diff-same   { background: #e2e8f0; color: #334155; border-color: #94a3b8; }
 .diff-filter-active { outline: 2px solid #1a3a5c; }
 
 
@@ -491,14 +521,14 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   flex-direction: column; gap: 8px;
 }
 .btn-score {
-  background: #10b981; color: #fff;
+  background: #1a3a5c; color: #fff;
   border: none; border-radius: 6px;
   padding: 8px 14px; font-size: .88rem;
   font-weight: 700; cursor: pointer;
   transition: background .2s;
 }
-.btn-score:hover:not(:disabled) { background: #388e3c; }
-.btn-score:disabled { background: #9dbfa0; cursor: not-allowed; }
+.btn-score:hover:not(:disabled) { background: #24548a; }
+.btn-score:disabled { background: #cbd5e1; color: #64748b; cursor: not-allowed; }
 #score-progress-wrap.hidden { display: none; }
 
 .src-chip {

@@ -224,6 +224,7 @@ async function onDemoClick() {
 function renderResults(items) {
   clearMarkers();
   const panel = document.getElementById("results-panel");
+  if (!panel) return;  // legacy fallback — panel bol presunutý do "Analyzovať" sekcie
   panel.innerHTML = "";
 
   if (!items || items.length === 0) {
@@ -239,12 +240,9 @@ function renderResults(items) {
 
     fitMapToMarkers();
 
-  // P4: Ensure single-parcel VYSLEDKY section is visible
-  const _sec = document.querySelector(".results-section");
-  if (_sec) {
-    _sec.classList.add("results-section-active");
-    setTimeout(() => _sec.scrollIntoView({ behavior: "smooth", block: "nearest" }), 120);
-  }
+  // Rozbaľ "Analyzovať 1 pozemok" sekciu nech vidno výstup
+  const _details = panel.closest("details.form-section");
+  if (_details && !_details.open) _details.open = true;
 }
 
 function buildCard(parcel, report) {
@@ -520,13 +518,19 @@ function _buildModalHtml(parcel) {
   const invIdx = parcel.investment_index || 0;
   const invSum = parcel.investment_summary || "";
   if (invIdx > 0) {
-    const invCls  = invIdx >= 70 ? "inv-high" : invIdx >= 40 ? "inv-mid" : "inv-low";
-    const invLabel = invIdx >= 70 ? "Silná príležitosť" : invIdx >= 40 ? "Stredná príležitosť" : "Slabá / nízka priorita";
+    // Zjednotené s legendou: 70+ Silná, 50-69 Zaujímavý, 30-49 Priemerný, <30 Slabý
+    const invCls   = invIdx >= 70 ? "inv-high" : invIdx >= 50 ? "inv-mid" : invIdx >= 30 ? "inv-low" : "inv-dim";
+    const invLabel = invIdx >= 70 ? "Silná príležitosť"
+                   : invIdx >= 50 ? "Zaujímavý"
+                   : invIdx >= 30 ? "Priemerný" : "Slabý / nízka priorita";
+    const invColor = invIdx >= 70 ? "#10b981"
+                   : invIdx >= 50 ? "#f59e0b"
+                   : invIdx >= 30 ? "#f97316" : "#ef4444";
     html += `<div class="modal-section-title">🏆 Investičný index</div>
       <div style="background:#f7f9fc;border-radius:8px;padding:10px 14px;font-size:.75rem;line-height:1.8">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
           <span class="inv-badge ${invCls}" style="width:44px;height:26px;font-size:.9rem">${invIdx}</span>
-          <span style="font-weight:700;color:${invIdx>=70?"#1a7a3c":invIdx>=40?"#2a6496":"#888"}">${invLabel}</span>
+          <span style="font-weight:700;color:${invColor}">${invLabel}</span>
         </div>
         ${invSum ? `<div style="font-size:.74rem;color:#444;line-height:1.6">${invSum}</div>` : ""}
         <div style="font-size:.65rem;color:#aaa;margin-top:4px">
@@ -943,11 +947,19 @@ function showTableSection(visible) {
 }
 
 function prelim_color(score) {
-  // Zjednotené s _scoreColor() a legendou (SILNÁ KÚPA / PREVERIŤ / ZVÁŽIŤ / PRESKOČIŤ)
-  if (score >= 85) return "#10b981";   // emerald-500
-  if (score >= 70) return "#f59e0b";   // amber-500
-  if (score >= 50) return "#f97316";   // orange-500
-  return "#ef4444";                     // red-500
+  // Prelim (bez GIS) — tlmené pastel odtiene (matchujú legendu "Prelim skóre")
+  if (score >= 85) return "#6ee7b7";   // emerald-300
+  if (score >= 70) return "#fcd34d";   // amber-300
+  if (score >= 50) return "#fdba74";   // orange-300
+  return "#94a3b8";                     // slate-400
+}
+
+function full_color(score) {
+  // Plné GIS skóre — sýte Tailwind-style (matchujú legendu "GIS skóre")
+  if (score >= 85) return "#10b981";   // emerald-500 — SILNÁ KÚPA
+  if (score >= 70) return "#f59e0b";   // amber-500 — PREVERIŤ
+  if (score >= 50) return "#f97316";   // orange-500 — ZVÁŽIŤ
+  return "#ef4444";                     // red-500 — PRESKOČIŤ
 }
 
 // P3c: Sort state — default: investment_index (B4)
@@ -969,7 +981,17 @@ function _sortItems(items) {
     } else if (_sortCol === "area_sqm") {
       va = a.area_sqm || 0; vb = b.area_sqm || 0;
     } else { return 0; }
-    return (va - vb) * _sortDir;
+    const primary = (va - vb) * _sortDir;
+    if (primary !== 0) return primary;
+    // Tie-breaker: pri rovnakej primárnej hodnote radíme podľa preliminary_score DESC,
+    // aby skupinky pozemkov s rovnakým Indexom nevyzerali náhodne usporiadané
+    if (_sortCol !== "preliminary_score") {
+      const sa = a.preliminary_score || 0;
+      const sb = b.preliminary_score || 0;
+      if (sa !== sb) return sb - sa;
+    }
+    // Stabilizácia: deterministický fallback podľa URL
+    return (a.url || "").localeCompare(b.url || "");
   });
 }
 
@@ -1006,8 +1028,22 @@ function renderResultsTable(items) {
   _updateSortHeaders();
 
   items.forEach((p, idx) => {
-    const score = (p.preliminary_score || 0).toFixed(1);
-    const col   = prelim_color(p.preliminary_score || 0);
+    // Dynamická farba: ak má pozemok plné GIS skóre (final_score), použi sýte farby,
+    // inak prelim pastel. Tabuľka ukazuje preliminary_score vo fontu, ale farba
+    // signalizuje úroveň overenia (pastel = odhad, sýte = overené).
+    const hasFinal = (p.final_score || 0) > 0;
+    const sNum     = hasFinal ? (p.final_score || 0) : (p.preliminary_score || 0);
+    const score    = sNum.toFixed(1);
+    const col      = hasFinal ? full_color(sNum) : prelim_color(sNum);
+    // Kontrast textu:
+    //   - plné GIS: amber (70-84) potrebuje tmavý text; ostatné biele
+    //   - prelim pastel: vždy tmavý text (pastel + biely = nečitateľné)
+    const colText  = hasFinal
+      ? ((sNum >= 70 && sNum < 85) ? "#78350f" : "#fff")
+      : (sNum >= 85 ? "#064e3b"     // emerald-300 → tmavozelený text
+         : sNum >= 70 ? "#78350f"   // amber-300 → tmavohnedý
+         : sNum >= 50 ? "#7c2d12"   // orange-300 → tmavý
+         : "#f8fafc");               // slate-400 → biely
     const ppsm  = p.price_per_sqm > 0
       ? p.price_per_sqm.toFixed(0)
       : (p.area_sqm > 0 ? (p.price_eur / p.area_sqm).toFixed(0) : "—");
@@ -1089,7 +1125,11 @@ function renderResultsTable(items) {
       : "";
     // B4 — Investičný index badge (vždy zobrazený, aj keď 0)
     const invIdx  = p.investment_index || 0;
-    const invCls  = invIdx >= 70 ? "inv-high" : invIdx >= 40 ? "inv-mid" : invIdx > 0 ? "inv-low" : "inv-zero";
+    // Zjednotené s legendou: 70+ emerald, 50-69 amber, 30-49 orange, 1-29 red, 0 zero
+    const invCls  = invIdx >= 70 ? "inv-high"
+                  : invIdx >= 50 ? "inv-mid"
+                  : invIdx >= 30 ? "inv-low"
+                  : invIdx > 0   ? "inv-dim" : "inv-zero";
     const invTip  = p.investment_summary
       ? `title="${p.investment_summary.replace(/"/g,"'")}"`
       : `title="Investičný index ${invIdx} — ešte nehodnotené alebo nedostatok dát"`;
@@ -1099,8 +1139,8 @@ function renderResultsTable(items) {
       <td class="tbl-num">${idx + 1}</td>
       <td><button class="star-btn${starred ? " active" : ""}" data-url="${p.url || ""}" title="Sledovať">${starred ? "★" : "☆"}</button></td>
       <td class="tbl-idx">${invBadge}</td>
-      <td class="tbl-score"><span class="prelim-badge" style="background:${col}">${score}</span>${confTxt}${sigHtml}${flagHtml}</td>
-      <td class="tbl-src">${(p.source_portal||"").replace(/_/g," ")}</td>
+      <td class="tbl-score"><span class="prelim-badge${hasFinal ? ' badge-final' : ' badge-prelim'}" style="background:${col};color:${colText}" title="${hasFinal ? 'Plné GIS skóre (overené)' : 'Prelim skóre (odhad — bez GIS)'}">${score}</span>${confTxt}${sigHtml}${flagHtml}</td>
+      <td class="tbl-src" title="${(p.source_portal||'').replace(/_/g,' ')}">${(p.source_portal||"").replace(/_/g," ")}</td>
       <td class="tbl-loc" title="${p.location_text || 'Lokalita neurčená — pozri detail'}">${p.location_text||"—"}</td>
       <td class="tbl-price">${p.price_eur>0?p.price_eur.toLocaleString("sk-SK"):"—"}</td>
       <td>${p.area_sqm>0?p.area_sqm.toLocaleString("sk-SK"):"—"}</td>
@@ -1527,10 +1567,13 @@ async function onBackupImport(inputEl) {
   inputEl.value = "";
 }
 
-// Načítaj stav zálohy pri kliknutí na details element
+// Načítaj stav zálohy pri kliknutí na details element + hneď pri loade ak je otvorený
 document.addEventListener("DOMContentLoaded", () => {
   const sec = document.getElementById("backup-section");
-  if (sec) sec.addEventListener("toggle", () => { if (sec.open) _loadBackupStatus(); });
+  if (!sec) return;
+  sec.addEventListener("toggle", () => { if (sec.open) _loadBackupStatus(); });
+  // Ak je sekcia otvorená hneď po reload (prehliadač si pamätal stav), načítaj aj teraz
+  if (sec.open) _loadBackupStatus();
 });
 
 // Toggle legendy (×)

@@ -4,6 +4,82 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 
 ---
 
+## 2026-11 — Fáza 5 UI polish: tretia dávka — dynamické farby Skóre
+
+### 🎯 Hlavná zmena: tabuľka Skóre teraz rozlišuje Prelim vs Full-GIS
+
+**Problém:** Tabuľka v Skóre stĺpci používala jednu sadu farieb (sýte emerald/amber/
+orange/red = **plné GIS skóre** podľa legendy), ale pozemok s `preliminary_score=93.8`
+dostal rovnakú **tmavo-zelenú „SILNÁ KÚPA"** farbu, aj keď ešte neprešiel GIS
+analýzou. Užívateľ nemal spôsob rozlíšiť „overené" vs „odhad".
+
+**Riešenie:** Dynamické farby podľa `final_score`:
+- **`final_score > 0`** → **plné GIS farby** (`full_color()` — sýte Tailwind-500)
+  + plný border + box-shadow (`.badge-final`)
+- **`final_score == 0`** → **prelim pastel** (`prelim_color()` — Tailwind-300)
+  + prerušovaný border, tmavý text pre kontrast (`.badge-prelim`)
+
+**Dopad:**
+- Tabuľka ihneď informuje: pastel + dashed border = odhad, sýte + solid border = overené
+- Legenda doplnená vysvetleniami: *„GIS skóre — sýte farby + plný okraj"* vs
+  *„Prelim skóre — pastel farby + prerušovaný okraj"*
+- Tooltip na badge: *„Plné GIS skóre (overené)"* / *„Prelim skóre (odhad — bez GIS)"*
+
+### 📊 Technické detaily
+- `prelim_color()` vrátený na pastel Tailwind-300 (`#6ee7b7, #fcd34d, #fdba74, #94a3b8`)
+- Nová `full_color()` so sýtymi Tailwind-500 (`#10b981, #f59e0b, #f97316, #ef4444`)
+- V `renderResultsTable()`: `hasFinal = (p.final_score || 0) > 0`,
+  podľa toho sa vyberá farba, kontrast textu aj CSS trieda
+- Mapa (`_prelimMapColor`) už to robila správne — teraz je tabuľka konzistentná
+
+### Verzie: v=41 → v=42
+Testy: **1642 zelených** (bez zmien v počte).
+
+---
+
+## 2026-11 — Fáza 5 UI polish: druhá dávka (8 opráv)
+
+Po ďalšom screenshot audite a reálnom teste prieskumu:
+
+### 🎨 Konzistencia s legendou
+- **`.inv-badge` farby** zjednotené s legendou (70+ emerald, 50-69 amber,
+  30-49 orange, 1-29 red, 0 slate). Predtým: 70+ dark-green, 40-69 navy-blue,
+  1-39 grey — nesúladné s legendou v mape a `_scoreColor()`.
+- **Thresholdy v JS** zladené v tabuľke aj v modali: 70 / 50 / 30 (predtým 70 / 40)
+- **Amber badge** (70-84 Skóre a 50-69 Index) má teraz tmavý text (`#78350f`)
+  namiesto bieleho — WCAG kontrast z ~2.3 na ~7+
+
+### 🧹 Legacy čistenie
+- **Odstránená prázdna `.results-section` s nadpisom „VYSLEDKY"** ktorá sa
+  zobrazovala pod všetkými sekciami ako artefakt pred tabuľkou. `#results-panel`
+  presunutý do „Analyzovať 1 pozemok" sekcie (legacy funkcia `renderResults()`
+  má kde renderovať jednorazový výsledok).
+
+### 📊 Tabuľka
+- **Stĺpec Zdroj** má teraz `max-width: 90px + ellipsis + title=full_text` —
+  rieši horizontálny scrollbar
+- **Tie-breaker v sorte**: pri rovnakom Index DESC sa druhotne radí podľa
+  `preliminary_score DESC`. Skupinky 12 pozemkov s rovnakým Index 40 už
+  nevyzerajú náhodne usporiadané.
+- **Mini-legenda signálov** (`.sig-hint`) nad tabuľkou vysvetľuje 🟢/🔴/🔥/🔨/📊
+  ikony v stĺpci Skóre — predtým užívateľ nevedel čo znamenajú
+
+### 🛠️ Opravy UX
+- **Záloha „Načítavam..." fix**: `_loadBackupStatus()` sa teraz volá aj pri
+  `DOMContentLoaded` ak je sekcia otvorená (prehliadač remembers stav). Predtým
+  visel „Načítavam..." kým používateľ neklikol toggle.
+- **„Skórovať vybrané" farba** aktívna zmena z zelenej (`#10b981` kolízia
+  s `btn-demo`) na navy (`#1a3a5c`), disabled zo svetlo-zelenej (`#9dbfa0`,
+  vyzeralo ako aktívne) na čisté sivé (`#cbd5e1 + #64748b text`)
+
+### 📎 Drobnosti
+- **Diff badge „N nezmenených"** — tmavší kontrast (`#e2e8f0 bg + #334155 text`)
+- **Verzie**: `v=40 → v=41` pre style.css + všetky JS
+
+Testy: **1642 zelených** (bez zmien v počte).
+
+---
+
 ## 2026-11 — Fáza 5 UI polish: vizuálna audit cez live screenshot
 
 Po reálnom teste prieskumu (4916 pozemkov) kompletný prechod cez UI zľava:

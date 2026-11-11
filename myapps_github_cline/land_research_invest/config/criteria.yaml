@@ -2,7 +2,7 @@ criteria:
   location:
     center_lat: 48.1486
     center_lon: 17.1077
-    max_distance_km: 82
+    max_distance_km: 80
     automation: AUTO
   price:
     min_eur: 0
@@ -363,10 +363,9 @@ signals:
   drazba_min_zlava_pct: 20.0
   peer_min_count: 4
   peer_lacny_ratio: 0.6
-  # Sanity check pre spoluvlastnícke podiely a chybné dáta
-  podiel_max_area_sqm: 100        # výmera < 100 m² → pravdepodobne podiel
-  podiel_max_price_eur: 500       # cena < 500 € AND malá výmera → podiel
-  podiel_max_area_small_sqm: 50   # "malá výmera" prah pri cenovom trigri
+  podiel_max_area_sqm: 100
+  podiel_max_price_eur: 500
+  podiel_max_area_small_sqm: 50
 rezoning:
   stavebne_ceny_podla_km:
   - max_km: 15
