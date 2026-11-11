@@ -4,6 +4,39 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 
 ---
 
+## 2026-11 — Fáza 5 UI polish: vizuálna audit cez live screenshot
+
+Po reálnom teste prieskumu (4916 pozemkov) kompletný prechod cez UI zľava:
+
+### Opravy konzistencie farieb
+- **`prelim_color()` v `app.js`** zjednotený s `_scoreColor()` a legendou:
+  - 85+ emerald-500 (`#10b981`), 70-84 amber-500 (`#f59e0b`),
+    50-69 orange-500 (`#f97316`), <50 red-500 (`#ef4444`)
+  - Predtým: stará paleta (`#2e7d32, #1565c0, #e65100, #757575`) — pozemok 75.8
+    zelený, 68.6 oranžový → nesedelo s legendou (70+ amber)
+- **Prelim marker <50** zmenený z `slate-300` (`#cbd5e1` — takmer neviditeľné
+  na svetlosivej mape) na `slate-400` (`#94a3b8`) + zladený v legende
+
+### Vizuálne vylepšenia
+- **Legenda** má teraz **toggle (×)** — dá sa zbaliť ak prekrýva mapu
+- **3 sekcie legendy** (Index / GIS / Prelim) oddelené horizontálnym dashed
+  separátorom (`.legend-group + .legend-group`)
+- **Ikona „Analyzovať 1 pozemok"** zmenená z 🔍 (duplicitná s "Spustiť prieskum")
+  na 🔬 (mikroskop — jasnejšia metafora pre analýzu)
+
+### Defenzívne CSS opravy
+- **Prázdny `.scrape-warn-banner:empty`** — `display: none` + reset padding/border,
+  aby neostal visieť ako žltý pruh po skončení prieskumu bez chybných zdrojov
+- **Prázdny `.progress-sources:empty`** — rovnako
+- JS `showProgressSection(false)` vyčistí `#progress-sources.innerHTML`
+
+### Verzie
+- `v=39 → v=40` pre `style.css` a všetky `*.js` (browser cache bust)
+
+Testy: **1642 zelených** (bez zmien v počte).
+
+---
+
 ## 2026-11 — Fáza 5 reálny test: F5-A oprava mapy
 
 - **Problém:** Po scrape 4734 pozemkov mala mapa **0 bodov**. Nominatim geokódovanie

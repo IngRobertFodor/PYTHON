@@ -165,7 +165,26 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   box-shadow: 0 2px 8px rgba(0,0,0,.2);
   font-size: .75rem;
 }
-.legend h3 { font-size: .78rem; margin-bottom: 6px; color: #333; }
+.legend h3 {
+  font-size: .78rem; margin-bottom: 6px; color: #333;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.legend-toggle {
+  background: transparent; border: none; cursor: pointer;
+  font-size: 1.1rem; line-height: 1; color: #888;
+  padding: 0 2px; margin-left: 8px;
+  transition: color .15s;
+}
+.legend-toggle:hover { color: #1a3a5c; }
+.legend.collapsed .legend-hint,
+.legend.collapsed .legend-group { display: none; }
+.legend.collapsed { padding: 6px 10px; }
+.legend.collapsed .legend-toggle::before { content: "▸ "; font-size: .85rem; }
+.legend.collapsed .legend-toggle { font-size: .75rem; }
+.legend-group + .legend-group {
+  border-top: 1px dashed #d0d7e0;
+  padding-top: 4px; margin-top: 4px;
+}
 .legend-hint {
   font-size: .72rem; color: #555;
   background: #f0f4f8; border: 1px solid #dde4ec;
@@ -235,6 +254,8 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 /* Progress bar */
 .research-progress { margin-top: 12px; }
 .research-progress.hidden { display: none; }
+/* Defenzívne: prázdny progress-sources nerobí žltý pruh */
+.progress-sources:empty { display: none; }
 
 .progress-label {
   display: flex; justify-content: space-between;
@@ -501,6 +522,8 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   color: #7a5800;
   line-height: 1.4;
 }
+/* Defenzívne: prázdny banner nerobí žltý pruh */
+.scrape-warn-banner:empty { display: none; padding: 0; border: 0; margin: 0; }
 
 #modal-body {
   font-size: .85rem; line-height: 1.5; color: #222;

@@ -863,6 +863,11 @@ function stopProgressPolling() {
 function showProgressSection(visible) {
   const el = document.getElementById("research-progress");
   if (el) el.classList.toggle("hidden", !visible);
+  // Keď schovávame, vyčistíme aj chip-y aby neostali vysieť ako artefakt (F5-UI)
+  if (!visible) {
+    const srcs = document.getElementById("progress-sources");
+    if (srcs) srcs.innerHTML = "";
+  }
 }
 
 function updateProgressUI(p) {
@@ -938,10 +943,11 @@ function showTableSection(visible) {
 }
 
 function prelim_color(score) {
-  if (score >= 85) return "#2e7d32";
-  if (score >= 70) return "#1565c0";
-  if (score >= 50) return "#e65100";
-  return "#757575";
+  // Zjednotené s _scoreColor() a legendou (SILNÁ KÚPA / PREVERIŤ / ZVÁŽIŤ / PRESKOČIŤ)
+  if (score >= 85) return "#10b981";   // emerald-500
+  if (score >= 70) return "#f59e0b";   // amber-500
+  if (score >= 50) return "#f97316";   // orange-500
+  return "#ef4444";                     // red-500
 }
 
 // P3c: Sort state — default: investment_index (B4)
@@ -1176,7 +1182,7 @@ function _prelimMapColor(score) {
   if (score >= 85) return { bg:"#6ee7b7", text:"#064e3b", border:"#10b981" };  // emerald-300
   if (score >= 70) return { bg:"#fcd34d", text:"#78350f", border:"#f59e0b" };  // amber-300
   if (score >= 50) return { bg:"#fdba74", text:"#7c2d12", border:"#f97316" };  // orange-300
-  return             { bg:"#cbd5e1", text:"#475569", border:"#64748b" };        // slate-300
+  return             { bg:"#94a3b8", text:"#f8fafc", border:"#475569" };        // slate-400 — viditeľnejšie na mape
 }
 
 // P3b: Dedup — zobraz len najnovsí run_id pre kazdu URL
@@ -1526,6 +1532,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const sec = document.getElementById("backup-section");
   if (sec) sec.addEventListener("toggle", () => { if (sec.open) _loadBackupStatus(); });
 });
+
+// Toggle legendy (×)
+function toggleLegend() {
+  const el = document.getElementById("map-legend");
+  if (!el) return;
+  el.classList.toggle("collapsed");
+  const btn = el.querySelector(".legend-toggle");
+  if (btn) {
+    btn.title = el.classList.contains("collapsed") ? "Zobraziť legendu" : "Skryť legendu";
+    btn.innerHTML = el.classList.contains("collapsed") ? "Legenda" : "&times;";
+  }
+}
 
 
   banner.querySelectorAll(".diff-chip[data-filter]").forEach(chip => {
