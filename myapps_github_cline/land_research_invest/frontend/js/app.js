@@ -1504,6 +1504,24 @@ function _renderDiffBanner(d) {
   const note = d.note ? `<span style="font-size:.70rem;color:#888;margin-left:4px">${d.note}</span>` : "";
   banner.innerHTML = `<span class="diff-title">Zmeny od minulého behu:</span>${chips.join("")}${note}`;
 
+  // Wire click handlers až po vyrenderovaní chips do DOM
+  banner.querySelectorAll(".diff-chip[data-filter]").forEach(chip => {
+    chip.addEventListener("click", () => {
+      const f = chip.dataset.filter;
+      if (_diffFilter === f) {
+        _diffFilter = null;
+        banner.querySelectorAll(".diff-chip").forEach(c => c.classList.remove("diff-filter-active"));
+        renderResultsTable(_allResults);
+      } else {
+        _diffFilter = f;
+        banner.querySelectorAll(".diff-chip").forEach(c => c.classList.remove("diff-filter-active"));
+        chip.classList.add("diff-filter-active");
+        _applyDiffFilter(f);
+      }
+    });
+  });
+}
+
 // =============================================================================
 // P2 — Záloha histórie prieskumov
 // =============================================================================
@@ -1576,7 +1594,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (sec.open) _loadBackupStatus();
 });
 
-// Toggle legendy — zbalenie/rozbalenie šípkou ▾/▴
+// Toggle legendy — minimalizačné tlačidlo (▴ zbaliť / ▾ rozbaliť)
 function toggleLegend() {
   const el = document.getElementById("map-legend");
   if (!el) return;
@@ -1584,27 +1602,12 @@ function toggleLegend() {
   const btn = el.querySelector(".legend-toggle");
   if (btn) {
     const collapsed = el.classList.contains("collapsed");
-    btn.title     = collapsed ? "Rozbaliť legendu" : "Zbaliť legendu";
-    btn.innerHTML = collapsed ? "&#9652;" : "&#9662;";   // ▴ hore / ▾ dolu
+    btn.title            = collapsed ? "Rozbaliť legendu" : "Minimalizovať legendu";
+    btn.setAttribute("aria-label",    btn.title);
+    btn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+    // ▾ (&#9662;) keď je zbalená → klik rozbalí; ▴ (&#9652;) keď je rozbalená → klik zbalí
+    btn.innerHTML        = collapsed ? "&#9662;" : "&#9652;";
   }
-}
-
-
-  banner.querySelectorAll(".diff-chip[data-filter]").forEach(chip => {
-    chip.addEventListener("click", () => {
-      const f = chip.dataset.filter;
-      if (_diffFilter === f) {
-        _diffFilter = null;
-        banner.querySelectorAll(".diff-chip").forEach(c => c.classList.remove("diff-filter-active"));
-        renderResultsTable(_allResults);
-      } else {
-        _diffFilter = f;
-        banner.querySelectorAll(".diff-chip").forEach(c => c.classList.remove("diff-filter-active"));
-        chip.classList.add("diff-filter-active");
-        _applyDiffFilter(f);
-      }
-    });
-  });
 }
 
 function _applyDiffFilter(filter) {

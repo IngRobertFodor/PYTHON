@@ -4,6 +4,54 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 
 ---
 
+## 2026-11 — Hotfix: rozbité toggle-funkcie vo frontende + minimalizácia legendy
+
+### 🐛 Kritická oprava: `_renderDiffBanner` nemala uzatváraciu zátvorku
+
+**Problém:** V `frontend/js/app.js` chýbala uzatváracia `}` za telom funkcie
+`_renderDiffBanner()` (okolo pôvodného r.1505). Následné top-level funkcie
+`_loadBackupStatus`, `onBackupExport`, `onBackupImport`, DOMContentLoaded-handler
+a `toggleLegend` sa tým stali **vnorenými function declarations** vo vnútri
+`_renderDiffBanner` → neviditeľné z globálneho scope. Každé
+`onclick="toggleLegend()"`, `onclick="onBackupExport()"`,
+`onchange="onBackupImport(this)"` v HTML vyhadzovalo `ReferenceError`.
+
+`node --check` chybu neodhalil (JS syntakticky validný), prejavila sa
+až pri behu v prehliadači.
+
+**Reálne rozbité pred opravou:**
+- Zbaliť/rozbaliť legendu v mape (tlačidlo vpravo hore)
+- „📤 Stiahnuť zálohu" tlačidlo
+- „📥 Obnoviť zo súboru" (import zálohy)
+- Auto-refresh statusu zálohy pri otvorení sekcie Záloha
+
+**Oprava:**
+- Pridaná chýbajúca `}` na koniec `_renderDiffBanner` (nový r.1523)
+- Blok wire-up diff-chip click-handlerov presunutý **dovnútra**
+  `_renderDiffBanner` — logicky správne miesto, lebo tam sa chips práve
+  vyrenderovali do DOM
+- Osirotený duplicitný blok za `toggleLegend` (pôvodné r.1610–1626) odstránený
+
+### 🎨 Krížik v legende → minimalizačné tlačidlo
+
+Predtým používateľ videl `×` (vyzerá ako „zatvoriť navždy"). Teraz je to
+jednoznačné **minimalizačné tlačidlo** so šípkou `▴` (zbaliť) / `▾` (rozbaliť):
+
+- `index.html` — `<button class="legend-toggle" type="button"
+  aria-label="Minimalizovať legendu" aria-expanded="true">&#9652;</button>`
+- `toggleLegend()` — prehodená sémantika šípok (▴ keď rozbalená → klik zbalí,
+  ▾ keď zbalená → klik rozbalí) + dynamicky aktualizuje `aria-expanded`
+  a `aria-label` pre screen readery
+- CSS `.legend-toggle` — pill vzhľad (sivé pozadie `#f1f5f9`, border,
+  hover `#e2e8f0` + `focus-visible`) — vyzerá jasne ako tlačidlo,
+  nie ako close ikona
+
+### Verzie: v=43 → v=44
+
+Testy: **1642 zelených** (bez zmien v počte — frontend-only zmena).
+
+---
+
 ## 2026-11 — Fáza 5 UI polish: tretia dávka — dynamické farby Skóre
 
 ### 🎯 Hlavná zmena: tabuľka Skóre teraz rozlišuje Prelim vs Full-GIS

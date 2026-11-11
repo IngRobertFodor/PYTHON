@@ -8,7 +8,7 @@
   <!-- Leaflet CSS (lokálne – žiadne CDN, žiadny tracking prevention) -->
   <link rel="stylesheet" href="/static/lib/leaflet/leaflet.css" />
   <!-- App CSS -->
-  <link rel="stylesheet" href="/static/css/style.css?v=43">
+  <link rel="stylesheet" href="/static/css/style.css?v=44">
   <!-- AI Asistent CSS -->
   <link rel="stylesheet" href="/static/css/ai_agent.css?v=2">
 </head>
@@ -259,7 +259,9 @@
 
     <!-- LEGENDA -->
     <div class="legend" id="map-legend">
-      <h3>Legenda <button class="legend-toggle" onclick="toggleLegend()" title="Zbaliť legendu">&#9662;</button></h3>
+      <h3>Legenda <button type="button" class="legend-toggle" onclick="toggleLegend()"
+          title="Minimalizovať legendu" aria-label="Minimalizovať legendu"
+          aria-expanded="true">&#9652;</button></h3>
 
       <!-- Vysvetlenie rozdielu Index vs Skóre -->
       <div class="legend-hint"
@@ -349,11 +351,11 @@
 <script src="/static/lib/leaflet/leaflet.js"></script>
 
 <!-- App JS -->
-<script src="/static/js/config.js?v=43"></script>
-<script src="/static/js/api.js?v=43"></script>
-<script src="/static/js/demo.js?v=43"></script>
-<script src="/static/js/map.js?v=43"></script>
-<script src="/static/js/app.js?v=43"></script>
+<script src="/static/js/config.js?v=44"></script>
+<script src="/static/js/api.js?v=44"></script>
+<script src="/static/js/demo.js?v=44"></script>
+<script src="/static/js/map.js?v=44"></script>
+<script src="/static/js/app.js?v=44"></script>
 <!-- AI Asistent JS -->
 <script src="/static/js/ai_agent.js?v=2"></script>
 

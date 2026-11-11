@@ -2,6 +2,43 @@
 
 > Pracovný dokument. Po review a commite zmazať.
 > **Stav 2026-11-03:** P0/P1 opravené, P2 testy hotové, C1 AI backend hotový.
+> **Stav 2026-11 (hotfix):** opravená rozbitá štruktúra `_renderDiffBanner` v `app.js`
+> + krížik v legende prerobený na minimalizačné tlačidlo. Detaily nižšie.
+
+---
+
+## ✅ OPRAVENÉ 2026-11 (hotfix frontend)
+
+### Rozbitá štruktúra `_renderDiffBanner()` v `app.js`
+
+**Symptóm:** Krížik v legende v mape (vpravo hore) sa nedal kliknúť — nič sa nedialo.
+Rovnako nefungovalo tlačidlo „📤 Stiahnuť zálohu", „📥 Obnoviť zo súboru"
+a status zálohy sa nenačítal pri otvorení sekcie.
+
+**Príčina:** Chýbajúca `}` za telom `_renderDiffBanner()` okolo r.1505. Všetky
+nasledujúce top-level funkcie (`_loadBackupStatus`, `onBackupExport`,
+`onBackupImport`, DOMContentLoaded-handler, `toggleLegend`) sa tým stali
+**nested function declarations** v scope `_renderDiffBanner` → neviditeľné
+pre `onclick="…"` inline handlery v HTML → `ReferenceError` pri behu.
+
+**Nebezpečné na odhalenie:** `node --check` ani static analyzer nepísali
+syntaktickú chybu (JS je formálne platný). Prejavilo sa to iba v runtime,
+a pretože toggleLegend je „nice-to-have" a backup používatelia nevyužívajú
+denne, chyba pretrvávala aj v produkčnom stave.
+
+**Oprava v jednom commite:**
+1. Pridaná uzatváracia `}` + blok `banner.querySelectorAll(".diff-chip[data-filter]")`
+   presunutý **dovnútra** `_renderDiffBanner` (pred jej koniec).
+2. Odstránený osirotený duplicitný blok + prebytočný `}` za `toggleLegend`.
+3. Cache-bust `?v=43` → `?v=44` (inak prehliadač ostane na starej JS kópii).
+
+### UX: krížik v legende → minimalizačné tlačidlo (▴/▾)
+- Sémanticky správne — nie je to „close for ever", je to „minimize/expand".
+- Pridané `aria-label`, `aria-expanded`, `type="button"` pre screen readery
+  a prístupnosť.
+- CSS `.legend-toggle` — pill vzhľad: sivé pozadie + border + hover + focus-visible.
+- Logika v `toggleLegend()`: ▴ (rozbalená) kliknutím zbalí → šípka sa zmení
+  na ▾; rovnako aktualizuje `aria-expanded` z `"true"` → `"false"`.
 
 ---
 
