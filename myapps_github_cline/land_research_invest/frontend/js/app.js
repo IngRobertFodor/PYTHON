@@ -1576,15 +1576,16 @@ document.addEventListener("DOMContentLoaded", () => {
   if (sec.open) _loadBackupStatus();
 });
 
-// Toggle legendy (×)
+// Toggle legendy — zbalenie/rozbalenie šípkou ▾/▴
 function toggleLegend() {
   const el = document.getElementById("map-legend");
   if (!el) return;
   el.classList.toggle("collapsed");
   const btn = el.querySelector(".legend-toggle");
   if (btn) {
-    btn.title = el.classList.contains("collapsed") ? "Zobraziť legendu" : "Skryť legendu";
-    btn.innerHTML = el.classList.contains("collapsed") ? "Legenda" : "&times;";
+    const collapsed = el.classList.contains("collapsed");
+    btn.title     = collapsed ? "Rozbaliť legendu" : "Zbaliť legendu";
+    btn.innerHTML = collapsed ? "&#9652;" : "&#9662;";   // ▴ hore / ▾ dolu
   }
 }
 
