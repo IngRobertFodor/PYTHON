@@ -9,6 +9,29 @@
 
 ## ✅ OPRAVENÉ 2026-11 (hotfix frontend)
 
+### `#diff-banner` stráca CSS triedu `diff-banner` (prienik 3 nezávislých prieskumov)
+
+**Symptóm:** CSS pravidlá pre `.diff-banner` (modré pozadie, border,
+padding, flex layout) sa neaplikovali na wrapper nad diff chipmi
+„✨ N nových / 📉 N zlacneli / 🗑️ N zmizlo / N nezmenených".
+Chipy samy mali vlastné pozadie, ale wrapper box okolo nich chýbal.
+
+**Metóda nálezu:** Po predošlých jednoduchších opravách som urobil
+**3 nezávislé prieskumy** s rôznym zameraním a opravujem len to, čo
+sa objavilo v ich **priesniku** (z ~15 individuálnych nálezov prešiel
+do prieniku len tento jeden).
+
+**Príčina:** HTML `<div id="diff-banner" class="hidden"></div>` nemalo
+základnú CSS triedu `diff-banner`. Zároveň v CSS chýbal selektor
+`.diff-banner.hidden` (ostatné `.hidden` boli vždy definované
+per-selektor).
+
+**Oprava:**
+1. HTML (`index.html` r.95): `class="diff-banner hidden"`
+2. CSS (`style.css` r.507): `.diff-banner.hidden { display: none; }`
+
+Cache-bust `?v=46` → `?v=47`.
+
 ### Rozbitá CSS štruktúra v `style.css` okolo `.up-checklist li` + `.backup-*`
 
 **Symptóm:** Sekcia *„Záloha histórie prieskumov"* v sidebar panely vyzerala

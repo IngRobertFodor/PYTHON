@@ -4,6 +4,64 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 
 ---
 
+## 2026-11 — Hotfix: diff banner stráca CSS triedu (prienik 3 prieskumov)
+
+### 🔍 Metóda nálezu
+
+Urobil som **3 nezávislé vizuálne/kódové prieskumy** (CSS validácia, HTML
+sémantika, JS logika) a opravujem **len nálezy, ktoré sa objavili v
+prieniku všetkých troch** — tým sa eliminujú falošne-pozitívne nálezy.
+
+Z celkových ~15 individuálnych nálezov prešiel do prieniku **1 skutočný**:
+
+### 🐛 `#diff-banner` nemá CSS triedu `diff-banner`
+
+**Dôkazy zo všetkých 3 prieskumov:**
+
+- **Prieskum 1 (CSS):** `.diff-banner.hidden` nie je definované v `style.css`
+  — pritom class `hidden` sa pridáva cez JS na mnohých miestach a vždy
+  je definované pre konkrétny selektor (`.research-progress.hidden`,
+  `#results-table-section.hidden`, `#score-progress-wrap.hidden`).
+  Pre `.diff-banner` chýba.
+- **Prieskum 2 (HTML):** `<div id="diff-banner" class="hidden"></div>`
+  má len `hidden`, **nie `diff-banner`**. Chýba základná CSS trieda.
+- **Prieskum 3 (JS):** `_renderDiffBanner()` nikdy nepridáva class
+  `diff-banner` k elementu — len mení `innerHTML` a toggle `hidden`.
+
+**Dopad:** CSS pravidlá pre `.diff-banner` (modré pozadie `#f0f6ff`,
+border `1px solid #c8d8f0`, padding `8px 12px`, border-radius, flex)
+**nikdy neplatili** na wrapper. Chipy vnútri majú vlastné pozadie a tak
+to vizuálne „vyzeralo prijateľne", ale wrapper box okolo nich chýbal.
+
+**Oprava:**
+1. `index.html` r.95 — pridaná trieda `diff-banner`:
+   `<div id="diff-banner" class="diff-banner hidden"></div>`
+2. `style.css` r.507 — pridaný selektor pre skrývanie:
+   `.diff-banner.hidden { display: none; }` (bez tohto by banner so
+   stylovaným `.diff-banner` zostal viditeľný ako prázdny modrý box
+   keď nie sú žiadne zmeny).
+
+### Ostatné nálezy (mimo prieniku) — nerobím
+
+Nevyhovujú kritériu „prienik 3 prieskumov", takže ich zatiaľ neopravujem:
+
+- `btn` selector bez bodky v `btn, .btn {...}` (dead CSS)
+- Duplicitný `.results-section` CSS blok
+- `grid-row: 1 / -1` na `.map-panel` (redundantné)
+- Chýbajúci `aria-label` na `.legend`
+- Chýbajúci `type="button"` na niektorých `<button>`
+- Splitter: `getComputedStyle(document.documentElement)` namiesto `layout`
+  → pri druhom drag-u sa `startW` resetuje na 400
+- Potenciálne XSS cez `innerHTML + p.title`
+
+Ak chceš niektoré z týchto opraviť, otvorím nový pass.
+
+### Verzie: v=46 → v=47
+
+Testy: **1642 zelených** (bez zmien v počte — frontend-only zmena).
+
+---
+
 ## 2026-11 — Hotfix CSS: rozbitá štruktúra v style.css + mobile splitter
 
 ### 🐛 Rozbitá CSS štruktúra okolo `.up-checklist li` + `.backup-*`

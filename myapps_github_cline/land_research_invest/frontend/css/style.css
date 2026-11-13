@@ -504,6 +504,7 @@ btn:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
   background: #f0f6ff; border: 1px solid #c8d8f0;
   margin-bottom: 8px; font-size: .78rem;
 }
+.diff-banner.hidden { display: none; }
 .diff-banner .diff-title { font-weight: 700; color: #1a3a5c; margin-right: 4px; }
 .diff-chip {
   display: inline-block; padding: 2px 8px;
