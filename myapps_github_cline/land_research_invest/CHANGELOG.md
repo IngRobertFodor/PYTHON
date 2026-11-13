@@ -4,6 +4,63 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 
 ---
 
+## 2026-11 — Hotfix CSS: rozbitá štruktúra v style.css + mobile splitter
+
+### 🐛 Rozbitá CSS štruktúra okolo `.up-checklist li` + `.backup-*`
+
+**Problém:** V `frontend/css/style.css` boli pravidlá pre ÚP checklist
+a BACKUP panel navzájom **popreplietané**:
+
+```css
+.up-checklist li {
+  padding: 5px 8px; border-radius: 5px;
+  background: #f8fafd; border: 1px solid #e0e8f4;
+/* BACKUP PANEL */              ← ❌ komentár uprostred pravidla
+.backup-status-info { ... }     ← ❌ selektor bez zatvorenia predošlého
+.backup-status-info .backup-row { ... }
+.backup-info-loading { ... }
+  font-size: .74rem;            ← ❌ „sirota" deklarácia
+}
+```
+
+**Dopad:** Prehliadač pri parsovaní použije error-recovery — zátvorky
+sú matematicky vybalansované (`{` = `}`), takže tichá chyba. Ale
+`.backup-status-info`, `.backup-row`, `.backup-info-loading` sa parsujú
+ako nested selektory vo vnútri `.up-checklist li` (štandardné CSS to
+nepodporuje, len CSS Nesting v moderných prehliadačoch) → pravidlá
+sa **ignorujú** → sekcia **Záloha histórie prieskumov** v sidebar
+nemá vlastné pozadie, border, flex-rozloženie labelov a hodnôt. Vyzerá
+ako holý text.
+
+Zároveň `.up-checklist li` strácal `font-size: .74rem` (deklarácia bola
+„sirota" po `}` z `.backup-info-loading`).
+
+**Oprava:** Pre-usporiadanie poradia pravidiel — `.up-checklist li`
+správne uzavreté so všetkými deklaráciami, `.backup-*` bloky
+presunuté na top-level za `.up-cl-hint`.
+
+### 🐛 Mobile media query ignorovala `.sidebar-splitter`
+
+Na obrazovkách `≤ 768px` sa layout prepína na jeden stĺpec, ale
+drag-splitter (2–4 px sivá lišta medzi sidebarom a mapou) ostával
+viditeľný — na dotykovom zariadení **nedáva zmysel** (col-resize cursor,
+no touch handler), vizuálne pôsobí ako artefakt. Navyše keďže
+`.sidebar`, `.sidebar-splitter` mali `grid-row: 1 / -1` ale mobile
+layout má 3 riadky, splitter bol „roztiahnutý" po celej výške a prekrýval
+ostatné časti.
+
+**Oprava v `@media (max-width: 768px)`:**
+```css
+.sidebar, .map-panel { grid-row: auto; }
+.sidebar-splitter { display: none; }
+```
+
+### Verzie: v=45 → v=46
+
+Testy: **1642 zelených** (bez zmien v počte — CSS-only zmena).
+
+---
+
 ## 2026-11 — Hotfix: duplicitné 🔴 bodky pri rizikových vlajočkách
 
 ### 🐛 Problém

@@ -9,6 +9,31 @@
 
 ## ✅ OPRAVENÉ 2026-11 (hotfix frontend)
 
+### Rozbitá CSS štruktúra v `style.css` okolo `.up-checklist li` + `.backup-*`
+
+**Symptóm:** Sekcia *„Záloha histórie prieskumov"* v sidebar panely vyzerala
+neštýlovaná — holý text namiesto krajného boxu s pozadím, borderom a
+flex-labelmi.
+
+**Príčina:** Blok `.up-checklist li { ... }` nebol uzavretý pred komentárom
+`/* BACKUP PANEL */` a všetky `.backup-status-info`, `.backup-row`,
+`.backup-info-loading` pravidlá sa parsovali ako **nested selektory**
+vo vnútri `.up-checklist li`. Štandardný CSS (bez CSS Nesting) ich
+ignoruje. Zátvorky boli matematicky v balance (222 `{` = 222 `}`),
+takže tichá chyba.
+
+Zároveň `.up-checklist li` strácal `font-size: .74rem` (sirota deklarácia).
+
+**Oprava:** Pre-usporiadanie pravidiel — `.up-checklist li` správne
+uzavreté, `.backup-*` presunuté na top-level za `.up-cl-hint`.
+Cache-bust `?v=45` → `?v=46`.
+
+### Mobile media query ignorovala `.sidebar-splitter`
+
+Na obrazovkách `≤ 768px` ostával drag-splitter viditeľný ako artefakt
+cez celú výšku. Pridané `.sidebar-splitter { display: none }` a
+`.sidebar, .map-panel { grid-row: auto }` v media query.
+
 ### Duplicitné 🔴 bodky pri rizikových vlajočkách
 
 **Symptóm:** V tabuľke pri niektorých pozemkoch dve červené bodky 🔴🔴 vedľa seba
