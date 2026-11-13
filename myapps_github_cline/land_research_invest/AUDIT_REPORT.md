@@ -9,6 +9,19 @@
 
 ## ✅ OPRAVENÉ 2026-11 (hotfix frontend)
 
+### Duplicitné 🔴 bodky pri rizikových vlajočkách
+
+**Symptóm:** V tabuľke pri niektorých pozemkoch dve červené bodky 🔴🔴 vedľa seba
+(napr. riadok 3878 — `PODIEL?` vlajka + `Lacný −57 % (háčik?)` vlajka + dve bodky).
+
+**Príčina:** V `app.js` r.1094 chýbal filter `!FLAG_KODY.has(s.kod)` v rozklade
+`riskSigs` — rovnaký filter bol pri `oppSigs` (r.1093) na príležitostné signály,
+ale pri rizikových sa nedoplnil. Výsledok: každé riziko s vlastnou vlajkou (chip)
+sa zobrazilo aj ako samostatná 🔴 bodka.
+
+**Oprava:** Doplnený filter → `riskSigs = sigs.filter(s => s.typ === "RIZIKO"
+&& !FLAG_KODY.has(s.kod))`. Cache-bust `?v=44` → `?v=45`.
+
 ### Rozbitá štruktúra `_renderDiffBanner()` v `app.js`
 
 **Symptóm:** Krížik v legende v mape (vpravo hore) sa nedal kliknúť — nič sa nedialo.

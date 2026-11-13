@@ -1091,7 +1091,7 @@ function renderResultsTable(items) {
                                 "DRAZBA_POD_ZNALECKOU", "DRAZBA_OPAKOVANA",
                                 "LACNEJSI_AKO_OKOLIE", "PODIEL_ALEBO_CHYBNE_DATA"]);
     const oppSigs  = sigs.filter(s => s.typ === "PRILEZITOST" && !FLAG_KODY.has(s.kod));
-    const riskSigs = sigs.filter(s => s.typ === "RIZIKO");
+    const riskSigs = sigs.filter(s => s.typ === "RIZIKO"      && !FLAG_KODY.has(s.kod));
     const sigHtml  = [
       ...oppSigs.map(s =>
         `<span title="${s.nazov}: ${s.dovod}" class="sig-badge sig-opp">🟢</span>`),

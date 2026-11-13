@@ -4,6 +4,47 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 
 ---
 
+## 2026-11 — Hotfix: duplicitné 🔴 bodky pri rizikových vlajočkách
+
+### 🐛 Problém
+
+Pri niektorých pozemkoch sa v tabuľke zobrazovali **dve červené bodky
+🔴🔴** namiesto jednej. Príklad: pozemok v riadku 3878 mal:
+- `PODIEL_ALEBO_CHYBNE_DATA` (riziko) → vlajka `⚠️ PODIEL?` + 🔴 bodka (duplikát)
+- `LACNEJSI_AKO_OKOLIE` (riziko, „háčik?") → vlajka `📊 Lacný −57 % (háčik?)` + 🔴 bodka (duplikát)
+
+### 🎯 Príčina
+
+V `app.js` r.1093–1094 bol filter `FLAG_KODY` aplikovaný **len na
+príležitostné signály** (🟢), nie na rizikové (🔴):
+
+```js
+const oppSigs  = sigs.filter(s => s.typ === "PRILEZITOST" && !FLAG_KODY.has(s.kod));
+const riskSigs = sigs.filter(s => s.typ === "RIZIKO");  // ❌ chýba filter
+```
+
+Dôsledok: každý rizikový signál s vlastnou vlajkou (`PODIEL_ALEBO_CHYBNE_DATA`,
+`LACNEJSI_AKO_OKOLIE` typu RIZIKO) sa zobrazil **dvakrát** — raz ako chip,
+raz ako samostatná 🔴 bodka.
+
+### ✅ Oprava
+
+Doplnený rovnaký filter aj na rizikové signály:
+
+```js
+const riskSigs = sigs.filter(s => s.typ === "RIZIKO" && !FLAG_KODY.has(s.kod));
+```
+
+Teraz každý signál s vlastnou vlajkou (chip) je **vylúčený z bodkovej
+reprezentácie** — nezávisle od typu. Všeobecné riziká bez vlajky (napr.
+`CENA_PODOZRIVA`, `PRILIS_DALEKO`) sa stále zobrazia ako 🔴.
+
+### Verzie: v=44 → v=45
+
+Testy: **1642 zelených** (bez zmien v počte — frontend-only zmena).
+
+---
+
 ## 2026-11 — Hotfix: rozbité toggle-funkcie vo frontende + minimalizácia legendy
 
 ### 🐛 Kritická oprava: `_renderDiffBanner` nemala uzatváraciu zátvorku
