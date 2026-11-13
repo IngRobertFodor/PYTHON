@@ -4,6 +4,62 @@ Míľniky projektu. Pre podrobný wave-by-wave log pozri `git log`.
 
 ---
 
+## 2026-11 — Hotfix: splitter stráca uloženú šírku sidebaru + skáče pri 2. dragu
+
+### 🐛 Bug
+
+V `_initSplitter()` sa `--sidebar-w` CSS custom property **nastavovala na
+`.main-layout`** (r.738, r.758), ale pri `mousedown` (r.746) a `mouseup`
+(r.768) sa **čítala z `document.documentElement`** (html element).
+
+CSS custom properties sa dedia smerom **nadol**, nie nahor, takže
+`getComputedStyle(document.documentElement).getPropertyValue("--sidebar-w")`
+vždy vrátil **prázdny reťazec** → `parseInt("") = NaN → NaN || 400 = 400`.
+
+**Reálny dopad:**
+
+1. **Šírka sa nikdy neuloží do localStorage správne** — pri `mouseup` sa
+   uložilo vždy `400` namiesto skutočne zvolenej hodnoty. Po F5 sa sidebar
+   zresetoval, hoci si ho posunul.
+2. **Pri 2. a ďalšom drag-u bez F5 sidebar skákal** — `startW` sa
+   resetoval na 400, ale aktuálna šírka bola iná → delta sa počítala z
+   fiktívneho štartu → sidebar skokovo zmenil pozíciu.
+
+### ✅ Oprava
+
+2× nahradené `getComputedStyle(document.documentElement)` →
+`getComputedStyle(layout)`:
+
+```js
+// r.746 (mousedown) + r.768 (mouseup):
+getComputedStyle(layout).getPropertyValue("--sidebar-w")
+```
+
+Teraz je set/get symetrický — číta sa z toho istého elementu, na ktorom
+sa vlastnosť nastavuje (`.main-layout`).
+
+### Manuálny test
+
+1. F5 → sidebar ~400 px
+2. Dragni splitter doprava na ~600 px, pusti
+3. DevTools → Application → Local Storage → `lri_sidebar_w` = **~600** ✓
+   (predtým: 400)
+4. Dragni splitter znova — **plynule pokračuje z aktuálnej pozície** ✓
+   (predtým: skočil)
+5. F5 → sidebar sa obnoví na ~600 px ✓ (predtým: 400)
+
+### Metóda nálezu
+
+Nález #6 z predošlého prieskumu „3 nezávislé prieskumy → prienik".
+Nebol v prieniku (odhalil ho len Prieskum 3 — JS logika), takže sa
+predtým neopravoval. Oprava na explicit request.
+
+### Verzie: v=47 → v=48
+
+Testy: **1642 zelených** (bez zmien v počte — frontend-only zmena).
+
+---
+
 ## 2026-11 — Hotfix: diff banner stráca CSS triedu (prienik 3 prieskumov)
 
 ### 🔍 Metóda nálezu

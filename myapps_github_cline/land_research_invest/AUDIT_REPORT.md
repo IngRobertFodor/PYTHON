@@ -9,6 +9,24 @@
 
 ## ✅ OPRAVENÉ 2026-11 (hotfix frontend)
 
+### Splitter: šírka sidebaru sa nikdy neuloží + skáče pri 2. dragu
+
+**Symptóm:**
+1. Po dragu sidebar zmenil veľkosť vizuálne, ale po F5 sa vždy zresetoval
+   na default 400 px (nerespektoval tvoj výber).
+2. Pri druhom a ďalšom dragu bez F5 sidebar skokovo zmenil pozíciu — delta
+   sa rátala z fiktívneho štartu 400, nie z aktuálnej šírky.
+
+**Príčina:** V `_initSplitter()` sa `--sidebar-w` CSS custom property
+**nastavovala na `.main-layout`**, ale pri `mousedown` a `mouseup` sa
+**čítala z `document.documentElement`**. Keďže custom properties sa
+dedia smerom nadol, `getComputedStyle(documentElement)` vždy vrátil
+prázdny reťazec → `NaN || 400 = 400`.
+
+**Oprava:** 2× nahradené `getComputedStyle(document.documentElement)` →
+`getComputedStyle(layout)` (r.746 mousedown, r.768 mouseup). Cache-bust
+`?v=47` → `?v=48`.
+
 ### `#diff-banner` stráca CSS triedu `diff-banner` (prienik 3 nezávislých prieskumov)
 
 **Symptóm:** CSS pravidlá pre `.diff-banner` (modré pozadie, border,

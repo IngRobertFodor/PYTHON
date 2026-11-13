@@ -743,7 +743,7 @@ function _initSplitter() {
   splitter.addEventListener("mousedown", e => {
     dragging = true;
     startX = e.clientX;
-    startW = parseInt(getComputedStyle(document.documentElement)
+    startW = parseInt(getComputedStyle(layout)
                       .getPropertyValue("--sidebar-w")) || 400;
     splitter.classList.add("dragging");
     document.body.style.cursor = "col-resize";
@@ -765,7 +765,7 @@ function _initSplitter() {
     document.body.style.cursor = "";
     document.body.style.userSelect = "";
     // Ulož šírku
-    const w = parseInt(getComputedStyle(document.documentElement)
+    const w = parseInt(getComputedStyle(layout)
                        .getPropertyValue("--sidebar-w")) || 400;
     localStorage.setItem(STORAGE_KEY, w);
     // Obnov mapu (Leaflet) po zmene veľkosti
