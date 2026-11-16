@@ -636,6 +636,69 @@ print_many("Hello", 3)
 
 > 💡 Defining a function does nothing by itself – the code runs only when you **call** it.
 
+### `return`
+
+**Theory:** `return` sends a value **back** to the place where the function was called, so you can store it or use it further. `print()` only shows a value on the screen, `return` hands it back to the code.
+
+```python
+def double_numbers(numbers):
+    doubles = []
+    for x in numbers:
+        doubles.append(x * 2)
+    return doubles
+
+result = double_numbers([1, 2, 3])
+print(result)   # [2, 4, 6]
+```
+
+**No `return` = `None`:** a function without `return` gives back `None`.
+```python
+x = greet("Alice")   # prints: Hello Alice!
+print(x)             # None
+```
+
+### `return` vs `break`
+
+| Keyword | What it ends |
+|---|---|
+| `return` | the **whole function**, no matter how many loops deep it is |
+| `break` | only the **innermost loop** it is in – the function keeps running after the loop |
+
+**`return` ends the function immediately** – even from inside nested loops. Nothing after it runs.
+```python
+def foo_return():
+    for letter in 'abc':
+        for number in range(3):
+            print(f"{letter} {number}")
+            if letter == 'b':
+                return letter
+
+print(foo_return())
+# a 0
+# a 1
+# a 2
+# b 0
+# b          <- the returned value; the loops stopped right at "b 0"
+```
+
+Unlike `return`, `break` only stops the innermost loop in which it is used, in this case `for number in range(3):`. The outer loop keeps going.
+```python
+def foo_break():
+    for letter in 'xyz':
+        for number in range(3):
+            print(f"{letter} {number}")
+            if number == 1:
+                break
+
+foo_break()
+# x 0
+# x 1      <- break leaves only the inner loop
+# y 0      <- the outer loop moves on to 'y'
+# y 1
+# z 0
+# z 1
+```
+
 ---
 
 ## 🔜 To add later
