@@ -66,6 +66,33 @@ if True:
 print("not indented – runs regardless")
 ```
 
+**Breaking long lines** — a statement normally ends at the end of the line. To split it over several lines, either use a backslash `\` at the end of the line, or put the code inside brackets `()`, `[]`, `{}` – inside brackets Python continues to the next line automatically.
+
+```python
+name = "Bob"
+
+# 1) backslash
+is_friend = name == "Alice" or \
+            name == "Bob"
+print(is_friend)   # True
+
+# 2) parentheses (preferred)
+is_friend = (name == "Alice" or
+             name == "Bob")
+print(is_friend)   # True
+
+# 3) square brackets – careful, this creates a LIST of two values, not one condition
+is_friend = [name == "Alice",
+             name == "Bob"]
+print(is_friend)   # [False, True]
+
+# 4) inside a function call – the parentheses of print() already do the job
+print(name == "Alice" or
+      name == "Bob")   # True
+```
+
+> 💡 Parentheses are preferred over `\` – the backslash must be the very last character on the line (no space after it), and it is easy to break by accident.
+
 **`=` vs `==`**
 
 | Operator | Meaning | Example |
