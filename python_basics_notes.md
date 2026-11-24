@@ -142,6 +142,32 @@ float("3.2")  # 3.2
 bool(0)       # False
 ```
 
+### Arithmetic operators
+
+| Operator | Meaning | Example |
+|---|---|---|
+| `+` `-` | add, subtract | `7 + 2` → `9` |
+| `*` | multiply | `7 * 2` → `14` |
+| `/` | divide (always returns a `float`) | `7 / 2` → `3.5` |
+| `//` | floor division (whole part only) | `7 // 2` → `3` |
+| `%` | remainder (modulo) | `7 % 2` → `1` |
+| `**` | power | `2 ** 3` → `8` |
+
+**Order of operations** (highest priority first):
+1. `()` – parentheses
+2. `**` – power
+3. `*` `/` `//` `%` – same level, evaluated left to right
+4. `+` `-` – same level, evaluated left to right
+
+```python
+print(2 + 3 * 4)       # 14  – multiplication first
+print((2 + 3) * 4)     # 20  – parentheses first
+print(10 - 4 - 3)      # 3   – same level, left to right: (10 - 4) - 3
+print(2 * 3 ** 2)      # 18  – power first: 2 * (3 ** 2)
+```
+
+> 💡 `x % 2 == 0` is the usual check for an even number.
+
 ### Adding strings (concatenation)
 
 **Theory:** Strings are joined with `+`. Only `str` + `str` works — numbers must be converted with `str()` first, or use an f-string instead.
@@ -246,7 +272,14 @@ print(True or False)    # True  – only one needs to be True
 print(not True)         # False – flipped
 ```
 
-> 💡 Priority: `not` is evaluated first, then `and`, then `or`. When unsure, use parentheses `()` for clarity.
+**Priority:** `not` is evaluated first, then `and`, then `or` – `and` has a higher priority than `or`.
+
+```python
+print(True or False and False)     # True   – same as: True or (False and False)
+print((True or False) and False)   # False  – parentheses change the order
+```
+
+> 💡 When unsure, use parentheses `()` for clarity.
 
 ```python
 age = 20
@@ -724,6 +757,43 @@ foo_break()
 # y 1
 # z 0
 # z 1
+```
+
+### Worked example: tic-tac-toe diagonals
+
+Combines nested lists (`board[row][column]`), `and` / `or`, a multi-line expression in parentheses and `return`.
+
+```python
+def diagonal_winner(board):
+    return (
+        (board[0][0] == "X" and board[1][1] == "X" and board[2][2] == "X") or
+        (board[0][0] == "O" and board[1][1] == "O" and board[2][2] == "O") or
+        (board[0][2] == "X" and board[1][1] == "X" and board[2][0] == "X") or
+        (board[0][2] == "O" and board[1][1] == "O" and board[2][0] == "O")
+    )
+```
+
+Each line in parentheses checks one diagonal for one player; `or` means any of the four is enough. The function returns `True` or `False`.
+
+**Testing with `assert`** – it does nothing when the condition is `True` and raises `AssertionError` when it is `False`:
+```python
+assert diagonal_winner([
+    ['X', 'O', 'X'],
+    ['X', 'X', 'O'],
+    ['O', 'O', 'X']
+]) == True     # X on the main diagonal
+
+assert diagonal_winner([
+    ['X', 'X', 'O'],
+    ['X', 'O', 'O'],
+    ['O', 'X', 'X']
+]) == True     # O on the anti-diagonal
+
+assert diagonal_winner([
+    ['O', 'X', 'O'],
+    ['X', 'X', 'X'],
+    ['O', 'O', 'X']
+]) == False    # X has a full row, but no diagonal
 ```
 
 ---
