@@ -272,11 +272,20 @@ print(True or False)    # True  – only one needs to be True
 print(not True)         # False – flipped
 ```
 
-**Priority:** `not` is evaluated first, then `and`, then `or` – `and` has a higher priority than `or`.
+**Priority:** `not` is evaluated first, then `and`, then `or`.
+- `not` has higher priority than `and`.
+- `not` has higher priority than `or`.
+- `and` has higher priority than `or`.
 
 ```python
 print(True or False and False)     # True   – same as: True or (False and False)
 print((True or False) and False)   # False  – parentheses change the order
+
+print(not True or True)            # True   – same as: (not True) or True
+print(not (True or True))          # False  – parentheses change the order
+
+print(not False and False)         # False  – same as: (not False) and False
+print(not (False and False))       # True   – parentheses change the order
 ```
 
 > 💡 When unsure, use parentheses `()` for clarity.
